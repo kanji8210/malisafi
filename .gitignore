@@ -1,0 +1,202 @@
+# WordPress Plugin .gitignore for Malisafi MLS
+
+# ===========================
+# Sensitive & Configuration Files
+# ===========================
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Configuration files with sensitive data
+wp-config.php
+config.php
+*-config.php
+
+# Database credentials
+db-config.php
+database.php
+
+# API Keys and Secrets
+*secret*.php
+*api-key*.php
+*private-key*.php
+
+# ===========================
+# Dependencies & Packages
+# ===========================
+
+# Composer
+/vendor/
+composer.phar
+composer.lock
+
+# Node modules (if using any build tools)
+node_modules/
+npm-debug.log
+yarn-error.log
+package-lock.json
+yarn.lock
+
+# ===========================
+# IDE & Editor Files
+# ===========================
+
+# Visual Studio Code
+.vscode/
+*.code-workspace
+
+# PhpStorm / IntelliJ IDEA
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# Eclipse
+.project
+.buildpath
+.settings/
+
+# NetBeans
+nbproject/
+
+# Atom
+.atom/
+
+# ===========================
+# Operating System Files
+# ===========================
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+*.lnk
+
+# Linux
+*~
+.directory
+
+# ===========================
+# Build & Temporary Files
+# ===========================
+
+# Logs
+*.log
+logs/
+*.sql
+*.sqlite
+
+# Temporary files
+*.tmp
+*.temp
+*.swp
+*.swo
+*.bak
+*.cache
+*.pid
+
+# Build directories
+/build/
+/dist/
+/release/
+
+# ===========================
+# WordPress Specific
+# ===========================
+
+# WordPress cache files
+wp-cache-config.php
+advanced-cache.php
+object-cache.php
+
+# WordPress uploads (if any in plugin)
+/uploads/
+/upload/
+
+# ===========================
+# Testing & Development
+# ===========================
+
+# Test files
+phpunit.xml
+.phpunit.result.cache
+/tests/_output/*
+/tests/_support/_generated
+
+# Coverage reports
+/coverage/
+clover.xml
+*.coverage
+
+# Debug files
+debug.log
+error_log
+php_errors.log
+
+# ===========================
+# Security & Sensitive Data
+# ===========================
+
+# Backup files
+*.sql.gz
+*.sql.zip
+*.tar.gz
+*.zip
+backup/
+backups/
+
+# Private keys
+*.pem
+*.key
+*.cert
+*.crt
+*.p12
+
+# Sensitive documentation (keep public docs)
+STRIPE_SETUP_GUIDE.md
+*-credentials.md
+*-passwords.md
+
+# ===========================
+# Plugin Specific
+# ===========================
+
+# Test/development scripts
+test-*.php
+verify-*.php
+fix-*.php
+install-*.ps1
+
+# SQL files (schema should be version controlled, but data should not)
+/sql/*.sql
+!/sql/schema.sql
+!/sql/install.sql
+
+# ===========================
+# Miscellaneous
+# ===========================
+
+# Sass cache
+.sass-cache/
+
+# Compiled CSS from preprocessors (if you commit source files)
+# Uncomment if you use SASS/LESS and want to ignore compiled CSS
+# /assets/css/*.css
+# !/assets/css/*.min.css
+
+# Minified files (if you version control source files)
+# *.min.js
+# *.min.css
