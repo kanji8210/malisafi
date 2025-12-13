@@ -1,0 +1,581 @@
+==============================================
+MALISAFI MLS - SHORTCODES REFERENCE
+==============================================
+Last Updated: 24 novembre 2025
+Plugin Version: 1.0.0
+
+==============================================
+CURRENT SHORTCODES (IMPLEMENTED)
+==============================================
+
+1. PROPERTIES GRID
+------------------
+[malisafi_properties]
+
+Description: Displays a grid of properties with filtering options
+
+Parameters:
+- type          : Filter by property type slug (e.g., "house", "apartment")
+- status        : Filter by property status slug (e.g., "for-sale", "for-rent")
+- location      : Filter by location slug (e.g., "new-york", "downtown")
+- featured      : Show only featured properties (any value to enable)
+- count         : Number of properties to display (default: 12)
+- orderby       : Order by field (date, price, title, rand, etc.)
+- order         : Sort order (ASC or DESC, default: DESC)
+
+Examples:
+[malisafi_properties count="9" orderby="price" order="ASC"]
+[malisafi_properties type="house" status="for-sale" count="6"]
+[malisafi_properties featured="1" count="3"]
+[malisafi_properties location="downtown" count="12"]
+
+
+2. PROPERTY SEARCH FORM
+-----------------------
+[malisafi_property_search]
+
+Description: Displays an advanced property search form
+
+Parameters:
+- style         : Form layout style (horizontal, vertical - default: horizontal)
+
+Examples:
+[malisafi_property_search]
+[malisafi_property_search style="vertical"]
+
+
+3. FEATURED PROPERTIES
+----------------------
+[malisafi_featured_properties]
+
+Description: Displays featured properties in a special layout
+
+Parameters:
+- count         : Number of featured properties to show (default: 6)
+
+Examples:
+[malisafi_featured_properties]
+[malisafi_featured_properties count="4"]
+
+
+==============================================
+FUTURE SHORTCODES (PLANNED)
+==============================================
+
+4. SINGLE PROPERTY
+------------------
+[malisafi_property id="123"]
+
+Description: Display a single property by ID
+Parameters:
+- id            : Property post ID (required)
+- layout        : Display layout (full, compact, card - default: full)
+- show_gallery  : Display image gallery (yes/no - default: yes)
+- show_map      : Display location map (yes/no - default: yes)
+- show_agent    : Display agent information (yes/no - default: yes)
+- show_share    : Display social share buttons (yes/no - default: yes)
+
+Examples:
+[malisafi_property id="123"]
+[malisafi_property id="123" layout="compact" show_map="no"]
+
+
+5. PROPERTY SLIDER/CAROUSEL
+---------------------------
+[malisafi_property_slider]
+
+Description: Display properties in a slider/carousel format
+Parameters:
+- type          : Filter by property type
+- status        : Filter by property status
+- featured      : Featured only (yes/no)
+- count         : Number of properties (default: 10)
+- autoplay      : Auto-scroll (yes/no - default: yes)
+- speed         : Transition speed in ms (default: 3000)
+- arrows        : Show navigation arrows (yes/no - default: yes)
+- dots          : Show navigation dots (yes/no - default: yes)
+
+Examples:
+[malisafi_property_slider count="8" autoplay="yes"]
+[malisafi_property_slider featured="yes" count="5" speed="5000"]
+
+
+6. PROPERTY MAP VIEW
+--------------------
+[malisafi_property_map]
+
+Description: Display properties on an interactive map
+Parameters:
+- type          : Filter by property type
+- status        : Filter by property status
+- location      : Filter by location
+- count         : Number of properties to show (default: all)
+- height        : Map height in pixels (default: 500)
+- zoom          : Initial zoom level (1-20, default: 12)
+- cluster       : Enable marker clustering (yes/no - default: yes)
+
+Examples:
+[malisafi_property_map height="600" zoom="10"]
+[malisafi_property_map location="new-york" cluster="yes"]
+
+
+7. PROPERTY COMPARISON TABLE
+----------------------------
+[malisafi_property_compare ids="123,456,789"]
+
+Description: Display a comparison table for multiple properties
+Parameters:
+- ids           : Comma-separated property IDs (required)
+- fields        : Fields to compare (price,bedrooms,bathrooms,area - default: all)
+
+Examples:
+[malisafi_property_compare ids="123,456,789"]
+[malisafi_property_compare ids="100,200,300" fields="price,bedrooms,area"]
+
+
+8. AGENT PROFILE
+----------------
+[malisafi_agent id="5"]
+
+Description: Display agent profile with their properties
+Parameters:
+- id            : User/Agent ID (required)
+- show_bio      : Show agent biography (yes/no - default: yes)
+- show_contact  : Show contact information (yes/no - default: yes)
+- show_properties: Show agent's properties (yes/no - default: yes)
+- properties_count: Number of properties to show (default: 6)
+
+Examples:
+[malisafi_agent id="5"]
+[malisafi_agent id="5" show_properties="yes" properties_count="12"]
+
+
+9. AGENT LISTING
+----------------
+[malisafi_agents]
+
+Description: Display a list/grid of all agents
+Parameters:
+- count         : Number of agents to display (default: all)
+- orderby       : Order by (name, date, property_count - default: name)
+- order         : Sort order (ASC, DESC - default: ASC)
+- layout        : Display layout (grid, list - default: grid)
+- columns       : Number of columns for grid (2, 3, 4 - default: 3)
+
+Examples:
+[malisafi_agents]
+[malisafi_agents layout="grid" columns="4"]
+[malisafi_agents orderby="property_count" order="DESC"]
+
+
+10. PROPERTY SUBMIT FORM
+------------------------
+[malisafi_submit_property]
+
+Description: Front-end property submission form
+Parameters:
+- redirect_url  : URL to redirect after submission
+- show_preview  : Enable preview before submission (yes/no - default: yes)
+- user_only     : Require user login (yes/no - default: yes)
+
+Examples:
+[malisafi_submit_property]
+[malisafi_submit_property redirect_url="/thank-you" user_only="yes"]
+
+
+11. USER FAVORITES/WISHLIST
+---------------------------
+[malisafi_favorites]
+
+Description: Display current user's favorite properties
+Parameters:
+- layout        : Display layout (grid, list - default: grid)
+- count         : Properties per page (default: 12)
+
+Examples:
+[malisafi_favorites]
+[malisafi_favorites layout="list" count="20"]
+
+
+12. PROPERTY STATS/DASHBOARD
+----------------------------
+[malisafi_property_stats]
+
+Description: Display property statistics and counts
+Parameters:
+- show_total    : Show total properties (yes/no - default: yes)
+- show_types    : Show counts by type (yes/no - default: yes)
+- show_status   : Show counts by status (yes/no - default: yes)
+- show_locations: Show counts by location (yes/no - default: yes)
+- layout        : Display layout (boxes, list, table - default: boxes)
+
+Examples:
+[malisafi_property_stats]
+[malisafi_property_stats layout="table" show_locations="no"]
+
+
+13. RECENT PROPERTIES
+---------------------
+[malisafi_recent_properties]
+
+Description: Display recently added properties
+Parameters:
+- count         : Number of properties (default: 5)
+- days          : Show properties from last X days (default: 30)
+- layout        : Display layout (list, grid, compact - default: list)
+
+Examples:
+[malisafi_recent_properties count="10"]
+[malisafi_recent_properties days="7" layout="grid"]
+
+
+14. SIMILAR PROPERTIES
+----------------------
+[malisafi_similar_properties id="123"]
+
+Description: Display properties similar to a specific property
+Parameters:
+- id            : Reference property ID (required)
+- count         : Number of similar properties (default: 4)
+- criteria      : Similarity criteria (type,location,price - default: all)
+
+Examples:
+[malisafi_similar_properties id="123" count="6"]
+[malisafi_similar_properties id="123" criteria="location,price"]
+
+
+15. PRICE RANGE FILTER
+----------------------
+[malisafi_price_filter]
+
+Description: Interactive price range slider widget
+Parameters:
+- min           : Minimum price (default: 0)
+- max           : Maximum price (default: 10000000)
+- step          : Price increment step (default: 10000)
+- currency      : Display currency (default: from settings)
+
+Examples:
+[malisafi_price_filter]
+[malisafi_price_filter min="50000" max="2000000" step="25000"]
+
+
+16. PROPERTY CONTACT FORM
+-------------------------
+[malisafi_property_contact property_id="123"]
+
+Description: Contact form for a specific property
+Parameters:
+- property_id   : Property ID (optional, auto-detect on single property page)
+- subject       : Email subject line
+- redirect_url  : URL after successful submission
+- show_property_info: Show property details in form (yes/no - default: yes)
+
+Examples:
+[malisafi_property_contact]
+[malisafi_property_contact property_id="123"]
+[malisafi_property_contact subject="Property Inquiry" redirect_url="/thank-you"]
+
+
+17. PROPERTY ARCHIVE
+--------------------
+[malisafi_property_archive]
+
+Description: Display properties organized by date/month
+Parameters:
+- view          : Archive view (year, month - default: month)
+- limit         : Number of items to show (default: 12)
+
+Examples:
+[malisafi_property_archive]
+[malisafi_property_archive view="year" limit="24"]
+
+
+18. PROPERTY CALCULATOR
+-----------------------
+[malisafi_mortgage_calculator]
+
+Description: Mortgage/loan calculator widget
+Parameters:
+- property_id   : Pre-fill with property price (optional)
+- show_amortization: Show amortization table (yes/no - default: no)
+- currency      : Display currency (default: from settings)
+
+Examples:
+[malisafi_mortgage_calculator]
+[malisafi_mortgage_calculator property_id="123" show_amortization="yes"]
+
+
+19. PROPERTY TYPES GRID
+-----------------------
+[malisafi_property_types]
+
+Description: Display property types with counts and images
+Parameters:
+- show_count    : Show property count (yes/no - default: yes)
+- show_image    : Show type image (yes/no - default: yes)
+- columns       : Number of columns (2, 3, 4 - default: 3)
+- orderby       : Order by (name, count - default: name)
+
+Examples:
+[malisafi_property_types]
+[malisafi_property_types columns="4" orderby="count"]
+
+
+20. LOCATION/CITY GRID
+----------------------
+[malisafi_locations]
+
+Description: Display locations/cities with property counts
+Parameters:
+- parent        : Show only children of parent location ID (optional)
+- show_count    : Show property count (yes/no - default: yes)
+- show_image    : Show location image (yes/no - default: yes)
+- columns       : Number of columns (2, 3, 4 - default: 3)
+
+Examples:
+[malisafi_locations]
+[malisafi_locations parent="5" columns="4"]
+
+
+21. PROPERTY TESTIMONIALS
+-------------------------
+[malisafi_testimonials]
+
+Description: Display property/agent testimonials
+Parameters:
+- count         : Number of testimonials (default: 3)
+- property_id   : Show testimonials for specific property (optional)
+- agent_id      : Show testimonials for specific agent (optional)
+- slider        : Display as slider (yes/no - default: no)
+
+Examples:
+[malisafi_testimonials count="5"]
+[malisafi_testimonials property_id="123" slider="yes"]
+
+
+22. PROPERTY VIDEO TOUR
+-----------------------
+[malisafi_property_video id="123"]
+
+Description: Display property video tour
+Parameters:
+- id            : Property ID (required)
+- width         : Video width (default: 100%)
+- height        : Video height (default: 450px)
+- autoplay      : Auto-play video (yes/no - default: no)
+
+Examples:
+[malisafi_property_video id="123"]
+[malisafi_property_video id="123" autoplay="yes" height="600px"]
+
+
+23. PROPERTY 360 VIRTUAL TOUR
+-----------------------------
+[malisafi_virtual_tour id="123"]
+
+Description: Embed 360° virtual tour
+Parameters:
+- id            : Property ID (required)
+- height        : Tour height (default: 500px)
+- autorotate    : Auto-rotate view (yes/no - default: yes)
+
+Examples:
+[malisafi_virtual_tour id="123"]
+[malisafi_virtual_tour id="123" height="700px" autorotate="no"]
+
+
+24. PROPERTY BROCHURE DOWNLOAD
+------------------------------
+[malisafi_property_brochure id="123"]
+
+Description: Download property brochure/PDF button
+Parameters:
+- id            : Property ID (required)
+- button_text   : Button text (default: "Download Brochure")
+- format        : File format (pdf, doc - default: pdf)
+
+Examples:
+[malisafi_property_brochure id="123"]
+[malisafi_property_brochure id="123" button_text="Get Property Details"]
+
+
+25. PROPERTY SCHEDULE VIEWING
+-----------------------------
+[malisafi_schedule_viewing property_id="123"]
+
+Description: Schedule property viewing form
+Parameters:
+- property_id   : Property ID (optional)
+- show_calendar : Show inline calendar (yes/no - default: yes)
+- time_slots    : Available time slots (morning,afternoon,evening - default: all)
+
+Examples:
+[malisafi_schedule_viewing]
+[malisafi_schedule_viewing property_id="123" time_slots="morning,afternoon"]
+
+
+==============================================
+WIDGET SHORTCODES (PLANNED)
+==============================================
+
+26. PROPERTY SEARCH WIDGET
+--------------------------
+[malisafi_search_widget]
+
+Description: Compact search widget for sidebar
+Parameters:
+- fields        : Fields to show (keyword,type,location,price - default: all)
+- layout        : Widget layout (vertical, compact - default: vertical)
+
+
+27. RECENT PROPERTIES WIDGET
+----------------------------
+[malisafi_recent_widget count="5"]
+
+Description: Sidebar widget showing recent properties
+Parameters:
+- count         : Number of properties (default: 5)
+- show_price    : Show price (yes/no - default: yes)
+- show_image    : Show thumbnail (yes/no - default: yes)
+
+
+28. FEATURED PROPERTIES WIDGET
+------------------------------
+[malisafi_featured_widget count="3"]
+
+Description: Sidebar widget for featured properties
+Parameters:
+- count         : Number of properties (default: 3)
+- layout        : Widget layout (compact, full - default: compact)
+
+
+==============================================
+ADVANCED SHORTCODES (FUTURE)
+==============================================
+
+29. PROPERTY AJAX FILTER
+------------------------
+[malisafi_ajax_properties]
+
+Description: Properties with AJAX filtering (no page reload)
+Parameters:
+- filters       : Available filters (type,status,location,price,bedrooms - default: all)
+- layout        : Display layout (grid, list, map - default: grid)
+- count         : Properties per page (default: 12)
+
+
+30. PROPERTY COMPARISON SLIDER
+------------------------------
+[malisafi_compare_slider]
+
+Description: Side-by-side property comparison with slider
+Parameters:
+- count         : Max properties to compare (default: 2)
+- fields        : Comparison fields (default: all)
+
+
+31. PROPERTY SUBSCRIPTION
+-------------------------
+[malisafi_property_alerts]
+
+Description: Subscribe to property alerts form
+Parameters:
+- criteria      : Alert criteria form fields
+- frequency     : Email frequency options (daily,weekly,monthly)
+
+
+32. PROPERTY SOCIAL SHARE
+-------------------------
+[malisafi_social_share property_id="123"]
+
+Description: Social media share buttons
+Parameters:
+- property_id   : Property ID (optional)
+- networks      : Social networks (facebook,twitter,linkedin,pinterest,email - default: all)
+- layout        : Button layout (horizontal, vertical - default: horizontal)
+
+
+33. PROPERTY PRINT VIEW
+-----------------------
+[malisafi_print_property id="123"]
+
+Description: Print-friendly property view button
+Parameters:
+- id            : Property ID (required)
+- button_text   : Button text (default: "Print Property")
+
+
+34. PROPERTY QR CODE
+--------------------
+[malisafi_property_qr id="123"]
+
+Description: Generate QR code for property
+Parameters:
+- id            : Property ID (required)
+- size          : QR code size in pixels (default: 200)
+
+
+35. PROPERTY RATING/REVIEWS
+---------------------------
+[malisafi_property_reviews id="123"]
+
+Description: Property rating and reviews section
+Parameters:
+- id            : Property ID (required)
+- allow_rating  : Allow new ratings (yes/no - default: yes)
+- show_average  : Show average rating (yes/no - default: yes)
+
+
+==============================================
+INTEGRATION SHORTCODES (FUTURE)
+==============================================
+
+36. ZILLOW/REALTOR IMPORT
+-------------------------
+[malisafi_mls_import source="zillow"]
+
+Description: Import properties from external MLS sources
+Parameters:
+- source        : Import source (zillow, realtor, etc.)
+- auto_sync     : Auto-sync properties (yes/no - default: no)
+
+
+37. IDX/MLS INTEGRATION
+-----------------------
+[malisafi_idx_search]
+
+Description: IDX/MLS search integration
+Parameters:
+- mls_id        : MLS system ID
+- board_id      : Real estate board ID
+
+
+==============================================
+USAGE NOTES
+==============================================
+
+1. Multiple shortcodes can be combined on the same page
+2. All shortcodes are responsive and mobile-friendly
+3. Shortcodes respect plugin settings (currency, units, etc.)
+4. Use WordPress's do_shortcode() function in templates
+5. Shortcodes can be nested where appropriate
+6. All user inputs are sanitized for security
+
+==============================================
+DEVELOPER NOTES
+==============================================
+
+To implement future shortcodes:
+
+1. Add shortcode handler in public/class-public.php
+2. Register in includes/class-core.php
+3. Create corresponding template in templates/
+4. Add necessary CSS in assets/css/public.css
+5. Add JavaScript if needed in assets/js/public.js
+6. Update this reference file
+7. Add to plugin documentation
+
+==============================================
+END OF SHORTCODE REFERENCE
+==============================================

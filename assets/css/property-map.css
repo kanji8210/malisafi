@@ -1,0 +1,304 @@
+/**
+ * Malisafi Property Map Styles
+ * 
+ * Theme-integrated styling for property map display
+ */
+
+/* Map Container */
+.malisafi-property-map-container {
+    position: relative;
+    width: 100%;
+    margin: 2rem 0;
+    border: 1px solid currentColor;
+    border-radius: 8px;
+    overflow: hidden;
+    opacity: 0.9;
+}
+
+#malisafi-property-map {
+    width: 100%;
+    min-height: 400px;
+    background: transparent;
+}
+
+/* Property Count Display */
+.map-property-count {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: rgba(255, 255, 255, 0.95);
+    color: inherit;
+    padding: 8px 16px;
+    border-radius: 4px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    z-index: 1000;
+    pointer-events: none;
+}
+
+/* No Properties Message */
+.no-properties-message {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 400px;
+    padding: 2rem;
+    text-align: center;
+    background: transparent;
+    color: inherit;
+    opacity: 0.7;
+}
+
+.no-properties-message p {
+    font-size: 1.125rem;
+    margin: 0;
+}
+
+/* Custom Marker Pin */
+.malisafi-marker {
+    background: transparent;
+    border: none;
+}
+
+.marker-pin {
+    width: 30px;
+    height: 42px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: currentColor;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+    transition: transform 0.2s ease;
+}
+
+.marker-pin svg {
+    width: 100%;
+    height: 100%;
+}
+
+/* Marker hover effect */
+.leaflet-marker-icon:hover .marker-pin {
+    transform: scale(1.15);
+}
+
+/* Popup Styles */
+.property-map-popup {
+    font-family: inherit;
+    color: inherit;
+}
+
+.popup-image {
+    width: 100%;
+    height: 150px;
+    margin-bottom: 12px;
+    overflow: hidden;
+    border-radius: 4px;
+}
+
+.popup-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.popup-image img:hover {
+    transform: scale(1.05);
+}
+
+.popup-content {
+    padding: 0 4px;
+}
+
+.popup-title {
+    margin: 0 0 8px 0;
+    font-size: 1rem;
+    font-weight: 600;
+    line-height: 1.3;
+}
+
+.popup-title a {
+    color: inherit;
+    text-decoration: none;
+    transition: opacity 0.2s ease;
+}
+
+.popup-title a:hover {
+    opacity: 0.7;
+}
+
+.popup-meta {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 8px;
+    flex-wrap: wrap;
+}
+
+.popup-type,
+.popup-status {
+    font-size: 0.75rem;
+    padding: 3px 8px;
+    border-radius: 3px;
+    background: transparent;
+    border: 1px solid currentColor;
+    opacity: 0.8;
+    font-weight: 500;
+}
+
+.popup-price {
+    font-size: 1.125rem;
+    font-weight: 700;
+    margin: 10px 0;
+    color: inherit;
+}
+
+.popup-link {
+    display: inline-block;
+    padding: 8px 16px;
+    background: transparent;
+    color: currentColor;
+    border: 1px solid currentColor;
+    border-radius: 4px;
+    text-decoration: none;
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-align: center;
+    transition: all 0.2s ease;
+    margin-top: 8px;
+}
+
+.popup-link:hover {
+    background: currentColor;
+    color: white;
+}
+
+/* Override Leaflet default popup styles */
+.leaflet-popup-content-wrapper {
+    padding: 0;
+    border-radius: 8px;
+    box-shadow: 0 3px 14px rgba(0, 0, 0, 0.2);
+}
+
+.leaflet-popup-content {
+    margin: 0;
+    width: auto !important;
+    min-width: 250px;
+}
+
+.leaflet-popup-tip-container {
+    opacity: 0.95;
+}
+
+/* Marker Cluster Styles (override defaults with theme colors) */
+.marker-cluster-small,
+.marker-cluster-medium,
+.marker-cluster-large {
+    background-color: rgba(110, 204, 57, 0.6) !important;
+}
+
+.marker-cluster-small div,
+.marker-cluster-medium div,
+.marker-cluster-large div {
+    background-color: rgba(110, 204, 57, 0.8) !important;
+    color: white !important;
+    font-weight: 600;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .malisafi-property-map-container {
+        margin: 1rem 0;
+        border-radius: 6px;
+    }
+    
+    #malisafi-property-map {
+        min-height: 300px;
+    }
+    
+    .map-property-count {
+        top: 8px;
+        right: 8px;
+        padding: 6px 12px;
+        font-size: 0.8125rem;
+    }
+    
+    .popup-image {
+        height: 120px;
+    }
+    
+    .popup-title {
+        font-size: 0.9375rem;
+    }
+    
+    .popup-price {
+        font-size: 1rem;
+    }
+    
+    .leaflet-popup-content {
+        min-width: 200px;
+    }
+}
+
+@media (max-width: 480px) {
+    .map-property-count {
+        position: static;
+        width: 100%;
+        border-radius: 0;
+        text-align: center;
+        margin-bottom: 0;
+    }
+    
+    #malisafi-property-map {
+        min-height: 250px;
+    }
+    
+    .popup-image {
+        height: 100px;
+    }
+}
+
+/* Loading State */
+.malisafi-property-map-container.loading {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+.malisafi-property-map-container.loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 40px;
+    height: 40px;
+    border: 4px solid transparent;
+    border-top-color: currentColor;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    z-index: 2000;
+}
+
+@keyframes spin {
+    to {
+        transform: translate(-50%, -50%) rotate(360deg);
+    }
+}
+
+/* Accessibility */
+.malisafi-marker:focus {
+    outline: 2px solid currentColor;
+    outline-offset: 2px;
+}
+
+/* Print Styles */
+@media print {
+    .map-property-count {
+        background: white;
+        box-shadow: none;
+    }
+    
+    .popup-link {
+        display: none;
+    }
+}

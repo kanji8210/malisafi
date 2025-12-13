@@ -1,0 +1,31 @@
+{
+    "name": "malisafi/mls-plugin",
+    "description": "Malisafi MLS - Multi Listing Service WordPress Plugin with Stripe Integration",
+    "type": "wordpress-plugin",
+    "keywords": ["wordpress", "plugin", "mls", "real-estate", "stripe", "subscriptions"],
+    "license": "GPL-2.0-or-later",
+    "authors": [
+        {
+            "name": "Malisafi",
+            "email": "support@malisafi.com"
+        }
+    ],
+    "require": {
+        "php": ">=7.2",
+        "stripe/stripe-php": "^10.0"
+    },
+    "autoload": {
+        "classmap": [
+            "includes/",
+            "admin/"
+        ]
+    },
+    "scripts": {
+        "post-install-cmd": [
+            "@php -r \"echo '\\n✅ Stripe PHP library installed successfully!\\n';\""
+        ],
+        "post-update-cmd": [
+            "@php -r \"echo '\\n✅ Dependencies updated successfully!\\n';\""
+        ]
+    }
+}

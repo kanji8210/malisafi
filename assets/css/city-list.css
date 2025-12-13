@@ -1,0 +1,447 @@
+/**
+ * Malisafi City List Styles
+ * 
+ * Theme-integrated styling for city list display
+ */
+
+/* Container */
+.malisafi-city-list-container {
+    width: 100%;
+    margin: 2rem 0;
+    padding: 0;
+}
+
+/* Header Section */
+.city-list-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+/* Search Box */
+.city-search-box {
+    position: relative;
+    flex: 1;
+    min-width: 250px;
+    max-width: 400px;
+}
+
+.city-search-input {
+    width: 100%;
+    padding: 12px 16px 12px 45px;
+    font-size: 1rem;
+    border: 2px solid currentColor;
+    border-radius: 8px;
+    background: transparent;
+    color: inherit;
+    transition: all 0.3s ease;
+    opacity: 0.8;
+}
+
+.city-search-input:focus {
+    outline: none;
+    opacity: 1;
+    border-color: currentColor;
+    box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.05);
+}
+
+.city-search-input::placeholder {
+    color: inherit;
+    opacity: 0.5;
+}
+
+.search-icon {
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: currentColor;
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+/* Count Summary */
+.city-count-summary {
+    font-size: 1rem;
+    font-weight: 600;
+    color: inherit;
+    opacity: 0.8;
+    white-space: nowrap;
+}
+
+.total-cities {
+    color: currentColor;
+    font-weight: 700;
+}
+
+/* City Grid Layout */
+.city-list-grid {
+    display: grid;
+    grid-template-columns: repeat(var(--columns, 4), 1fr);
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+/* City List Layout */
+.city-list-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+/* City Item */
+.city-item {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.3s ease;
+}
+
+.city-item.animate-in {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.city-link {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    color: inherit;
+    border: 1px solid currentColor;
+    border-radius: 8px;
+    overflow: hidden;
+    background: transparent;
+    transition: all 0.3s ease;
+    position: relative;
+    opacity: 0.9;
+}
+
+.city-link:hover {
+    opacity: 1;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.city-link.loading {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+/* Grid Layout City Item */
+.city-list-grid .city-link {
+    flex-direction: column;
+    height: 100%;
+}
+
+.city-list-grid .city-image-wrapper {
+    width: 100%;
+    height: 200px;
+}
+
+.city-list-grid .city-content {
+    padding: 1.25rem;
+    text-align: center;
+    flex: 1;
+}
+
+.city-list-grid .city-arrow {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    width: 32px;
+    height: 32px;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transform: scale(0.8);
+    transition: all 0.3s ease;
+}
+
+.city-list-grid .city-link:hover .city-arrow {
+    opacity: 1;
+    transform: scale(1);
+}
+
+/* List Layout City Item */
+.city-list-list .city-link {
+    flex-direction: row;
+}
+
+.city-list-list .city-image-wrapper {
+    width: 120px;
+    height: 120px;
+    flex-shrink: 0;
+}
+
+.city-list-list .city-content {
+    padding: 1.25rem;
+    flex: 1;
+}
+
+.city-list-list .city-arrow {
+    padding: 0 1.5rem;
+    opacity: 0.6;
+}
+
+.city-list-list .city-link:hover .city-arrow {
+    opacity: 1;
+    transform: translateX(4px);
+}
+
+/* City Image */
+.city-image-wrapper {
+    position: relative;
+    overflow: hidden;
+    background: rgba(0, 0, 0, 0.05);
+}
+
+.city-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.4s ease;
+}
+
+.city-link:hover .city-image {
+    transform: scale(1.1);
+}
+
+.city-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(180deg, transparent 0%, rgba(0, 0, 0, 0.4) 100%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.city-link:hover .city-overlay {
+    opacity: 1;
+}
+
+/* City Content */
+.city-content {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.city-name {
+    margin: 0;
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: inherit;
+    line-height: 1.3;
+}
+
+.city-property-count {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    color: inherit;
+    opacity: 0.7;
+}
+
+.city-property-count svg {
+    flex-shrink: 0;
+}
+
+/* No Results Message */
+.city-no-results {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: inherit;
+    opacity: 0.6;
+}
+
+.city-no-results svg {
+    margin: 0 auto 1rem;
+    opacity: 0.5;
+}
+
+.city-no-results p {
+    font-size: 1.125rem;
+    margin: 0;
+}
+
+/* Empty State */
+.city-list-empty {
+    text-align: center;
+    padding: 4rem 1rem;
+    color: inherit;
+    opacity: 0.6;
+}
+
+.city-list-empty svg {
+    margin: 0 auto 1.5rem;
+    opacity: 0.4;
+}
+
+.city-list-empty p {
+    font-size: 1.125rem;
+    margin: 0;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+    .city-list-grid {
+        --columns: 3 !important;
+    }
+}
+
+@media (max-width: 768px) {
+    .city-list-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .city-search-box {
+        max-width: 100%;
+    }
+    
+    .city-count-summary {
+        text-align: center;
+    }
+    
+    .city-list-grid {
+        --columns: 2 !important;
+        gap: 1rem;
+    }
+    
+    .city-list-grid .city-image-wrapper {
+        height: 150px;
+    }
+    
+    .city-list-grid .city-content {
+        padding: 1rem;
+    }
+    
+    .city-name {
+        font-size: 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .malisafi-city-list-container {
+        margin: 1rem 0;
+    }
+    
+    .city-list-header {
+        margin-bottom: 1.5rem;
+    }
+    
+    .city-search-input {
+        padding: 10px 12px 10px 40px;
+        font-size: 0.9375rem;
+    }
+    
+    .city-list-grid {
+        --columns: 1 !important;
+    }
+    
+    .city-list-list .city-image-wrapper {
+        width: 80px;
+        height: 80px;
+    }
+    
+    .city-list-list .city-content {
+        padding: 1rem;
+    }
+    
+    .city-list-list .city-arrow {
+        padding: 0 1rem;
+    }
+    
+    .city-name {
+        font-size: 0.9375rem;
+    }
+    
+    .city-property-count {
+        font-size: 0.8125rem;
+    }
+}
+
+/* Focus Styles for Accessibility */
+.city-link:focus {
+    outline: 2px solid currentColor;
+    outline-offset: 2px;
+}
+
+.city-link:focus:not(:focus-visible) {
+    outline: none;
+}
+
+.city-link:focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 2px;
+}
+
+/* Loading State */
+.city-link.loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 24px;
+    height: 24px;
+    border: 3px solid transparent;
+    border-top-color: currentColor;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: translate(-50%, -50%) rotate(360deg);
+    }
+}
+
+/* Hover State for Touch Devices */
+@media (hover: none) {
+    .city-link:hover {
+        transform: none;
+        box-shadow: none;
+    }
+    
+    .city-link:active {
+        opacity: 0.8;
+    }
+}
+
+/* Print Styles */
+@media print {
+    .city-search-box,
+    .city-arrow {
+        display: none;
+    }
+    
+    .city-list-grid {
+        --columns: 2 !important;
+    }
+    
+    .city-link {
+        border: 1px solid #000;
+        page-break-inside: avoid;
+    }
+}
+
+/* Dark Mode Support (if theme provides dark mode) */
+@media (prefers-color-scheme: dark) {
+    .city-image-wrapper {
+        background: rgba(255, 255, 255, 0.05);
+    }
+    
+    .city-list-grid .city-arrow {
+        background: rgba(0, 0, 0, 0.8);
+    }
+}

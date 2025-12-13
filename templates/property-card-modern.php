@@ -1,0 +1,126 @@
+<?php
+/**
+ * Modern Property Card Template
+ * Sleek card design for property display
+ */
+
+if (!defined('ABSPATH')) {
+    exit;
+}
+
+$property_id = get_the_ID();
+
+// Get property meta directly
+$price = get_post_meta($property_id, '_malisafi_price', true);
+$currency = get_post_meta($property_id, '_malisafi_currency', true);
+if (empty($currency)) {
+    $currency = 'USD'; // Default currency
+}
+$bedrooms = get_post_meta($property_id, '_malisafi_bedrooms', true);
+$bathrooms = get_post_meta($property_id, '_malisafi_bathrooms', true);
+$area = get_post_meta($property_id, '_malisafi_area', true);
+$status = get_post_meta($property_id, '_malisafi_status', true);
+$featured = get_post_meta($property_id, '_malisafi_featured', true);
+$city = get_post_meta($property_id, '_malisafi_city', true);
+$state = get_post_meta($property_id, '_malisafi_state', true);
+$location = $city ? $city . ($state ? ', ' . $state : '') : '';
+
+// Get featured image
+$image_url = get_the_post_thumbnail_url($property_id, 'large');
+if (!$image_url) {
+    $image_url = plugins_url('malisafi/assets/images/placeholder-property.svg');
+}
+
+// Get property permalink
+$property_url = get_permalink($property_id);
+
+// Format price with currency
+$currency_symbol = ($currency === 'KES') ? 'KSh' : '$';
+$formatted_price = $currency_symbol . ' ' . number_format(floatval($price));
+
+// Check if property is new (posted within last 7 days)
+$post_date = get_the_date('U');
+$is_new = (time() - $post_date) < (7 * 24 * 60 * 60);
+?>
+
+<article class="property-card-modern" data-url="<?php echo esc_url($property_url); ?>" data-property-id="<?php echo $property_id; ?>">
+    
+    <div class="property-image-wrapper">
+        <img src="<?php echo esc_url($image_url); ?>" alt="<?php echo esc_attr(get_the_title()); ?>">
+        
+        <div class="property-badges">
+            <?php if ($featured) : ?>
+                <span class="property-badge featured">Featured</span>
+            <?php endif; ?>
+            
+            <?php if ($is_new) : ?>
+                <span class="property-badge new">New</span>
+            <?php endif; ?>
+            
+            <?php if ($status && strtolower($status) === 'hot') : ?>
+                <span class="property-badge hot">Hot Deal</span>
+            <?php endif; ?>
+        </div>
+        
+        <?php
+        // Check if property is favorited
+        $is_favorited = false;
+        if (is_user_logged_in()) {
+            $user_id = get_current_user_id();
+            $favorites = get_user_meta($user_id, '_malisafi_favorites', true);
+            $favorites = $favorites ? explode(',', $favorites) : array();
+            $is_favorited = in_array($property_id, $favorites);
+        }
+        ?>
+        <button class="property-favorite<?php echo $is_favorited ? ' favorited' : ''; ?>" data-property-id="<?php echo $property_id; ?>">
+            <span class="dashicons dashicons-heart"></span>
+        </button>
+    </div>
+    
+    <div class="property-card-body">
+        
+        <div class="property-price">
+            <?php echo esc_html($formatted_price); ?>
+        </div>
+        
+        <h3 class="property-title">
+            <?php the_title(); ?>
+        </h3>
+        
+        <?php if ($location) : ?>
+        <div class="property-location">
+            <span class="dashicons dashicons-location"></span>
+            <span><?php echo esc_html($location); ?></span>
+        </div>
+        <?php endif; ?>
+        
+        <div class="property-features">
+            <?php if ($bedrooms) : ?>
+            <div class="property-feature">
+                <svg class="feature-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M20 9.556V3h-2v2H6V3H4v6.557C2.81 10.25 2 11.526 2 13v4a1 1 0 0 0 1 1h1v4h2v-4h12v4h2v-4h1a1 1 0 0 0 1-1v-4c0-1.474-.811-2.75-2-3.444zM11 9H6V7h5v2zm7 0h-5V7h5v2z"/>
+                </svg>
+                <span><?php echo esc_html($bedrooms); ?> Bed<?php echo $bedrooms > 1 ? 's' : ''; ?></span>
+            </div>
+            <?php endif; ?>
+            
+            <?php if ($bathrooms) : ?>
+            <div class="property-feature">
+                <svg class="feature-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M21 10H7V7c0-1.103.897-2 2-2s2 .897 2 2h2c0-2.206-1.794-4-4-4S5 4.794 5 7v3H3a1 1 0 0 0-1 1v2c0 2.606 1.674 4.823 4 5.65V22h2v-3h8v3h2v-3.35c2.326-.827 4-3.044 4-5.65v-2a1 1 0 0 0-1-1z"/>
+                </svg>
+                <span><?php echo esc_html($bathrooms); ?> Bath<?php echo $bathrooms > 1 ? 's' : ''; ?></span>
+            </div>
+            <?php endif; ?>
+            
+            <?php if ($area) : ?>
+            <div class="property-feature">
+                <span class="dashicons dashicons-editor-expand"></span>
+                <span><?php echo number_format(floatval($area)); ?> sq ft</span>
+            </div>
+            <?php endif; ?>
+        </div>
+        
+    </div>
+    
+</article>

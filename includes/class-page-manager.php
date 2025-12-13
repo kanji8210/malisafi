@@ -1,0 +1,469 @@
+<?php
+/**
+ * Page Manager - Handles automatic page creation and shortcode assignment
+ *
+ * @package MalisafiMLS
+ */
+
+namespace MalisafiMLS;
+
+/**
+ * Page_Manager class
+ */
+class Page_Manager {
+    
+    /**
+     * Required pages configuration
+     */
+    private static $required_pages = array(
+        // Public Pages
+        'properties' => array(
+            'title' => 'Properties',
+            'slug' => 'properties',
+            'shortcode' => '[malisafi_properties]',
+            'description' => 'Main properties listing page',
+            'parent' => 0
+        ),
+        'property_search' => array(
+            'title' => 'Property Search',
+            'slug' => 'property-search',
+            'shortcode' => '[malisafi_property_search]',
+            'description' => 'Advanced property search page',
+            'parent' => 0
+        ),
+        'featured_properties' => array(
+            'title' => 'Featured Properties',
+            'slug' => 'featured-properties',
+            'shortcode' => '[malisafi_featured_properties]',
+            'description' => 'Featured properties showcase',
+            'parent' => 0
+        ),
+        'agents' => array(
+            'title' => 'Our Agents',
+            'slug' => 'agents',
+            'shortcode' => '[malisafi_agents]',
+            'description' => 'All agents listing',
+            'parent' => 0
+        ),
+        'pricing' => array(
+            'title' => 'Pricing & Plans',
+            'slug' => 'pricing',
+            'shortcode' => '[malisafi_pricing]',
+            'description' => 'Subscription plans page',
+            'parent' => 0
+        ),
+        
+        // Client Dashboard Pages
+        'client_dashboard' => array(
+            'title' => 'My Dashboard',
+            'slug' => 'client-dashboard',
+            'shortcode' => '[malisafi_client_dashboard]',
+            'description' => 'Client dashboard homepage',
+            'parent' => 0
+        ),
+        'client_favorites' => array(
+            'title' => 'My Favorites',
+            'slug' => 'my-favorites',
+            'shortcode' => '[malisafi_favorites]',
+            'description' => 'Saved properties',
+            'parent' => 'client_dashboard'
+        ),
+        'client_searches' => array(
+            'title' => 'Saved Searches',
+            'slug' => 'saved-searches',
+            'shortcode' => '[malisafi_saved_searches]',
+            'description' => 'User saved searches',
+            'parent' => 'client_dashboard'
+        ),
+        'client_inquiries' => array(
+            'title' => 'My Inquiries',
+            'slug' => 'my-inquiries',
+            'shortcode' => '[malisafi_client_inquiries]',
+            'description' => 'Property inquiries history',
+            'parent' => 'client_dashboard'
+        ),
+        
+        // Agent Dashboard Pages
+        'agent_dashboard' => array(
+            'title' => 'Agent Dashboard',
+            'slug' => 'agent-dashboard',
+            'shortcode' => '[malisafi_agent_dashboard]',
+            'description' => 'Agent dashboard homepage',
+            'parent' => 0
+        ),
+        'agent_properties' => array(
+            'title' => 'My Properties',
+            'slug' => 'agent-properties',
+            'shortcode' => '[malisafi_agent_properties]',
+            'description' => 'Agent properties list',
+            'parent' => 'agent_dashboard'
+        ),
+        'agent_add_property' => array(
+            'title' => 'Add Property',
+            'slug' => 'add-property',
+            'shortcode' => '[malisafi_property_submit]',
+            'description' => 'Property submission form',
+            'parent' => 'agent_dashboard'
+        ),
+        'agent_leads' => array(
+            'title' => 'My Leads',
+            'slug' => 'agent-leads',
+            'shortcode' => '[malisafi_agent_leads]',
+            'description' => 'Agent leads management',
+            'parent' => 'agent_dashboard'
+        ),
+        'agent_profile' => array(
+            'title' => 'My Profile',
+            'slug' => 'agent-profile',
+            'shortcode' => '[malisafi_agent_profile]',
+            'description' => 'Agent profile editor',
+            'parent' => 'agent_dashboard'
+        ),
+        
+        // Owner Dashboard Pages
+        'owner_dashboard' => array(
+            'title' => 'Owner Dashboard',
+            'slug' => 'owner-dashboard',
+            'shortcode' => '[malisafi_owner_dashboard]',
+            'description' => 'Property owner dashboard',
+            'parent' => 0
+        ),
+        'owner_properties' => array(
+            'title' => 'My Properties',
+            'slug' => 'owner-properties',
+            'shortcode' => '[malisafi_owner_properties]',
+            'description' => 'Owner properties list',
+            'parent' => 'owner_dashboard'
+        ),
+        'owner_add_property' => array(
+            'title' => 'List Property',
+            'slug' => 'list-property',
+            'shortcode' => '[malisafi_property_submit role="owner"]',
+            'description' => 'Owner property listing form',
+            'parent' => 'owner_dashboard'
+        ),
+        'owner_inquiries' => array(
+            'title' => 'Inquiries',
+            'slug' => 'owner-inquiries',
+            'shortcode' => '[malisafi_owner_inquiries]',
+            'description' => 'Inquiries for owner properties',
+            'parent' => 'owner_dashboard'
+        ),
+        
+        // Developer Dashboard Pages
+        'developer_dashboard' => array(
+            'title' => 'Developer Dashboard',
+            'slug' => 'developer-dashboard',
+            'shortcode' => '[malisafi_developer_dashboard]',
+            'description' => 'Developer project dashboard',
+            'parent' => 0
+        ),
+        'developer_projects' => array(
+            'title' => 'My Projects',
+            'slug' => 'developer-projects',
+            'shortcode' => '[malisafi_developer_projects]',
+            'description' => 'Developer projects list',
+            'parent' => 'developer_dashboard'
+        ),
+        'developer_add_project' => array(
+            'title' => 'Add Project',
+            'slug' => 'add-project',
+            'shortcode' => '[malisafi_property_submit role="developer"]',
+            'description' => 'New project submission',
+            'parent' => 'developer_dashboard'
+        ),
+        'developer_analytics' => array(
+            'title' => 'Analytics',
+            'slug' => 'developer-analytics',
+            'shortcode' => '[malisafi_developer_analytics]',
+            'description' => 'Project analytics and reports',
+            'parent' => 'developer_dashboard'
+        ),
+        
+        // Account Pages
+        'login' => array(
+            'title' => 'Login',
+            'slug' => 'login',
+            'shortcode' => '[malisafi_login]',
+            'description' => 'User login page',
+            'parent' => 0
+        ),
+        'register' => array(
+            'title' => 'Register',
+            'slug' => 'register',
+            'shortcode' => '[malisafi_register]',
+            'description' => 'User registration page',
+            'parent' => 0
+        ),
+        'account' => array(
+            'title' => 'My Account',
+            'slug' => 'my-account',
+            'shortcode' => '[malisafi_account]',
+            'description' => 'User account settings',
+            'parent' => 0
+        )
+    );
+    
+    /**
+     * Initialize the page manager
+     */
+    public static function init() {
+        add_action('admin_init', array(__CLASS__, 'check_pages_status'));
+        add_action('admin_notices', array(__CLASS__, 'pages_status_notice'));
+    }
+    
+    /**
+     * Get all required pages
+     */
+    public static function get_required_pages() {
+        return self::$required_pages;
+    }
+    
+    /**
+     * Create all required pages
+     */
+    public static function create_all_pages() {
+        $created_pages = array();
+        $parent_pages = array();
+        
+        // First pass: Create parent pages
+        foreach (self::$required_pages as $key => $page) {
+            if ($page['parent'] === 0) {
+                $page_id = self::create_page($key, $page);
+                if ($page_id) {
+                    $parent_pages[$key] = $page_id;
+                    $created_pages[$key] = $page_id;
+                    update_option('malisafi_page_' . $key, $page_id);
+                }
+            }
+        }
+        
+        // Second pass: Create child pages
+        foreach (self::$required_pages as $key => $page) {
+            if ($page['parent'] !== 0) {
+                $parent_id = isset($parent_pages[$page['parent']]) ? $parent_pages[$page['parent']] : 0;
+                $page['parent_id'] = $parent_id;
+                
+                $page_id = self::create_page($key, $page);
+                if ($page_id) {
+                    $created_pages[$key] = $page_id;
+                    update_option('malisafi_page_' . $key, $page_id);
+                }
+            }
+        }
+        
+        // Save creation timestamp
+        update_option('malisafi_pages_created', current_time('timestamp'));
+        
+        return $created_pages;
+    }
+    
+    /**
+     * Create a single page
+     */
+    private static function create_page($key, $page_config) {
+        // Check if page already exists
+        $existing_id = get_option('malisafi_page_' . $key);
+        if ($existing_id && get_post($existing_id)) {
+            return $existing_id;
+        }
+        
+        $parent_id = isset($page_config['parent_id']) ? $page_config['parent_id'] : 0;
+        
+        $page_data = array(
+            'post_title' => $page_config['title'],
+            'post_name' => $page_config['slug'],
+            'post_content' => $page_config['shortcode'],
+            'post_status' => 'publish',
+            'post_type' => 'page',
+            'post_author' => 1,
+            'post_parent' => $parent_id,
+            'comment_status' => 'closed',
+            'ping_status' => 'closed'
+        );
+        
+        $page_id = wp_insert_post($page_data);
+        
+        if ($page_id && !is_wp_error($page_id)) {
+            // Add page description as meta
+            update_post_meta($page_id, '_malisafi_page_description', $page_config['description']);
+            update_post_meta($page_id, '_malisafi_page_key', $key);
+            
+            return $page_id;
+        }
+        
+        return false;
+    }
+    
+    /**
+     * Check pages status
+     */
+    public static function check_pages_status() {
+        $status = array();
+        
+        foreach (self::$required_pages as $key => $page) {
+            $page_id = get_option('malisafi_page_' . $key);
+            $status[$key] = array(
+                'exists' => $page_id && get_post($page_id) ? true : false,
+                'page_id' => $page_id,
+                'title' => $page['title'],
+                'shortcode' => $page['shortcode']
+            );
+        }
+        
+        update_option('malisafi_pages_status', $status);
+        return $status;
+    }
+    
+    /**
+     * Get pages status
+     */
+    public static function get_pages_status() {
+        $status = get_option('malisafi_pages_status');
+        if (!$status) {
+            $status = self::check_pages_status();
+        }
+        return $status;
+    }
+    
+    /**
+     * Show admin notice if pages are missing
+     */
+    public static function pages_status_notice() {
+        if (!current_user_can('manage_options')) {
+            return;
+        }
+        
+        $status = self::get_pages_status();
+        $missing_pages = array();
+        
+        foreach ($status as $key => $page_status) {
+            if (!$page_status['exists']) {
+                $missing_pages[] = $page_status['title'];
+            }
+        }
+        
+        if (!empty($missing_pages) && count($missing_pages) > 3) {
+            $screen = get_current_screen();
+            if ($screen && $screen->id === 'toplevel_page_malisafi-dashboard') {
+                ?>
+                <div class="notice notice-warning is-dismissible">
+                    <p>
+                        <strong><?php _e('MalisafiMLS:', 'malisafi-mls'); ?></strong> 
+                        <?php printf(
+                            __('%d required pages are missing. ', 'malisafi-mls'),
+                            count($missing_pages)
+                        ); ?>
+                        <a href="<?php echo admin_url('admin.php?page=malisafi-pages'); ?>" class="button button-primary">
+                            <?php _e('Manage Pages', 'malisafi-mls'); ?>
+                        </a>
+                    </p>
+                </div>
+                <?php
+            }
+        }
+    }
+    
+    /**
+     * Get page URL by key
+     */
+    public static function get_page_url($key) {
+        $page_id = get_option('malisafi_page_' . $key);
+        if ($page_id && get_post($page_id)) {
+            return get_permalink($page_id);
+        }
+        return home_url();
+    }
+    
+    /**
+     * Delete all plugin pages
+     */
+    public static function delete_all_pages() {
+        foreach (self::$required_pages as $key => $page) {
+            $page_id = get_option('malisafi_page_' . $key);
+            if ($page_id) {
+                wp_delete_post($page_id, true);
+                delete_option('malisafi_page_' . $key);
+            }
+        }
+        delete_option('malisafi_pages_status');
+        delete_option('malisafi_pages_created');
+    }
+    
+    /**
+     * Get missing pages
+     */
+    public static function get_missing_pages() {
+        $status = self::get_pages_status();
+        $missing = array();
+        
+        foreach ($status as $key => $page_status) {
+            if (!$page_status['exists']) {
+                $missing[$key] = self::$required_pages[$key];
+            }
+        }
+        
+        return $missing;
+    }
+    
+    /**
+     * Recreate a specific page
+     */
+    public static function recreate_page($key) {
+        if (!isset(self::$required_pages[$key])) {
+            return false;
+        }
+        
+        // Delete existing page
+        $page_id = get_option('malisafi_page_' . $key);
+        if ($page_id) {
+            wp_delete_post($page_id, true);
+        }
+        
+        // Create new page
+        $page_config = self::$required_pages[$key];
+        
+        // Handle parent
+        if ($page_config['parent'] !== 0) {
+            $parent_id = get_option('malisafi_page_' . $page_config['parent']);
+            $page_config['parent_id'] = $parent_id ? $parent_id : 0;
+        }
+        
+        $new_page_id = self::create_page($key, $page_config);
+        
+        if ($new_page_id) {
+            update_option('malisafi_page_' . $key, $new_page_id);
+            return $new_page_id;
+        }
+        
+        return false;
+    }
+    
+    /**
+     * Update page shortcode
+     */
+    public static function update_page_shortcode($page_id, $shortcode) {
+        $page = get_post($page_id);
+        if (!$page) {
+            return false;
+        }
+        
+        wp_update_post(array(
+            'ID' => $page_id,
+            'post_content' => $shortcode
+        ));
+        
+        return true;
+    }
+    
+    /**
+     * Get page by key
+     */
+    public static function get_page($key) {
+        $page_id = get_option('malisafi_page_' . $key);
+        if ($page_id) {
+            return get_post($page_id);
+        }
+        return null;
+    }
+}

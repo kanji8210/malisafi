@@ -1,0 +1,631 @@
+/**
+ * Single Page Registration Form Styles
+ * Theme-integrated design - uses site colors
+ * 
+ * @package MalisafiMLS
+ */
+
+.malisafi-registration-wrapper {
+    padding: 40px 20px;
+    background: transparent;
+    font-family: inherit;
+}
+
+.registration-container {
+    max-width: 900px;
+    width: 100%;
+    margin: 0 auto;
+    background: transparent;
+    border-radius: 0;
+    box-shadow: none;
+    overflow: visible;
+}
+
+.registration-header {
+    background: transparent;
+    color: inherit;
+    padding: 20px 0 30px;
+    text-align: center;
+    border-bottom: 2px solid currentColor;
+    margin-bottom: 40px;
+}
+
+.registration-header h2 {
+    margin: 0 0 10px 0;
+    font-size: 32px;
+    font-weight: 700;
+    color: inherit;
+}
+
+.registration-header .subtitle {
+    margin: 0;
+    font-size: 18px;
+    opacity: 0.8;
+    font-weight: 500;
+    color: inherit;
+}
+
+/* Single Page Form Layout */
+.single-page-form {
+    padding: 40px 0 50px;
+}
+
+.form-section {
+    margin-bottom: 40px;
+    padding-bottom: 40px;
+    border-bottom: 1px solid currentColor;
+    opacity: 0.9;
+}
+
+.form-section:last-of-type {
+    border-bottom: none;
+    margin-bottom: 20px;
+    opacity: 1;
+}
+
+.form-section h3 {
+    margin: 0 0 25px 0;
+    font-size: 22px;
+    font-weight: 600;
+    color: inherit;
+}
+
+/* Hide old progress bar */
+.progress-bar {
+    display: none;
+}
+
+.progress-step {
+    display: none;
+    border-color: #00c853;
+    color: white;
+}
+
+.progress-step span {
+    font-size: 12px;
+    color: #6c757d;
+    font-weight: 500;
+    text-align: center;
+}
+
+.progress-step.active span {
+    color: #667eea;
+    font-weight: 700;
+}
+
+/* Form Steps */
+.conversational-form {
+    padding: 40px 50px;
+}
+
+.form-step {
+    display: none;
+    animation: fadeIn 0.5s ease;
+}
+
+/* Hide old form steps - single page layout */
+.form-step {
+    display: none;
+}
+
+.form-step.active {
+    display: none;
+}
+
+.step-content h3 {
+    display: none;
+}
+
+.step-description {
+    display: none;
+}
+
+/* Account Type Cards */
+.account-type-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+    margin: 25px 0 35px;
+}
+
+@media (max-width: 768px) {
+    .account-type-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.account-type-card {
+    position: relative;
+    cursor: pointer;
+    border-radius: 12px;
+    transition: all 0.3s ease;
+}
+
+.account-type-card input[type="radio"] {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.account-type-card .card-content {
+    padding: 30px 25px;
+    border: 2px solid currentColor;
+    border-radius: 12px;
+    text-align: center;
+    transition: all 0.3s ease;
+    background: transparent;
+    opacity: 0.6;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.account-type-card:hover .card-content {
+    opacity: 0.85;
+    transform: translateY(-3px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.account-type-card input[type="radio"]:checked + .card-content {
+    opacity: 1;
+    border-width: 3px;
+    background: transparent;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+.account-type-card .icon {
+    font-size: 52px;
+    margin-bottom: 15px;
+}
+
+.account-type-card h4 {
+    font-size: 18px;
+    margin: 0 0 10px 0;
+    color: inherit;
+    font-weight: 700;
+}
+
+.account-type-card p {
+    font-size: 14px;
+    color: inherit;
+    margin: 0;
+    line-height: 1.5;
+    font-weight: 600;
+    color: #495057;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.account-type-card input[type="radio"]:checked + .card-content .card-badge {
+    background: #667eea;
+    color: white;
+}
+
+/* Form Groups */
+.form-row {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group.half-width {
+    flex: 1;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: inherit;
+    font-size: 14px;
+}
+
+.form-group .required {
+    color: #dc3545;
+}
+
+.form-group input[type="text"],
+.form-group input[type="email"],
+.form-group input[type="tel"],
+.form-group input[type="password"] {
+    width: 100%;
+    padding: 12px 16px;
+    border: 2px solid currentColor;
+    opacity: 0.3;
+    border-radius: 8px;
+    font-size: 15px;
+    transition: all 0.3s ease;
+    box-sizing: border-box;
+    background: transparent;
+    color: inherit;
+}
+
+.form-group input:focus {
+    outline: none;
+    opacity: 0.8;
+    box-shadow: 0 0 0 4px rgba(0, 0, 0, 0.05);
+}
+
+.form-group input:invalid:not(:placeholder-shown) {
+    border-color: #dc3545;
+}
+
+.form-group input:valid:not(:placeholder-shown) {
+    border-color: #00c853;
+}
+
+.form-hint {
+    display: block;
+    margin-top: 6px;
+    font-size: 12px;
+    color: inherit;
+    opacity: 0.6;
+}
+
+/* Phone Input */
+.phone-input-wrapper {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.phone-prefix {
+    padding: 12px 16px;
+    background: transparent;
+    border: 2px solid currentColor;
+    opacity: 0.3;
+    border-radius: 8px;
+    font-weight: 600;
+    color: inherit;
+}
+
+.phone-input-wrapper input {
+    flex: 1;
+}
+
+/* Password Input */
+.password-input-wrapper {
+    position: relative;
+}
+
+.password-input-wrapper input {
+    padding-right: 45px;
+}
+
+.toggle-password {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 18px;
+    padding: 5px;
+    opacity: 0.6;
+    transition: opacity 0.3s;
+}
+
+.toggle-password:hover {
+    opacity: 1;
+}
+
+/* Password Strength Indicator */
+.password-strength {
+    margin-top: 8px;
+}
+
+.strength-bar {
+    height: 4px;
+    background: #e9ecef;
+    border-radius: 2px;
+    overflow: hidden;
+    margin-bottom: 5px;
+    position: relative;
+}
+
+.strength-bar::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    width: 0%;
+    transition: width 0.3s ease, background 0.3s ease;
+    border-radius: 2px;
+}
+
+.password-strength.weak .strength-bar::before {
+    width: 33%;
+    background: #dc3545;
+}
+
+.password-strength.medium .strength-bar::before {
+    width: 66%;
+    background: #ffc107;
+}
+
+.password-strength.strong .strength-bar::before {
+    width: 100%;
+    background: #00c853;
+}
+
+.strength-text {
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.password-strength.weak .strength-text {
+    color: #dc3545;
+}
+
+.password-strength.medium .strength-text {
+    color: #ffc107;
+}
+
+.password-strength.strong .strength-text {
+    color: #00c853;
+}
+
+/* Checkbox Group */
+.checkbox-group {
+    margin-top: 25px;
+}
+
+.checkbox-label {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    cursor: pointer;
+    font-weight: normal;
+}
+
+.checkbox-label input[type="checkbox"] {
+    margin-top: 3px;
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+}
+
+.checkbox-label span {
+    font-size: 14px;
+    color: inherit;
+    line-height: 1.5;
+}
+
+.checkbox-label a {
+    color: inherit;
+    text-decoration: underline;
+    font-weight: 600;
+    opacity: 0.9;
+}
+
+.checkbox-label a:hover {
+    text-decoration: underline;
+}
+
+/* Form Actions */
+.form-actions {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    margin-top: 30px;
+}
+
+.btn {
+    padding: 16px 48px;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 200px;
+    justify-content: center;
+}
+
+.btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.btn-primary,
+.btn-submit {
+    background: currentColor;
+    color: var(--wp--preset--color--background, #fff);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    border: 2px solid currentColor;
+}
+
+.btn-primary:hover:not(:disabled),
+.btn-submit:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+    opacity: 0.9;
+}
+
+.btn-primary:active,
+.btn-submit:active {
+    transform: translateY(0);
+}
+
+.btn-secondary {
+    background: transparent;
+    color: inherit;
+    border: 2px solid currentColor;
+    opacity: 0.7;
+}
+
+.btn-secondary:hover {
+    opacity: 1;
+}
+
+/* Hide old step navigation */
+.btn-prev,
+.btn-next {
+    display: none;
+}
+
+/* Registration Footer */
+.registration-footer {
+    padding: 20px 0 30px;
+    text-align: center;
+    background: transparent;
+    border-top: 1px solid currentColor;
+    opacity: 0.7;
+}
+
+.registration-footer p {
+    margin: 0;
+    font-size: 14px;
+    color: inherit;
+}
+
+.registration-footer a {
+    color: inherit;
+    text-decoration: underline;
+    font-weight: 600;
+}
+
+.registration-footer a:hover {
+    text-decoration: underline;
+}
+
+/* Success Message */
+.registration-success {
+    text-align: center;
+    padding: 60px 30px;
+}
+
+.success-icon {
+    font-size: 72px;
+    margin-bottom: 20px;
+    animation: bounceIn 0.6s ease;
+}
+
+@keyframes bounceIn {
+    0% {
+        transform: scale(0);
+    }
+    50% {
+        transform: scale(1.1);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+.registration-success h3 {
+    font-size: 28px;
+    margin: 0 0 15px 0;
+    color: inherit;
+}
+
+.registration-success p {
+    font-size: 16px;
+    color: inherit;
+    opacity: 0.8;
+    margin: 0;
+}
+
+/* Error Messages */
+.registration-errors {
+    margin: 20px 0;
+    padding: 15px 20px;
+    background: transparent;
+    border: 2px solid currentColor;
+    border-radius: 8px;
+    color: inherit;
+    opacity: 0.9;
+}
+
+.registration-errors ul {
+    margin: 0;
+    padding-left: 20px;
+}
+
+.registration-errors li {
+    margin: 5px 0;
+}
+
+/* Agent-specific fields animation */
+.agent-fields {
+    animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        max-height: 0;
+        overflow: hidden;
+    }
+    to {
+        opacity: 1;
+        max-height: 500px;
+    }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .malisafi-registration-wrapper {
+        padding: 20px 10px;
+    }
+
+    .registration-header {
+        padding: 20px 0;
+    }
+
+    .registration-header h2 {
+        font-size: 24px;
+    }
+
+    .single-page-form {
+        padding: 30px 20px;
+    }
+
+    .account-type-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .form-row {
+        flex-direction: column;
+        gap: 0;
+    }
+
+    .form-actions {
+        flex-direction: column;
+    }
+
+    .btn {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .registration-footer {
+        padding: 20px 0;
+    }
+}
+
+@media (max-width: 480px) {
+    .progress-step .step-circle {
+        width: 32px;
+        height: 32px;
+        font-size: 14px;
+    }
+
+    .step-content h3 {
+        font-size: 20px;
+    }
+
+    .account-type-card .icon {
+        font-size: 36px;
+    }
+}

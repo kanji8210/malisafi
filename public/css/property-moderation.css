@@ -1,0 +1,271 @@
+/**
+ * Frontend Property Moderation Styles
+ */
+
+/* Report Button */
+.report-property-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 8px 15px;
+    background: #f5f5f5;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    color: #666;
+    text-decoration: none;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.report-property-btn:hover {
+    background: #d63638;
+    border-color: #d63638;
+    color: white;
+}
+
+.report-property-btn .dashicons {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+}
+
+/* Verification Badge */
+.malisafi-verification-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 15px;
+    margin: 15px 0;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.malisafi-verification-badge.verified {
+    background: #d4edda;
+    border: 2px solid #28a745;
+    color: #155724;
+}
+
+.malisafi-verification-badge.unverified {
+    background: #fff3cd;
+    border: 2px solid #ffc107;
+    color: #856404;
+}
+
+.malisafi-verification-badge.rejected {
+    background: #f8d7da;
+    border: 2px solid #dc3545;
+    color: #721c24;
+}
+
+.malisafi-verification-badge .dashicons {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+}
+
+.verification-message {
+    margin-top: 8px;
+    font-size: 13px;
+    font-weight: normal;
+    line-height: 1.5;
+}
+
+/* Modal */
+.malisafi-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 999999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.malisafi-modal .modal-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    cursor: pointer;
+}
+
+.malisafi-modal .modal-dialog {
+    position: relative;
+    z-index: 1;
+    width: 90%;
+    max-width: 500px;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.malisafi-modal .modal-content {
+    background: white;
+    border-radius: 8px;
+    padding: 30px;
+    box-shadow: 0 5px 30px rgba(0, 0, 0, 0.3);
+    position: relative;
+}
+
+.malisafi-modal .modal-close {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: none;
+    border: none;
+    font-size: 28px;
+    line-height: 1;
+    color: #999;
+    cursor: pointer;
+    padding: 0;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.malisafi-modal .modal-close:hover {
+    color: #333;
+}
+
+.malisafi-modal h3 {
+    margin: 0 0 20px 0;
+    font-size: 24px;
+    color: #333;
+}
+
+/* Form */
+.malisafi-modal .form-group {
+    margin-bottom: 20px;
+}
+
+.malisafi-modal label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #333;
+    font-size: 14px;
+}
+
+.malisafi-modal select,
+.malisafi-modal textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    font-family: inherit;
+    transition: border-color 0.3s;
+}
+
+.malisafi-modal select:focus,
+.malisafi-modal textarea:focus {
+    outline: none;
+    border-color: #2271b1;
+    box-shadow: 0 0 0 1px #2271b1;
+}
+
+.malisafi-modal textarea {
+    resize: vertical;
+}
+
+/* Form Actions */
+.malisafi-modal .form-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 25px;
+}
+
+.malisafi-modal .btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.malisafi-modal .btn-primary {
+    background: #2271b1;
+    color: white;
+}
+
+.malisafi-modal .btn-primary:hover {
+    background: #135e96;
+}
+
+.malisafi-modal .btn-primary:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+}
+
+.malisafi-modal .btn-secondary {
+    background: #f5f5f5;
+    color: #666;
+}
+
+.malisafi-modal .btn-secondary:hover {
+    background: #e0e0e0;
+}
+
+/* Report Message */
+.report-message {
+    margin-top: 15px;
+    padding: 12px 15px;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.report-message.success {
+    background: #d4edda;
+    border: 1px solid #28a745;
+    color: #155724;
+}
+
+.report-message.error {
+    background: #f8d7da;
+    border: 1px solid #dc3545;
+    color: #721c24;
+}
+
+/* Body when modal is open */
+body.modal-open {
+    overflow: hidden;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .malisafi-modal .modal-dialog {
+        width: 95%;
+    }
+    
+    .malisafi-modal .modal-content {
+        padding: 20px;
+    }
+    
+    .malisafi-modal h3 {
+        font-size: 20px;
+        padding-right: 30px;
+    }
+    
+    .malisafi-modal .form-actions {
+        flex-direction: column;
+    }
+    
+    .malisafi-modal .btn {
+        width: 100%;
+    }
+    
+    .malisafi-verification-badge {
+        font-size: 13px;
+        padding: 8px 12px;
+    }
+}

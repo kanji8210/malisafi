@@ -1,0 +1,11 @@
+Veuillez maintenant :
+
+1. Aller dans WordPress Admin > Plugins
+2. Activer le plugin MalisafiMLS
+3. Si ça échoue, exécutez cette commande :
+
+Get-Content "C:\xampp\htdocs\wordpress\wp-content\debug.log" -Tail 30
+
+Et partagez le résultat.
+
+Si l'activation réussit, vous verrez le menu "Malisafi" dans l'admin.
