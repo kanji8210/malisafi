@@ -39,6 +39,7 @@ class Core {
         require_once MALISAFI_MLS_PATH . 'includes/class-property-manager.php';
         require_once MALISAFI_MLS_PATH . 'includes/class-role-manager.php';
         require_once MALISAFI_MLS_PATH . 'includes/class-stripe.php';
+        require_once MALISAFI_MLS_PATH . 'includes/class-featured-properties.php';
         require_once MALISAFI_MLS_PATH . 'includes/class-shortcodes.php';
         require_once MALISAFI_MLS_PATH . 'includes/class-property-filters-ajax.php';
         require_once MALISAFI_MLS_PATH . 'includes/class-property-actions-ajax.php';
@@ -79,6 +80,9 @@ class Core {
         
         // Initialize Stripe integration
         \Malisafi_Stripe::init();
+        
+        // Initialize featured properties
+        $featured_properties = new Featured_Properties();
         
         // Initialize login customizer
         Login_Customizer::init();

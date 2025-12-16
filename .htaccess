@@ -1,0 +1,25 @@
+# Malisafi MLS Plugin - PHP Configuration
+# Increase limits for Stripe operations
+
+<IfModule mod_php7.c>
+    php_value max_execution_time 180
+    php_value max_input_time 180
+    php_value memory_limit 256M
+</IfModule>
+
+<IfModule mod_php8.c>
+    php_value max_execution_time 180
+    php_value max_input_time 180
+    php_value memory_limit 256M
+</IfModule>
+
+# Protect sensitive files
+<FilesMatch "^\.">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
+<FilesMatch "(composer\.json|composer\.lock|package\.json|\.gitignore)$">
+    Order allow,deny
+    Deny from all
+</FilesMatch>

@@ -8,12 +8,60 @@
     
     $(document).ready(function() {
         
+        // Gallery Navigation
+        var $thumbnails = $('.gallery-thumbnails .thumbnail');
+        var totalImages = $thumbnails.length;
+        
+        function changeImage(index) {
+            if (index < 0) index = totalImages - 1;
+            if (index >= totalImages) index = 0;
+            
+            var $thumbnail = $thumbnails.eq(index);
+            var imageUrl = $thumbnail.data('image');
+            
+            $('.gallery-main .main-image').attr('src', imageUrl).attr('data-current-index', index);
+            $thumbnails.removeClass('active');
+            $thumbnail.addClass('active');
+            
+            // Update counter
+            $('.gallery-counter .current').text(index + 1);
+            
+            // Scroll thumbnail into view
+            if ($thumbnail.length) {
+                var container = $('.gallery-thumbnails');
+                var scrollLeft = $thumbnail.position().left + container.scrollLeft() - (container.width() / 2) + ($thumbnail.width() / 2);
+                container.animate({scrollLeft: scrollLeft}, 300);
+            }
+        }
+        
         // Gallery Thumbnails Click
-        $('.gallery-thumbnails .thumbnail').on('click', function() {
-            var imageUrl = $(this).data('image');
-            $('.gallery-main .main-image').attr('src', imageUrl);
-            $('.gallery-thumbnails .thumbnail').removeClass('active');
-            $(this).addClass('active');
+        $thumbnails.on('click', function() {
+            var index = $(this).data('index');
+            changeImage(index);
+        });
+        
+        // Previous button
+        $('.gallery-nav-prev').on('click', function() {
+            var currentIndex = parseInt($('.gallery-main .main-image').attr('data-current-index')) || 0;
+            changeImage(currentIndex - 1);
+        });
+        
+        // Next button
+        $('.gallery-nav-next').on('click', function() {
+            var currentIndex = parseInt($('.gallery-main .main-image').attr('data-current-index')) || 0;
+            changeImage(currentIndex + 1);
+        });
+        
+        // Keyboard navigation
+        $(document).on('keydown', function(e) {
+            if ($('.property-gallery').length) {
+                var currentIndex = parseInt($('.gallery-main .main-image').attr('data-current-index')) || 0;
+                if (e.keyCode === 37) { // Left arrow
+                    changeImage(currentIndex - 1);
+                } else if (e.keyCode === 39) { // Right arrow
+                    changeImage(currentIndex + 1);
+                }
+            }
         });
         
         // Favorite Button

@@ -180,13 +180,21 @@ class Property_Manager {
      * Get featured properties
      *
      * @param int $count Number of properties
+     * @param array $extra_args Additional query arguments
      * @return \WP_Query
      */
-    public static function get_featured_properties($count = 6) {
-        return self::get_properties(array(
+    public static function get_featured_properties($count = 6, $extra_args = array()) {
+        $args = array(
             'featured' => true,
             'posts_per_page' => $count,
-        ));
+        );
+        
+        // Merge with extra args if provided
+        if (!empty($extra_args)) {
+            $args = array_merge($args, $extra_args);
+        }
+        
+        return self::get_properties($args);
     }
     
     /**

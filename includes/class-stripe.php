@@ -107,6 +107,13 @@ composer install</pre>
         $secret_key = self::get_secret_key();
         if ($secret_key) {
             \Stripe\Stripe::setApiKey($secret_key);
+            
+            // Set timeout for API requests to prevent hanging
+            \Stripe\Stripe::setMaxNetworkRetries(2);
+            \Stripe\ApiRequestor::setHttpClient(new \Stripe\HttpClient\CurlClient([
+                CURLOPT_CONNECTTIMEOUT => 30,
+                CURLOPT_TIMEOUT => 80
+            ]));
         }
         
         return true;

@@ -8,13 +8,19 @@
 if (!defined('WPINC')) {
     die;
 }
+
+// Get shortcode attributes (passed from shortcode handler)
+$columns = isset($shortcode_atts['columns']) ? intval($shortcode_atts['columns']) : 3;
+$show_excerpt = isset($shortcode_atts['show_excerpt']) ? $shortcode_atts['show_excerpt'] === 'yes' : true;
+$show_features = isset($shortcode_atts['show_features']) ? $shortcode_atts['show_features'] === 'yes' : true;
+
+// Column classes
+$column_class = 'featured-col-' . $columns;
 ?>
 
 <div class="malisafi-featured-properties">
-    <h2 class="section-title"><?php _e('Featured Properties', 'malisafi-mls'); ?></h2>
-    
     <?php if ($properties->have_posts()) : ?>
-        <div class="featured-container">
+        <div class="featured-container <?php echo esc_attr($column_class); ?>">
             <?php while ($properties->have_posts()) : $properties->the_post(); 
                 $property_data = \MalisafiMLS\Property_Manager::get_property_data(get_the_ID());
             ?>
@@ -23,6 +29,7 @@ if (!defined('WPINC')) {
                         <div class="featured-image">
                             <a href="<?php the_permalink(); ?>">
                                 <?php the_post_thumbnail('medium'); ?>
+                                <span class="featured-badge">★ <?php _e('Featured', 'malisafi-mls'); ?></span>
                             </a>
                         </div>
                     <?php endif; ?>
@@ -30,21 +37,53 @@ if (!defined('WPINC')) {
                     <div class="featured-content">
                         <h3><a href="<?php the_permalink(); ?>"><?php the_title(); ?></a></h3>
                         
+                        <?php if (!empty($property_data['location'])) : ?>
+                            <div class="property-location">
+                                <span class="dashicons dashicons-location"></span>
+                                <?php echo esc_html($property_data['location']); ?>
+                            </div>
+                        <?php endif; ?>
+                        
                         <?php if (!empty($property_data['price'])) : ?>
                             <div class="price">
                                 <?php echo \MalisafiMLS\Property_Manager::format_price($property_data['price']); ?>
                             </div>
                         <?php endif; ?>
                         
-                        <div class="features">
-                            <?php if (!empty($property_data['bedrooms'])) : ?>
-                                <span><?php echo esc_html($property_data['bedrooms']); ?> <?php _e('Beds', 'malisafi-mls'); ?></span>
-                            <?php endif; ?>
-                            
-                            <?php if (!empty($property_data['bathrooms'])) : ?>
-                                <span><?php echo esc_html($property_data['bathrooms']); ?> <?php _e('Baths', 'malisafi-mls'); ?></span>
-                            <?php endif; ?>
-                        </div>
+                        <?php if ($show_features) : ?>
+                            <div class="features">
+                                <?php if (!empty($property_data['bedrooms'])) : ?>
+                                    <span>
+                                        <span class="dashicons dashicons-admin-multisite"></span>
+                                        <?php echo esc_html($property_data['bedrooms']); ?> <?php _e('Beds', 'malisafi-mls'); ?>
+                                    </span>
+                                <?php endif; ?>
+                                
+                                <?php if (!empty($property_data['bathrooms'])) : ?>
+                                    <span>
+                                        <span class="dashicons dashicons-admin-site"></span>
+                                        <?php echo esc_html($property_data['bathrooms']); ?> <?php _e('Baths', 'malisafi-mls'); ?>
+                                    </span>
+                                <?php endif; ?>
+                                
+                                <?php if (!empty($property_data['area'])) : ?>
+                                    <span>
+                                        <span class="dashicons dashicons-editor-expand"></span>
+                                        <?php echo esc_html($property_data['area']); ?> <?php _e('sqm', 'malisafi-mls'); ?>
+                                    </span>
+                                <?php endif; ?>
+                            </div>
+                        <?php endif; ?>
+                        
+                        <?php if ($show_excerpt && has_excerpt()) : ?>
+                            <div class="property-excerpt">
+                                <?php echo wp_trim_words(get_the_excerpt(), 20); ?>
+                            </div>
+                        <?php endif; ?>
+                        
+                        <a href="<?php the_permalink(); ?>" class="view-details-btn">
+                            <?php _e('View Details', 'malisafi-mls'); ?>
+                        </a>
                     </div>
                 </div>
             <?php endwhile; ?>
@@ -52,6 +91,8 @@ if (!defined('WPINC')) {
         
         <?php wp_reset_postdata(); ?>
     <?php else : ?>
-        <p><?php _e('No featured properties at this time.', 'malisafi-mls'); ?></p>
+        <div class="no-featured-properties">
+            <p><?php _e('No featured properties at this time.', 'malisafi-mls'); ?></p>
+        </div>
     <?php endif; ?>
 </div>

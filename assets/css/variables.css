@@ -1,0 +1,197 @@
+/**
+ * Malisafi MLS - Global CSS Variables
+ * Centralized color palette and design tokens
+ * Independent from WordPress themes
+ */
+
+:root {
+    /* ===================================
+       PRIMARY COLOR PALETTE
+       =================================== */
+    --mls-dark: #333333;           /* Main dark color */
+    --mls-dark-grey: #292929;      /* Darker backgrounds */
+    --mls-grey: #808083;           /* Secondary text, borders */
+    --mls-light-grey: #cecdca;     /* Light backgrounds, borders */
+    --mls-grey-green: #737d5d;     /* Accent color */
+    
+    /* ===================================
+       SEMANTIC COLORS
+       =================================== */
+    --mls-primary: #333333;
+    --mls-primary-dark: #292929;
+    --mls-primary-light: #808083;
+    --mls-accent: #737d5d;
+    --mls-accent-hover: #5f6a4a;
+    
+    /* Background Colors */
+    --mls-bg-primary: #ffffff;
+    --mls-bg-secondary: #f8f8f8;
+    --mls-bg-dark: #292929;
+    --mls-bg-darker: #1f1f1f;
+    --mls-bg-card: #ffffff;
+    --mls-bg-hover: #f5f5f5;
+    --mls-bg-sidebar: #fafafa;
+    
+    /* Text Colors */
+    --mls-text-primary: #333333;
+    --mls-text-secondary: #808083;
+    --mls-text-muted: #999999;
+    --mls-text-light: #cecdca;
+    --mls-text-inverse: #ffffff;
+    
+    /* Border Colors */
+    --mls-border-light: #e8e8e8;
+    --mls-border-medium: #cecdca;
+    --mls-border-dark: #808083;
+    --mls-border-accent: #737d5d;
+    
+    /* State Colors */
+    --mls-success: #737d5d;
+    --mls-success-light: #8a9872;
+    --mls-warning: #d4a574;
+    --mls-danger: #c16b6b;
+    --mls-info: #6b8fc1;
+    
+    /* ===================================
+       SHADOWS
+       =================================== */
+    --mls-shadow-xs: 0 1px 2px rgba(41, 41, 41, 0.05);
+    --mls-shadow-sm: 0 2px 4px rgba(41, 41, 41, 0.08);
+    --mls-shadow-md: 0 4px 8px rgba(41, 41, 41, 0.12);
+    --mls-shadow-lg: 0 8px 16px rgba(41, 41, 41, 0.16);
+    --mls-shadow-xl: 0 12px 24px rgba(41, 41, 41, 0.20);
+    --mls-shadow-2xl: 0 20px 40px rgba(41, 41, 41, 0.24);
+    
+    /* ===================================
+       SPACING
+       =================================== */
+    --mls-space-xs: 0.25rem;      /* 4px */
+    --mls-space-sm: 0.5rem;       /* 8px */
+    --mls-space-md: 1rem;         /* 16px */
+    --mls-space-lg: 1.5rem;       /* 24px */
+    --mls-space-xl: 2rem;         /* 32px */
+    --mls-space-2xl: 3rem;        /* 48px */
+    --mls-space-3xl: 4rem;        /* 64px */
+    
+    /* ===================================
+       BORDER RADIUS
+       =================================== */
+    --mls-radius-sm: 4px;
+    --mls-radius-md: 6px;
+    --mls-radius-lg: 8px;
+    --mls-radius-xl: 12px;
+    --mls-radius-2xl: 16px;
+    --mls-radius-full: 50%;
+    
+    /* ===================================
+       TYPOGRAPHY
+       =================================== */
+    --mls-font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    
+    /* Font Sizes */
+    --mls-text-xs: 0.75rem;       /* 12px */
+    --mls-text-sm: 0.875rem;      /* 14px */
+    --mls-text-base: 1rem;        /* 16px */
+    --mls-text-lg: 1.125rem;      /* 18px */
+    --mls-text-xl: 1.25rem;       /* 20px */
+    --mls-text-2xl: 1.5rem;       /* 24px */
+    --mls-text-3xl: 1.875rem;     /* 30px */
+    --mls-text-4xl: 2.25rem;      /* 36px */
+    
+    /* Font Weights */
+    --mls-weight-normal: 400;
+    --mls-weight-medium: 500;
+    --mls-weight-semibold: 600;
+    --mls-weight-bold: 700;
+    
+    /* Line Heights */
+    --mls-leading-tight: 1.25;
+    --mls-leading-normal: 1.5;
+    --mls-leading-relaxed: 1.75;
+    
+    /* ===================================
+       TRANSITIONS
+       =================================== */
+    --mls-transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+    --mls-transition-base: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+    --mls-transition-slow: 350ms cubic-bezier(0.4, 0, 0.2, 1);
+    
+    /* ===================================
+       Z-INDEX LAYERS
+       =================================== */
+    --mls-z-base: 1;
+    --mls-z-dropdown: 1000;
+    --mls-z-sticky: 1020;
+    --mls-z-fixed: 1030;
+    --mls-z-modal-backdrop: 1040;
+    --mls-z-modal: 1050;
+    --mls-z-popover: 1060;
+    --mls-z-tooltip: 1070;
+    
+    /* ===================================
+       BREAKPOINTS (for reference in JS)
+       =================================== */
+    --mls-breakpoint-sm: 640px;
+    --mls-breakpoint-md: 768px;
+    --mls-breakpoint-lg: 1024px;
+    --mls-breakpoint-xl: 1280px;
+    --mls-breakpoint-2xl: 1536px;
+}
+
+/* ===================================
+   GLOBAL RESETS
+   =================================== */
+
+.malisafi-plugin *,
+.malisafi-plugin *::before,
+.malisafi-plugin *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+.malisafi-plugin {
+    font-family: var(--mls-font-family);
+    color: var(--mls-text-primary);
+    line-height: var(--mls-leading-normal);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* ===================================
+   UTILITY CLASSES
+   =================================== */
+
+/* Text Colors */
+.mls-text-primary { color: var(--mls-text-primary) !important; }
+.mls-text-secondary { color: var(--mls-text-secondary) !important; }
+.mls-text-muted { color: var(--mls-text-muted) !important; }
+.mls-text-accent { color: var(--mls-accent) !important; }
+.mls-text-inverse { color: var(--mls-text-inverse) !important; }
+
+/* Background Colors */
+.mls-bg-primary { background-color: var(--mls-bg-primary) !important; }
+.mls-bg-secondary { background-color: var(--mls-bg-secondary) !important; }
+.mls-bg-dark { background-color: var(--mls-bg-dark) !important; }
+.mls-bg-accent { background-color: var(--mls-accent) !important; }
+
+/* Shadows */
+.mls-shadow-sm { box-shadow: var(--mls-shadow-sm); }
+.mls-shadow-md { box-shadow: var(--mls-shadow-md); }
+.mls-shadow-lg { box-shadow: var(--mls-shadow-lg); }
+.mls-shadow-xl { box-shadow: var(--mls-shadow-xl); }
+
+/* Borders */
+.mls-border { border: 1px solid var(--mls-border-light); }
+.mls-border-accent { border-color: var(--mls-border-accent) !important; }
+
+/* Spacing */
+.mls-mb-sm { margin-bottom: var(--mls-space-sm); }
+.mls-mb-md { margin-bottom: var(--mls-space-md); }
+.mls-mb-lg { margin-bottom: var(--mls-space-lg); }
+.mls-mb-xl { margin-bottom: var(--mls-space-xl); }
+
+.mls-p-sm { padding: var(--mls-space-sm); }
+.mls-p-md { padding: var(--mls-space-md); }
+.mls-p-lg { padding: var(--mls-space-lg); }
+.mls-p-xl { padding: var(--mls-space-xl); }

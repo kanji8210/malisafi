@@ -1,6 +1,7 @@
 /**
- * Dashboard Shortcodes Styles
- * Styles for all dashboard pages (Client, Agent, Owner, Developer)
+ * Malisafi MLS - Dashboard Styles
+ * Styles for Client, Agent, Owner, and Developer Dashboards
+ * Uses global color variables
  */
 
 /* General Dashboard Layout */
@@ -15,19 +16,20 @@
 .dashboard-header {
     margin-bottom: 30px;
     padding: 20px;
-    background: #f8f9fa;
-    border-radius: 8px;
+    background: var(--mls-bg-secondary);
+    border-radius: var(--mls-radius-lg);
+    border: 1px solid var(--mls-border-light);
 }
 
 .dashboard-header h1 {
     margin: 0 0 10px 0;
     font-size: 28px;
-    color: #2c3e50;
+    color: var(--mls-text-primary);
 }
 
 .dashboard-header p {
     margin: 0;
-    color: #7f8c8d;
+    color: var(--mls-text-secondary);
     font-size: 16px;
 }
 
@@ -40,29 +42,30 @@
 }
 
 .stat-card {
-    background: #fff;
+    background: var(--mls-bg-primary);
     padding: 25px;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    border-radius: var(--mls-radius-lg);
+    box-shadow: var(--mls-shadow-md);
+    border: 1px solid var(--mls-border-light);
     text-align: center;
-    transition: transform 0.2s, box-shadow 0.2s;
+    transition: transform var(--mls-transition-base), box-shadow var(--mls-transition-base);
 }
 
 .stat-card:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    box-shadow: var(--mls-shadow-lg);
 }
 
 .stat-card h3 {
     margin: 0 0 10px 0;
     font-size: 36px;
-    color: #3498db;
+    color: var(--mls-accent);
     font-weight: bold;
 }
 
 .stat-card p {
     margin: 0 0 15px 0;
-    color: #7f8c8d;
+    color: var(--mls-text-secondary);
     font-size: 14px;
     text-transform: uppercase;
     letter-spacing: 1px;
@@ -71,16 +74,17 @@
 .stat-card a {
     display: inline-block;
     padding: 8px 16px;
-    background: #3498db;
-    color: #fff;
+    background: var(--mls-accent);
+    color: var(--mls-text-inverse);
     text-decoration: none;
-    border-radius: 4px;
+    border-radius: var(--mls-radius-md);
     font-size: 13px;
-    transition: background 0.2s;
+    transition: all var(--mls-transition-base);
 }
 
 .stat-card a:hover {
-    background: #2980b9;
+    background: var(--mls-accent-hover);
+    transform: translateY(-1px);
 }
 
 /* Quick Actions */
@@ -91,7 +95,7 @@
 .dashboard-quick-actions h2 {
     margin: 0 0 20px 0;
     font-size: 22px;
-    color: #2c3e50;
+    color: var(--mls-text-primary);
 }
 
 .actions-grid {
@@ -106,31 +110,31 @@
     justify-content: center;
     gap: 10px;
     padding: 20px;
-    background: #fff;
-    color: #2c3e50;
+    background: var(--mls-bg-primary);
+    color: var(--mls-text-primary);
     text-decoration: none;
-    border: 2px solid #e0e0e0;
-    border-radius: 8px;
+    border: 2px solid var(--mls-border-light);
+    border-radius: var(--mls-radius-lg);
     font-weight: 500;
-    transition: all 0.2s;
+    transition: all var(--mls-transition-base);
 }
 
 .action-button:hover {
-    border-color: #3498db;
-    color: #3498db;
+    border-color: var(--mls-accent);
+    color: var(--mls-accent);
     transform: translateY(-2px);
 }
 
 .action-button.primary {
-    background: #3498db;
-    color: #fff;
-    border-color: #3498db;
+    background: var(--mls-accent);
+    color: var(--mls-text-inverse);
+    border-color: var(--mls-accent);
 }
 
 .action-button.primary:hover {
-    background: #2980b9;
-    border-color: #2980b9;
-    color: #fff;
+    background: var(--mls-accent-hover);
+    border-color: var(--mls-accent-hover);
+    color: var(--mls-text-inverse);
 }
 
 .action-button .dashicons {
@@ -141,16 +145,17 @@
 
 /* Recent Activity */
 .dashboard-recent-activity {
-    background: #fff;
+    background: var(--mls-bg-primary);
     padding: 25px;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    border-radius: var(--mls-radius-lg);
+    box-shadow: var(--mls-shadow-md);
+    border: 1px solid var(--mls-border-light);
 }
 
 .dashboard-recent-activity h2 {
     margin: 0 0 20px 0;
     font-size: 20px;
-    color: #2c3e50;
+    color: var(--mls-text-primary);
 }
 
 .recent-properties {
@@ -161,7 +166,7 @@
 
 .recent-properties li {
     padding: 10px 0;
-    border-bottom: 1px solid #e0e0e0;
+    border-bottom: 1px solid var(--mls-border-light);
 }
 
 .recent-properties li:last-child {
@@ -169,7 +174,7 @@
 }
 
 .recent-properties a {
-    color: #3498db;
+    color: var(--mls-accent);
     text-decoration: none;
 }
 
@@ -180,16 +185,15 @@
 /* Login Required / Access Denied */
 .malisafi-login-required,
 .malisafi-access-denied {
-    background: #fff3cd;
-    border: 1px solid #ffc107;
+    background: var(--mls-bg-secondary);
+    border: 1px solid var(--mls-warning);
     padding: 20px;
-    border-radius: 8px;
+    border-radius: var(--mls-radius-lg);
     text-align: center;
 }
 
 .malisafi-access-denied {
-    background: #f8d7da;
-    border-color: #dc3545;
+    border-color: var(--mls-danger);
 }
 
 /* Favorites Page */
@@ -203,11 +207,12 @@
 .no-searches,
 .no-inquiries,
 .no-properties {
-    background: #f8f9fa;
+    background: var(--mls-bg-secondary);
     padding: 40px;
     text-align: center;
-    border-radius: 8px;
+    border-radius: var(--mls-radius-lg);
     margin: 20px 0;
+    color: var(--mls-text-secondary);
 }
 
 .properties-grid {
@@ -218,16 +223,17 @@
 }
 
 .property-card {
-    background: #fff;
-    border-radius: 8px;
+    background: var(--mls-bg-primary);
+    border-radius: var(--mls-radius-lg);
     overflow: hidden;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    transition: transform 0.2s, box-shadow 0.2s;
+    box-shadow: var(--mls-shadow-sm);
+    border: 1px solid var(--mls-border-light);
+    transition: transform var(--mls-transition-base), box-shadow var(--mls-transition-base);
 }
 
 .property-card:hover {
     transform: translateY(-4px);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    box-shadow: var(--mls-shadow-lg);
 }
 
 .property-card .property-image {
@@ -239,7 +245,7 @@
     width: 100%;
     height: 200px;
     object-fit: cover;
-    transition: transform 0.3s;
+    transition: transform var(--mls-transition-base);
 }
 
 .property-card:hover .property-image img {
@@ -256,16 +262,16 @@
 }
 
 .property-card h3 a {
-    color: #2c3e50;
+    color: var(--mls-text-primary);
     text-decoration: none;
 }
 
 .property-card h3 a:hover {
-    color: #3498db;
+    color: var(--mls-accent);
 }
 
 .property-card .price {
-    color: #27ae60;
+    color: var(--mls-accent);
     font-size: 20px;
     font-weight: bold;
     margin: 0 0 10px 0;
@@ -274,7 +280,7 @@
 .property-card .property-meta {
     display: flex;
     gap: 15px;
-    color: #7f8c8d;
+    color: var(--mls-text-secondary);
     font-size: 14px;
 }
 
@@ -292,20 +298,21 @@
 }
 
 .search-item {
-    background: #fff;
+    background: var(--mls-bg-primary);
     padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    border-radius: var(--mls-radius-lg);
+    box-shadow: var(--mls-shadow-sm);
+    border: 1px solid var(--mls-border-light);
 }
 
 .search-item h3 {
     margin: 0 0 15px 0;
     font-size: 20px;
-    color: #2c3e50;
+    color: var(--mls-text-primary);
 }
 
 .search-criteria {
-    color: #7f8c8d;
+    color: var(--mls-text-secondary);
     margin-bottom: 15px;
 }
 
@@ -320,12 +327,12 @@
 }
 
 .search-actions .delete-search {
-    background: #dc3545;
-    color: #fff;
+    background: var(--mls-danger);
+    color: var(--mls-text-inverse);
 }
 
 .search-actions .delete-search:hover {
-    background: #c82333;
+    background: #a85757;
 }
 
 /* Inquiries */
@@ -338,30 +345,31 @@
 
 .inquiries-table {
     width: 100%;
-    background: #fff;
-    border-radius: 8px;
+    background: var(--mls-bg-primary);
+    border-radius: var(--mls-radius-lg);
     overflow: hidden;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    box-shadow: var(--mls-shadow-sm);
+    border: 1px solid var(--mls-border-light);
 }
 
 .inquiries-table thead {
-    background: #f8f9fa;
+    background: var(--mls-bg-secondary);
 }
 
 .inquiries-table th,
 .inquiries-table td {
     padding: 12px;
     text-align: left;
-    border-bottom: 1px solid #e0e0e0;
+    border-bottom: 1px solid var(--mls-border-light);
 }
 
 .inquiries-table th {
     font-weight: 600;
-    color: #2c3e50;
+    color: var(--mls-text-primary);
 }
 
 .inquiries-table tbody tr:hover {
-    background: #f8f9fa;
+    background: var(--mls-bg-hover);
 }
 
 .status-badge {
@@ -373,28 +381,27 @@
 }
 
 .status-badge.status-pending {
-    background: #fff3cd;
-    color: #856404;
+    background: var(--mls-bg-secondary);
+    color: var(--mls-text-secondary);
+    border: 1px solid var(--mls-border-medium);
 }
 
 .status-badge.status-responded {
-    background: #d1ecf1;
-    color: #0c5460;
+    background: rgba(115, 125, 93, 0.1);
+    color: var(--mls-accent);
+    border: 1px solid var(--mls-accent);
 }
 
-.status-badge.status-closed {
-    background: #d4edda;
-    color: #155724;
-}
-
+.status-badge.status-closed,
 .status-badge.status-publish {
-    background: #d4edda;
-    color: #155724;
+    background: rgba(115, 125, 93, 0.2);
+    color: var(--mls-accent);
 }
 
 .status-badge.status-draft {
-    background: #e2e3e5;
-    color: #383d41;
+    background: var(--mls-bg-secondary);
+    color: var(--mls-text-muted);
+    border: 1px solid var(--mls-border-light);
 }
 
 /* Agent Dashboard Redirect */
@@ -403,9 +410,10 @@
     margin: 100px auto;
     padding: 40px;
     text-align: center;
-    background: #fff;
-    border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    background: var(--mls-bg-primary);
+    border-radius: var(--mls-radius-lg);
+    box-shadow: var(--mls-shadow-lg);
+    border: 1px solid var(--mls-border-light);
 }
 
 /* Owner Properties */
@@ -428,21 +436,22 @@
 
 .properties-table {
     width: 100%;
-    background: #fff;
-    border-radius: 8px;
+    background: var(--mls-bg-primary);
+    border-radius: var(--mls-radius-lg);
     overflow: hidden;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    box-shadow: var(--mls-shadow-sm);
+    border: 1px solid var(--mls-border-light);
 }
 
 .properties-table thead {
-    background: #f8f9fa;
+    background: var(--mls-bg-secondary);
 }
 
 .properties-table th,
 .properties-table td {
     padding: 12px;
     text-align: left;
-    border-bottom: 1px solid #e0e0e0;
+    border-bottom: 1px solid var(--mls-border-light);
 }
 
 .properties-table td {
@@ -451,11 +460,11 @@
 
 .properties-table th {
     font-weight: 600;
-    color: #2c3e50;
+    color: var(--mls-text-primary);
 }
 
 .properties-table tbody tr:hover {
-    background: #f8f9fa;
+    background: var(--mls-bg-hover);
 }
 
 .button-small {
@@ -473,10 +482,11 @@
 
 .malisafi-register-form form,
 #malisafi-loginform {
-    background: #fff;
+    background: var(--mls-bg-primary);
     padding: 30px;
-    border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    border-radius: var(--mls-radius-lg);
+    box-shadow: var(--mls-shadow-lg);
+    border: 1px solid var(--mls-border-light);
 }
 
 .malisafi-register-form label,
@@ -484,7 +494,7 @@
     display: block;
     margin-bottom: 5px;
     font-weight: 500;
-    color: #2c3e50;
+    color: var(--mls-text-primary);
 }
 
 .malisafi-register-form input[type="text"],
@@ -494,9 +504,11 @@
 #malisafi-loginform input[type="password"] {
     width: 100%;
     padding: 10px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
+    border: 1px solid var(--mls-border-light);
+    border-radius: var(--mls-radius-md);
     font-size: 14px;
+    background: var(--mls-bg-primary);
+    color: var(--mls-text-primary);
 }
 
 .register-link,
@@ -508,10 +520,11 @@
 /* Account Page */
 .account-info,
 .account-actions {
-    background: #fff;
+    background: var(--mls-bg-primary);
     padding: 25px;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    border-radius: var(--mls-radius-lg);
+    box-shadow: var(--mls-shadow-sm);
+    border: 1px solid var(--mls-border-light);
     margin-bottom: 20px;
 }
 
@@ -526,7 +539,7 @@
 }
 
 .account-actions a {
-    color: #3498db;
+    color: var(--mls-accent);
     text-decoration: none;
 }
 

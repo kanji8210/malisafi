@@ -18,10 +18,19 @@ class PublicArea {
      * Enqueue public styles
      */
     public function enqueue_styles() {
+        // Enqueue global variables first
+        wp_enqueue_style(
+            'malisafi-mls-variables',
+            MALISAFI_MLS_URL . 'assets/css/variables.css',
+            array(),
+            MALISAFI_MLS_VERSION,
+            'all'
+        );
+        
         wp_enqueue_style(
             'malisafi-mls-public',
             MALISAFI_MLS_URL . 'assets/css/public.css',
-            array(),
+            array('malisafi-mls-variables'),
             MALISAFI_MLS_VERSION,
             'all'
         );
@@ -30,7 +39,16 @@ class PublicArea {
         wp_enqueue_style(
             'malisafi-mls-dashboards',
             MALISAFI_MLS_URL . 'assets/css/dashboards.css',
-            array(),
+            array('malisafi-mls-variables'),
+            MALISAFI_MLS_VERSION,
+            'all'
+        );
+        
+        // Enqueue featured properties styles
+        wp_enqueue_style(
+            'malisafi-mls-featured',
+            MALISAFI_MLS_URL . 'assets/css/featured-properties.css',
+            array('malisafi-mls-variables'),
             MALISAFI_MLS_VERSION,
             'all'
         );
@@ -175,13 +193,58 @@ class PublicArea {
     
     /**
      * Featured properties shortcode
+     * 
+     * Usage: [malisafi_featured_properties count="6" columns="3" orderby="date" order="DESC"]
+     * 
+     * @param array $atts Shortcode attributes
+     * @return string HTML output
      */
     public function featured_properties_shortcode($atts) {
         $atts = shortcode_atts(array(
-            'count' => 6,
+            'count' => 6,           // Number of properties to display
+            'columns' => 3,          // Number of columns (1-4)
+            'rows' => 0,             // Number of rows (0 = auto based on count)
+            'orderby' => 'date',     // date, title, rand, price
+            'order' => 'DESC',       // DESC (descending/newest first) or ASC (ascending/oldest first)
+            'show_excerpt' => 'yes', // Show property excerpt
+            'show_features' => 'yes' // Show property features
         ), $atts);
         
-        $properties = Property_Manager::get_featured_properties(intval($atts['count']));
+        // Sanitize attributes
+        $count = intval($atts['count']);
+        $columns = max(1, min(4, intval($atts['columns'])));
+        $rows = intval($atts['rows']);
+        $orderby = sanitize_text_field($atts['orderby']);
+        $order = strtoupper(sanitize_text_field($atts['order'])) === 'ASC' ? 'ASC' : 'DESC';
+        
+        // Build query args
+        $query_args = array(
+            'posts_per_page' => $count,
+            'order' => $order
+        );
+        
+        // Handle orderby
+        switch ($orderby) {
+            case 'price':
+                $query_args['meta_key'] = '_malisafi_price';
+                $query_args['orderby'] = 'meta_value_num';
+                break;
+            case 'title':
+                $query_args['orderby'] = 'title';
+                break;
+            case 'rand':
+            case 'random':
+                $query_args['orderby'] = 'rand';
+                break;
+            default:
+                $query_args['orderby'] = 'date';
+                break;
+        }
+        
+        $properties = Property_Manager::get_featured_properties($count, $query_args);
+        
+        // Pass shortcode attributes to template
+        $shortcode_atts = $atts;
         
         ob_start();
         include MALISAFI_MLS_PATH . 'templates/featured-properties.php';

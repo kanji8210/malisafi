@@ -200,8 +200,15 @@ jQuery(document).ready(function($) {
                 if (imageIds.indexOf(attachment.id) === -1) {
                     imageIds.push(attachment.id);
                     
+                    // Use thumbnail if available, otherwise use full size
+                    var thumbUrl = attachment.sizes && attachment.sizes.thumbnail 
+                        ? attachment.sizes.thumbnail.url 
+                        : (attachment.sizes && attachment.sizes.medium 
+                            ? attachment.sizes.medium.url 
+                            : attachment.url);
+                    
                     var imageItem = $('<div class="property-image-item" data-id="' + attachment.id + '">' +
-                        '<img src="' + attachment.sizes.thumbnail.url + '" alt="">' +
+                        '<img src="' + thumbUrl + '" alt="">' +
                         '<button type="button" class="remove-image" title="<?php _e('Remove', 'malisafi-mls'); ?>">&times;</button>' +
                         '</div>');
                     

@@ -41,9 +41,28 @@ while (have_posts()) : the_post();
     $author_email = get_the_author_meta('user_email', $author_id);
     $author_phone = get_user_meta($author_id, 'phone', true);
     
-    // Gallery
+    // Gallery - load all attached images
     $gallery_ids = get_post_meta($property_id, '_malisafi_gallery_ids', true);
-    $gallery_images = $gallery_ids ? explode(',', $gallery_ids) : array();
+    
+    // If gallery_ids meta exists, use it
+    if ($gallery_ids) {
+        $gallery_images = array_filter(array_map('trim', explode(',', $gallery_ids)));
+    } else {
+        // Fallback: get all images attached to this post
+        $attachments = get_posts(array(
+            'post_type' => 'attachment',
+            'posts_per_page' => -1,
+            'post_parent' => $property_id,
+            'post_mime_type' => 'image',
+            'orderby' => 'menu_order',
+            'order' => 'ASC'
+        ));
+        
+        $gallery_images = array();
+        foreach ($attachments as $attachment) {
+            $gallery_images[] = $attachment->ID;
+        }
+    }
     
     // Features
     $features = array(
@@ -76,46 +95,91 @@ while (have_posts()) : the_post();
     
     <!-- Property Gallery -->
     <section class="property-gallery">
-        <div class="gallery-main">
-            <?php if (has_post_thumbnail()) : ?>
-                <img src="<?php echo get_the_post_thumbnail_url($property_id, 'full'); ?>" alt="<?php echo esc_attr(get_the_title()); ?>" class="main-image">
-            <?php else : ?>
-                <img src="<?php echo plugins_url('malisafi/assets/images/placeholder-property.svg'); ?>" alt="<?php echo esc_attr(get_the_title()); ?>" class="main-image">
-            <?php endif; ?>
-            
-            <div class="gallery-badges">
-                <?php if ($featured) : ?>
-                    <span class="badge featured">Featured</span>
+        <?php 
+        // Prepare all images for thumbnails
+        $all_images = array();
+        $featured_img = get_post_thumbnail_id($property_id);
+        
+        // Add featured image first
+        if ($featured_img) {
+            $all_images[] = $featured_img;
+        }
+        
+        // Add gallery images (exclude featured if it's already in gallery)
+        if (!empty($gallery_images)) {
+            foreach ($gallery_images as $img_id) {
+                if ($img_id != $featured_img) {
+                    $all_images[] = $img_id;
+                }
+            }
+        }
+        ?>
+        
+        <div class="gallery-main-wrapper">
+            <div class="gallery-main">
+                <?php if (has_post_thumbnail()) : ?>
+                    <img src="<?php echo get_the_post_thumbnail_url($property_id, 'full'); ?>" alt="<?php echo esc_attr(get_the_title()); ?>" class="main-image" data-current-index="0">
+                <?php else : ?>
+                    <img src="<?php echo plugins_url('malisafi/assets/images/placeholder-property.svg'); ?>" alt="<?php echo esc_attr(get_the_title()); ?>" class="main-image" data-current-index="0">
                 <?php endif; ?>
-                <?php if ($status) : ?>
-                    <span class="badge status"><?php echo esc_html($status); ?></span>
+                
+                <?php if (!empty($all_images) && count($all_images) > 1) : ?>
+                <button class="gallery-nav gallery-nav-prev" aria-label="Previous Image">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="15 18 9 12 15 6"></polyline>
+                    </svg>
+                </button>
+                
+                <button class="gallery-nav gallery-nav-next" aria-label="Next Image">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="9 18 15 12 9 6"></polyline>
+                    </svg>
+                </button>
+                <?php endif; ?>
+                
+                <div class="gallery-badges">
+                    <?php if ($featured) : ?>
+                        <span class="badge featured">Featured</span>
+                    <?php endif; ?>
+                    <?php if ($status) : ?>
+                        <span class="badge status"><?php echo esc_html($status); ?></span>
+                    <?php endif; ?>
+                </div>
+                
+                <?php if (!empty($all_images) && count($all_images) > 1) : ?>
+                <div class="gallery-counter">
+                    <span class="current">1</span> / <span class="total"><?php echo count($all_images); ?></span>
+                </div>
                 <?php endif; ?>
             </div>
         </div>
         
-        <?php if (!empty($gallery_images)) : ?>
+        <?php 
+        // Display thumbnails below if we have images
+        if (!empty($all_images)) : 
+        ?>
+        <!-- Debug: Total images = <?php echo count($all_images); ?>, Gallery IDs: <?php echo esc_html($gallery_ids); ?> -->
         <div class="gallery-thumbnails">
-            <?php 
-            $featured_img = get_post_thumbnail_id($property_id);
-            if ($featured_img) {
-                array_unshift($gallery_images, $featured_img);
-            }
-            foreach (array_slice($gallery_images, 0, 6) as $index => $img_id) : 
+            <?php foreach ($all_images as $index => $img_id) : 
                 $img_url = wp_get_attachment_image_url($img_id, 'medium');
                 if ($img_url) :
             ?>
-                <div class="thumbnail <?php echo $index === 0 ? 'active' : ''; ?>" data-image="<?php echo esc_url(wp_get_attachment_image_url($img_id, 'full')); ?>">
-                    <img src="<?php echo esc_url($img_url); ?>" alt="Property image <?php echo $index + 1; ?>">
-                    <?php if ($index === 5 && count($gallery_images) > 6) : ?>
-                        <div class="thumbnail-overlay">+<?php echo count($gallery_images) - 6; ?></div>
-                    <?php endif; ?>
+                <div class="thumbnail <?php echo $index === 0 ? 'active' : ''; ?>" data-index="<?php echo $index; ?>" data-image="<?php echo esc_url(wp_get_attachment_image_url($img_id, 'full')); ?>">
+                    <img src="<?php echo esc_url($img_url); ?>" alt="<?php echo esc_attr(get_the_title() . ' - Image ' . ($index + 1)); ?>">
                 </div>
             <?php 
+                else:
+                    // Debug: image ID exists but no URL found
+                    echo '<!-- Image ID ' . $img_id . ' has no URL -->';
                 endif;
             endforeach; 
             ?>
         </div>
-        <?php endif; ?>
+        <?php 
+        else:
+            echo '<!-- No gallery images found. Gallery IDs meta: ' . esc_html($gallery_ids) . ' -->';
+        endif; 
+        ?>
     </section>
     
     <div class="property-content-wrapper">

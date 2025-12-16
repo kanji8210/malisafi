@@ -20,6 +20,26 @@ if (!defined('WPINC')) {
 }
 
 /**
+ * Configure PHP settings for optimal plugin performance
+ */
+if (!ini_get('safe_mode')) {
+    // Increase execution time for Stripe and heavy operations
+    $current_limit = ini_get('max_execution_time');
+    if ($current_limit < 180) {
+        @ini_set('max_execution_time', '180');
+    }
+    
+    // Increase memory limit if needed
+    $current_memory = ini_get('memory_limit');
+    $current_memory_bytes = wp_convert_hr_to_bytes($current_memory);
+    $required_memory_bytes = 256 * 1024 * 1024; // 256MB
+    
+    if ($current_memory_bytes < $required_memory_bytes) {
+        @ini_set('memory_limit', '256M');
+    }
+}
+
+/**
  * Plugin version
  */
 define('MALISAFI_MLS_VERSION', '1.0.0');

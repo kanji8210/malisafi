@@ -114,6 +114,7 @@ class Malisafi_Roles_Manager {
                     $role->add_cap('publish_properties', true);
                     $role->add_cap('moderate_properties', true);
                     $role->add_cap('manage_malisafi_settings', true);
+                    $role->add_cap('manage_featured_properties', true); // Allow moderators to manage featured
                 }
 
                 // Allow clients to manage required pages only

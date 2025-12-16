@@ -1,4 +1,8 @@
-/* Public styles for Malisafi MLS */
+/**
+ * Malisafi MLS - Public Styles
+ * Properties Grid, Search, and Featured Properties
+ * Uses global color variables
+ */
 
 /* Properties Grid */
 .malisafi-properties-grid {
@@ -13,16 +17,17 @@
 }
 
 .property-card {
-    background: #f5f5f5;
-    border: 1px solid #e5e5e5;
-    border-radius: 8px;
+    background: var(--mls-bg-primary);
+    border: 1px solid var(--mls-border-light);
+    border-radius: var(--mls-radius-lg);
     overflow: hidden;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    transition: transform var(--mls-transition-base), box-shadow var(--mls-transition-base);
+    box-shadow: var(--mls-shadow-sm);
 }
 
 .property-card:hover {
     transform: translateY(-5px);
-    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    box-shadow: var(--mls-shadow-lg);
 }
 
 .property-image {
@@ -35,7 +40,7 @@
     width: 100%;
     height: 100%;
     object-fit: cover;
-    transition: transform 0.3s ease;
+    transition: transform var(--mls-transition-base);
 }
 
 .property-card:hover .property-image img {
@@ -46,8 +51,8 @@
     position: absolute;
     top: 15px;
     right: 15px;
-    background: #ff6b6b;
-    color: #fff;
+    background: var(--mls-dark);
+    color: var(--mls-text-inverse);
     padding: 5px 15px;
     border-radius: 20px;
     font-size: 12px;
@@ -59,7 +64,7 @@
     position: absolute;
     top: 15px;
     left: 15px;
-    color: #fff;
+    color: var(--mls-text-inverse);
     padding: 5px 15px;
     border-radius: 20px;
     font-size: 11px;
@@ -69,24 +74,24 @@
 }
 
 .setting-badge.setting-urban {
-    background: rgba(33, 150, 243, 0.9);
+    background: rgba(51, 51, 51, 0.9);
 }
 
 .setting-badge.setting-semi-rural {
-    background: rgba(76, 175, 80, 0.9);
+    background: rgba(115, 125, 93, 0.9);
 }
 
 .setting-badge.setting-rural {
-    background: rgba(255, 152, 0, 0.9);
+    background: rgba(128, 128, 131, 0.9);
 }
 
 .setting-badge.setting-isolated {
-    background: rgba(158, 158, 158, 0.9);
+    background: rgba(41, 41, 41, 0.9);
 }
 
 .property-content {
     padding: 20px;
-    background: #f5f5f5;
+    background: var(--mls-bg-primary);
 }
 
 .property-title {
@@ -95,24 +100,24 @@
 }
 
 .property-title a {
-    color: #1a1a1a;
+    color: var(--mls-text-primary);
     text-decoration: none;
-    transition: color 0.3s ease;
+    transition: color var(--mls-transition-base);
 }
 
 .property-title a:hover {
-    color: #007bff;
+    color: var(--mls-accent);
 }
 
 .property-price {
     font-size: 24px;
     font-weight: 700;
-    color: #1a1a1a;
+    color: var(--mls-dark);
     margin: 10px 0;
 }
 
 .property-location {
-    color: #4a4a4a;
+    color: var(--mls-text-secondary);
     margin: 10px 0;
     display: flex;
     align-items: center;
@@ -125,15 +130,15 @@
     gap: 15px;
     margin: 15px 0;
     padding: 15px 0;
-    border-top: 1px solid #e0e0e0;
-    border-bottom: 1px solid #e0e0e0;
+    border-top: 1px solid var(--mls-border-light);
+    border-bottom: 1px solid var(--mls-border-light);
 }
 
 .property-features .feature {
     display: flex;
     align-items: center;
     gap: 5px;
-    color: #4a4a4a;
+    color: var(--mls-text-secondary);
     font-size: 14px;
 }
 
@@ -142,30 +147,32 @@
     height: 18px;
     min-width: 18px;
     min-height: 18px;
-    color: #1a1a1a;
+    color: var(--mls-accent);
     fill: currentColor;
     flex-shrink: 0;
 }
 
 .property-excerpt {
-    color: #4a4a4a;
+    color: var(--mls-text-secondary);
     line-height: 1.6;
     margin: 15px 0;
 }
 
 .view-details-btn {
     display: inline-block;
-    background: #007bff;
-    color: #fff;
+    background: var(--mls-accent);
+    color: var(--mls-text-inverse);
     padding: 10px 20px;
-    border-radius: 5px;
+    border-radius: var(--mls-radius-md);
     text-decoration: none;
-    transition: background 0.3s ease;
+    transition: all var(--mls-transition-base);
+    font-weight: 500;
 }
 
 .view-details-btn:hover {
-    background: #0056b3;
-    color: #fff;
+    background: var(--mls-accent-hover);
+    color: var(--mls-text-inverse);
+    transform: translateY(-1px);
 }
 
 /* Pagination */
@@ -178,27 +185,29 @@
     display: inline-block;
     padding: 8px 15px;
     margin: 0 5px;
-    background: #f5f5f5;
-    color: #333;
+    background: var(--mls-bg-secondary);
+    color: var(--mls-text-primary);
     text-decoration: none;
-    border-radius: 5px;
-    transition: background 0.3s ease;
+    border-radius: var(--mls-radius-md);
+    border: 1px solid var(--mls-border-light);
+    transition: all var(--mls-transition-base);
 }
 
 .malisafi-pagination .page-numbers:hover,
 .malisafi-pagination .page-numbers.current {
-    background: #007bff;
-    color: #fff;
+    background: var(--mls-accent);
+    color: var(--mls-text-inverse);
+    border-color: var(--mls-accent);
 }
 
 /* Search Form */
 .malisafi-search-form {
-    background: transparent;
+    background: var(--mls-bg-secondary);
     padding: 30px;
-    border-radius: 8px;
-    border: 1px solid currentColor;
+    border-radius: var(--mls-radius-lg);
+    border: 1px solid var(--mls-border-light);
     margin: 20px 0;
-    opacity: 0.9;
+    box-shadow: var(--mls-shadow-sm);
 }
 
 .property-search {
@@ -215,18 +224,17 @@
 .search-field label {
     margin-bottom: 5px;
     font-weight: 600;
-    color: whitesmoke;
+    color: var(--mls-text-primary);
 }
 
 .search-field input,
 .search-field select {
     padding: 10px;
-    border: 1px solid currentColor;
-    border-radius: 5px;
+    border: 1px solid var(--mls-border-light);
+    border-radius: var(--mls-radius-md);
     font-size: 14px;
-    background: transparent;
-    color: rgb(255, 255, 255);
-    opacity: 0.9;
+    background: var(--mls-bg-primary);
+    color: var(--mls-text-primary);
 }
 
 .search-submit {
@@ -237,20 +245,20 @@
 .search-button {
     width: 100%;
     padding: 10px 20px;
-    color: currentColor;
-    border: 2px solid currentColor;
-    border-radius: 5px;
+    color: var(--mls-text-inverse);
+    background: var(--mls-accent);
+    border: 2px solid var(--mls-accent);
+    border-radius: var(--mls-radius-md);
     font-size: 16px;
     font-weight: 600;
     cursor: pointer;
-    transition: all 0.3s ease;
-   
+    transition: all var(--mls-transition-base);
 }
 
 .search-button:hover {
-    background: currentColor;
-    color: white;
-    opacity: 1;
+    background: var(--mls-accent-hover);
+    border-color: var(--mls-accent-hover);
+    transform: translateY(-1px);
 }
 
 /* Featured Properties */
@@ -262,6 +270,7 @@
     font-size: 28px;
     margin-bottom: 30px;
     text-align: center;
+    color: var(--mls-text-primary);
 }
 
 .featured-container {
@@ -271,16 +280,17 @@
 }
 
 .featured-property {
-    background: #fff;
-    border: 1px solid #e0e0e0;
-    border-radius: 8px;
+    background: var(--mls-bg-primary);
+    border: 1px solid var(--mls-border-light);
+    border-radius: var(--mls-radius-lg);
     overflow: hidden;
-    transition: transform 0.3s ease;
+    transition: transform var(--mls-transition-base), box-shadow var(--mls-transition-base);
+    box-shadow: var(--mls-shadow-sm);
 }
 
 .featured-property:hover {
     transform: translateY(-3px);
-    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    box-shadow: var(--mls-shadow-lg);
 }
 
 .featured-image {
@@ -304,25 +314,25 @@
 }
 
 .featured-content h3 a {
-    color: #333;
+    color: var(--mls-text-primary);
     text-decoration: none;
 }
 
 .featured-content h3 a:hover {
-    color: #007bff;
+    color: var(--mls-accent);
 }
 
 .featured-content .price {
     font-size: 20px;
     font-weight: 700;
-    color: #007bff;
+    color: var(--mls-dark);
     margin: 10px 0;
 }
 
 .featured-content .features {
     display: flex;
     gap: 15px;
-    color: #666;
+    color: var(--mls-text-secondary);
     font-size: 14px;
 }
 
@@ -330,7 +340,7 @@
 .no-properties {
     text-align: center;
     padding: 40px 20px;
-    color: #666;
+    color: var(--mls-text-secondary);
     font-size: 16px;
 }
 
