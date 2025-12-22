@@ -72,9 +72,18 @@ class Malisafi_Registration_Handler {
         $username = sanitize_user($_POST['username'] ?? '');
         $password = $_POST['password'] ?? '';
         
-        // Optional fields for agents
+        // Agent-specific fields
         $agency_name = sanitize_text_field($_POST['agency_name'] ?? '');
         $license_number = sanitize_text_field($_POST['license_number'] ?? '');
+        $years_experience = sanitize_text_field($_POST['years_experience'] ?? '');
+        $agent_county = sanitize_text_field($_POST['agent_county'] ?? '');
+        $business_address = sanitize_text_field($_POST['business_address'] ?? '');
+        $city = sanitize_text_field($_POST['city'] ?? '');
+        $specializations = isset($_POST['specializations']) ? array_map('sanitize_text_field', $_POST['specializations']) : array();
+        $agent_bio = sanitize_textarea_field($_POST['agent_bio'] ?? '');
+        $national_id = sanitize_text_field($_POST['national_id'] ?? '');
+        $website = esc_url_raw($_POST['website'] ?? '');
+        $whatsapp = sanitize_text_field($_POST['whatsapp'] ?? '');
         
         // Validation
         $errors = array();
@@ -105,6 +114,37 @@ class Malisafi_Registration_Handler {
         
         if (strlen($password) < 8) {
             $errors[] = __('Password must be at least 8 characters long.', 'malisafi-mls');
+        }
+        
+        // Validate agent-specific fields
+        if ($account_type === 'agent') {
+            if (empty($agency_name)) {
+                $errors[] = __('Agency name is required for agents.', 'malisafi-mls');
+            }
+            if (empty($license_number)) {
+                $errors[] = __('License number is required for agents.', 'malisafi-mls');
+            }
+            if (empty($years_experience)) {
+                $errors[] = __('Years of experience is required for agents.', 'malisafi-mls');
+            }
+            if (empty($agent_county)) {
+                $errors[] = __('Operating county is required for agents.', 'malisafi-mls');
+            }
+            if (empty($business_address)) {
+                $errors[] = __('Business address is required for agents.', 'malisafi-mls');
+            }
+            if (empty($city)) {
+                $errors[] = __('City is required for agents.', 'malisafi-mls');
+            }
+            if (empty($specializations)) {
+                $errors[] = __('At least one specialization is required for agents.', 'malisafi-mls');
+            }
+            if (empty($agent_bio) || strlen($agent_bio) < 100) {
+                $errors[] = __('Professional bio is required and must be at least 100 characters.', 'malisafi-mls');
+            }
+            if (empty($national_id)) {
+                $errors[] = __('National ID is required for verification.', 'malisafi-mls');
+            }
         }
         
         // Validate role
@@ -149,12 +189,60 @@ class Malisafi_Registration_Handler {
         
         // Add agent-specific metadata
         if ($account_type === 'agent') {
-            if (!empty($agency_name)) {
-                update_user_meta($user_id, 'agency_name', $agency_name);
+            update_user_meta($user_id, 'agency_name', $agency_name);
+            update_user_meta($user_id, 'license_number', $license_number);
+            update_user_meta($user_id, 'years_experience', $years_experience);
+            update_user_meta($user_id, 'agent_county', $agent_county);
+            update_user_meta($user_id, 'business_address', $business_address);
+            update_user_meta($user_id, 'city', $city);
+            update_user_meta($user_id, 'specializations', $specializations);
+            update_user_meta($user_id, 'agent_bio', $agent_bio);
+            update_user_meta($user_id, 'national_id', $national_id);
+            
+            if (!empty($website)) {
+                update_user_meta($user_id, 'website', $website);
             }
-            if (!empty($license_number)) {
-                update_user_meta($user_id, 'license_number', $license_number);
+            if (!empty($whatsapp)) {
+                update_user_meta($user_id, 'whatsapp', $whatsapp);
             }
+            
+            // Agent approval status - pending by default
+            update_user_meta($user_id, 'agent_status', 'pending');
+            update_user_meta($user_id, 'agent_registered_date', current_time('mysql'));
+            
+            // Create agent post type entry
+            $agent_post_id = wp_insert_post(array(
+                'post_title' => $first_name . ' ' . $last_name,
+                'post_type' => 'malisafi_agent',
+                'post_status' => 'pending', // Requires admin approval
+                'post_author' => $user_id,
+                'meta_input' => array(
+                    '_agent_user_id' => $user_id,
+                    '_agent_email' => $email,
+                    '_agent_phone' => $phone,
+                    '_agent_agency' => $agency_name,
+                    '_agent_license' => $license_number,
+                    '_agent_experience' => $years_experience,
+                    '_agent_county' => $agent_county,
+                    '_agent_address' => $business_address,
+                    '_agent_city' => $city,
+                    '_agent_specializations' => $specializations,
+                    '_agent_bio' => $agent_bio,
+                    '_agent_national_id' => $national_id,
+                    '_agent_website' => $website,
+                    '_agent_whatsapp' => $whatsapp,
+                    '_agent_rating' => 0,
+                    '_agent_total_reviews' => 0,
+                    '_agent_properties_count' => 0,
+                )
+            ));
+            
+            if (!is_wp_error($agent_post_id)) {
+                update_user_meta($user_id, 'agent_post_id', $agent_post_id);
+            }
+            
+            // Notify admin about new agent registration
+            self::notify_admin_new_agent($user_id, $email, $first_name . ' ' . $last_name);
         }
         
         // Log user registration
@@ -179,6 +267,24 @@ class Malisafi_Registration_Handler {
             'redirect' => $redirect_url,
             'user_id' => $user_id
         ));
+    }
+    
+    /**
+     * Notify admin about new agent registration
+     */
+    private static function notify_admin_new_agent($user_id, $email, $name) {
+        $admin_email = get_option('admin_email');
+        $subject = sprintf(__('[%s] New Agent Registration Pending Approval', 'malisafi-mls'), get_bloginfo('name'));
+        
+        $message = sprintf(
+            __("A new agent has registered and is pending approval:\n\nName: %s\nEmail: %s\nUser ID: %d\n\nPlease review and approve/reject this agent:\n%s", 'malisafi-mls'),
+            $name,
+            $email,
+            $user_id,
+            admin_url('admin.php?page=malisafi-agent-management')
+        );
+        
+        wp_mail($admin_email, $subject, $message);
     }
     
     /**

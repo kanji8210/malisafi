@@ -39,9 +39,39 @@
                 $('#email').on('blur', this.validateEmail);
                 $('#username').on('blur', this.validateUsername);
                 $('#phone').on('input', this.formatPhone);
+                
+                // Bio character count
+                $('#agent_bio').on('input', this.updateCharCount);
+                
+                // Specialization validation
+                $('.specialization-checkbox').on('change', this.validateSpecializations);
 
                 // Enable/disable submit button based on validation
-                $('input[required]').on('input change', this.validateForm.bind(this));
+                $('input[required], select[required], textarea[required]').on('input change', this.validateForm.bind(this));
+            },
+            
+            updateCharCount: function() {
+                const text = $(this).val();
+                const length = text.length;
+                const $hint = $(this).siblings('.form-hint');
+                $hint.text(`100-500 characters (${length}/500)`);
+                
+                if (length < 100) {
+                    $(this).css('border-color', '#dc3545');
+                } else if (length >= 100 && length <= 500) {
+                    $(this).css('border-color', '#00c853');
+                } else {
+                    $(this).css('border-color', '#dc3545');
+                }
+            },
+            
+            validateSpecializations: function() {
+                const checked = $('.specialization-checkbox:checked').length;
+                if (checked > 0) {
+                    $('.specialization-checkbox').prop('required', false);
+                } else {
+                    $('.specialization-checkbox').prop('required', true);
+                }
             },
 
             handleAccountTypeLink: function(e) {
@@ -83,12 +113,20 @@
                     $('.agent-registration-notice').slideDown(400);
                     $('.personal-info-section').slideDown(400);
                     $('.agent-fields').slideDown(300);
-                    $('#agency_name, #license_number').prop('required', false); // Optional fields
+                    
+                    // Make agent fields required
+                    $('.agent-required').prop('required', true);
+                    
+                    // At least one specialization must be checked
+                    $('.specialization-checkbox').prop('required', true);
                 } else {
                     $('.agent-registration-notice').slideUp(400);
                     $('.personal-info-section').slideDown(400);
                     $('.agent-fields').slideUp(300);
-                    $('#agency_name, #license_number').prop('required', false).val('');
+                    
+                    // Remove required from agent fields
+                    $('.agent-required').prop('required', false).val('');
+                    $('.specialization-checkbox').prop('required', false).prop('checked', false);
                 }
 
                 // Validate form

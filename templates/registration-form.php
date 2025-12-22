@@ -155,20 +155,143 @@ defined('ABSPATH') || exit;
 
                 <!-- Additional fields for Agents -->
                 <div class="agent-fields" style="display: none;">
-                    <div class="form-group">
-                        <label for="agency_name">
-                            <?php _e('Agency Name', 'malisafi-mls'); ?>
-                        </label>
-                        <input type="text" id="agency_name" name="agency_name" 
-                               placeholder="<?php esc_attr_e('Your real estate agency (optional)', 'malisafi-mls'); ?>">
+                    <h4 class="subsection-title"><?php _e('Professional Information', 'malisafi-mls'); ?></h4>
+                    
+                    <div class="form-row">
+                        <div class="form-group half-width">
+                            <label for="agency_name">
+                                <?php _e('Agency Name', 'malisafi-mls'); ?> <span class="required">*</span>
+                            </label>
+                            <input type="text" id="agency_name" name="agency_name" class="agent-required"
+                                   placeholder="<?php esc_attr_e('Your real estate agency', 'malisafi-mls'); ?>">
+                        </div>
+
+                        <div class="form-group half-width">
+                            <label for="license_number">
+                                <?php _e('License Number', 'malisafi-mls'); ?> <span class="required">*</span>
+                            </label>
+                            <input type="text" id="license_number" name="license_number" class="agent-required"
+                                   placeholder="<?php esc_attr_e('Professional license number', 'malisafi-mls'); ?>">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group half-width">
+                            <label for="years_experience">
+                                <?php _e('Years of Experience', 'malisafi-mls'); ?> <span class="required">*</span>
+                            </label>
+                            <select id="years_experience" name="years_experience" class="agent-required">
+                                <option value=""><?php _e('Select experience', 'malisafi-mls'); ?></option>
+                                <option value="0-1"><?php _e('Less than 1 year', 'malisafi-mls'); ?></option>
+                                <option value="1-3"><?php _e('1-3 years', 'malisafi-mls'); ?></option>
+                                <option value="3-5"><?php _e('3-5 years', 'malisafi-mls'); ?></option>
+                                <option value="5-10"><?php _e('5-10 years', 'malisafi-mls'); ?></option>
+                                <option value="10+"><?php _e('10+ years', 'malisafi-mls'); ?></option>
+                            </select>
+                        </div>
+
+                        <div class="form-group half-width">
+                            <label for="agent_county">
+                                <?php _e('Operating County', 'malisafi-mls'); ?> <span class="required">*</span>
+                            </label>
+                            <select id="agent_county" name="agent_county" class="agent-required">
+                                <option value=""><?php _e('Select county', 'malisafi-mls'); ?></option>
+                                <?php
+                                if (function_exists('malisafi_get_kenya_counties')) {
+                                    $counties = malisafi_get_kenya_counties();
+                                    foreach ($counties as $county) {
+                                        echo '<option value="' . esc_attr($county) . '">' . esc_html($county) . '</option>';
+                                    }
+                                }
+                                ?>
+                            </select>
+                        </div>
                     </div>
 
                     <div class="form-group">
-                        <label for="license_number">
-                            <?php _e('License Number', 'malisafi-mls'); ?>
+                        <label for="business_address">
+                            <?php _e('Business Address', 'malisafi-mls'); ?> <span class="required">*</span>
                         </label>
-                        <input type="text" id="license_number" name="license_number" 
-                               placeholder="<?php esc_attr_e('Your professional license number (optional)', 'malisafi-mls'); ?>">
+                        <input type="text" id="business_address" name="business_address" class="agent-required"
+                               placeholder="<?php esc_attr_e('Street address, building name, floor', 'malisafi-mls'); ?>">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="city">
+                            <?php _e('City/Town', 'malisafi-mls'); ?> <span class="required">*</span>
+                        </label>
+                        <input type="text" id="city" name="city" class="agent-required"
+                               placeholder="<?php esc_attr_e('Enter city or town', 'malisafi-mls'); ?>">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="specializations">
+                            <?php _e('Specializations', 'malisafi-mls'); ?> <span class="required">*</span>
+                        </label>
+                        <div class="checkbox-group-inline">
+                            <label class="checkbox-label-inline">
+                                <input type="checkbox" name="specializations[]" value="residential" class="specialization-checkbox">
+                                <span><?php _e('Residential', 'malisafi-mls'); ?></span>
+                            </label>
+                            <label class="checkbox-label-inline">
+                                <input type="checkbox" name="specializations[]" value="commercial" class="specialization-checkbox">
+                                <span><?php _e('Commercial', 'malisafi-mls'); ?></span>
+                            </label>
+                            <label class="checkbox-label-inline">
+                                <input type="checkbox" name="specializations[]" value="land" class="specialization-checkbox">
+                                <span><?php _e('Land', 'malisafi-mls'); ?></span>
+                            </label>
+                            <label class="checkbox-label-inline">
+                                <input type="checkbox" name="specializations[]" value="rental" class="specialization-checkbox">
+                                <span><?php _e('Rental', 'malisafi-mls'); ?></span>
+                            </label>
+                            <label class="checkbox-label-inline">
+                                <input type="checkbox" name="specializations[]" value="luxury" class="specialization-checkbox">
+                                <span><?php _e('Luxury', 'malisafi-mls'); ?></span>
+                            </label>
+                        </div>
+                        <small class="form-hint"><?php _e('Select at least one specialization', 'malisafi-mls'); ?></small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="agent_bio">
+                            <?php _e('Professional Bio', 'malisafi-mls'); ?> <span class="required">*</span>
+                        </label>
+                        <textarea id="agent_bio" name="agent_bio" rows="4" class="agent-required"
+                                  placeholder="<?php esc_attr_e('Tell clients about your experience, achievements, and what makes you a great agent...', 'malisafi-mls'); ?>"
+                                  minlength="100" maxlength="500"></textarea>
+                        <small class="form-hint char-count"><?php _e('100-500 characters (0/500)', 'malisafi-mls'); ?></small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="national_id">
+                            <?php _e('National ID Number', 'malisafi-mls'); ?> <span class="required">*</span>
+                        </label>
+                        <input type="text" id="national_id" name="national_id" class="agent-required"
+                               placeholder="<?php esc_attr_e('Enter your National ID number', 'malisafi-mls'); ?>"
+                               pattern="[0-9]{7,8}" maxlength="8">
+                        <small class="form-hint"><?php _e('Required for verification purposes', 'malisafi-mls'); ?></small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="website">
+                            <?php _e('Website (Optional)', 'malisafi-mls'); ?>
+                        </label>
+                        <input type="url" id="website" name="website"
+                               placeholder="<?php esc_attr_e('https://yourwebsite.com', 'malisafi-mls'); ?>">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="whatsapp">
+                            <?php _e('WhatsApp Number (Optional)', 'malisafi-mls'); ?>
+                        </label>
+                        <div class="phone-input-wrapper">
+                            <span class="phone-prefix">+254</span>
+                            <input type="tel" id="whatsapp" name="whatsapp"
+                                   placeholder="712345678"
+                                   pattern="[0-9]{9,10}"
+                                   maxlength="10">
+                        </div>
                     </div>
                 </div>
             </div>

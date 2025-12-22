@@ -54,6 +54,7 @@ class Core {
         require_once MALISAFI_MLS_PATH . 'admin/class-property-submit.php';
         require_once MALISAFI_MLS_PATH . 'admin/class-property-moderation.php';
         require_once MALISAFI_MLS_PATH . 'admin/class-agent-dashboard.php';
+        require_once MALISAFI_MLS_PATH . 'admin/class-agent-management.php';
         require_once MALISAFI_MLS_PATH . 'public/class-public.php';
         
         $this->loader = new Loader();
@@ -66,6 +67,9 @@ class Core {
         
         // Initialize agent dashboard
         \Malisafi_Agent_Dashboard::init();
+        
+        // Initialize agent management
+        \Malisafi_Agent_Management::init();
         
         // Initialize dashboard widgets
         \Malisafi_Dashboard_Widgets::init();
