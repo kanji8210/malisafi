@@ -19,6 +19,7 @@ class Malisafi_Shortcodes {
         add_shortcode('malisafi_submit_property', array(__CLASS__, 'submit_property_form'));
         add_shortcode('malisafi_properties_modern', array(__CLASS__, 'properties_with_filters'));
         add_shortcode('malisafi_properties', array(__CLASS__, 'properties_with_filters')); // Alias for modern filters
+        add_shortcode('malisafi_properties_minimalist', array(__CLASS__, 'properties_minimalist_filters')); // Minimalist filters
         add_shortcode('malisafi_registration', array(__CLASS__, 'registration_form'));
         add_shortcode('malisafi_register', array(__CLASS__, 'registration_form')); // Alias
         add_shortcode('malisafi_property_map', array(__CLASS__, 'property_map')); // Property map view
@@ -282,6 +283,25 @@ class Malisafi_Shortcodes {
         
         // Include the modern properties template
         include MALISAFI_MLS_PATH . 'templates/properties-filters.php';
+        
+        return ob_get_clean();
+    }
+    
+    /**
+     * Minimalist properties listing with filters
+     * Shortcode: [malisafi_properties_minimalist]
+     * 
+     * Clean design with:
+     * - Row 1: Status buttons (For Rent, For Sale, Short Stay)
+     * - Row 2: Property type dropdown, City dropdown, Search input
+     *
+     * @return string
+     */
+    public static function properties_minimalist_filters() {
+        ob_start();
+        
+        // Include the minimalist properties template
+        include MALISAFI_MLS_PATH . 'templates/properties-filters-minimalist.php';
         
         return ob_get_clean();
     }

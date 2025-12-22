@@ -35,6 +35,7 @@ class Property_Filters_Ajax {
     public function enqueue_scripts() {
         // Always enqueue on frontend (will be used by shortcode)
         if (!is_admin()) {
+            // Modern filters
             wp_enqueue_style(
                 'malisafi-property-filters',
                 plugins_url('malisafi/assets/css/property-filters.css'),
@@ -51,6 +52,29 @@ class Property_Filters_Ajax {
             );
             
             wp_localize_script('malisafi-property-filters', 'malisafiFilters', array(
+                'ajaxurl' => admin_url('admin-ajax.php'),
+                'nonce' => wp_create_nonce('malisafi_filter_nonce'),
+                'isLoggedIn' => is_user_logged_in()
+            ));
+            
+            // Minimalist filters
+            wp_enqueue_style(
+                'malisafi-property-filters-minimalist',
+                plugins_url('malisafi/assets/css/property-filters-minimalist.css'),
+                array(),
+                '1.0.0'
+            );
+            
+            wp_enqueue_script(
+                'malisafi-property-filters-minimalist',
+                plugins_url('malisafi/assets/js/property-filters-minimalist.js'),
+                array('jquery'),
+                '1.0.0',
+                true
+            );
+            
+            // Same localized data for minimalist version
+            wp_localize_script('malisafi-property-filters-minimalist', 'malisafiFilters', array(
                 'ajaxurl' => admin_url('admin-ajax.php'),
                 'nonce' => wp_create_nonce('malisafi_filter_nonce'),
                 'isLoggedIn' => is_user_logged_in()

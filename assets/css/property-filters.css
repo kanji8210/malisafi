@@ -76,19 +76,20 @@ body {
 
 /* Main Wrapper - Optimized Layout */
 .malisafi-properties-wrapper {
-    display: grid;
-    grid-template-columns: 360px 1fr;
+    display: grid !important;
+    grid-template-columns: minmax(200px, 25%) minmax(70%, 1fr) !important;
     gap: var(--malisafi-spacing-xl);
     padding: var(--malisafi-spacing-2xl);
     max-width: 1600px;
     margin: 0 auto;
     min-height: calc(100vh - 120px);
     background: transparent;
+    align-items: start;
 }
 
 @media (max-width: 1280px) {
     .malisafi-properties-wrapper {
-        grid-template-columns: 320px 1fr;
+        grid-template-columns: minmax(200px, 30%) minmax(65%, 1fr) !important;
         padding: var(--malisafi-spacing-xl);
     }
 }
@@ -126,6 +127,7 @@ body {
     opacity: 0.9;
     color: inherit;
     z-index: 10;
+    grid-column: 1;
 }
 
 .malisafi-filters-sidebar:hover {
@@ -481,6 +483,8 @@ body {
     padding: var(--malisafi-spacing-xl);
     box-shadow: none;
     border: none;
+    grid-column: 2;
+    width: 100%;
 }
 
 /* Active Filters - Minimal Chips */
