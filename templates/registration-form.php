@@ -41,6 +41,54 @@ defined('ABSPATH') || exit;
                         </div>
                     </label>
 
+                    <label class="account-type-card" data-role="malisafi_client">
+                        <input type="radio" name="account_type" value="hunter" required>
+                        <div class="card-content">
+                            <div class="icon">🔍</div>
+                            <h4><?php _e('Hunter', 'malisafi-mls'); ?></h4>
+                            <p><?php _e('Property searcher actively looking for deals', 'malisafi-mls'); ?></p>
+                        </div>
+                    </label>
+                </div>
+
+                <!-- Agent Registration Notice -->
+                <div class="agent-registration-notice" style="display: none;">
+                    <div class="notice-box">
+                        <div class="notice-icon">💼</div>
+                        <div class="notice-content">
+                            <h4><?php _e('Registering as an Agent', 'malisafi-mls'); ?></h4>
+                            <p><?php _e('You are about to create an agent account. This will give you access to:', 'malisafi-mls'); ?></p>
+                            <ul>
+                                <li><?php _e('List properties for sale or rent', 'malisafi-mls'); ?></li>
+                                <li><?php _e('Manage client inquiries', 'malisafi-mls'); ?></li>
+                                <li><?php _e('Track property performance', 'malisafi-mls'); ?></li>
+                                <li><?php _e('Access agent dashboard', 'malisafi-mls'); ?></li>
+                            </ul>
+                            <p class="other-account-types">
+                                <?php _e('Looking for a different account type?', 'malisafi-mls'); ?>
+                                <br>
+                                <a href="#" class="account-type-link" data-type="owner">
+                                    <?php _e('Register as Property Owner', 'malisafi-mls'); ?>
+                                </a> | 
+                                <a href="#" class="account-type-link" data-type="developer">
+                                    <?php _e('Register as Developer', 'malisafi-mls'); ?>
+                                </a> | 
+                                <a href="#" class="account-type-link" data-type="client">
+                                    <?php _e('Register as Client', 'malisafi-mls'); ?>
+                                </a> | 
+                                <a href="#" class="account-type-link" data-type="hunter">
+                                    <?php _e('Register as Hunter', 'malisafi-mls'); ?>
+                                </a>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Personal Information -->
+            <div class="form-section personal-info-section" style="display: none;">
+                <h3><?php _e('Your Information', 'malisafi-mls'); ?></h3>
+
                     <label class="account-type-card" data-role="malisafi_owner">
                         <input type="radio" name="account_type" value="owner" required>
                         <div class="card-content">

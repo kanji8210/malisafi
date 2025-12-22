@@ -20,6 +20,9 @@
                 // Account type selection
                 $('input[name="account_type"]').on('change', this.handleAccountTypeChange.bind(this));
 
+                // Account type quick links
+                $('.account-type-link').on('click', this.handleAccountTypeLink.bind(this));
+
                 // Form submission
                 $('#malisafi-registration-form').on('submit', this.handleSubmit.bind(this));
 
@@ -41,13 +44,31 @@
                 $('input[required]').on('input change', this.validateForm.bind(this));
             },
 
+            handleAccountTypeLink: function(e) {
+                e.preventDefault();
+                const targetType = $(e.currentTarget).data('type');
+                
+                // Uncheck all account types
+                $('input[name="account_type"]').prop('checked', false);
+                $('.account-type-card').removeClass('selected');
+                
+                // Select the target type
+                $(`input[name="account_type"][value="${targetType}"]`).prop('checked', true).trigger('change');
+                
+                // Scroll to account type section
+                $('html, body').animate({
+                    scrollTop: $('.account-type-grid').offset().top - 100
+                }, 500);
+            },
+
             handleAccountTypeChange: function(e) {
                 const accountType = $(e.target).val();
                 const roleMapping = {
                     'client': 'malisafi_client',
                     'agent': 'malisafi_agent_basic',
                     'owner': 'malisafi_owner',
-                    'developer': 'malisafi_developer'
+                    'developer': 'malisafi_developer',
+                    'hunter': 'malisafi_client'
                 };
 
                 this.selectedRole = roleMapping[accountType] || 'malisafi_client';
@@ -57,11 +78,15 @@
                 $('.account-type-card').removeClass('selected');
                 $(e.target).closest('.account-type-card').addClass('selected');
 
-                // Show/hide agent-specific fields
+                // Show/hide agent registration notice
                 if (accountType === 'agent') {
+                    $('.agent-registration-notice').slideDown(400);
+                    $('.personal-info-section').slideDown(400);
                     $('.agent-fields').slideDown(300);
                     $('#agency_name, #license_number').prop('required', false); // Optional fields
                 } else {
+                    $('.agent-registration-notice').slideUp(400);
+                    $('.personal-info-section').slideDown(400);
                     $('.agent-fields').slideUp(300);
                     $('#agency_name, #license_number').prop('required', false).val('');
                 }
