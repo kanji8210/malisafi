@@ -59,10 +59,74 @@ Examples:
 
 
 ==============================================
+USER SHORTCODES (IMPLEMENTED)
+==============================================
+
+4. AGENT PROFILE
+----------------
+[malisafi_agent id="123"]
+
+Description: Display agent profile with ratings, reviews, and properties
+
+Parameters:
+- id            : Agent post ID (required)
+
+Examples:
+[malisafi_agent id="123"]
+
+Features:
+- Agent photo, bio, and statistics
+- Star rating display (1-5 stars)
+- Reviews with helpful voting
+- Contact information (hidden for non-editors/moderators/admins)
+- Agent's properties grid
+- Rating form for logged-in users
+- Report agent functionality
+
+
+5. AGENTS LIST
+--------------
+[malisafi_agents]
+
+Description: Display a grid/list of all agents
+
+Parameters:
+- layout        : Display layout (grid, list - default: grid)
+- columns       : Number of columns for grid (2, 3, 4 - default: 3)
+- per_page      : Number of agents to display (default: 12)
+- featured      : Show only featured agents (true/false - default: false)
+
+Examples:
+[malisafi_agents]
+[malisafi_agents layout="grid" columns="4"]
+[malisafi_agents featured="true" per_page="6"]
+
+
+6. PROPERTIES WITH MINIMALIST FILTERS
+--------------------------------------
+[malisafi_properties_minimalist]
+
+Description: Minimalist property filters with redirect-based filtering
+
+Parameters:
+- None (displays filter form only, redirects to properties page)
+
+Examples:
+[malisafi_properties_minimalist]
+
+Features:
+- Status buttons (For Rent, For Sale, Short Stay)
+- Property type dropdown
+- County dropdown (Kenya counties)
+- Search input
+- Redirect-based filtering (SEO-friendly)
+
+
+==============================================
 FUTURE SHORTCODES (PLANNED)
 ==============================================
 
-4. SINGLE PROPERTY
+7. SINGLE PROPERTY
 ------------------
 [malisafi_property id="123"]
 
@@ -133,42 +197,7 @@ Examples:
 [malisafi_property_compare ids="100,200,300" fields="price,bedrooms,area"]
 
 
-8. AGENT PROFILE
-----------------
-[malisafi_agent id="5"]
-
-Description: Display agent profile with their properties
-Parameters:
-- id            : User/Agent ID (required)
-- show_bio      : Show agent biography (yes/no - default: yes)
-- show_contact  : Show contact information (yes/no - default: yes)
-- show_properties: Show agent's properties (yes/no - default: yes)
-- properties_count: Number of properties to show (default: 6)
-
-Examples:
-[malisafi_agent id="5"]
-[malisafi_agent id="5" show_properties="yes" properties_count="12"]
-
-
-9. AGENT LISTING
-----------------
-[malisafi_agents]
-
-Description: Display a list/grid of all agents
-Parameters:
-- count         : Number of agents to display (default: all)
-- orderby       : Order by (name, date, property_count - default: name)
-- order         : Sort order (ASC, DESC - default: ASC)
-- layout        : Display layout (grid, list - default: grid)
-- columns       : Number of columns for grid (2, 3, 4 - default: 3)
-
-Examples:
-[malisafi_agents]
-[malisafi_agents layout="grid" columns="4"]
-[malisafi_agents orderby="property_count" order="DESC"]
-
-
-10. PROPERTY SUBMIT FORM
+8. PROPERTY SUBMIT FORM
 ------------------------
 [malisafi_submit_property]
 

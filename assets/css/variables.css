@@ -6,61 +6,61 @@
 
 :root {
     /* ===================================
-       PRIMARY COLOR PALETTE
+       PRIMARY COLOR PALETTE - DARK BLUE THEME
        =================================== */
-    --mls-dark: #333333;           /* Main dark color */
-    --mls-dark-grey: #292929;      /* Darker backgrounds */
-    --mls-grey: #808083;           /* Secondary text, borders */
-    --mls-light-grey: #cecdca;     /* Light backgrounds, borders */
-    --mls-grey-green: #737d5d;     /* Accent color */
+    --mls-dark: #1a3a52;           /* Main dark blue color */
+    --mls-dark-grey: transparent;  /* Transparent backgrounds */
+    --mls-grey: #1a3a52;           /* Dark blue for secondary text */
+    --mls-light-grey: rgba(26, 58, 82, 0.1);  /* Very light blue backgrounds */
+    --mls-grey-green: #1a3a52;     /* Dark blue accent */
     
     /* ===================================
        SEMANTIC COLORS
        =================================== */
-    --mls-primary: #333333;
-    --mls-primary-dark: #292929;
-    --mls-primary-light: #808083;
-    --mls-accent: #737d5d;
-    --mls-accent-hover: #5f6a4a;
+    --mls-primary: #1a3a52;        /* Dark blue */
+    --mls-primary-dark: #0f2a3f;   /* Darker blue */
+    --mls-primary-light: #2d5575;  /* Lighter blue */
+    --mls-accent: #1a3a52;         /* Dark blue accent */
+    --mls-accent-hover: #0f2a3f;   /* Darker blue on hover */
     
     /* Background Colors */
-    --mls-bg-primary: #ffffff;
-    --mls-bg-secondary: #f8f8f8;
-    --mls-bg-dark: #292929;
-    --mls-bg-darker: #1f1f1f;
-    --mls-bg-card: #ffffff;
-    --mls-bg-hover: #f5f5f5;
-    --mls-bg-sidebar: #fafafa;
+    --mls-bg-primary: transparent;
+    --mls-bg-secondary: rgba(26, 58, 82, 0.03);
+    --mls-bg-dark: transparent;
+    --mls-bg-darker: transparent;
+    --mls-bg-card: rgba(255, 255, 255, 0.5);
+    --mls-bg-hover: rgba(26, 58, 82, 0.05);
+    --mls-bg-sidebar: transparent;
     
-    /* Text Colors */
-    --mls-text-primary: #333333;
-    --mls-text-secondary: #808083;
-    --mls-text-muted: #999999;
-    --mls-text-light: #cecdca;
-    --mls-text-inverse: #ffffff;
+    /* Text Colors - ALL DARK BLUE */
+    --mls-text-primary: #1a3a52;   /* Dark blue */
+    --mls-text-secondary: #2d5575; /* Medium blue */
+    --mls-text-muted: #4a7090;     /* Lighter blue */
+    --mls-text-light: #1a3a52;     /* Dark blue (no light text) */
+    --mls-text-inverse: #1a3a52;   /* Dark blue (no white text) */
     
     /* Border Colors */
-    --mls-border-light: #e8e8e8;
-    --mls-border-medium: #cecdca;
-    --mls-border-dark: #808083;
-    --mls-border-accent: #737d5d;
+    --mls-border-light: rgba(26, 58, 82, 0.15);
+    --mls-border-medium: rgba(26, 58, 82, 0.3);
+    --mls-border-dark: #1a3a52;
+    --mls-border-accent: #1a3a52;
     
     /* State Colors */
-    --mls-success: #737d5d;
-    --mls-success-light: #8a9872;
-    --mls-warning: #d4a574;
-    --mls-danger: #c16b6b;
-    --mls-info: #6b8fc1;
+    --mls-success: #1a3a52;
+    --mls-success-light: #2d5575;
+    --mls-warning: #1a3a52;
+    --mls-danger: #1a3a52;
+    --mls-info: #1a3a52;
     
     /* ===================================
-       SHADOWS
+       SHADOWS - DARK BLUE SHADOWS
        =================================== */
-    --mls-shadow-xs: 0 1px 2px rgba(41, 41, 41, 0.05);
-    --mls-shadow-sm: 0 2px 4px rgba(41, 41, 41, 0.08);
-    --mls-shadow-md: 0 4px 8px rgba(41, 41, 41, 0.12);
-    --mls-shadow-lg: 0 8px 16px rgba(41, 41, 41, 0.16);
-    --mls-shadow-xl: 0 12px 24px rgba(41, 41, 41, 0.20);
-    --mls-shadow-2xl: 0 20px 40px rgba(41, 41, 41, 0.24);
+    --mls-shadow-xs: 0 1px 2px rgba(26, 58, 82, 0.08);
+    --mls-shadow-sm: 0 2px 4px rgba(26, 58, 82, 0.12);
+    --mls-shadow-md: 0 4px 8px rgba(26, 58, 82, 0.15);
+    --mls-shadow-lg: 0 8px 16px rgba(26, 58, 82, 0.18);
+    --mls-shadow-xl: 0 12px 24px rgba(26, 58, 82, 0.22);
+    --mls-shadow-2xl: 0 20px 40px rgba(26, 58, 82, 0.25);
     
     /* ===================================
        SPACING

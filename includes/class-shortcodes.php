@@ -24,6 +24,9 @@ class Malisafi_Shortcodes {
         add_shortcode('malisafi_register', array(__CLASS__, 'registration_form')); // Alias
         add_shortcode('malisafi_property_map', array(__CLASS__, 'property_map')); // Property map view
         add_shortcode('malisafi_city_list', array(__CLASS__, 'city_list')); // City list with search links
+        add_shortcode('malisafi_agent', array(__CLASS__, 'agent_profile')); // Single agent profile
+        add_shortcode('malisafi_agents', array(__CLASS__, 'agents_list')); // Agents listing
+        add_shortcode('malisafi_add_property', array(__CLASS__, 'add_property_page')); // Add property with permission checks
     }
     
     /**
@@ -400,6 +403,102 @@ class Malisafi_Shortcodes {
         
         // Include the city list template
         include MALISAFI_MLS_PATH . 'templates/city-list.php';
+        
+        return ob_get_clean();
+    }
+    
+    /**
+     * Agent profile shortcode
+     * Shortcode: [malisafi_agent id="123"]
+     * 
+     * @param array $atts Shortcode attributes
+     * @return string
+     */
+    public static function agent_profile($atts) {
+        $atts = shortcode_atts(array(
+            'id' => 0
+        ), $atts);
+        
+        // Enqueue agent profile assets
+        wp_enqueue_style(
+            'malisafi-agent-profile',
+            MALISAFI_MLS_URL . 'assets/css/agent-profile.css',
+            array('malisafi-mls-variables'),
+            MALISAFI_MLS_VERSION
+        );
+        
+        wp_enqueue_script(
+            'malisafi-agent-actions',
+            MALISAFI_MLS_URL . 'assets/js/agent-actions.js',
+            array('jquery'),
+            MALISAFI_MLS_VERSION,
+            true
+        );
+        
+        ob_start();
+        
+        // Include the agent profile template
+        include MALISAFI_MLS_PATH . 'templates/agent-profile.php';
+        
+        return ob_get_clean();
+    }
+    
+    /**
+     * Agents list shortcode
+     * Shortcode: [malisafi_agents]
+     * 
+     * @param array $atts Shortcode attributes
+     * @return string
+     */
+    public static function agents_list($atts) {
+        $atts = shortcode_atts(array(
+            'count' => -1,
+            'orderby' => 'name',
+            'order' => 'ASC',
+            'layout' => 'grid',
+            'columns' => 3
+        ), $atts);
+        
+        // Enqueue agent profile CSS for list cards
+        wp_enqueue_style(
+            'malisafi-agent-profile',
+            MALISAFI_MLS_URL . 'assets/css/agent-profile.css',
+            array('malisafi-mls-variables'),
+            MALISAFI_MLS_VERSION
+        );
+        
+        ob_start();
+        
+        // Include the agents list template
+        include MALISAFI_MLS_PATH . 'templates/agents-list.php';
+        
+        return ob_get_clean();
+    }
+    
+    /**
+     * Add Property page shortcode
+     * Shortcode: [malisafi_add_property]
+     * 
+     * @param array $atts Shortcode attributes
+     * @return string
+     */
+    public static function add_property_page($atts) {
+        $atts = shortcode_atts(array(
+            'redirect' => ''
+        ), $atts);
+        
+        // Enqueue modern styles
+        wp_enqueue_style(
+            'malisafi-add-property',
+            MALISAFI_MLS_URL . 'assets/css/add-property-page.css',
+            array('malisafi-mls-variables'),
+            MALISAFI_MLS_VERSION
+        );
+        
+        ob_start();
+        
+        // Include the add property page template
+        include MALISAFI_MLS_PATH . 'templates/add-property-page.php';
         
         return ob_get_clean();
     }

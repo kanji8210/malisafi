@@ -1,8 +1,9 @@
+<?php
 /**
  * Properties grid template
  *
  * @package MalisafiMLS
- */
+ **/
 
 if (!defined('WPINC')) {
     die;

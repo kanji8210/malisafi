@@ -242,7 +242,7 @@ class Dashboard_Shortcodes {
         // Get inquiries from database
         $table_name = $wpdb->prefix . 'mf_inquiries';
         $inquiries = $wpdb->get_results($wpdb->prepare(
-            "SELECT * FROM $table_name WHERE user_id = %d ORDER BY created_at DESC",
+            "SELECT * FROM $table_name WHERE client_id = %d ORDER BY created_at DESC",
             $current_user->ID
         ));
         
@@ -933,7 +933,7 @@ class Dashboard_Shortcodes {
         global $wpdb;
         $table_name = $wpdb->prefix . 'mf_inquiries';
         return $wpdb->get_var($wpdb->prepare(
-            "SELECT COUNT(*) FROM $table_name WHERE user_id = %d",
+            "SELECT COUNT(*) FROM $table_name WHERE client_id = %d",
             $user_id
         )) ?: 0;
     }

@@ -46,6 +46,10 @@ class Database {
         // Property Reports
         self::create_property_reports_table($charset_collate);
         
+        // Agent Ratings and Reports
+        self::create_agent_ratings_table($charset_collate);
+        self::create_agent_reports_table($charset_collate);
+        
         // Analytics and Tracking
         self::create_analytics_table($charset_collate);
     }
@@ -383,8 +387,76 @@ class Database {
             'favorites' => $wpdb->prefix . 'mf_favorites',
             'moderation_queue' => $wpdb->prefix . 'mf_moderation_queue',
             'property_reports' => $wpdb->prefix . 'mf_property_reports',
+            'agent_ratings' => $wpdb->prefix . 'mf_agent_ratings',
+            'agent_reports' => $wpdb->prefix . 'mf_agent_reports',
             'analytics' => $wpdb->prefix . 'mf_analytics'
         );
+    }
+    
+    /**
+     * Create agent ratings table
+     */
+    private static function create_agent_ratings_table($charset_collate) {
+        global $wpdb;
+        
+        $table_name = $wpdb->prefix . 'mf_agent_ratings';
+        
+        $sql = "CREATE TABLE IF NOT EXISTS $table_name (
+            id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+            agent_id BIGINT UNSIGNED NOT NULL,
+            user_id BIGINT UNSIGNED NOT NULL,
+            rating TINYINT UNSIGNED NOT NULL CHECK (rating >= 1 AND rating <= 5),
+            review_title VARCHAR(255),
+            review_text TEXT,
+            property_id BIGINT UNSIGNED NULL,
+            verified_client BOOLEAN DEFAULT FALSE,
+            helpful_count INT DEFAULT 0,
+            not_helpful_count INT DEFAULT 0,
+            agent_response TEXT NULL,
+            agent_responded_at DATETIME NULL,
+            status ENUM('pending', 'approved', 'rejected') DEFAULT 'approved',
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            
+            KEY agent_id (agent_id),
+            KEY user_id (user_id),
+            KEY idx_agent_rating (agent_id, rating),
+            KEY idx_status (status),
+            UNIQUE KEY unique_user_agent (user_id, agent_id)
+        ) $charset_collate;";
+        
+        dbDelta($sql);
+    }
+    
+    /**
+     * Create agent reports table
+     */
+    private static function create_agent_reports_table($charset_collate) {
+        global $wpdb;
+        
+        $table_name = $wpdb->prefix . 'mf_agent_reports';
+        
+        $sql = "CREATE TABLE IF NOT EXISTS $table_name (
+            id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+            agent_id BIGINT UNSIGNED NOT NULL,
+            reported_by BIGINT UNSIGNED NOT NULL,
+            report_type ENUM('spam', 'inappropriate', 'fraud', 'harassment', 'fake_info', 'other') NOT NULL,
+            report_reason TEXT NOT NULL,
+            evidence_urls TEXT NULL,
+            status ENUM('pending', 'under_review', 'resolved', 'dismissed') DEFAULT 'pending',
+            admin_notes TEXT NULL,
+            reviewed_by BIGINT UNSIGNED NULL,
+            reviewed_at DATETIME NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            
+            KEY agent_id (agent_id),
+            KEY reported_by (reported_by),
+            KEY idx_status (status),
+            KEY idx_agent_reports (agent_id, status)
+        ) $charset_collate;";
+        
+        dbDelta($sql);
     }
     
     /**
