@@ -135,9 +135,8 @@
                 let isValid = true;
                 let errorMessages = [];
                 
-                // Clear previous errors
+                // Clear previous errors (field-level only, not error message box)
                 requiredFields.removeClass('error');
-                $('.error-message').remove();
                 
                 requiredFields.each(function() {
                     const $field = $(this);
@@ -166,7 +165,10 @@
                         // Check specializations
                         if ($('.specialization-checkbox:checked').length === 0) {
                             isValid = false;
-                            errorMessages.push('At least one specialization');
+                            $('.checkbox-group-inline').addClass('error');
+                            errorMessages.push('Please select at least one specialization');
+                        } else {
+                            $('.checkbox-group-inline').removeClass('error');
                         }
                         
                         // Check required agent fields
@@ -216,9 +218,10 @@
                 }
                 
                 if (!isValid) {
-                    // Display error message
+                    // Display error message with close button
                     const errorHtml = `
-                        <div class="error-message" style="background:#fee; border-left:4px solid #dc2626; padding:15px; margin:20px 0; border-radius:8px;">
+                        <div class="error-message" style="background:#fee; border-left:4px solid #dc2626; padding:15px; margin:20px 0; border-radius:8px; position:relative;">
+                            <button type="button" class="close-error" style="position:absolute; top:10px; right:10px; background:transparent; border:none; font-size:20px; cursor:pointer; color:#dc2626; line-height:1; padding:0; width:24px; height:24px;">&times;</button>
                             <strong>⚠️ Please complete the following:</strong>
                             <ul style="margin:10px 0 0 20px;">
                                 ${errorMessages.map(msg => `<li>${msg}</li>`).join('')}
@@ -227,10 +230,14 @@
                     `;
                     currentStepElement.prepend(errorHtml);
                     
-                    // Scroll to error message
-                    $('html, body').animate({
-                        scrollTop: $('.error-message').offset().top - 100
-                    }, 300);
+                    // Add close button handler
+                    $('.close-error').on('click', function() {
+                        $(this).closest('.error-message').fadeOut(300, function() {
+                            $(this).remove();
+                        });
+                    });
+                    
+                    // Don't auto-remove errors - user must close manually
                 }
                 
                 return isValid;
@@ -271,6 +278,13 @@
                 $('#email').on('blur', this.validateEmail);
                 $('#username').on('blur', this.validateUsername);
                 $('#phone').on('input', this.formatPhone);
+                
+                // Specialization checkbox validation
+                $('.specialization-checkbox').on('change', function() {
+                    if ($('.specialization-checkbox:checked').length > 0) {
+                        $('.checkbox-group-inline').removeClass('error');
+                    }
+                });
 
                 // Enable/disable submit button based on validation
                 $('input[required], select[required], textarea[required]').on('input change', this.validateForm.bind(this));

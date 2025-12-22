@@ -1083,6 +1083,14 @@ textarea.error {
     color: var(--wp--preset--color--background, #fff);
 }
 
+/* Error state for checkbox group */
+.checkbox-group-inline.error {
+    padding: 10px;
+    border: 2px solid #dc2626;
+    border-radius: 8px;
+    background: rgba(220, 38, 38, 0.05);
+}
+
 /* Textarea */
 textarea.agent-required {
     width: 100%;
