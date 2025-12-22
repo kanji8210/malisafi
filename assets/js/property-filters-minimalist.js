@@ -82,139 +82,45 @@
             filterProperties();
         });
 
-        // ==========================
-        // Sort Change
-        // ==========================
-        $('.sort-select').on('change', function() {
-            if (isLoading) return;
-            
-            currentSort = $(this).val();
-            currentPage = 1;
-            filterProperties();
-        });
+        // Pagination removed - handled on results page
 
         // ==========================
-        // Pagination
-        // ==========================
-        $('.prev-page').on('click', function() {
-            if (isLoading || currentPage <= 1) return;
-            
-            currentPage--;
-            filterProperties();
-        });
-
-        $('.next-page').on('click', function() {
-            if (isLoading) return;
-            
-            const totalPages = parseInt($('.total-pages').text()) || 1;
-            if (currentPage >= totalPages) return;
-            
-            currentPage++;
-            filterProperties();
-        });
-
-        // ==========================
-        // Filter Properties AJAX
+        // Redirect to Filtered Results
         // ==========================
         function filterProperties() {
             if (isLoading) return;
             
-            isLoading = true;
+            // Get results page URL from wrapper
+            const resultsUrl = $('.malisafi-minimalist-wrapper').data('results-url');
+            if (!resultsUrl) {
+                console.error('Results URL not configured');
+                return;
+            }
             
-            // Show loading state
-            $('.malisafi-properties-grid').addClass('loading');
-            $('.loading-overlay').fadeIn(200);
-
-            $.ajax({
-                url: malisafiFilters.ajaxurl,
-                type: 'POST',
-                data: {
-                    action: 'malisafi_filter_properties',
-                    nonce: malisafiFilters.nonce,
-                    filters: currentFilters,
-                    sort: currentSort,
-                    page: currentPage
-                },
-                success: function(response) {
-                    if (response.success) {
-                        updateResults(response.data);
-                    } else {
-                        console.error('Filter error:', response.data);
-                        showError(response.data.message || 'An error occurred');
-                    }
-                },
-                error: function(xhr, status, error) {
-                    console.error('AJAX error:', error);
-                    showError('Failed to load properties. Please try again.');
-                },
-                complete: function() {
-                    isLoading = false;
-                    $('.malisafi-properties-grid').removeClass('loading');
-                    $('.loading-overlay').fadeOut(200);
-                }
-            });
-        }
-
-        // ==========================
-        // Update Results
-        // ==========================
-        function updateResults(data) {
-            // Update properties grid
-            if (data.html) {
-                $('.malisafi-properties-grid').html(data.html);
+            // Build URL with query parameters
+            const params = new URLSearchParams();
+            
+            if (currentFilters.status) {
+                params.append('status', currentFilters.status);
             }
-
-            // Update count
-            if (data.total !== undefined) {
-                $('.count-number').text(data.total);
+            if (currentFilters.property_type) {
+                params.append('type', currentFilters.property_type);
             }
-
-            // Update pagination
-            if (data.pagination) {
-                updatePagination(data.pagination);
+            if (currentFilters.county) {
+                params.append('county', currentFilters.county);
             }
-
-            // Scroll to top
-            $('html, body').animate({
-                scrollTop: $('.malisafi-minimalist-wrapper').offset().top - 100
-            }, 400);
-        }
-
-        // ==========================
-        // Update Pagination
-        // ==========================
-        function updatePagination(pagination) {
-            $('.current-page').text(pagination.current);
-            $('.total-pages').text(pagination.total);
-
-            // Enable/disable buttons
-            if (pagination.current <= 1) {
-                $('.prev-page').prop('disabled', true);
-            } else {
-                $('.prev-page').prop('disabled', false);
+            if (currentFilters.search) {
+                params.append('search', currentFilters.search);
             }
-
-            if (pagination.current >= pagination.total) {
-                $('.next-page').prop('disabled', true);
-            } else {
-                $('.next-page').prop('disabled', false);
+            if (currentSort && currentSort !== 'date-desc') {
+                params.append('sort', currentSort);
             }
-        }
-
-        // ==========================
-        // Show Error
-        // ==========================
-        function showError(message) {
-            const errorHtml = `
-                <div class="no-properties">
-                    <div class="no-properties-icon">
-                        <span class="dashicons dashicons-warning"></span>
-                    </div>
-                    <h3>Error</h3>
-                    <p>${message}</p>
-                </div>
-            `;
-            $('.malisafi-properties-grid').html(errorHtml);
+            
+            // Build final URL
+            const finalUrl = resultsUrl + (params.toString() ? '?' + params.toString() : '');
+            
+            // Redirect to results page
+            window.location.href = finalUrl;
         }
 
         // ==========================
@@ -238,18 +144,12 @@
                 county: '',
                 search: ''
             };
-            currentPage = 1;
-            currentSort = 'date-desc';
 
             // Reset UI
             $('.status-btn').removeClass('active');
             $('.status-btn[data-status=""]').addClass('active');
             $('.filter-select').val('');
             $('.filter-search-input').val('');
-            $('.sort-select').val('date-desc');
-
-            // Reload
-            filterProperties();
         });
 
     });

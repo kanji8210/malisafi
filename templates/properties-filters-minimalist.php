@@ -16,17 +16,11 @@ $statuses = get_terms(array('taxonomy' => 'malisafi_property_status', 'hide_empt
 // Get Kenya counties for city dropdown
 $counties = function_exists('malisafi_get_kenya_counties') ? malisafi_get_kenya_counties() : array();
 
-// Get initial properties
-$args = array(
-    'post_type' => 'malisafi_property',
-    'posts_per_page' => 12,
-    'post_status' => 'publish',
-);
-$properties_query = new WP_Query($args);
-$total_properties = $properties_query->found_posts;
+// Get results page URL (you can customize this)
+$results_page_url = home_url('/properties'); // Change to your properties listing page
 ?>
 
-<div class="malisafi-minimalist-wrapper">
+<div class="malisafi-minimalist-wrapper" data-results-url="<?php echo esc_url($results_page_url); ?>">
     
     <!-- Minimalist Filters -->
     <div class="malisafi-minimalist-filters">

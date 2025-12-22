@@ -192,6 +192,23 @@
 }
 
 /* ==========================
+   Info Message
+   ========================== */
+.filter-info-message {
+    text-align: center;
+    padding: 40px 20px;
+    background: var(--mls-bg-secondary, #f8f8f8);
+    border-radius: 8px;
+    margin-top: 20px;
+}
+
+.filter-info-message p {
+    font-size: 16px;
+    color: var(--mls-text-secondary, #808083);
+    margin: 0;
+}
+
+/* ==========================
    Results Header
    ========================== */
 .malisafi-results-header {
