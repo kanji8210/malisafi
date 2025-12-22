@@ -58,7 +58,7 @@ class Dashboard_Shortcodes {
             return '<div class="malisafi-login-required">
                 <p>' . __('You must be logged in to view this page.', 'malisafi-mls') . '</p>
                 <a href="' . wp_login_url(get_permalink()) . '" class="button">' . __('Login', 'malisafi-mls') . '</a>
-                <a href="' . esc_url($register_url) . '" class="button button-secondary">' . __('Register as Agent', 'malisafi-mls') . '</a>
+                <a href="' . esc_url($register_url . '?type=agent') . '" class="button button-secondary">' . __('Register as Agent', 'malisafi-mls') . '</a>
             </div>';
         }
         

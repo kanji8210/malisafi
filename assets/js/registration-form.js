@@ -14,10 +14,30 @@
             init: function() {
                 this.bindEvents();
                 this.validateForm();
+                this.initializePreselectedType();
+            },
+            
+            initializePreselectedType: function() {
+                // Check if dropdown has a preselected value
+                const preselectedValue = $('#account_type_select').val();
+                if (preselectedValue) {
+                    // Show sections immediately for preselected type
+                    $('#personal-info-section').show();
+                    $('#credentials-section').show();
+                    
+                    // Trigger the dropdown change to sync with radio buttons
+                    $('#account_type_select').trigger('change');
+                    
+                    // Also check the corresponding radio button
+                    $(`input[name="account_type"][value="${preselectedValue}"]`).prop('checked', true).trigger('change');
+                }
             },
 
             bindEvents: function() {
-                // Account type selection
+                // Dropdown change - sync with radio buttons
+                $('#account_type_select').on('change', this.handleDropdownChange.bind(this));
+                
+                // Account type selection (radio buttons)
                 $('input[name="account_type"]').on('change', this.handleAccountTypeChange.bind(this));
 
                 // Account type quick links
@@ -48,6 +68,24 @@
 
                 // Enable/disable submit button based on validation
                 $('input[required], select[required], textarea[required]').on('input change', this.validateForm.bind(this));
+            },
+            
+            handleDropdownChange: function(e) {
+                const selectedType = $(e.target).val();
+                
+                if (selectedType) {
+                    // Uncheck all radio buttons first
+                    $('input[name="account_type"]').prop('checked', false);
+                    $('.account-type-card').removeClass('selected');
+                    
+                    // Check the corresponding radio button
+                    const $radio = $(`input[name="account_type"][value="${selectedType}"]`);
+                    $radio.prop('checked', true);
+                    $radio.closest('.account-type-card').addClass('selected');
+                    
+                    // Trigger the radio change event to show/hide agent fields
+                    $radio.trigger('change');
+                }
             },
             
             updateCharCount: function() {
@@ -107,11 +145,17 @@
                 // Add visual feedback
                 $('.account-type-card').removeClass('selected');
                 $(e.target).closest('.account-type-card').addClass('selected');
+                
+                // Sync dropdown with radio selection
+                $('#account_type_select').val(accountType);
+
+                // Show personal info and credentials sections after type selection
+                $('#personal-info-section').slideDown(400);
+                $('#credentials-section').slideDown(400);
 
                 // Show/hide agent registration notice
                 if (accountType === 'agent') {
                     $('.agent-registration-notice').slideDown(400);
-                    $('.personal-info-section').slideDown(400);
                     $('.agent-fields').slideDown(300);
                     
                     // Make agent fields required
@@ -121,7 +165,6 @@
                     $('.specialization-checkbox').prop('required', true);
                 } else {
                     $('.agent-registration-notice').slideUp(400);
-                    $('.personal-info-section').slideDown(400);
                     $('.agent-fields').slideUp(300);
                     
                     // Remove required from agent fields

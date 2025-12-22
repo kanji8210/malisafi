@@ -85,6 +85,19 @@ class Malisafi_Registration_Handler {
         $website = esc_url_raw($_POST['website'] ?? '');
         $whatsapp = sanitize_text_field($_POST['whatsapp'] ?? '');
         
+        // New agent fields
+        $office_phone = sanitize_text_field($_POST['office_phone'] ?? '');
+        $languages = sanitize_text_field($_POST['languages'] ?? '');
+        $service_areas = sanitize_textarea_field($_POST['service_areas'] ?? '');
+        $commission_rate = floatval($_POST['commission_rate'] ?? 0);
+        
+        // Social media
+        $facebook = esc_url_raw($_POST['facebook'] ?? '');
+        $twitter = esc_url_raw($_POST['twitter'] ?? '');
+        $linkedin = esc_url_raw($_POST['linkedin'] ?? '');
+        $instagram = esc_url_raw($_POST['instagram'] ?? '');
+        $youtube = esc_url_raw($_POST['youtube'] ?? '');
+        
         // Validation
         $errors = array();
         
@@ -199,11 +212,41 @@ class Malisafi_Registration_Handler {
             update_user_meta($user_id, 'agent_bio', $agent_bio);
             update_user_meta($user_id, 'national_id', $national_id);
             
+            // Optional fields
             if (!empty($website)) {
                 update_user_meta($user_id, 'website', $website);
             }
             if (!empty($whatsapp)) {
                 update_user_meta($user_id, 'whatsapp', $whatsapp);
+            }
+            if (!empty($office_phone)) {
+                update_user_meta($user_id, 'office_phone', $office_phone);
+            }
+            if (!empty($languages)) {
+                update_user_meta($user_id, 'languages', $languages);
+            }
+            if (!empty($service_areas)) {
+                update_user_meta($user_id, 'service_areas', $service_areas);
+            }
+            if (!empty($commission_rate)) {
+                update_user_meta($user_id, 'commission_rate', $commission_rate);
+            }
+            
+            // Social media
+            if (!empty($facebook)) {
+                update_user_meta($user_id, 'facebook', $facebook);
+            }
+            if (!empty($twitter)) {
+                update_user_meta($user_id, 'twitter', $twitter);
+            }
+            if (!empty($linkedin)) {
+                update_user_meta($user_id, 'linkedin', $linkedin);
+            }
+            if (!empty($instagram)) {
+                update_user_meta($user_id, 'instagram', $instagram);
+            }
+            if (!empty($youtube)) {
+                update_user_meta($user_id, 'youtube', $youtube);
             }
             
             // Agent approval status - pending by default
@@ -220,20 +263,30 @@ class Malisafi_Registration_Handler {
                     '_agent_user_id' => $user_id,
                     '_agent_email' => $email,
                     '_agent_phone' => $phone,
-                    '_agent_agency' => $agency_name,
-                    '_agent_license' => $license_number,
-                    '_agent_experience' => $years_experience,
+                    '_agent_mobile' => $phone,  // Same as phone for mobile
+                    '_agent_agency_name' => $agency_name,
+                    '_agent_license_number' => $license_number,
+                    '_agent_experience_years' => $years_experience,
                     '_agent_county' => $agent_county,
-                    '_agent_address' => $business_address,
+                    '_agent_office_address' => $business_address,
                     '_agent_city' => $city,
-                    '_agent_specializations' => $specializations,
+                    '_agent_specializations' => implode(', ', $specializations),
                     '_agent_bio' => $agent_bio,
                     '_agent_national_id' => $national_id,
                     '_agent_website' => $website,
                     '_agent_whatsapp' => $whatsapp,
+                    '_agent_languages' => $languages,
+                    '_agent_service_areas' => $service_areas,
+                    '_agent_commission_rate' => $commission_rate,
+                    '_agent_facebook' => $facebook,
+                    '_agent_twitter' => $twitter,
+                    '_agent_linkedin' => $linkedin,
+                    '_agent_instagram' => $instagram,
+                    '_agent_youtube' => $youtube,
                     '_agent_rating' => 0,
                     '_agent_total_reviews' => 0,
                     '_agent_properties_count' => 0,
+                    '_agent_status' => 'active',
                 )
             ));
             

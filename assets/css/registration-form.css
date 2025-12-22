@@ -128,6 +128,13 @@
     margin: 25px 0 35px;
 }
 
+/* Make grid 3 columns when all 5 options are present */
+@media (min-width: 900px) {
+    .account-type-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
 @media (max-width: 768px) {
     .account-type-grid {
         grid-template-columns: 1fr;

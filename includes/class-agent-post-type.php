@@ -190,6 +190,10 @@ class Agent_Post_Type {
         $service_areas = get_post_meta($post->ID, '_agent_service_areas', true);
         $commission_rate = get_post_meta($post->ID, '_agent_commission_rate', true);
         $agency_name = get_post_meta($post->ID, '_agent_agency_name', true);
+        $national_id = get_post_meta($post->ID, '_agent_national_id', true);
+        $city = get_post_meta($post->ID, '_agent_city', true);
+        $county = get_post_meta($post->ID, '_agent_county', true);
+        $bio = get_post_meta($post->ID, '_agent_bio', true);
         ?>
         <table class="form-table">
             <tr>
@@ -201,8 +205,20 @@ class Agent_Post_Type {
                 <td><input type="text" id="agent_agency_name" name="agent_agency_name" value="<?php echo esc_attr($agency_name); ?>" class="regular-text" /></td>
             </tr>
             <tr>
+                <th><label for="agent_national_id"><?php _e('National ID Number', 'malisafi-mls'); ?></label></th>
+                <td><input type="text" id="agent_national_id" name="agent_national_id" value="<?php echo esc_attr($national_id); ?>" class="regular-text" /></td>
+            </tr>
+            <tr>
                 <th><label for="agent_experience_years"><?php _e('Years of Experience', 'malisafi-mls'); ?></label></th>
                 <td><input type="number" id="agent_experience_years" name="agent_experience_years" value="<?php echo esc_attr($experience_years); ?>" min="0" max="50" /></td>
+            </tr>
+            <tr>
+                <th><label for="agent_county"><?php _e('Operating County', 'malisafi-mls'); ?></label></th>
+                <td><input type="text" id="agent_county" name="agent_county" value="<?php echo esc_attr($county); ?>" class="regular-text" /></td>
+            </tr>
+            <tr>
+                <th><label for="agent_city"><?php _e('City/Town', 'malisafi-mls'); ?></label></th>
+                <td><input type="text" id="agent_city" name="agent_city" value="<?php echo esc_attr($city); ?>" class="regular-text" /></td>
             </tr>
             <tr>
                 <th><label for="agent_languages"><?php _e('Languages Spoken', 'malisafi-mls'); ?></label></th>
@@ -215,6 +231,13 @@ class Agent_Post_Type {
             <tr>
                 <th><label for="agent_commission_rate"><?php _e('Commission Rate (%)', 'malisafi-mls'); ?></label></th>
                 <td><input type="number" id="agent_commission_rate" name="agent_commission_rate" value="<?php echo esc_attr($commission_rate); ?>" min="0" max="100" step="0.1" /> %</td>
+            </tr>
+            <tr>
+                <th><label for="agent_bio"><?php _e('Professional Bio', 'malisafi-mls'); ?></label></th>
+                <td>
+                    <textarea id="agent_bio" name="agent_bio" rows="5" class="large-text" placeholder="<?php esc_attr_e('Professional biography and achievements...', 'malisafi-mls'); ?>"><?php echo esc_textarea($bio); ?></textarea>
+                    <p class="description"><?php _e('A brief description of experience and expertise (100-500 characters recommended)', 'malisafi-mls'); ?></p>
+                </td>
             </tr>
         </table>
         <?php
@@ -361,7 +384,8 @@ class Agent_Post_Type {
         // Professional Information
         $professional_fields = array(
             'agent_license_number', 'agent_experience_years', 'agent_languages',
-            'agent_service_areas', 'agent_commission_rate', 'agent_agency_name'
+            'agent_service_areas', 'agent_commission_rate', 'agent_agency_name',
+            'agent_national_id', 'agent_city', 'agent_county', 'agent_bio'
         );
         
         foreach ($professional_fields as $field) {

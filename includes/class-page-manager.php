@@ -191,7 +191,7 @@ class Page_Manager {
         'register' => array(
             'title' => 'Register',
             'slug' => 'register',
-            'shortcode' => '[malisafi_register]',
+            'shortcode' => '[malisafi_registration]',
             'description' => 'User registration page',
             'parent' => 0
         ),
