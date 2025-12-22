@@ -93,9 +93,4 @@ $results_page_url = home_url('/properties'); // Change to your properties listin
 
     </div>
 
-    <!-- Info Message -->
-    <div class="filter-info-message">
-        <p>Select your search criteria above and click Search to find properties.</p>
-    </div>
-
 </div>
