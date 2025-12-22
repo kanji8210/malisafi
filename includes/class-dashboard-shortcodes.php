@@ -54,7 +54,7 @@ class Dashboard_Shortcodes {
      */
     private static function require_login($required_role = null) {
         if (!is_user_logged_in()) {
-            $register_url = get_permalink(Page_Manager::get_page_id('register'));
+            $register_url = Page_Manager::get_page_url('register');
             return '<div class="malisafi-login-required">
                 <p>' . __('You must be logged in to view this page.', 'malisafi-mls') . '</p>
                 <a href="' . wp_login_url(get_permalink()) . '" class="button">' . __('Login', 'malisafi-mls') . '</a>
