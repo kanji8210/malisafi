@@ -93,66 +93,9 @@ $results_page_url = home_url('/properties'); // Change to your properties listin
 
     </div>
 
-    <!-- Results Header -->
-    <div class="malisafi-results-header">
-        <div class="results-count">
-            <span class="count-number"><?php echo esc_html($total_properties); ?></span>
-            <span class="count-text">properties found</span>
-        </div>
-        <div class="results-controls">
-            <select class="sort-select" data-sort="date-desc">
-                <option value="date-desc">Newest First</option>
-                <option value="date-asc">Oldest First</option>
-                <option value="price-asc">Price: Low to High</option>
-                <option value="price-desc">Price: High to Low</option>
-                <option value="area-desc">Area: Largest First</option>
-                <option value="area-asc">Area: Smallest First</option>
-            </select>
-        </div>
-    </div>
-
-    <!-- Properties Grid -->
-    <div class="malisafi-properties-grid loading">
-        
-        <?php if ($properties_query->have_posts()) : ?>
-            <?php while ($properties_query->have_posts()) : $properties_query->the_post(); ?>
-                <?php include MALISAFI_MLS_PATH . 'templates/property-card-modern.php'; ?>
-            <?php endwhile; ?>
-            <?php wp_reset_postdata(); ?>
-        <?php else : ?>
-            <div class="no-properties">
-                <div class="no-properties-icon">
-                    <span class="dashicons dashicons-warning"></span>
-                </div>
-                <h3>No properties found</h3>
-                <p>Try adjusting your filters to see more results.</p>
-            </div>
-        <?php endif; ?>
-
-    </div>
-
-    <!-- Pagination -->
-    <div class="malisafi-pagination">
-        <!-- Pagination will be updated via AJAX -->
-        <button class="pagination-btn prev-page" disabled>
-            <span class="dashicons dashicons-arrow-left-alt2"></span>
-            Previous
-        </button>
-        <span class="pagination-info">
-            Page <span class="current-page">1</span> of <span class="total-pages">1</span>
-        </span>
-        <button class="pagination-btn next-page" disabled>
-            Next
-            <span class="dashicons dashicons-arrow-right-alt2"></span>
-        </button>
-    </div>
-
-    <!-- Loading Overlay -->
-    <div class="loading-overlay" style="display: none;">
-        <div class="loading-spinner">
-            <div class="spinner"></div>
-            <p>Loading properties...</p>
-        </div>
+    <!-- Info Message -->
+    <div class="filter-info-message">
+        <p>Select your search criteria above and click Search to find properties.</p>
     </div>
 
 </div>
