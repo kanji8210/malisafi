@@ -25,6 +25,8 @@ class Login_Customizer {
         add_action('login_head', [__CLASS__, 'add_favicon']);
         add_filter('login_errors', [__CLASS__, 'custom_login_errors']);
         add_action('login_footer', [__CLASS__, 'add_custom_footer']);
+        add_filter('login_redirect', [__CLASS__, 'redirect_to_dashboard'], 10, 3);
+        add_action('admin_bar_menu', [__CLASS__, 'add_dashboard_link'], 999);
     }
     
     /**
@@ -322,5 +324,74 @@ class Login_Customizer {
         });
         </script>
         <?php
+    }
+    
+    /**
+     * Redirect users to appropriate Malisafi dashboard after login
+     */
+    public static function redirect_to_dashboard($redirect_to, $request, $user) {
+        // Check if user object exists and has roles
+        if (!isset($user->roles) || !is_array($user->roles)) {
+            return $redirect_to;
+        }
+        
+        // Determine dashboard URL based on user role
+        $dashboard_url = '';
+        
+        if (in_array('malisafi_agent_basic', $user->roles) || in_array('malisafi_agent_premium', $user->roles)) {
+            $dashboard_url = Page_Manager::get_page_url('agent_dashboard');
+        } elseif (in_array('malisafi_owner', $user->roles)) {
+            $dashboard_url = Page_Manager::get_page_url('owner_dashboard');
+        } elseif (in_array('malisafi_developer', $user->roles)) {
+            $dashboard_url = Page_Manager::get_page_url('developer_dashboard');
+        } elseif (in_array('malisafi_client', $user->roles)) {
+            $dashboard_url = Page_Manager::get_page_url('client_dashboard');
+        } elseif (in_array('administrator', $user->roles)) {
+            // Admins go to WP admin
+            return admin_url();
+        }
+        
+        // If we found a dashboard URL, use it; otherwise use default redirect
+        return !empty($dashboard_url) ? $dashboard_url : $redirect_to;
+    }
+    
+    /**
+     * Add Malisafi Dashboard link to admin bar for logged-in users
+     */
+    public static function add_dashboard_link($wp_admin_bar) {
+        if (!is_user_logged_in()) {
+            return;
+        }
+        
+        $current_user = wp_get_current_user();
+        $dashboard_url = '';
+        $dashboard_title = '';
+        
+        // Determine dashboard URL and title based on user role
+        if (in_array('malisafi_agent_basic', $current_user->roles) || in_array('malisafi_agent_premium', $current_user->roles)) {
+            $dashboard_url = Page_Manager::get_page_url('agent_dashboard');
+            $dashboard_title = __('Agent Dashboard', 'malisafi-mls');
+        } elseif (in_array('malisafi_owner', $current_user->roles)) {
+            $dashboard_url = Page_Manager::get_page_url('owner_dashboard');
+            $dashboard_title = __('Owner Dashboard', 'malisafi-mls');
+        } elseif (in_array('malisafi_developer', $current_user->roles)) {
+            $dashboard_url = Page_Manager::get_page_url('developer_dashboard');
+            $dashboard_title = __('Developer Dashboard', 'malisafi-mls');
+        } elseif (in_array('malisafi_client', $current_user->roles)) {
+            $dashboard_url = Page_Manager::get_page_url('client_dashboard');
+            $dashboard_title = __('My Dashboard', 'malisafi-mls');
+        }
+        
+        // Add the link if we have a valid dashboard URL
+        if (!empty($dashboard_url)) {
+            $wp_admin_bar->add_node([
+                'id'    => 'malisafi-dashboard',
+                'title' => '<span class="ab-icon dashicons dashicons-admin-home"></span>' . $dashboard_title,
+                'href'  => $dashboard_url,
+                'meta'  => [
+                    'class' => 'malisafi-dashboard-link'
+                ]
+            ]);
+        }
     }
 }

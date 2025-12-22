@@ -23,7 +23,14 @@ defined('ABSPATH') || exit;
             $preselected_type = isset($_GET['type']) ? sanitize_text_field($_GET['type']) : '';
             ?>
             
-            <!-- Step Progress Indicator -->
+            <!-- Step Progress Indicator with Bar -->
+            <div class="step-progress-wrapper">
+                <div class="progress-bar-container">
+                    <div class="progress-bar" style="width: 33.33%;"></div>
+                </div>
+                <div class="step-counter"><?php _e('Step 1 of 3', 'malisafi-mls'); ?></div>
+            </div>
+            
             <div class="step-progress">
                 <div class="step-item active" data-step="1">
                     <div class="step-number">1</div>
@@ -31,56 +38,68 @@ defined('ABSPATH') || exit;
                 </div>
                 <div class="step-item" data-step="2">
                     <div class="step-number">2</div>
-                    <div class="step-label"><?php _e('Your Information', 'malisafi-mls'); ?></div>
+                    <div class="step-label"><?php _e('Your Info', 'malisafi-mls'); ?></div>
                 </div>
                 <div class="step-item" data-step="3">
                     <div class="step-number">3</div>
-                    <div class="step-label"><?php _e('Credentials', 'malisafi-mls'); ?></div>
+                    <div class="step-label"><?php _e('Login Details', 'malisafi-mls'); ?></div>
                 </div>
             </div>
             
             <!-- Step 1: Account Type Selection -->
             <div class="form-step" data-step="1">
-                <h3><?php _e('Choose Your Account Type', 'malisafi-mls'); ?></h3>
-                <p class="step-description"><?php _e('Select the type of account that best suits your needs', 'malisafi-mls'); ?></p>
+                <h3><?php _e('What brings you to Malisafi?', 'malisafi-mls'); ?></h3>
+                <p class="step-description"><?php _e('Choose the option that best describes you', 'malisafi-mls'); ?></p>
                 
-                <div class="form-group">
-                    <label for="account_type_select">
-                        <?php _e('I want to register as', 'malisafi-mls'); ?> <span class="required">*</span>
+                <div class="account-type-cards">
+                    <label class="account-card" data-type="client">
+                        <input type="radio" name="account_type" value="client" required>
+                        <div class="card-content">
+                            <div class="card-icon">🏠</div>
+                            <h4><?php _e('Looking for Property', 'malisafi-mls'); ?></h4>
+                            <p><?php _e('I want to buy, rent, or browse properties', 'malisafi-mls'); ?></p>
+                        </div>
+                        <div class="card-checkmark">✓</div>
                     </label>
-                    <select id="account_type_select" name="account_type_select" required>
-                        <option value=""><?php _e('-- Select Account Type --', 'malisafi-mls'); ?></option>
-                        <option value="client" <?php selected($preselected_type, 'client'); ?>>
-                            <?php _e('Client - Find properties to buy or rent', 'malisafi-mls'); ?>
-                        </option>
-                        <option value="agent" <?php selected($preselected_type, 'agent'); ?>>
-                            <?php _e('Agent - Real estate professional', 'malisafi-mls'); ?>
-                        </option>
-                        <option value="hunter" <?php selected($preselected_type, 'hunter'); ?>>
-                            <?php _e('Hunter - Property searcher/investor', 'malisafi-mls'); ?>
-                        </option>
-                        <option value="owner" <?php selected($preselected_type, 'owner'); ?>>
-                            <?php _e('Owner - List my property', 'malisafi-mls'); ?>
-                        </option>
-                        <option value="developer" <?php selected($preselected_type, 'developer'); ?>>
-                            <?php _e('Developer - Property development projects', 'malisafi-mls'); ?>
-                        </option>
-                    </select>
+                    
+                    <label class="account-card" data-type="agent">
+                        <input type="radio" name="account_type" value="agent" required>
+                        <div class="card-content">
+                            <div class="card-icon">💼</div>
+                            <h4><?php _e('Real Estate Agent', 'malisafi-mls'); ?></h4>
+                            <p><?php _e('Licensed agent or agency professional', 'malisafi-mls'); ?></p>
+                        </div>
+                        <div class="card-checkmark">✓</div>
+                    </label>
+                    
+                    <label class="account-card" data-type="owner">
+                        <input type="radio" name="account_type" value="owner" required>
+                        <div class="card-content">
+                            <div class="card-icon">🔑</div>
+                            <h4><?php _e('Property Owner', 'malisafi-mls'); ?></h4>
+                            <p><?php _e('I want to list my property for sale or rent', 'malisafi-mls'); ?></p>
+                        </div>
+                        <div class="card-checkmark">✓</div>
+                    </label>
+                    
+                    <label class="account-card" data-type="developer">
+                        <input type="radio" name="account_type" value="developer" required>
+                        <div class="card-content">
+                            <div class="card-icon">🏗️</div>
+                            <h4><?php _e('Developer', 'malisafi-mls'); ?></h4>
+                            <p><?php _e('Property developer or construction company', 'malisafi-mls'); ?></p>
+                        </div>
+                        <div class="card-checkmark">✓</div>
+                    </label>
                 </div>
                 
-                <input type="hidden" name="account_type" id="account_type_hidden" value="<?php echo esc_attr($preselected_type); ?>">
-                
-                <div class="step-navigation">
-                    <button type="button" class="btn btn-primary btn-next" data-next="2">
-                        <?php _e('Continue', 'malisafi-mls'); ?> →
-                    </button>
-                </div>
+                <input type="hidden" id="user_role" name="user_role" value="">
             </div>
 
             <!-- Step 2: Personal Information -->
             <div class="form-step" data-step="2" style="display: none;">
-                <h3><?php _e('Your Information', 'malisafi-mls'); ?></h3>
-                <p class="step-description"><?php _e('Tell us about yourself', 'malisafi-mls'); ?></p>
+                <h3><?php _e('Tell us about yourself', 'malisafi-mls'); ?></h3>
+                <p class="step-description"><?php _e('Basic information to get started', 'malisafi-mls'); ?></p>
                 
                 <div class="form-row">
                     <div class="form-group half-width">
@@ -88,7 +107,7 @@ defined('ABSPATH') || exit;
                             <?php _e('First Name', 'malisafi-mls'); ?> <span class="required">*</span>
                         </label>
                         <input type="text" id="first_name" name="first_name" required 
-                               placeholder="<?php esc_attr_e('Enter your first name', 'malisafi-mls'); ?>">
+                               placeholder="<?php esc_attr_e('John', 'malisafi-mls'); ?>">
                     </div>
                     
                     <div class="form-group half-width">
@@ -96,16 +115,8 @@ defined('ABSPATH') || exit;
                             <?php _e('Last Name', 'malisafi-mls'); ?> <span class="required">*</span>
                         </label>
                         <input type="text" id="last_name" name="last_name" required 
-                               placeholder="<?php esc_attr_e('Enter your last name', 'malisafi-mls'); ?>">
+                               placeholder="<?php esc_attr_e('Doe', 'malisafi-mls'); ?>">
                     </div>
-                </div>
-
-                <div class="form-group">
-                    <label for="email">
-                        <?php _e('Email Address', 'malisafi-mls'); ?> <span class="required">*</span>
-                    </label>
-                    <input type="email" id="email" name="email" required 
-                           placeholder="<?php esc_attr_e('your.email@example.com', 'malisafi-mls'); ?>">
                 </div>
 
                 <div class="form-group">
@@ -119,83 +130,48 @@ defined('ABSPATH') || exit;
                                pattern="[0-9]{9,10}"
                                maxlength="10">
                     </div>
-                    <small class="form-hint"><?php _e('Enter your mobile number without the country code', 'malisafi-mls'); ?></small>
+                    <small class="form-hint"><?php _e('Your mobile number', 'malisafi-mls'); ?></small>
                 </div>
-
-                <!-- Additional fields for Agents -->
+                
+                <!-- Agent-specific fields (conditionally shown) -->
                 <div class="agent-fields" style="display: none;">
-                    <h4 class="subsection-title"><?php _e('Professional Information', 'malisafi-mls'); ?></h4>
+                    <h4 class="subsection-title"><?php _e('Professional Details', 'malisafi-mls'); ?></h4>
+                    
+                    <div class="form-group">
+                        <label for="agency_name">
+                            <?php _e('Agency/Company Name', 'malisafi-mls'); ?> <span class="required">*</span>
+                        </label>
+                        <input type="text" id="agency_name" name="agency_name" class="agent-required"
+                               placeholder="<?php esc_attr_e('e.g. Malisafi Real Estate', 'malisafi-mls'); ?>">
+                    </div>
                     
                     <div class="form-row">
-                        <div class="form-group half-width">
-                            <label for="agency_name">
-                                <?php _e('Agency Name', 'malisafi-mls'); ?> <span class="required">*</span>
-                            </label>
-                            <input type="text" id="agency_name" name="agency_name" class="agent-required"
-                                   placeholder="<?php esc_attr_e('Your real estate agency', 'malisafi-mls'); ?>">
-                        </div>
-
                         <div class="form-group half-width">
                             <label for="license_number">
                                 <?php _e('License Number', 'malisafi-mls'); ?> <span class="required">*</span>
                             </label>
                             <input type="text" id="license_number" name="license_number" class="agent-required"
-                                   placeholder="<?php esc_attr_e('Professional license number', 'malisafi-mls'); ?>">
+                                   placeholder="<?php esc_attr_e('Your professional license', 'malisafi-mls'); ?>">
                         </div>
-                    </div>
-
-                    <div class="form-row">
+                        
                         <div class="form-group half-width">
                             <label for="years_experience">
-                                <?php _e('Years of Experience', 'malisafi-mls'); ?> <span class="required">*</span>
+                                <?php _e('Experience', 'malisafi-mls'); ?> <span class="required">*</span>
                             </label>
                             <select id="years_experience" name="years_experience" class="agent-required">
-                                <option value=""><?php _e('Select experience', 'malisafi-mls'); ?></option>
-                                <option value="0-1"><?php _e('Less than 1 year', 'malisafi-mls'); ?></option>
+                                <option value=""><?php _e('Select...', 'malisafi-mls'); ?></option>
+                                <option value="0-1"><?php _e('<1 year', 'malisafi-mls'); ?></option>
                                 <option value="1-3"><?php _e('1-3 years', 'malisafi-mls'); ?></option>
                                 <option value="3-5"><?php _e('3-5 years', 'malisafi-mls'); ?></option>
                                 <option value="5-10"><?php _e('5-10 years', 'malisafi-mls'); ?></option>
                                 <option value="10+"><?php _e('10+ years', 'malisafi-mls'); ?></option>
                             </select>
                         </div>
-
-                        <div class="form-group half-width">
-                            <label for="agent_county">
-                                <?php _e('Operating County', 'malisafi-mls'); ?> <span class="required">*</span>
-                            </label>
-                            <select id="agent_county" name="agent_county" class="agent-required">
-                                <option value=""><?php _e('Select county', 'malisafi-mls'); ?></option>
-                                <?php
-                                if (function_exists('malisafi_get_kenya_counties')) {
-                                    $counties = malisafi_get_kenya_counties();
-                                    foreach ($counties as $county) {
-                                        echo '<option value="' . esc_attr($county) . '">' . esc_html($county) . '</option>';
-                                    }
-                                }
-                                ?>
-                            </select>
-                        </div>
                     </div>
-
-                    <div class="form-group">
-                        <label for="business_address">
-                            <?php _e('Business Address', 'malisafi-mls'); ?> <span class="required">*</span>
-                        </label>
-                        <input type="text" id="business_address" name="business_address" class="agent-required"
-                               placeholder="<?php esc_attr_e('Street address, building name, floor', 'malisafi-mls'); ?>">
-                    </div>
-
-                    <div class="form-group">
-                        <label for="city">
-                            <?php _e('City/Town', 'malisafi-mls'); ?> <span class="required">*</span>
-                        </label>
-                        <input type="text" id="city" name="city" class="agent-required"
-                               placeholder="<?php esc_attr_e('Enter city or town', 'malisafi-mls'); ?>">
-                    </div>
-
+                    
                     <div class="form-group">
                         <label for="specializations">
-                            <?php _e('Specializations', 'malisafi-mls'); ?> <span class="required">*</span>
+                            <?php _e('Specialization', 'malisafi-mls'); ?> <span class="required">*</span>
                         </label>
                         <div class="checkbox-group-inline">
                             <label class="checkbox-label-inline">
@@ -210,175 +186,35 @@ defined('ABSPATH') || exit;
                                 <input type="checkbox" name="specializations[]" value="land" class="specialization-checkbox">
                                 <span><?php _e('Land', 'malisafi-mls'); ?></span>
                             </label>
-                            <label class="checkbox-label-inline">
-                                <input type="checkbox" name="specializations[]" value="rental" class="specialization-checkbox">
-                                <span><?php _e('Rental', 'malisafi-mls'); ?></span>
-                            </label>
-                            <label class="checkbox-label-inline">
-                                <input type="checkbox" name="specializations[]" value="luxury" class="specialization-checkbox">
-                                <span><?php _e('Luxury', 'malisafi-mls'); ?></span>
-                            </label>
                         </div>
-                        <small class="form-hint"><?php _e('Select at least one specialization', 'malisafi-mls'); ?></small>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="agent_bio">
-                            <?php _e('Professional Bio', 'malisafi-mls'); ?> <span class="required">*</span>
-                        </label>
-                        <textarea id="agent_bio" name="agent_bio" rows="4" class="agent-required"
-                                  placeholder="<?php esc_attr_e('Tell clients about your experience, achievements, and what makes you a great agent...', 'malisafi-mls'); ?>"
-                                  minlength="100" maxlength="500"></textarea>
-                        <small class="form-hint char-count"><?php _e('100-500 characters (0/500)', 'malisafi-mls'); ?></small>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="national_id">
-                            <?php _e('National ID Number', 'malisafi-mls'); ?> <span class="required">*</span>
-                        </label>
-                        <input type="text" id="national_id" name="national_id" class="agent-required"
-                               placeholder="<?php esc_attr_e('Enter your National ID number', 'malisafi-mls'); ?>"
-                               pattern="[0-9]{7,8}" maxlength="8">
-                        <small class="form-hint"><?php _e('Required for verification purposes', 'malisafi-mls'); ?></small>
-                    </div>
-
-                    <h4 class="subsection-title"><?php _e('Contact & Service Details', 'malisafi-mls'); ?></h4>
-
-                    <div class="form-row">
-                        <div class="form-group half-width">
-                            <label for="office_phone">
-                                <?php _e('Office Phone (Optional)', 'malisafi-mls'); ?>
-                            </label>
-                            <div class="phone-input-wrapper">
-                                <span class="phone-prefix">+254</span>
-                                <input type="tel" id="office_phone" name="office_phone"
-                                       placeholder="712345678"
-                                       pattern="[0-9]{9,10}"
-                                       maxlength="10">
-                            </div>
-                        </div>
-
-                        <div class="form-group half-width">
-                            <label for="whatsapp">
-                                <?php _e('WhatsApp Number (Optional)', 'malisafi-mls'); ?>
-                            </label>
-                            <div class="phone-input-wrapper">
-                                <span class="phone-prefix">+254</span>
-                                <input type="tel" id="whatsapp" name="whatsapp"
-                                       placeholder="712345678"
-                                       pattern="[0-9]{9,10}"
-                                       maxlength="10">
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="languages">
-                            <?php _e('Languages Spoken (Optional)', 'malisafi-mls'); ?>
-                        </label>
-                        <input type="text" id="languages" name="languages"
-                               placeholder="<?php esc_attr_e('e.g. English, Swahili, French', 'malisafi-mls'); ?>">
-                        <small class="form-hint"><?php _e('Separate multiple languages with commas', 'malisafi-mls'); ?></small>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="service_areas">
-                            <?php _e('Service Areas (Optional)', 'malisafi-mls'); ?>
-                        </label>
-                        <textarea id="service_areas" name="service_areas" rows="2"
-                                  placeholder="<?php esc_attr_e('e.g. Nairobi, Westlands, Karen, Kiambu', 'malisafi-mls'); ?>"></textarea>
-                        <small class="form-hint"><?php _e('Specific neighborhoods, towns or areas you serve', 'malisafi-mls'); ?></small>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="commission_rate">
-                            <?php _e('Commission Rate % (Optional)', 'malisafi-mls'); ?>
-                        </label>
-                        <input type="number" id="commission_rate" name="commission_rate"
-                               min="0" max="100" step="0.1"
-                               placeholder="<?php esc_attr_e('e.g. 2.5', 'malisafi-mls'); ?>">
-                        <small class="form-hint"><?php _e('Your typical commission percentage', 'malisafi-mls'); ?></small>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="website">
-                            <?php _e('Website (Optional)', 'malisafi-mls'); ?>
-                        </label>
-                        <input type="url" id="website" name="website"
-                               placeholder="<?php esc_attr_e('https://yourwebsite.com', 'malisafi-mls'); ?>">
-                    </div>
-
-                    <h4 class="subsection-title"><?php _e('Social Media Profiles (Optional)', 'malisafi-mls'); ?></h4>
-                    
-                    <div class="form-row">
-                        <div class="form-group half-width">
-                            <label for="facebook">
-                                <?php _e('Facebook', 'malisafi-mls'); ?>
-                            </label>
-                            <input type="url" id="facebook" name="facebook"
-                                   placeholder="<?php esc_attr_e('https://facebook.com/yourprofile', 'malisafi-mls'); ?>">
-                        </div>
-
-                        <div class="form-group half-width">
-                            <label for="twitter">
-                                <?php _e('Twitter/X', 'malisafi-mls'); ?>
-                            </label>
-                            <input type="url" id="twitter" name="twitter"
-                                   placeholder="<?php esc_attr_e('https://twitter.com/yourhandle', 'malisafi-mls'); ?>">
-                        </div>
-                    </div>
-
-                    <div class="form-row">
-                        <div class="form-group half-width">
-                            <label for="linkedin">
-                                <?php _e('LinkedIn', 'malisafi-mls'); ?>
-                            </label>
-                            <input type="url" id="linkedin" name="linkedin"
-                                   placeholder="<?php esc_attr_e('https://linkedin.com/in/yourprofile', 'malisafi-mls'); ?>">
-                        </div>
-
-                        <div class="form-group half-width">
-                            <label for="instagram">
-                                <?php _e('Instagram', 'malisafi-mls'); ?>
-                            </label>
-                            <input type="url" id="instagram" name="instagram"
-                                   placeholder="<?php esc_attr_e('https://instagram.com/yourhandle', 'malisafi-mls'); ?>">
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="youtube">
-                            <?php _e('YouTube Channel', 'malisafi-mls'); ?>
-                        </label>
-                        <input type="url" id="youtube" name="youtube"
-                               placeholder="<?php esc_attr_e('https://youtube.com/@yourchannel', 'malisafi-mls'); ?>">
+                        <small class="form-hint"><?php _e('Select at least one', 'malisafi-mls'); ?></small>
                     </div>
                 </div>
-                
-                <div class="step-navigation">
-                    <button type="button" class="btn btn-secondary btn-prev" data-prev="1">
-                        ← <?php _e('Back', 'malisafi-mls'); ?>
-                    </button>
-                    <button type="button" class="btn btn-primary btn-next" data-next="3">
-                        <?php _e('Continue', 'malisafi-mls'); ?> →
-                    </button>
-                </div>
+                <!-- End of agent-specific fields -->
             </div>
 
             <!-- Step 3: Account Credentials -->
             <div class="form-step" data-step="3" style="display: none;">
                 <h3><?php _e('Create Your Account', 'malisafi-mls'); ?></h3>
-                <p class="step-description"><?php _e('Choose your login credentials', 'malisafi-mls'); ?></p>
+                <p class="step-description"><?php _e('Almost there! Set up your login details', 'malisafi-mls'); ?></p>
+                
+                <div class="form-group">
+                    <label for="email">
+                        <?php _e('Email Address', 'malisafi-mls'); ?> <span class="required">*</span>
+                    </label>
+                    <input type="email" id="email" name="email" required 
+                           placeholder="<?php esc_attr_e('your.email@example.com', 'malisafi-mls'); ?>">
+                </div>
                 
                 <div class="form-group">
                     <label for="username">
                         <?php _e('Username', 'malisafi-mls'); ?> <span class="required">*</span>
                     </label>
                     <input type="text" id="username" name="username" required 
-                           placeholder="<?php esc_attr_e('Choose a unique username', 'malisafi-mls'); ?>"
+                           placeholder="<?php esc_attr_e('Choose a username', 'malisafi-mls'); ?>"
                            pattern="[a-zA-Z0-9_-]{4,}"
                            minlength="4">
-                    <small class="form-hint"><?php _e('At least 4 characters, letters, numbers, dashes and underscores only', 'malisafi-mls'); ?></small>
+                    <small class="form-hint"><?php _e('At least 4 characters', 'malisafi-mls'); ?></small>
                 </div>
 
                 <div class="form-row">
@@ -388,7 +224,7 @@ defined('ABSPATH') || exit;
                         </label>
                         <div class="password-input-wrapper">
                             <input type="password" id="password" name="password" required 
-                                   placeholder="<?php esc_attr_e('Create a strong password', 'malisafi-mls'); ?>"
+                                   placeholder="<?php esc_attr_e('••••••••', 'malisafi-mls'); ?>"
                                    minlength="8">
                             <button type="button" class="toggle-password" aria-label="<?php esc_attr_e('Show password', 'malisafi-mls'); ?>">
                                 <span class="eye-icon">👁️</span>
@@ -398,21 +234,27 @@ defined('ABSPATH') || exit;
                             <div class="strength-bar"></div>
                             <span class="strength-text"></span>
                         </div>
-                        <small class="form-hint"><?php _e('At least 8 characters', 'malisafi-mls'); ?></small>
+                        <small class="form-hint"><?php _e('Min 8 characters', 'malisafi-mls'); ?></small>
                     </div>
 
                     <div class="form-group half-width">
                         <label for="password_confirm">
                             <?php _e('Confirm Password', 'malisafi-mls'); ?> <span class="required">*</span>
                         </label>
-                        <input type="password" id="password_confirm" name="password_confirm" required 
-                               placeholder="<?php esc_attr_e('Re-enter your password', 'malisafi-mls'); ?>">
+                        <div class="password-input-wrapper">
+                            <input type="password" id="password_confirm" name="password_confirm" required 
+                                   placeholder="<?php esc_attr_e('••••••••', 'malisafi-mls'); ?>">
+                            <button type="button" class="toggle-password" aria-label="<?php esc_attr_e('Show password', 'malisafi-mls'); ?>">
+                                <span class="eye-icon">👁️</span>
+                            </button>
+                        </div>
+                        <div class="password-match-status"></div>
                     </div>
                 </div>
 
                 <div class="form-group checkbox-group">
                     <label class="checkbox-label">
-                        <input type="checkbox" id="terms" name="terms" required>
+                        <input type="checkbox" id="terms_checkbox" name="terms" required>
                         <span>
                             <?php _e('I agree to the', 'malisafi-mls'); ?> 
                             <a href="#" target="_blank"><?php _e('Terms & Conditions', 'malisafi-mls'); ?></a> 
@@ -421,19 +263,20 @@ defined('ABSPATH') || exit;
                         </span>
                     </label>
                 </div>
-                
-                <div class="step-navigation">
-                    <button type="button" class="btn btn-secondary btn-prev" data-prev="2">
-                        ← <?php _e('Back', 'malisafi-mls'); ?>
-                    </button>
-                    <button type="submit" class="btn btn-primary btn-submit">
-                        <?php _e('Create My Account', 'malisafi-mls'); ?> ✨
-                    </button>
-                </div>
             </div>
-
-            <!-- Hidden field for user role -->
-            <input type="hidden" id="user_role" name="user_role" value="">
+            
+            <!-- Single Navigation Section (outside steps) -->
+            <div class="step-navigation">
+                <button type="button" class="btn btn-secondary btn-prev" style="display: none;">
+                    ← <?php _e('Back', 'malisafi-mls'); ?>
+                </button>
+                <button type="button" class="btn btn-primary btn-next">
+                    <?php _e('Continue', 'malisafi-mls'); ?> →
+                </button>
+                <button type="submit" class="btn btn-primary btn-submit" style="display: none;">
+                    <?php _e('Create My Account', 'malisafi-mls'); ?> ✨
+                </button>
+            </div>
         </form>
 
         <div class="registration-footer">
