@@ -5,10 +5,158 @@
  * @package MalisafiMLS
  */
 
+/* ===================================
+   MULTI-STEP PROGRESS INDICATOR
+   =================================== */
+
+.step-progress {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 600px;
+    margin: 0 auto 50px;
+    padding: 0;
+    position: relative;
+}
+
+.step-progress::before {
+    content: '';
+    position: absolute;
+    top: 20px;
+    left: 10%;
+    right: 10%;
+    height: 2px;
+    background: rgba(26, 58, 82, 0.2);
+    z-index: 0;
+}
+
+.step-item {
+    flex: 1;
+    text-align: center;
+    position: relative;
+    z-index: 1;
+}
+
+.step-number {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #ffffff;
+    border: 2px solid rgba(26, 58, 82, 0.3);
+    color: rgba(26, 58, 82, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 8px;
+    font-weight: 600;
+    font-size: 16px;
+    transition: all 0.3s ease;
+}
+
+.step-label {
+    font-size: 13px;
+    color: rgba(26, 58, 82, 0.6);
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.step-item.active .step-number {
+    background: var(--mls-dark, #1a3a52);
+    border-color: var(--mls-dark, #1a3a52);
+    color: #ffffff;
+    box-shadow: 0 4px 12px rgba(26, 58, 82, 0.3);
+}
+
+.step-item.active .step-label {
+    color: var(--mls-dark, #1a3a52);
+    font-weight: 600;
+}
+
+.step-item.completed .step-number {
+    background: #00c853;
+    border-color: #00c853;
+    color: #ffffff;
+}
+
+.step-item.completed .step-number::after {
+    content: '✓';
+    font-size: 20px;
+}
+
+.step-item.completed .step-label {
+    color: #00c853;
+}
+
+/* ===================================
+   FORM STEPS
+   =================================== */
+
+.form-step {
+    min-height: 400px;
+    padding: 20px 0;
+}
+
+/* First step visible by default, others hidden */
+.form-step[data-step="1"] {
+    display: block !important;
+}
+
+.form-step[data-step="2"],
+.form-step[data-step="3"] {
+    display: none;
+}
+
+.form-step h3 {
+    margin: 0 0 10px 0;
+    font-size: 26px;
+    font-weight: 600;
+    color: var(--mls-dark, #1a3a52);
+}
+
+.step-description {
+    margin: 0 0 30px 0;
+    font-size: 16px;
+    color: rgba(26, 58, 82, 0.7);
+}
+
+.step-navigation {
+    display: flex;
+    gap: 15px;
+    justify-content: space-between;
+    margin-top: 40px;
+    padding-top: 30px;
+    border-top: 1px solid rgba(26, 58, 82, 0.15);
+}
+
+.step-navigation .btn {
+    flex: 1;
+    max-width: 200px;
+}
+
+.step-navigation .btn-prev {
+    margin-right: auto;
+}
+
+.step-navigation .btn-next,
+.step-navigation .btn-submit {
+    margin-left: auto;
+}
+
+/* Input error state for validation */
+input.error,
+select.error,
+textarea.error {
+    border-color: #dc2626 !important;
+    box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+}
+
+
 .malisafi-registration-wrapper {
     padding: 40px 20px;
     background: transparent;
     font-family: inherit;
+    display: block !important;
+    visibility: visible !important;
 }
 
 .registration-container {
@@ -19,6 +167,12 @@
     border-radius: 0;
     box-shadow: none;
     overflow: visible;
+    display: block !important;
+}
+
+.multi-step-form {
+    display: block !important;
+    visibility: visible !important;
 }
 
 .registration-header {
@@ -96,28 +250,6 @@
 /* Form Steps */
 .conversational-form {
     padding: 40px 50px;
-}
-
-.form-step {
-    display: none;
-    animation: fadeIn 0.5s ease;
-}
-
-/* Hide old form steps - single page layout */
-.form-step {
-    display: none;
-}
-
-.form-step.active {
-    display: none;
-}
-
-.step-content h3 {
-    display: none;
-}
-
-.step-description {
-    display: none;
 }
 
 /* Account Type Cards */
@@ -446,22 +578,25 @@
 
 .btn-primary,
 .btn-submit {
-    background: currentColor;
-    color: var(--wp--preset--color--background, #fff);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-    border: 2px solid currentColor;
+    background: var(--mls-dark, #1a3a52);
+    color: #ffffff;
+    box-shadow: 0 4px 12px rgba(26, 58, 82, 0.3);
+    border: 2px solid var(--mls-dark, #1a3a52);
+    font-weight: 600;
 }
 
 .btn-primary:hover:not(:disabled),
 .btn-submit:hover:not(:disabled) {
+    background: var(--mls-primary-dark, #0f2a3f);
+    border-color: var(--mls-primary-dark, #0f2a3f);
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
-    opacity: 0.9;
+    box-shadow: 0 6px 20px rgba(26, 58, 82, 0.4);
 }
 
 .btn-primary:active,
 .btn-submit:active {
     transform: translateY(0);
+    box-shadow: 0 2px 8px rgba(26, 58, 82, 0.3);
 }
 
 .btn-secondary {

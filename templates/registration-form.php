@@ -15,7 +15,7 @@ defined('ABSPATH') || exit;
             <p class="subtitle"><?php _e('What do you need an account for?', 'malisafi-mls'); ?></p>
         </div>
 
-        <form id="malisafi-registration-form" class="single-page-form" method="post">
+        <form id="malisafi-registration-form" class="multi-step-form" method="post">
             <?php wp_nonce_field('malisafi_registration', 'malisafi_registration_nonce'); ?>
             
             <?php
@@ -23,11 +23,27 @@ defined('ABSPATH') || exit;
             $preselected_type = isset($_GET['type']) ? sanitize_text_field($_GET['type']) : '';
             ?>
             
-            <!-- Account Type Selection -->
-            <div class="form-section">
-                <h3><?php _e('Choose Account Type', 'malisafi-mls'); ?></h3>
+            <!-- Step Progress Indicator -->
+            <div class="step-progress">
+                <div class="step-item active" data-step="1">
+                    <div class="step-number">1</div>
+                    <div class="step-label"><?php _e('Account Type', 'malisafi-mls'); ?></div>
+                </div>
+                <div class="step-item" data-step="2">
+                    <div class="step-number">2</div>
+                    <div class="step-label"><?php _e('Your Information', 'malisafi-mls'); ?></div>
+                </div>
+                <div class="step-item" data-step="3">
+                    <div class="step-number">3</div>
+                    <div class="step-label"><?php _e('Credentials', 'malisafi-mls'); ?></div>
+                </div>
+            </div>
+            
+            <!-- Step 1: Account Type Selection -->
+            <div class="form-step" data-step="1">
+                <h3><?php _e('Choose Your Account Type', 'malisafi-mls'); ?></h3>
+                <p class="step-description"><?php _e('Select the type of account that best suits your needs', 'malisafi-mls'); ?></p>
                 
-                <!-- Dropdown for Account Type -->
                 <div class="form-group">
                     <label for="account_type_select">
                         <?php _e('I want to register as', 'malisafi-mls'); ?> <span class="required">*</span>
@@ -52,90 +68,19 @@ defined('ABSPATH') || exit;
                     </select>
                 </div>
                 
-                <div class="account-type-grid">
-                    <label class="account-type-card" data-role="malisafi_client">
-                        <input type="radio" name="account_type" value="client" <?php checked($preselected_type, 'client'); ?>>
-                        <div class="card-content">
-                            <div class="icon">🏠</div>
-                            <h4><?php _e('Client', 'malisafi-mls'); ?></h4>
-                            <p><?php _e('Find property like apartments, houses to buy or rent', 'malisafi-mls'); ?></p>
-                        </div>
-                    </label>
-
-                    <label class="account-type-card" data-role="malisafi_agent_basic">
-                        <input type="radio" name="account_type" value="agent" <?php checked($preselected_type, 'agent'); ?>>
-                        <div class="card-content">
-                            <div class="icon">💼</div>
-                            <h4><?php _e('Agent', 'malisafi-mls'); ?></h4>
-                            <p><?php _e('Real estate professional helping clients find properties', 'malisafi-mls'); ?></p>
-                        </div>
-                    </label>
-
-                    <label class="account-type-card" data-role="malisafi_client">
-                        <input type="radio" name="account_type" value="hunter" <?php checked($preselected_type, 'hunter'); ?>>
-                        <div class="card-content">
-                            <div class="icon">🔍</div>
-                            <h4><?php _e('Hunter', 'malisafi-mls'); ?></h4>
-                            <p><?php _e('Property searcher actively looking for deals', 'malisafi-mls'); ?></p>
-                        </div>
-                    </label>
-
-                    <label class="account-type-card" data-role="malisafi_owner">
-                        <input type="radio" name="account_type" value="owner" <?php checked($preselected_type, 'owner'); ?>>
-                        <div class="card-content">
-                            <div class="icon">🔑</div>
-                            <h4><?php _e('Owner', 'malisafi-mls'); ?></h4>
-                            <p><?php _e('List my property to sell or rent out', 'malisafi-mls'); ?></p>
-                        </div>
-                    </label>
-
-                    <label class="account-type-card" data-role="malisafi_developer">
-                        <input type="radio" name="account_type" value="developer" <?php checked($preselected_type, 'developer'); ?>>
-                        <div class="card-content">
-                            <div class="icon">🏗️</div>
-                            <h4><?php _e('Developer', 'malisafi-mls'); ?></h4>
-                            <p><?php _e('Develop and market new property projects', 'malisafi-mls'); ?></p>
-                        </div>
-                    </label>
-                </div>
-
-                <!-- Agent Registration Notice -->
-                <div class="agent-registration-notice" style="display: none;">
-                    <div class="notice-box">
-                        <div class="notice-icon">💼</div>
-                        <div class="notice-content">
-                            <h4><?php _e('Registering as an Agent', 'malisafi-mls'); ?></h4>
-                            <p><?php _e('You are about to create an agent account. This will give you access to:', 'malisafi-mls'); ?></p>
-                            <ul>
-                                <li><?php _e('List properties for sale or rent', 'malisafi-mls'); ?></li>
-                                <li><?php _e('Manage client inquiries', 'malisafi-mls'); ?></li>
-                                <li><?php _e('Track property performance', 'malisafi-mls'); ?></li>
-                                <li><?php _e('Access agent dashboard', 'malisafi-mls'); ?></li>
-                            </ul>
-                            <p class="other-account-types">
-                                <?php _e('Looking for a different account type?', 'malisafi-mls'); ?>
-                                <br>
-                                <a href="#" class="account-type-link" data-type="owner">
-                                    <?php _e('Register as Property Owner', 'malisafi-mls'); ?>
-                                </a> | 
-                                <a href="#" class="account-type-link" data-type="developer">
-                                    <?php _e('Register as Developer', 'malisafi-mls'); ?>
-                                </a> | 
-                                <a href="#" class="account-type-link" data-type="client">
-                                    <?php _e('Register as Client', 'malisafi-mls'); ?>
-                                </a> | 
-                                <a href="#" class="account-type-link" data-type="hunter">
-                                    <?php _e('Register as Hunter', 'malisafi-mls'); ?>
-                                </a>
-                            </p>
-                        </div>
-                    </div>
+                <input type="hidden" name="account_type" id="account_type_hidden" value="<?php echo esc_attr($preselected_type); ?>">
+                
+                <div class="step-navigation">
+                    <button type="button" class="btn btn-primary btn-next" data-next="2">
+                        <?php _e('Continue', 'malisafi-mls'); ?> →
+                    </button>
                 </div>
             </div>
 
-            <!-- Personal Information -->
-            <div class="form-section" id="personal-info-section" style="display: none;">
+            <!-- Step 2: Personal Information -->
+            <div class="form-step" data-step="2" style="display: none;">
                 <h3><?php _e('Your Information', 'malisafi-mls'); ?></h3>
+                <p class="step-description"><?php _e('Tell us about yourself', 'malisafi-mls'); ?></p>
                 
                 <div class="form-row">
                     <div class="form-group half-width">
@@ -409,11 +354,21 @@ defined('ABSPATH') || exit;
                                placeholder="<?php esc_attr_e('https://youtube.com/@yourchannel', 'malisafi-mls'); ?>">
                     </div>
                 </div>
+                
+                <div class="step-navigation">
+                    <button type="button" class="btn btn-secondary btn-prev" data-prev="1">
+                        ← <?php _e('Back', 'malisafi-mls'); ?>
+                    </button>
+                    <button type="button" class="btn btn-primary btn-next" data-next="3">
+                        <?php _e('Continue', 'malisafi-mls'); ?> →
+                    </button>
+                </div>
             </div>
 
-            <!-- Account Credentials -->
-            <div class="form-section" id="credentials-section" style="display: none;">
-                <h3><?php _e('Account Credentials', 'malisafi-mls'); ?></h3>
+            <!-- Step 3: Account Credentials -->
+            <div class="form-step" data-step="3" style="display: none;">
+                <h3><?php _e('Create Your Account', 'malisafi-mls'); ?></h3>
+                <p class="step-description"><?php _e('Choose your login credentials', 'malisafi-mls'); ?></p>
                 
                 <div class="form-group">
                     <label for="username">
@@ -466,12 +421,15 @@ defined('ABSPATH') || exit;
                         </span>
                     </label>
                 </div>
-            </div>
-
-            <div class="form-actions">
-                <button type="submit" class="btn btn-primary btn-submit">
-                    <?php _e('Create My Account', 'malisafi-mls'); ?> ✨
-                </button>
+                
+                <div class="step-navigation">
+                    <button type="button" class="btn btn-secondary btn-prev" data-prev="2">
+                        ← <?php _e('Back', 'malisafi-mls'); ?>
+                    </button>
+                    <button type="submit" class="btn btn-primary btn-submit">
+                        <?php _e('Create My Account', 'malisafi-mls'); ?> ✨
+                    </button>
+                </div>
             </div>
 
             <!-- Hidden field for user role -->

@@ -10,38 +10,118 @@
     $(document).ready(function() {
         const RegistrationForm = {
             selectedRole: '',
+            currentStep: 1,
 
             init: function() {
                 this.bindEvents();
                 this.validateForm();
                 this.initializePreselectedType();
+                this.updateStepProgress();
             },
             
             initializePreselectedType: function() {
                 // Check if dropdown has a preselected value
                 const preselectedValue = $('#account_type_select').val();
                 if (preselectedValue) {
-                    // Show sections immediately for preselected type
-                    $('#personal-info-section').show();
-                    $('#credentials-section').show();
+                    // Set hidden field
+                    $('#account_type_hidden').val(preselectedValue);
                     
-                    // Trigger the dropdown change to sync with radio buttons
-                    $('#account_type_select').trigger('change');
+                    // Map account type to role
+                    const roleMapping = {
+                        'client': 'malisafi_client',
+                        'agent': 'malisafi_agent_basic',
+                        'owner': 'malisafi_owner',
+                        'developer': 'malisafi_developer',
+                        'hunter': 'malisafi_client'
+                    };
                     
-                    // Also check the corresponding radio button
-                    $(`input[name="account_type"][value="${preselectedValue}"]`).prop('checked', true).trigger('change');
+                    this.selectedRole = roleMapping[preselectedValue] || 'malisafi_client';
+                    $('#user_role').val(this.selectedRole);
+                    
+                    // Show agent fields if agent selected
+                    if (preselectedValue === 'agent') {
+                        $('.agent-fields').show();
+                        $('.agent-required').prop('required', true);
+                    }
                 }
+            },
+            
+            nextStep: function(e) {
+                e.preventDefault();
+                const nextStep = parseInt($(e.currentTarget).data('next'));
+                
+                // Validate current step before proceeding
+                if (this.validateCurrentStep()) {
+                    this.goToStep(nextStep);
+                }
+            },
+            
+            prevStep: function(e) {
+                e.preventDefault();
+                const prevStep = parseInt($(e.currentTarget).data('prev'));
+                this.goToStep(prevStep);
+            },
+            
+            goToStep: function(stepNumber) {
+                // Hide all steps
+                $('.form-step').hide();
+                
+                // Show target step
+                $(`.form-step[data-step="${stepNumber}"]`).fadeIn(300);
+                
+                // Update current step
+                this.currentStep = stepNumber;
+                
+                // Update progress indicator
+                this.updateStepProgress();
+                
+                // Scroll to top
+                $('html, body').animate({
+                    scrollTop: $('.registration-header').offset().top - 50
+                }, 300);
+            },
+            
+            updateStepProgress: function() {
+                $('.step-item').removeClass('active completed');
+                
+                $('.step-item').each((index, item) => {
+                    const stepNum = parseInt($(item).data('step'));
+                    if (stepNum < this.currentStep) {
+                        $(item).addClass('completed');
+                    } else if (stepNum === this.currentStep) {
+                        $(item).addClass('active');
+                    }
+                });
+            },
+            
+            validateCurrentStep: function() {
+                const currentStepElement = $(`.form-step[data-step="${this.currentStep}"]`);
+                const requiredFields = currentStepElement.find('input[required], select[required], textarea[required]');
+                let isValid = true;
+                
+                requiredFields.each(function() {
+                    if (!$(this).val() || !$(this)[0].checkValidity()) {
+                        $(this).addClass('error');
+                        isValid = false;
+                    } else {
+                        $(this).removeClass('error');
+                    }
+                });
+                
+                if (!isValid) {
+                    alert('Please fill in all required fields before continuing.');
+                }
+                
+                return isValid;
             },
 
             bindEvents: function() {
-                // Dropdown change - sync with radio buttons
-                $('#account_type_select').on('change', this.handleDropdownChange.bind(this));
+                // Step navigation
+                $('.btn-next').on('click', this.nextStep.bind(this));
+                $('.btn-prev').on('click', this.prevStep.bind(this));
                 
-                // Account type selection (radio buttons)
-                $('input[name="account_type"]').on('change', this.handleAccountTypeChange.bind(this));
-
-                // Account type quick links
-                $('.account-type-link').on('click', this.handleAccountTypeLink.bind(this));
+                // Dropdown change - sync with hidden field and update role
+                $('#account_type_select').on('change', this.handleDropdownChange.bind(this));
 
                 // Form submission
                 $('#malisafi-registration-form').on('submit', this.handleSubmit.bind(this));
@@ -74,17 +154,31 @@
                 const selectedType = $(e.target).val();
                 
                 if (selectedType) {
-                    // Uncheck all radio buttons first
-                    $('input[name="account_type"]').prop('checked', false);
-                    $('.account-type-card').removeClass('selected');
+                    // Update hidden field
+                    $('#account_type_hidden').val(selectedType);
                     
-                    // Check the corresponding radio button
-                    const $radio = $(`input[name="account_type"][value="${selectedType}"]`);
-                    $radio.prop('checked', true);
-                    $radio.closest('.account-type-card').addClass('selected');
+                    // Map account type to role
+                    const roleMapping = {
+                        'client': 'malisafi_client',
+                        'agent': 'malisafi_agent_basic',
+                        'owner': 'malisafi_owner',
+                        'developer': 'malisafi_developer',
+                        'hunter': 'malisafi_client'
+                    };
                     
-                    // Trigger the radio change event to show/hide agent fields
-                    $radio.trigger('change');
+                    this.selectedRole = roleMapping[selectedType] || 'malisafi_client';
+                    $('#user_role').val(this.selectedRole);
+                    
+                    // Show/hide agent-specific fields
+                    if (selectedType === 'agent') {
+                        $('.agent-fields').slideDown(300);
+                        $('.agent-required').prop('required', true);
+                        $('.specialization-checkbox').prop('required', true);
+                    } else {
+                        $('.agent-fields').slideUp(300);
+                        $('.agent-required').prop('required', false).val('');
+                        $('.specialization-checkbox').prop('required', false).prop('checked', false);
+                    }
                 }
             },
             
@@ -110,70 +204,6 @@
                 } else {
                     $('.specialization-checkbox').prop('required', true);
                 }
-            },
-
-            handleAccountTypeLink: function(e) {
-                e.preventDefault();
-                const targetType = $(e.currentTarget).data('type');
-                
-                // Uncheck all account types
-                $('input[name="account_type"]').prop('checked', false);
-                $('.account-type-card').removeClass('selected');
-                
-                // Select the target type
-                $(`input[name="account_type"][value="${targetType}"]`).prop('checked', true).trigger('change');
-                
-                // Scroll to account type section
-                $('html, body').animate({
-                    scrollTop: $('.account-type-grid').offset().top - 100
-                }, 500);
-            },
-
-            handleAccountTypeChange: function(e) {
-                const accountType = $(e.target).val();
-                const roleMapping = {
-                    'client': 'malisafi_client',
-                    'agent': 'malisafi_agent_basic',
-                    'owner': 'malisafi_owner',
-                    'developer': 'malisafi_developer',
-                    'hunter': 'malisafi_client'
-                };
-
-                this.selectedRole = roleMapping[accountType] || 'malisafi_client';
-                $('#user_role').val(this.selectedRole);
-
-                // Add visual feedback
-                $('.account-type-card').removeClass('selected');
-                $(e.target).closest('.account-type-card').addClass('selected');
-                
-                // Sync dropdown with radio selection
-                $('#account_type_select').val(accountType);
-
-                // Show personal info and credentials sections after type selection
-                $('#personal-info-section').slideDown(400);
-                $('#credentials-section').slideDown(400);
-
-                // Show/hide agent registration notice
-                if (accountType === 'agent') {
-                    $('.agent-registration-notice').slideDown(400);
-                    $('.agent-fields').slideDown(300);
-                    
-                    // Make agent fields required
-                    $('.agent-required').prop('required', true);
-                    
-                    // At least one specialization must be checked
-                    $('.specialization-checkbox').prop('required', true);
-                } else {
-                    $('.agent-registration-notice').slideUp(400);
-                    $('.agent-fields').slideUp(300);
-                    
-                    // Remove required from agent fields
-                    $('.agent-required').prop('required', false).val('');
-                    $('.specialization-checkbox').prop('required', false).prop('checked', false);
-                }
-
-                // Validate form
-                this.validateForm();
             },
 
             validateForm: function() {
