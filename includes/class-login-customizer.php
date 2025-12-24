@@ -27,6 +27,130 @@ class Login_Customizer {
         add_action('login_footer', [__CLASS__, 'add_custom_footer']);
         add_filter('login_redirect', [__CLASS__, 'redirect_to_dashboard'], 10, 3);
         add_action('admin_bar_menu', [__CLASS__, 'add_dashboard_link'], 999);
+        
+        // Block WordPress dashboard access for Malisafi users
+        add_action('admin_init', [__CLASS__, 'block_wp_dashboard_access']);
+        
+        // Remove WordPress dashboard menu items for Malisafi users
+        add_action('admin_menu', [__CLASS__, 'remove_wp_menu_items'], 999);
+        
+        // Hide WordPress dashboard widgets for Malisafi users
+        add_action('wp_dashboard_setup', [__CLASS__, 'remove_dashboard_widgets'], 999);
+    }
+    
+    /**
+     * Remove WordPress menu items for Malisafi users
+     */
+    public static function remove_wp_menu_items() {
+        $user = wp_get_current_user();
+        
+        // Skip if admin or moderator
+        if (in_array('administrator', $user->roles) || in_array('malisafi_moderator', $user->roles)) {
+            return;
+        }
+        
+        // Check if user has Malisafi role
+        $malisafi_roles = array('malisafi_agent_basic', 'malisafi_agent_premium', 'malisafi_owner', 'malisafi_developer', 'malisafi_client');
+        $has_malisafi_role = array_intersect($malisafi_roles, $user->roles);
+        
+        if ($has_malisafi_role) {
+            // Remove WordPress core menu items
+            remove_menu_page('index.php');                  // Dashboard
+            remove_menu_page('edit.php');                   // Posts
+            // Keep upload.php (Media) for property images
+            remove_menu_page('edit.php?post_type=page');    // Pages
+            remove_menu_page('edit-comments.php');          // Comments
+            remove_menu_page('themes.php');                 // Appearance
+            remove_menu_page('plugins.php');                // Plugins
+            remove_menu_page('users.php');                  // Users
+            remove_menu_page('tools.php');                  // Tools
+            remove_menu_page('options-general.php');        // Settings
+            
+            // Keep only Malisafi menus, Media, and Profile
+        }
+    }
+    
+    /**
+     * Remove WordPress dashboard widgets for Malisafi users
+     */
+    public static function remove_dashboard_widgets() {
+        $user = wp_get_current_user();
+        
+        // Skip if admin or moderator
+        if (in_array('administrator', $user->roles) || in_array('malisafi_moderator', $user->roles)) {
+            return;
+        }
+        
+        // Check if user has Malisafi role
+        $malisafi_roles = array('malisafi_agent_basic', 'malisafi_agent_premium', 'malisafi_owner', 'malisafi_developer', 'malisafi_client');
+        $has_malisafi_role = array_intersect($malisafi_roles, $user->roles);
+        
+        if ($has_malisafi_role) {
+            // Remove all default WordPress dashboard widgets
+            remove_meta_box('dashboard_right_now', 'dashboard', 'normal');
+            remove_meta_box('dashboard_activity', 'dashboard', 'normal');
+            remove_meta_box('dashboard_quick_press', 'dashboard', 'side');
+            remove_meta_box('dashboard_primary', 'dashboard', 'side');
+        }
+    }
+    
+    /**
+     * Block WordPress dashboard access for Malisafi users and redirect to appropriate dashboard
+     */
+    public static function block_wp_dashboard_access() {
+        $user = wp_get_current_user();
+        
+        // Skip if no user or user is admin/moderator
+        if (!$user || !isset($user->roles)) {
+            return;
+        }
+        
+        // Allow admins and moderators to access WP dashboard
+        if (in_array('administrator', $user->roles) || in_array('malisafi_moderator', $user->roles)) {
+            return;
+        }
+        
+        // Check if user has a Malisafi role (but not admin/moderator)
+        $malisafi_roles = array('malisafi_agent_basic', 'malisafi_agent_premium', 'malisafi_owner', 'malisafi_developer', 'malisafi_client');
+        $has_malisafi_role = array_intersect($malisafi_roles, $user->roles);
+        
+        if (!$has_malisafi_role) {
+            return;
+        }
+        
+        // Allow AJAX requests
+        if (defined('DOING_AJAX') && DOING_AJAX) {
+            return;
+        }
+        
+        // Get current page
+        global $pagenow;
+        
+        // Allow access to agent dashboard and related pages
+        if (isset($_GET['page']) && strpos($_GET['page'], 'malisafi-agent-') === 0) {
+            return;
+        }
+        
+        // Block access to main WP dashboard (index.php) and redirect to Malisafi dashboard
+        if ($pagenow === 'index.php' || ($pagenow === 'admin.php' && !isset($_GET['page']))) {
+            // Determine redirect URL based on user role
+            $redirect_url = '';
+            
+            if (in_array('malisafi_agent_basic', $user->roles) || in_array('malisafi_agent_premium', $user->roles)) {
+                $redirect_url = admin_url('admin.php?page=malisafi-agent-dashboard');
+            } elseif (in_array('malisafi_owner', $user->roles)) {
+                $redirect_url = Page_Manager::get_page_url('owner_dashboard');
+            } elseif (in_array('malisafi_developer', $user->roles)) {
+                $redirect_url = Page_Manager::get_page_url('developer_dashboard');
+            } elseif (in_array('malisafi_client', $user->roles)) {
+                $redirect_url = Page_Manager::get_page_url('client_dashboard');
+            }
+            
+            if (!empty($redirect_url)) {
+                wp_redirect($redirect_url);
+                exit;
+            }
+        }
     }
     
     /**
@@ -339,15 +463,16 @@ class Login_Customizer {
         $dashboard_url = '';
         
         if (in_array('malisafi_agent_basic', $user->roles) || in_array('malisafi_agent_premium', $user->roles)) {
-            $dashboard_url = Page_Manager::get_page_url('agent_dashboard');
+            // Redirect agents to backend agent dashboard
+            $dashboard_url = admin_url('admin.php?page=malisafi-agent-dashboard');
         } elseif (in_array('malisafi_owner', $user->roles)) {
             $dashboard_url = Page_Manager::get_page_url('owner_dashboard');
         } elseif (in_array('malisafi_developer', $user->roles)) {
             $dashboard_url = Page_Manager::get_page_url('developer_dashboard');
         } elseif (in_array('malisafi_client', $user->roles)) {
             $dashboard_url = Page_Manager::get_page_url('client_dashboard');
-        } elseif (in_array('administrator', $user->roles)) {
-            // Admins go to WP admin
+        } elseif (in_array('administrator', $user->roles) || in_array('malisafi_moderator', $user->roles)) {
+            // Admins and moderators go to WP admin
             return admin_url();
         }
         
@@ -369,7 +494,8 @@ class Login_Customizer {
         
         // Determine dashboard URL and title based on user role
         if (in_array('malisafi_agent_basic', $current_user->roles) || in_array('malisafi_agent_premium', $current_user->roles)) {
-            $dashboard_url = Page_Manager::get_page_url('agent_dashboard');
+            // Agents use backend dashboard
+            $dashboard_url = admin_url('admin.php?page=malisafi-agent-dashboard');
             $dashboard_title = __('Agent Dashboard', 'malisafi-mls');
         } elseif (in_array('malisafi_owner', $current_user->roles)) {
             $dashboard_url = Page_Manager::get_page_url('owner_dashboard');
