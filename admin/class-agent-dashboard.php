@@ -168,7 +168,21 @@ class Malisafi_Agent_Dashboard {
         $agent_id = self::get_current_agent_id();
         
         if (!$agent_id) {
-            echo '<div class="wrap"><div class="notice notice-error"><p>' . __('No agent profile found for your account. Please contact the administrator.', 'malisafi-mls') . '</p></div></div>';
+            $current_user = wp_get_current_user();
+            $user_info = sprintf(
+                __('Logged in as: <strong>%s</strong> (Username: %s, Email: %s, Role: %s)', 'malisafi-mls'),
+                $current_user->display_name,
+                $current_user->user_login,
+                $current_user->user_email,
+                implode(', ', $current_user->roles)
+            );
+            
+            echo '<div class="wrap">';
+            echo '<h1>' . __('Access Denied', 'malisafi-mls') . '</h1>';
+            echo '<div class="notice notice-error"><p>' . __('No agent profile found for your account. Please contact the administrator.', 'malisafi-mls') . '</p></div>';
+            echo '<div class="notice notice-info"><p>' . $user_info . '</p></div>';
+            echo '<p><a href="' . admin_url() . '" class="button button-primary">' . __('Return to Dashboard', 'malisafi-mls') . '</a></p>';
+            echo '</div>';
             return;
         }
         
@@ -239,7 +253,21 @@ class Malisafi_Agent_Dashboard {
         $agent_id = self::get_current_agent_id();
         
         if (!$agent_id) {
-            echo '<div class="wrap"><div class="notice notice-error"><p>' . __('No agent profile found.', 'malisafi-mls') . '</p></div></div>';
+            $current_user = wp_get_current_user();
+            $user_info = sprintf(
+                __('Logged in as: <strong>%s</strong> (Username: %s, Email: %s, Role: %s)', 'malisafi-mls'),
+                $current_user->display_name,
+                $current_user->user_login,
+                $current_user->user_email,
+                implode(', ', $current_user->roles)
+            );
+            
+            echo '<div class="wrap">';
+            echo '<h1>' . __('Access Denied', 'malisafi-mls') . '</h1>';
+            echo '<div class="notice notice-error"><p>' . __('No agent profile found.', 'malisafi-mls') . '</p></div>';
+            echo '<div class="notice notice-info"><p>' . $user_info . '</p></div>';
+            echo '<p><a href="' . admin_url() . '" class="button button-primary">' . __('Return to Dashboard', 'malisafi-mls') . '</a></p>';
+            echo '</div>';
             return;
         }
         
@@ -253,7 +281,21 @@ class Malisafi_Agent_Dashboard {
         $agent_id = self::get_current_agent_id();
         
         if (!$agent_id) {
-            echo '<div class="wrap"><div class="notice notice-error"><p>' . __('No agent profile found.', 'malisafi-mls') . '</p></div></div>';
+            $current_user = wp_get_current_user();
+            $user_info = sprintf(
+                __('Logged in as: <strong>%s</strong> (Username: %s, Email: %s, Role: %s)', 'malisafi-mls'),
+                $current_user->display_name,
+                $current_user->user_login,
+                $current_user->user_email,
+                implode(', ', $current_user->roles)
+            );
+            
+            echo '<div class="wrap">';
+            echo '<h1>' . __('Access Denied', 'malisafi-mls') . '</h1>';
+            echo '<div class="notice notice-error"><p>' . __('No agent profile found.', 'malisafi-mls') . '</p></div>';
+            echo '<div class="notice notice-info"><p>' . $user_info . '</p></div>';
+            echo '<p><a href="' . admin_url() . '" class="button button-primary">' . __('Return to Dashboard', 'malisafi-mls') . '</a></p>';
+            echo '</div>';
             return;
         }
         
