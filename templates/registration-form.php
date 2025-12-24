@@ -189,6 +189,62 @@ defined('ABSPATH') || exit;
                         </div>
                         <small class="form-hint"><?php _e('Select at least one', 'malisafi-mls'); ?></small>
                     </div>
+                    
+                    <h4 class="subsection-title"><?php _e('Business Location', 'malisafi-mls'); ?></h4>
+                    
+                    <div class="form-row">
+                        <div class="form-group half-width">
+                            <label for="agent_county">
+                                <?php _e('Operating County', 'malisafi-mls'); ?> <span class="required">*</span>
+                            </label>
+                            <select id="agent_county" name="agent_county" class="agent-required">
+                                <option value=""><?php _e('Select County', 'malisafi-mls'); ?></option>
+                                <?php
+                                $counties = malisafi_get_kenya_counties();
+                                foreach ($counties as $county) {
+                                    echo '<option value="' . esc_attr($county) . '">' . esc_html($county) . '</option>';
+                                }
+                                ?>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group half-width">
+                            <label for="city">
+                                <?php _e('City/Town', 'malisafi-mls'); ?> <span class="required">*</span>
+                            </label>
+                            <input type="text" id="city" name="city" class="agent-required"
+                                   placeholder="<?php esc_attr_e('e.g. Nairobi', 'malisafi-mls'); ?>">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="business_address">
+                            <?php _e('Business Address', 'malisafi-mls'); ?> <span class="required">*</span>
+                        </label>
+                        <input type="text" id="business_address" name="business_address" class="agent-required"
+                               placeholder="<?php esc_attr_e('Street address or building', 'malisafi-mls'); ?>">
+                    </div>
+                    
+                    <h4 class="subsection-title"><?php _e('Verification & Profile', 'malisafi-mls'); ?></h4>
+                    
+                    <div class="form-group">
+                        <label for="national_id">
+                            <?php _e('National ID Number', 'malisafi-mls'); ?> <span class="required">*</span>
+                        </label>
+                        <input type="text" id="national_id" name="national_id" class="agent-required"
+                               placeholder="<?php esc_attr_e('For verification purposes', 'malisafi-mls'); ?>"
+                               pattern="[0-9]{7,8}">
+                        <small class="form-hint"><?php _e('Required for agent verification', 'malisafi-mls'); ?></small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="agent_bio">
+                            <?php _e('Professional Bio', 'malisafi-mls'); ?> <span class="required">*</span>
+                        </label>
+                        <textarea id="agent_bio" name="agent_bio" class="agent-required" rows="4"
+                                  placeholder="<?php esc_attr_e('Tell clients about your experience and expertise... (minimum 100 characters)', 'malisafi-mls'); ?>"></textarea>
+                        <small class="form-hint" id="bio-counter">0 / 100 characters minimum</small>
+                    </div>
                 </div>
                 <!-- End of agent-specific fields -->
             </div>
@@ -212,9 +268,10 @@ defined('ABSPATH') || exit;
                     </label>
                     <input type="text" id="username" name="username" required 
                            placeholder="<?php esc_attr_e('Choose a username', 'malisafi-mls'); ?>"
-                           pattern="[a-zA-Z0-9_-]{4,}"
+                           pattern="[a-zA-Z0-9_\-]{4,}"
+                           title="At least 4 characters, letters, numbers, underscore, or dash"
                            minlength="4">
-                    <small class="form-hint"><?php _e('At least 4 characters', 'malisafi-mls'); ?></small>
+                    <small class="form-hint"><?php _e('At least 4 characters (letters, numbers, _ or -)', 'malisafi-mls'); ?></small>
                 </div>
 
                 <div class="form-row">

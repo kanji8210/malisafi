@@ -14,10 +14,11 @@
 
             init: function() {
                 this.bindEvents();
-                this.validateForm();
                 this.initializeAccountTypeCards();
                 this.updateStepProgress();
                 this.updateNavigationButtons();
+                // Initial validation only for current step
+                this.validateForm();
             },
             
             initializeAccountTypeCards: function() {
@@ -70,7 +71,7 @@
                 // Show/hide buttons based on current step
                 if (this.currentStep === 1) {
                     $prevBtn.hide();
-                    $nextBtn.show();
+                    $nextBtn.show().prop('disabled', true); // Disabled until account type selected
                     $submitBtn.hide();
                 } else if (this.currentStep === 2) {
                     $prevBtn.show();
@@ -80,6 +81,11 @@
                     $prevBtn.show();
                     $nextBtn.hide();
                     $submitBtn.show();
+                }
+                
+                // Trigger validation to update button states (but not on initial load)
+                if (this.currentStep > 1 || $('input[name="account_type"]:checked').length > 0) {
+                    this.validateForm();
                 }
             },
             
@@ -131,12 +137,15 @@
             
             validateCurrentStep: function() {
                 const currentStepElement = $(`.form-step[data-step="${this.currentStep}"]`);
-                const requiredFields = currentStepElement.find('input[required]:visible, select[required]:visible, textarea[required]:visible');
+                // Exclude specialization checkboxes from general required validation (handled separately)
+                const requiredFields = currentStepElement.find('input[required]:visible:not(.specialization-checkbox), select[required]:visible, textarea[required]:visible');
                 let isValid = true;
                 let errorMessages = [];
                 
-                // Clear previous errors (field-level only, not error message box)
+                // Clear ALL previous errors (field-level AND error message box)
                 requiredFields.removeClass('error');
+                $('.checkbox-group-inline').removeClass('error');
+                $('.error-message').remove();
                 
                 requiredFields.each(function() {
                     const $field = $(this);
@@ -175,6 +184,11 @@
                         const agencyName = $('#agency_name').val();
                         const licenseNumber = $('#license_number').val();
                         const experience = $('#years_experience').val();
+                        const county = $('#agent_county').val();
+                        const city = $('#city').val();
+                        const address = $('#business_address').val();
+                        const nationalId = $('#national_id').val();
+                        const bio = $('#agent_bio').val();
                         
                         if (!agencyName) {
                             isValid = false;
@@ -189,7 +203,32 @@
                         if (!experience) {
                             isValid = false;
                             $('#years_experience').addClass('error');
-                            errorMessages.push('Experience Level');
+                            errorMessages.push('Years of Experience');
+                        }
+                        if (!county) {
+                            isValid = false;
+                            $('#agent_county').addClass('error');
+                            errorMessages.push('Operating County');
+                        }
+                        if (!city) {
+                            isValid = false;
+                            $('#city').addClass('error');
+                            errorMessages.push('City/Town');
+                        }
+                        if (!address) {
+                            isValid = false;
+                            $('#business_address').addClass('error');
+                            errorMessages.push('Business Address');
+                        }
+                        if (!nationalId) {
+                            isValid = false;
+                            $('#national_id').addClass('error');
+                            errorMessages.push('National ID Number');
+                        }
+                        if (!bio || bio.length < 100) {
+                            isValid = false;
+                            $('#agent_bio').addClass('error');
+                            errorMessages.push('Professional Bio (minimum 100 characters)');
                         }
                     }
                 } else if (this.currentStep === 3) {
@@ -267,9 +306,11 @@
                 // Password toggle
                 $('.toggle-password').on('click', this.togglePassword);
 
-                // Password strength and requirements
-                $('#password').on('input', this.checkPasswordStrength.bind(this));
-                $('#password').on('input', this.checkPasswordRequirements.bind(this));
+                // Password strength and requirements (only if password field exists)
+                if ($('#password').length > 0) {
+                    $('#password').on('input', this.checkPasswordStrength.bind(this));
+                    $('#password').on('input', this.checkPasswordRequirements.bind(this));
+                }
 
                 // Password confirmation
                 $('#password_confirm').on('input', this.checkPasswordMatch);
@@ -280,14 +321,79 @@
                 $('#phone').on('input', this.formatPhone);
                 
                 // Specialization checkbox validation
-                $('.specialization-checkbox').on('change', function() {
+                $('.specialization-checkbox').on('change', () => {
                     if ($('.specialization-checkbox:checked').length > 0) {
                         $('.checkbox-group-inline').removeClass('error');
                     }
+                    // Re-validate form when specializations change
+                    this.validateForm();
+                });
+                
+                // Bio character counter
+                const self = this; // Save reference to this
+                $('#agent_bio').on('input', function() {
+                    const text = $(this).val();
+                    const length = text.trim().length; // Use trimmed length for validation
+                    const counter = $('#bio-counter');
+                    const $formGroup = $(this).closest('.form-group');
+                    
+                    if (length < 100) {
+                        counter.text(`${length} / 100 characters minimum`).css('color', '#dc2626');
+                        $(this).addClass('error');
+                        $formGroup.addClass('has-error');
+                    } else {
+                        counter.text(`${length} characters`).css('color', '#00c853');
+                        $(this).removeClass('error');
+                        $formGroup.removeClass('has-error');
+                    }
+                    
+                    // Trigger validation using saved reference
+                    self.validateForm();
                 });
 
-                // Enable/disable submit button based on validation
-                $('input[required], select[required], textarea[required]').on('input change', this.validateForm.bind(this));
+                // Enable/disable submit button based on validation (with debounce)
+                let validationTimeout;
+                $('input[required], select[required], textarea[required]').on('input change', () => {
+                    clearTimeout(validationTimeout);
+                    validationTimeout = setTimeout(() => {
+                        this.validateForm();
+                    }, 300);
+                });
+                
+                // Real-time field validation with visual feedback
+                $('input[required], select[required], textarea[required]').on('blur', function() {
+                    const $field = $(this);
+                    
+                    // Skip if field is hidden
+                    if (!$field.is(':visible')) return;
+                    
+                    // Skip specialization checkboxes (handled separately)
+                    if ($field.hasClass('specialization-checkbox')) return;
+                    
+                    // Special handling for select elements
+                    if ($field.is('select')) {
+                        if ($field.val() && $field.val() !== '') {
+                            $field.removeClass('error');
+                        } else {
+                            $field.addClass('error');
+                        }
+                    } else {
+                        // Standard validation for other fields
+                        if ($field.val() && $field[0].validity.valid) {
+                            $field.removeClass('error');
+                        } else {
+                            $field.addClass('error');
+                        }
+                    }
+                });
+                
+                // Also trigger validation on select change
+                $('select[required]').on('change', function() {
+                    const $field = $(this);
+                    if ($field.val() && $field.val() !== '') {
+                        $field.removeClass('error');
+                    }
+                });
             },
 
             handleAccountCardClick: function(e) {
@@ -327,17 +433,40 @@
                 // Show/hide agent-specific fields
                 if (type === 'agent') {
                     $('.agent-fields').slideDown(300);
-                    $('.agent-required').prop('required', true);
-                    $('.specialization-checkbox').prop('required', true);
+                    // Mark agent fields as required
+                    $('.agent-required').each(function() {
+                        $(this).prop('required', true);
+                    });
+                    // Note: Specialization checkboxes are NOT marked as required 
+                    // because HTML5 doesn't support required on checkbox groups well
+                    // We validate them manually in validateForm()
+                    $('#agent_bio').prop('required', true);
                 } else {
                     $('.agent-fields').slideUp(300);
-                    $('.agent-required').prop('required', false).val('');
-                    $('.specialization-checkbox').prop('required', false).prop('checked', false);
+                    // Remove required from agent fields and clear values
+                    $('.agent-required').each(function() {
+                        $(this).prop('required', false).val('').removeClass('error');
+                    });
+                    // Clear specializations
+                    $('.specialization-checkbox').prop('checked', false).removeClass('error');
+                    $('.checkbox-group-inline').removeClass('error');
+                    // Clear bio
+                    $('#agent_bio').prop('required', false).val('').removeClass('error');
                 }
+                
+                // Re-validate form after showing/hiding fields
+                setTimeout(() => {
+                    this.validateForm();
+                }, 350);
             },
             
             checkPasswordRequirements: function() {
                 const password = $('#password').val();
+                
+                // Guard against undefined
+                if (typeof password !== 'string') {
+                    return;
+                }
                 
                 // Simple password strength indicator
                 let strength = 0;
@@ -385,31 +514,177 @@
             },
 
             validateForm: function() {
-                const requiredInputs = $('#malisafi-registration-form input[required]');
+                // Clear previous error messages
+                $('.validation-error-box').remove();
+                $('.form-group').removeClass('has-error');
+                
+                // Special handling for Step 1 - only check if account type is selected
+                if (this.currentStep === 1) {
+                    const accountType = $('input[name="account_type"]:checked').val();
+                    const isValid = !!accountType;
+                    console.log('Step 1 validation:', { accountType, isValid });
+                    $('.btn-next').prop('disabled', !isValid);
+                    if (!isValid) {
+                        $('.btn-next').attr('title', 'Please select an account type');
+                    } else {
+                        $('.btn-next').attr('title', 'Continue to next step');
+                    }
+                    return isValid;
+                }
+                
+                // Get current step and account type
+                const currentStepElement = $(`.form-step[data-step="${this.currentStep}"]`);
+                const accountType = $('input[name="account_type"]:checked').val();
+                const isAgent = accountType === 'agent';
+                
+                console.log('Validation check:', { 
+                    step: this.currentStep, 
+                    accountType, 
+                    isAgent 
+                });
+                
+                // Find all required fields, excluding specialization checkboxes (handled separately)
+                const requiredInputs = currentStepElement.find('input[required]:visible:not(.specialization-checkbox), select[required]:visible, textarea[required]:visible');
+                
+                console.log('Found required inputs:', requiredInputs.length);
+                
                 let isValid = true;
+                let invalidFields = [];
 
                 requiredInputs.each(function() {
-                    if ($(this).attr('type') === 'radio') {
-                        const radioName = $(this).attr('name');
+                    const $field = $(this);
+                    const $formGroup = $field.closest('.form-group');
+                    const fieldLabel = $formGroup.find('label').text().replace('*', '').trim();
+                    const fieldName = $field.attr('name') || $field.attr('id');
+                    
+                    // Skip agent-required fields if not an agent
+                    if (!isAgent && $field.hasClass('agent-required')) {
+                        console.log('Skipping agent field for non-agent:', fieldLabel);
+                        return true; // continue to next field
+                    }
+                    
+                    console.log('Checking field:', { fieldLabel, fieldName, value: $field.val() });
+                    
+                    if ($field.attr('type') === 'radio') {
+                        const radioName = $field.attr('name');
                         if (!$(`input[name="${radioName}"]:checked`).length) {
                             isValid = false;
+                            invalidFields.push(fieldLabel || radioName);
                             return false;
                         }
-                    } else if ($(this).attr('type') === 'checkbox') {
-                        if (!$(this).is(':checked')) {
+                    } else if ($field.attr('type') === 'checkbox') {
+                        if (!$field.is(':checked')) {
                             isValid = false;
+                            invalidFields.push(fieldLabel || 'Terms checkbox');
                             return false;
                         }
                     } else {
-                        if (!$(this).val() || !$(this)[0].validity.valid) {
-                            isValid = false;
-                            return false;
+                        // For select elements, check if value is empty string
+                        if ($field.is('select')) {
+                            if (!$field.val() || $field.val() === '') {
+                                isValid = false;
+                                invalidFields.push(fieldLabel || $field.attr('name'));
+                                $formGroup.addClass('has-error');
+                            }
+                        } else {
+                            // For other inputs and textareas, use standard validation
+                            const value = $field.val();
+                            
+                            // Special handling for textarea bio field - check trimmed length
+                            if ($field.is('textarea') && $field.attr('id') === 'agent_bio') {
+                                const trimmedLength = value ? value.trim().length : 0;
+                                console.log('Bio field check:', { value, trimmedLength, required: 100 });
+                                
+                                // Skip general validation here, we handle it separately below
+                                if (trimmedLength >= 100) {
+                                    $formGroup.removeClass('has-error');
+                                }
+                                // Don't mark as invalid here, will be checked in agent-specific validation
+                                return true; // continue to next field
+                            }
+                            
+                            if (!value || value.trim() === '') {
+                                isValid = false;
+                                invalidFields.push(fieldLabel || fieldName);
+                                $formGroup.addClass('has-error');
+                                console.log('Field is empty:', fieldLabel);
+                            } else if ($field[0].validity && !$field[0].validity.valid) {
+                                isValid = false;
+                                invalidFields.push(fieldLabel || fieldName);
+                                $formGroup.addClass('has-error');
+                                console.log('Field is invalid:', fieldLabel);
+                            }
                         }
                     }
                 });
+                
+                console.log('Validation result:', { isValid, invalidFields });
+                
+                // For agent accounts in step 2, also check specializations and bio
+                if (isAgent && this.currentStep === 2) {
+                    if ($('.specialization-checkbox:checked').length === 0) {
+                        isValid = false;
+                        invalidFields.push('Specialization (select at least one)');
+                    }
+                    
+                    // Check bio length (use trimmed text for validation)
+                    const bio = $('#agent_bio').val();
+                    const bioLength = bio ? bio.trim().length : 0;
+                    console.log('Bio validation:', { bio, bioLength, required: 100 });
+                    
+                    if (bioLength < 100) {
+                        isValid = false;
+                        invalidFields.push(`Professional Bio (${bioLength}/100 characters)`);
+                        $('#agent_bio').closest('.form-group').addClass('has-error');
+                    } else {
+                        $('#agent_bio').closest('.form-group').removeClass('has-error');
+                    }
+                }
 
-                // Enable/disable submit button
-                $('.btn-submit').prop('disabled', !isValid);
+                // Show visual error message to user if validation fails
+                if (!isValid && invalidFields.length > 0) {
+                    const errorHtml = `
+                        <div class="validation-error-box" style="background:#fee; border-left:4px solid #dc2626; padding:15px; margin:15px 0; border-radius:8px;">
+                            <h4 style="margin:0 0 10px; color:#dc2626; font-size:16px;">
+                                <span style="margin-right:5px;">⚠️</span> Please complete the following fields:
+                            </h4>
+                            <ul style="margin:5px 0; padding-left:25px; color:#666;">
+                                ${invalidFields.map(field => `<li>${field}</li>`).join('')}
+                            </ul>
+                        </div>
+                    `;
+                    currentStepElement.prepend(errorHtml);
+                    
+                    // Scroll to error message
+                    setTimeout(() => {
+                        const errorBox = document.querySelector('.validation-error-box');
+                        if (errorBox) {
+                            errorBox.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        }
+                    }, 100);
+                }
+                
+                // Enable/disable appropriate button based on step
+                if (this.currentStep === 3) {
+                    $('.btn-submit').prop('disabled', !isValid);
+                    if (!isValid) {
+                        $('.btn-submit').attr('title', 'Please complete all required fields: ' + invalidFields.join(', '));
+                    } else {
+                        $('.btn-submit').attr('title', 'Create your account');
+                    }
+                } else {
+                    $('.btn-next').prop('disabled', !isValid);
+                    if (!isValid) {
+                        $('.btn-next').attr('title', 'Missing: ' + invalidFields.join(', '));
+                    } else {
+                        $('.btn-next').attr('title', 'Continue to next step');
+                    }
+                }
+
+                console.log('Button state:', { 
+                    disabled: $('.btn-next').prop('disabled'),
+                    isValid 
+                });
 
                 return isValid;
             },
@@ -424,10 +699,12 @@
             },
 
             checkPasswordStrength: function() {
-                const password = $(this).val();
+                // Safely get password value
+                const password = $('#password').val();
                 const strengthContainer = $('.password-strength');
                 
-                if (password.length === 0) {
+                // Guard against undefined or null
+                if (typeof password !== 'string' || password.length === 0) {
                     strengthContainer.removeClass('weak medium strong');
                     strengthContainer.find('.strength-text').text('');
                     return;
@@ -549,6 +826,33 @@
             handleSubmit: function(e) {
                 e.preventDefault();
 
+                // Get account type to check if agent validation is needed
+                const accountType = $('input[name="account_type"]:checked').val();
+                const isAgent = accountType === 'agent';
+
+                // For agents, validate specializations before general validation
+                if (isAgent) {
+                    const checkedSpecializations = $('.specialization-checkbox:checked').length;
+                    if (checkedSpecializations === 0) {
+                        this.showError('Please select at least one specialization.');
+                        // Scroll to specializations
+                        $('.checkbox-group-inline').addClass('error');
+                        $('html, body').animate({
+                            scrollTop: $('.checkbox-group-inline').offset().top - 100
+                        }, 500);
+                        return;
+                    }
+                    
+                    // Validate bio length (use trimmed text)
+                    const bio = $('#agent_bio').val();
+                    const bioLength = bio ? bio.trim().length : 0;
+                    if (bioLength < 100) {
+                        this.showError(`Professional Bio must be at least 100 characters. Current: ${bioLength}/100 characters.`);
+                        $('#agent_bio').addClass('error').focus();
+                        return;
+                    }
+                }
+
                 // Final validation
                 if (!this.validateForm()) {
                     this.showError('Please fill in all required fields correctly.');
@@ -579,8 +883,30 @@
                     email: $('#email').val(),
                     username: $('#username').val(),
                     password: password,
+                    // Agent-specific fields
                     agency_name: $('#agency_name').val(),
-                    license_number: $('#license_number').val()
+                    license_number: $('#license_number').val(),
+                    years_experience: $('#years_experience').val(),
+                    agent_county: $('#agent_county').val(),
+                    business_address: $('#business_address').val(),
+                    city: $('#city').val(),
+                    specializations: $('.specialization-checkbox:checked').map(function() {
+                        return $(this).val();
+                    }).get(),
+                    agent_bio: $('#agent_bio').val(),
+                    national_id: $('#national_id').val(),
+                    website: $('#website').val(),
+                    whatsapp: $('#whatsapp').val(),
+                    office_phone: $('#office_phone').val(),
+                    languages: $('#languages').val(),
+                    service_areas: $('#service_areas').val(),
+                    commission_rate: $('#commission_rate').val(),
+                    // Social media
+                    facebook: $('#facebook').val(),
+                    twitter: $('#twitter').val(),
+                    linkedin: $('#linkedin').val(),
+                    instagram: $('#instagram').val(),
+                    youtube: $('#youtube').val()
                 };
 
                 // Submit via AJAX

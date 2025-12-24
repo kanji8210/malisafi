@@ -563,6 +563,18 @@ textarea.error {
     border-color: #00c853;
 }
 
+/* Error state for form groups */
+.form-group.has-error input,
+.form-group.has-error select,
+.form-group.has-error textarea {
+    border-color: #dc2626 !important;
+    background-color: rgba(220, 38, 38, 0.05);
+}
+
+.form-group.has-error label {
+    color: #dc2626;
+}
+
 .form-hint {
     display: block;
     margin-top: 6px;

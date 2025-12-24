@@ -5,6 +5,8 @@
  * @package MalisafiMLS
  */
 
+use MalisafiMLS\User_Creation_Helper;
+
 class Malisafi_Registration_Handler {
     
     /**
@@ -178,8 +180,44 @@ class Malisafi_Registration_Handler {
             ));
         }
         
-        // Create user
-        $user_id = wp_create_user($username, $password, $email);
+        // Prepare user data for helper
+        $user_data = array(
+            'username' => $username,
+            'email' => $email,
+            'password' => $password,
+            'first_name' => $first_name,
+            'last_name' => $last_name,
+            'role' => $user_role
+        );
+        
+        // Prepare metadata
+        $meta_data = array(
+            'phone' => $phone,
+            'account_type' => $account_type,
+            'agency_name' => $agency_name,
+            'license_number' => $license_number,
+            'years_experience' => $years_experience,
+            'agent_county' => $agent_county,
+            'business_address' => $business_address,
+            'city' => $city,
+            'specializations' => $specializations,
+            'agent_bio' => $agent_bio,
+            'national_id' => $national_id,
+            'website' => $website,
+            'whatsapp' => $whatsapp,
+            'office_phone' => $office_phone,
+            'languages' => $languages,
+            'service_areas' => $service_areas,
+            'commission_rate' => $commission_rate,
+            'facebook' => $facebook,
+            'twitter' => $twitter,
+            'linkedin' => $linkedin,
+            'instagram' => $instagram,
+            'youtube' => $youtube
+        );
+        
+        // Create user using helper (with auto-login)
+        $user_id = User_Creation_Helper::create_user($user_data, $meta_data, true);
         
         if (is_wp_error($user_id)) {
             wp_send_json_error(array(
@@ -187,126 +225,11 @@ class Malisafi_Registration_Handler {
             ));
         }
         
-        // Update user meta
-        wp_update_user(array(
-            'ID' => $user_id,
-            'first_name' => $first_name,
-            'last_name' => $last_name,
-            'display_name' => $first_name . ' ' . $last_name,
-            'role' => $user_role
-        ));
-        
-        // Add phone number
-        update_user_meta($user_id, 'phone', $phone);
-        update_user_meta($user_id, 'account_type', $account_type);
-        
-        // Add agent-specific metadata
-        if ($account_type === 'agent') {
-            update_user_meta($user_id, 'agency_name', $agency_name);
-            update_user_meta($user_id, 'license_number', $license_number);
-            update_user_meta($user_id, 'years_experience', $years_experience);
-            update_user_meta($user_id, 'agent_county', $agent_county);
-            update_user_meta($user_id, 'business_address', $business_address);
-            update_user_meta($user_id, 'city', $city);
-            update_user_meta($user_id, 'specializations', $specializations);
-            update_user_meta($user_id, 'agent_bio', $agent_bio);
-            update_user_meta($user_id, 'national_id', $national_id);
-            
-            // Optional fields
-            if (!empty($website)) {
-                update_user_meta($user_id, 'website', $website);
-            }
-            if (!empty($whatsapp)) {
-                update_user_meta($user_id, 'whatsapp', $whatsapp);
-            }
-            if (!empty($office_phone)) {
-                update_user_meta($user_id, 'office_phone', $office_phone);
-            }
-            if (!empty($languages)) {
-                update_user_meta($user_id, 'languages', $languages);
-            }
-            if (!empty($service_areas)) {
-                update_user_meta($user_id, 'service_areas', $service_areas);
-            }
-            if (!empty($commission_rate)) {
-                update_user_meta($user_id, 'commission_rate', $commission_rate);
-            }
-            
-            // Social media
-            if (!empty($facebook)) {
-                update_user_meta($user_id, 'facebook', $facebook);
-            }
-            if (!empty($twitter)) {
-                update_user_meta($user_id, 'twitter', $twitter);
-            }
-            if (!empty($linkedin)) {
-                update_user_meta($user_id, 'linkedin', $linkedin);
-            }
-            if (!empty($instagram)) {
-                update_user_meta($user_id, 'instagram', $instagram);
-            }
-            if (!empty($youtube)) {
-                update_user_meta($user_id, 'youtube', $youtube);
-            }
-            
-            // Agent approval status - pending by default
-            update_user_meta($user_id, 'agent_status', 'pending');
-            update_user_meta($user_id, 'agent_registered_date', current_time('mysql'));
-            
-            // Create agent post type entry
-            $agent_post_id = wp_insert_post(array(
-                'post_title' => $first_name . ' ' . $last_name,
-                'post_type' => 'malisafi_agent',
-                'post_status' => 'pending', // Requires admin approval
-                'post_author' => $user_id,
-                'meta_input' => array(
-                    '_agent_user_id' => $user_id,
-                    '_agent_email' => $email,
-                    '_agent_phone' => $phone,
-                    '_agent_mobile' => $phone,  // Same as phone for mobile
-                    '_agent_agency_name' => $agency_name,
-                    '_agent_license_number' => $license_number,
-                    '_agent_experience_years' => $years_experience,
-                    '_agent_county' => $agent_county,
-                    '_agent_office_address' => $business_address,
-                    '_agent_city' => $city,
-                    '_agent_specializations' => implode(', ', $specializations),
-                    '_agent_bio' => $agent_bio,
-                    '_agent_national_id' => $national_id,
-                    '_agent_website' => $website,
-                    '_agent_whatsapp' => $whatsapp,
-                    '_agent_languages' => $languages,
-                    '_agent_service_areas' => $service_areas,
-                    '_agent_commission_rate' => $commission_rate,
-                    '_agent_facebook' => $facebook,
-                    '_agent_twitter' => $twitter,
-                    '_agent_linkedin' => $linkedin,
-                    '_agent_instagram' => $instagram,
-                    '_agent_youtube' => $youtube,
-                    '_agent_rating' => 0,
-                    '_agent_total_reviews' => 0,
-                    '_agent_properties_count' => 0,
-                    '_agent_status' => 'active',
-                )
-            ));
-            
-            if (!is_wp_error($agent_post_id)) {
-                update_user_meta($user_id, 'agent_post_id', $agent_post_id);
-            }
-            
-            // Notify admin about new agent registration
-            self::notify_admin_new_agent($user_id, $email, $first_name . ' ' . $last_name);
-        }
-        
         // Log user registration
         do_action('malisafi_user_registered', $user_id, $user_role, $account_type);
         
         // Send welcome email
         self::send_welcome_email($user_id, $email, $first_name, $account_type);
-        
-        // Auto login
-        wp_set_current_user($user_id);
-        wp_set_auth_cookie($user_id);
         
         // Determine redirect URL based on account type
         $redirect_url = home_url('/dashboard');
@@ -322,23 +245,7 @@ class Malisafi_Registration_Handler {
         ));
     }
     
-    /**
-     * Notify admin about new agent registration
-     */
-    private static function notify_admin_new_agent($user_id, $email, $name) {
-        $admin_email = get_option('admin_email');
-        $subject = sprintf(__('[%s] New Agent Registration Pending Approval', 'malisafi-mls'), get_bloginfo('name'));
-        
-        $message = sprintf(
-            __("A new agent has registered and is pending approval:\n\nName: %s\nEmail: %s\nUser ID: %d\n\nPlease review and approve/reject this agent:\n%s", 'malisafi-mls'),
-            $name,
-            $email,
-            $user_id,
-            admin_url('admin.php?page=malisafi-agent-management')
-        );
-        
-        wp_mail($admin_email, $subject, $message);
-    }
+
     
     /**
      * Check if email exists (AJAX)

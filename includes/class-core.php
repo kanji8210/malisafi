@@ -35,6 +35,8 @@ class Core {
     private function load_dependencies() {
         require_once MALISAFI_MLS_PATH . 'includes/class-loader.php';
         require_once MALISAFI_MLS_PATH . 'includes/class-i18n.php';
+        require_once MALISAFI_MLS_PATH . 'includes/class-database.php';
+        require_once MALISAFI_MLS_PATH . 'includes/class-user-creation-helper.php';
         require_once MALISAFI_MLS_PATH . 'includes/class-post-types.php';
         require_once MALISAFI_MLS_PATH . 'includes/class-property-manager.php';
         require_once MALISAFI_MLS_PATH . 'includes/class-role-manager.php';

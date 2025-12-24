@@ -5,6 +5,8 @@
  * @package MalisafiMLS
  */
 
+use MalisafiMLS\User_Creation_Helper;
+
 /**
  * Malisafi_User_Manager class
  */
@@ -75,7 +77,7 @@ class Malisafi_User_Manager {
             wp_die(__('You do not have permission to add users.', 'malisafi-mls'));
         }
         
-        // Sanitize input
+        // Sanitize basic input
         $username = sanitize_user($_POST['username']);
         $email = sanitize_email($_POST['email']);
         $first_name = sanitize_text_field($_POST['first_name']);
@@ -84,11 +86,43 @@ class Malisafi_User_Manager {
         $password = $_POST['password'];
         $phone = sanitize_text_field($_POST['phone'] ?? '');
         
-        // Validate
+        // Agent-specific fields
+        $agency_name = sanitize_text_field($_POST['agency_name'] ?? '');
+        $license_number = sanitize_text_field($_POST['license_number'] ?? '');
+        $years_experience = sanitize_text_field($_POST['years_experience'] ?? '');
+        $agent_county = sanitize_text_field($_POST['agent_county'] ?? '');
+        $business_address = sanitize_text_field($_POST['business_address'] ?? '');
+        $city = sanitize_text_field($_POST['city'] ?? '');
+        $national_id = sanitize_text_field($_POST['national_id'] ?? '');
+        $specializations = isset($_POST['specializations']) ? array_map('sanitize_text_field', $_POST['specializations']) : array();
+        $agent_bio = sanitize_textarea_field($_POST['agent_bio'] ?? '');
+        $website = esc_url_raw($_POST['website'] ?? '');
+        $whatsapp = sanitize_text_field($_POST['whatsapp'] ?? '');
+        $office_phone = sanitize_text_field($_POST['office_phone'] ?? '');
+        $languages = sanitize_text_field($_POST['languages'] ?? '');
+        $service_areas = sanitize_textarea_field($_POST['service_areas'] ?? '');
+        $commission_rate = floatval($_POST['commission_rate'] ?? 0);
+        
+        // Social media
+        $facebook = esc_url_raw($_POST['facebook'] ?? '');
+        $twitter = esc_url_raw($_POST['twitter'] ?? '');
+        $linkedin = esc_url_raw($_POST['linkedin'] ?? '');
+        $instagram = esc_url_raw($_POST['instagram'] ?? '');
+        $youtube = esc_url_raw($_POST['youtube'] ?? '');
+        
+        // Validate basic fields
         $errors = array();
         
         if (empty($username) || empty($email) || empty($password)) {
             $errors[] = __('Username, email, and password are required.', 'malisafi-mls');
+        }
+        
+        if (empty($first_name) || empty($last_name)) {
+            $errors[] = __('First name and last name are required.', 'malisafi-mls');
+        }
+        
+        if (empty($phone)) {
+            $errors[] = __('Phone number is required.', 'malisafi-mls');
         }
         
         if (!is_email($email)) {
@@ -107,6 +141,38 @@ class Malisafi_User_Manager {
             $errors[] = __('Password must be at least 8 characters.', 'malisafi-mls');
         }
         
+        // Validate agent-specific fields
+        $isAgent = strpos($role, 'agent') !== false;
+        if ($isAgent) {
+            if (empty($agency_name)) {
+                $errors[] = __('Agency name is required for agents.', 'malisafi-mls');
+            }
+            if (empty($license_number)) {
+                $errors[] = __('License number is required for agents.', 'malisafi-mls');
+            }
+            if (empty($years_experience)) {
+                $errors[] = __('Years of experience is required for agents.', 'malisafi-mls');
+            }
+            if (empty($agent_county)) {
+                $errors[] = __('Operating county is required for agents.', 'malisafi-mls');
+            }
+            if (empty($business_address)) {
+                $errors[] = __('Business address is required for agents.', 'malisafi-mls');
+            }
+            if (empty($city)) {
+                $errors[] = __('City is required for agents.', 'malisafi-mls');
+            }
+            if (empty($national_id)) {
+                $errors[] = __('National ID is required for agents.', 'malisafi-mls');
+            }
+            if (empty($specializations)) {
+                $errors[] = __('At least one specialization is required for agents.', 'malisafi-mls');
+            }
+            if (empty($agent_bio) || strlen($agent_bio) < 100) {
+                $errors[] = __('Professional bio is required and must be at least 100 characters for agents.', 'malisafi-mls');
+            }
+        }
+        
         if (!empty($errors)) {
             $error_message = implode('<br>', $errors);
             wp_redirect(add_query_arg(array(
@@ -117,8 +183,55 @@ class Malisafi_User_Manager {
             exit;
         }
         
-        // Create user
-        $user_id = wp_create_user($username, $password, $email);
+        // Prepare user data for helper
+        $user_data = array(
+            'username' => $username,
+            'email' => $email,
+            'password' => $password,
+            'first_name' => $first_name,
+            'last_name' => $last_name,
+            'role' => $role
+        );
+        
+        // Prepare metadata
+        $meta_data = array(
+            'phone' => $phone
+        );
+        
+        // Determine account type from role
+        if (strpos($role, 'agent') !== false) {
+            $meta_data['account_type'] = 'agent';
+            // Add all agent fields
+            $meta_data['agency_name'] = $agency_name;
+            $meta_data['license_number'] = $license_number;
+            $meta_data['years_experience'] = $years_experience;
+            $meta_data['agent_county'] = $agent_county;
+            $meta_data['business_address'] = $business_address;
+            $meta_data['city'] = $city;
+            $meta_data['national_id'] = $national_id;
+            $meta_data['specializations'] = $specializations;
+            $meta_data['agent_bio'] = $agent_bio;
+            $meta_data['website'] = $website;
+            $meta_data['whatsapp'] = $whatsapp;
+            $meta_data['office_phone'] = $office_phone;
+            $meta_data['languages'] = $languages;
+            $meta_data['service_areas'] = $service_areas;
+            $meta_data['commission_rate'] = $commission_rate;
+            $meta_data['facebook'] = $facebook;
+            $meta_data['twitter'] = $twitter;
+            $meta_data['linkedin'] = $linkedin;
+            $meta_data['instagram'] = $instagram;
+            $meta_data['youtube'] = $youtube;
+        } elseif (strpos($role, 'owner') !== false) {
+            $meta_data['account_type'] = 'owner';
+        } elseif (strpos($role, 'developer') !== false) {
+            $meta_data['account_type'] = 'developer';
+        } else {
+            $meta_data['account_type'] = 'client';
+        }
+        
+        // Create user using helper (no auto-login for admin)
+        $user_id = User_Creation_Helper::create_user($user_data, $meta_data, false);
         
         if (is_wp_error($user_id)) {
             wp_redirect(add_query_arg(array(
@@ -129,30 +242,9 @@ class Malisafi_User_Manager {
             exit;
         }
         
-        // Set user role
-        $user = new WP_User($user_id);
-        $user->set_role($role);
-        
-        // Update user meta
-        wp_update_user(array(
-            'ID' => $user_id,
-            'first_name' => $first_name,
-            'last_name' => $last_name,
-            'display_name' => $first_name . ' ' . $last_name
-        ));
-        
-        if (!empty($phone)) {
-            update_user_meta($user_id, 'phone', $phone);
-        }
-        
         // Send notification email
         if (isset($_POST['send_notification']) && $_POST['send_notification'] == '1') {
             wp_new_user_notification($user_id, null, 'both');
-        }
-        
-        // Create subscription record if applicable
-        if (in_array($role, array('malisafi_agent_basic', 'malisafi_agent_premium', 'malisafi_developer'))) {
-            self::create_subscription($user_id, $role);
         }
         
         // Redirect with success message
@@ -287,35 +379,7 @@ class Malisafi_User_Manager {
         }
     }
     
-    /**
-     * Create subscription record for user
-     */
-    private static function create_subscription($user_id, $role) {
-        global $wpdb;
-        $table = $wpdb->prefix . 'mf_subscriptions';
-        
-        // Map role to subscription type
-        $plan_type_map = array(
-            'malisafi_agent_basic' => 'basic_agent',
-            'malisafi_agent_premium' => 'premium_agent',
-            'malisafi_developer' => 'developer'
-        );
-        
-        $plan_type = $plan_type_map[$role] ?? 'basic_agent';
-        
-        $wpdb->insert(
-            $table,
-            array(
-                'user_id' => $user_id,
-                'plan_type' => $plan_type,
-                'status' => 'active',
-                'start_date' => current_time('mysql'),
-                'created_at' => current_time('mysql'),
-                'updated_at' => current_time('mysql')
-            ),
-            array('%d', '%s', '%s', '%s', '%s', '%s')
-        );
-    }
+
     
     /**
      * Get available roles for user creation

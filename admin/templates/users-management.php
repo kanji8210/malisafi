@@ -180,12 +180,30 @@ if (isset($_GET['error'])) {
         <h1><?php _e('Add New User', 'malisafi-mls'); ?></h1>
         <hr class="wp-header-end">
         
-        <form method="post" action="<?php echo admin_url('admin-post.php'); ?>" class="malisafi-user-form">
+        <form method="post" action="<?php echo admin_url('admin-post.php'); ?>" class="malisafi-user-form" id="add-user-form">
             <input type="hidden" name="action" value="malisafi_add_user">
             <?php wp_nonce_field('malisafi_add_user', 'malisafi_user_nonce'); ?>
             
+            <h2><?php _e('Account Information', 'malisafi-mls'); ?></h2>
             <table class="form-table" role="presentation">
                 <tbody>
+                    <tr>
+                        <th scope="row">
+                            <label for="user_role"><?php _e('Role', 'malisafi-mls'); ?> <span class="required">*</span></label>
+                        </th>
+                        <td>
+                            <select name="user_role" id="user_role" required>
+                                <option value=""><?php _e('Select Role', 'malisafi-mls'); ?></option>
+                                <?php foreach (Malisafi_User_Manager::get_available_roles() as $role_key => $role_name) : ?>
+                                    <option value="<?php echo esc_attr($role_key); ?>">
+                                        <?php echo esc_html($role_name); ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                            <p class="description"><?php _e('Select the user role first to determine which fields to display.', 'malisafi-mls'); ?></p>
+                        </td>
+                    </tr>
+                    
                     <tr>
                         <th scope="row">
                             <label for="username"><?php _e('Username', 'malisafi-mls'); ?> <span class="required">*</span></label>
@@ -207,49 +225,6 @@ if (isset($_GET['error'])) {
                     
                     <tr>
                         <th scope="row">
-                            <label for="first_name"><?php _e('First Name', 'malisafi-mls'); ?></label>
-                        </th>
-                        <td>
-                            <input type="text" name="first_name" id="first_name" class="regular-text">
-                        </td>
-                    </tr>
-                    
-                    <tr>
-                        <th scope="row">
-                            <label for="last_name"><?php _e('Last Name', 'malisafi-mls'); ?></label>
-                        </th>
-                        <td>
-                            <input type="text" name="last_name" id="last_name" class="regular-text">
-                        </td>
-                    </tr>
-                    
-                    <tr>
-                        <th scope="row">
-                            <label for="phone"><?php _e('Phone', 'malisafi-mls'); ?></label>
-                        </th>
-                        <td>
-                            <input type="tel" name="phone" id="phone" class="regular-text">
-                        </td>
-                    </tr>
-                    
-                    <tr>
-                        <th scope="row">
-                            <label for="user_role"><?php _e('Role', 'malisafi-mls'); ?> <span class="required">*</span></label>
-                        </th>
-                        <td>
-                            <select name="user_role" id="user_role" required>
-                                <option value=""><?php _e('Select Role', 'malisafi-mls'); ?></option>
-                                <?php foreach (Malisafi_User_Manager::get_available_roles() as $role_key => $role_name) : ?>
-                                    <option value="<?php echo esc_attr($role_key); ?>">
-                                        <?php echo esc_html($role_name); ?>
-                                    </option>
-                                <?php endforeach; ?>
-                            </select>
-                        </td>
-                    </tr>
-                    
-                    <tr>
-                        <th scope="row">
                             <label for="password"><?php _e('Password', 'malisafi-mls'); ?> <span class="required">*</span></label>
                         </th>
                         <td>
@@ -258,7 +233,251 @@ if (isset($_GET['error'])) {
                             <p class="description"><?php _e('Minimum 8 characters.', 'malisafi-mls'); ?></p>
                         </td>
                     </tr>
+                </tbody>
+            </table>
+            
+            <h2><?php _e('Personal Information', 'malisafi-mls'); ?></h2>
+            <table class="form-table" role="presentation">
+                <tbody>
+                    <tr>
+                        <th scope="row">
+                            <label for="first_name"><?php _e('First Name', 'malisafi-mls'); ?> <span class="required">*</span></label>
+                        </th>
+                        <td>
+                            <input type="text" name="first_name" id="first_name" class="regular-text" required>
+                        </td>
+                    </tr>
                     
+                    <tr>
+                        <th scope="row">
+                            <label for="last_name"><?php _e('Last Name', 'malisafi-mls'); ?> <span class="required">*</span></label>
+                        </th>
+                        <td>
+                            <input type="text" name="last_name" id="last_name" class="regular-text" required>
+                        </td>
+                    </tr>
+                    
+                    <tr>
+                        <th scope="row">
+                            <label for="phone"><?php _e('Phone', 'malisafi-mls'); ?> <span class="required">*</span></label>
+                        </th>
+                        <td>
+                            <input type="tel" name="phone" id="phone" class="regular-text" placeholder="+254..." required>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <!-- Agent-Specific Fields (Hidden by default) -->
+            <div id="agent-fields" style="display: none;">
+                <h2><?php _e('Agent Professional Information', 'malisafi-mls'); ?></h2>
+                <table class="form-table" role="presentation">
+                    <tbody>
+                        <tr>
+                            <th scope="row">
+                                <label for="agency_name"><?php _e('Agency Name', 'malisafi-mls'); ?> <span class="required agent-required">*</span></label>
+                            </th>
+                            <td>
+                                <input type="text" name="agency_name" id="agency_name" class="regular-text">
+                            </td>
+                        </tr>
+                        
+                        <tr>
+                            <th scope="row">
+                                <label for="license_number"><?php _e('License Number', 'malisafi-mls'); ?> <span class="required agent-required">*</span></label>
+                            </th>
+                            <td>
+                                <input type="text" name="license_number" id="license_number" class="regular-text">
+                            </td>
+                        </tr>
+                        
+                        <tr>
+                            <th scope="row">
+                                <label for="years_experience"><?php _e('Years of Experience', 'malisafi-mls'); ?> <span class="required agent-required">*</span></label>
+                            </th>
+                            <td>
+                                <input type="number" name="years_experience" id="years_experience" class="regular-text" min="0" max="50">
+                            </td>
+                        </tr>
+                        
+                        <tr>
+                            <th scope="row">
+                                <label for="agent_county"><?php _e('Operating County', 'malisafi-mls'); ?> <span class="required agent-required">*</span></label>
+                            </th>
+                            <td>
+                                <select name="agent_county" id="agent_county" class="regular-text">
+                                    <option value=""><?php _e('Select County', 'malisafi-mls'); ?></option>
+                                    <?php
+                                    if (function_exists('malisafi_get_kenya_counties')) {
+                                        foreach (malisafi_get_kenya_counties() as $county) {
+                                            echo '<option value="' . esc_attr($county) . '">' . esc_html($county) . '</option>';
+                                        }
+                                    }
+                                    ?>
+                                </select>
+                            </td>
+                        </tr>
+                        
+                        <tr>
+                            <th scope="row">
+                                <label for="business_address"><?php _e('Business Address', 'malisafi-mls'); ?> <span class="required agent-required">*</span></label>
+                            </th>
+                            <td>
+                                <input type="text" name="business_address" id="business_address" class="regular-text">
+                            </td>
+                        </tr>
+                        
+                        <tr>
+                            <th scope="row">
+                                <label for="city"><?php _e('City', 'malisafi-mls'); ?> <span class="required agent-required">*</span></label>
+                            </th>
+                            <td>
+                                <input type="text" name="city" id="city" class="regular-text">
+                            </td>
+                        </tr>
+                        
+                        <tr>
+                            <th scope="row">
+                                <label for="national_id"><?php _e('National ID', 'malisafi-mls'); ?> <span class="required agent-required">*</span></label>
+                            </th>
+                            <td>
+                                <input type="text" name="national_id" id="national_id" class="regular-text">
+                            </td>
+                        </tr>
+                        
+                        <tr>
+                            <th scope="row">
+                                <label><?php _e('Specializations', 'malisafi-mls'); ?> <span class="required agent-required">*</span></label>
+                            </th>
+                            <td>
+                                <label><input type="checkbox" name="specializations[]" value="residential"> <?php _e('Residential', 'malisafi-mls'); ?></label><br>
+                                <label><input type="checkbox" name="specializations[]" value="commercial"> <?php _e('Commercial', 'malisafi-mls'); ?></label><br>
+                                <label><input type="checkbox" name="specializations[]" value="land"> <?php _e('Land', 'malisafi-mls'); ?></label><br>
+                                <label><input type="checkbox" name="specializations[]" value="rental"> <?php _e('Rental Management', 'malisafi-mls'); ?></label><br>
+                                <label><input type="checkbox" name="specializations[]" value="investment"> <?php _e('Investment Properties', 'malisafi-mls'); ?></label>
+                            </td>
+                        </tr>
+                        
+                        <tr>
+                            <th scope="row">
+                                <label for="agent_bio"><?php _e('Professional Bio', 'malisafi-mls'); ?> <span class="required agent-required">*</span></label>
+                            </th>
+                            <td>
+                                <textarea name="agent_bio" id="agent_bio" rows="5" class="large-text"></textarea>
+                                <p class="description"><?php _e('Minimum 100 characters. Describe your experience and expertise.', 'malisafi-mls'); ?></p>
+                            </td>
+                        </tr>
+                        
+                        <tr>
+                            <th scope="row">
+                                <label for="office_phone"><?php _e('Office Phone', 'malisafi-mls'); ?></label>
+                            </th>
+                            <td>
+                                <input type="tel" name="office_phone" id="office_phone" class="regular-text">
+                            </td>
+                        </tr>
+                        
+                        <tr>
+                            <th scope="row">
+                                <label for="whatsapp"><?php _e('WhatsApp Number', 'malisafi-mls'); ?></label>
+                            </th>
+                            <td>
+                                <input type="tel" name="whatsapp" id="whatsapp" class="regular-text">
+                            </td>
+                        </tr>
+                        
+                        <tr>
+                            <th scope="row">
+                                <label for="website"><?php _e('Website', 'malisafi-mls'); ?></label>
+                            </th>
+                            <td>
+                                <input type="url" name="website" id="website" class="regular-text" placeholder="https://">
+                            </td>
+                        </tr>
+                        
+                        <tr>
+                            <th scope="row">
+                                <label for="languages"><?php _e('Languages Spoken', 'malisafi-mls'); ?></label>
+                            </th>
+                            <td>
+                                <input type="text" name="languages" id="languages" class="regular-text" placeholder="e.g., English, Swahili">
+                            </td>
+                        </tr>
+                        
+                        <tr>
+                            <th scope="row">
+                                <label for="service_areas"><?php _e('Service Areas', 'malisafi-mls'); ?></label>
+                            </th>
+                            <td>
+                                <textarea name="service_areas" id="service_areas" rows="3" class="large-text" placeholder="List the areas/neighborhoods you serve"></textarea>
+                            </td>
+                        </tr>
+                        
+                        <tr>
+                            <th scope="row">
+                                <label for="commission_rate"><?php _e('Commission Rate (%)', 'malisafi-mls'); ?></label>
+                            </th>
+                            <td>
+                                <input type="number" name="commission_rate" id="commission_rate" class="small-text" min="0" max="100" step="0.1">
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                
+                <h3><?php _e('Social Media', 'malisafi-mls'); ?></h3>
+                <table class="form-table" role="presentation">
+                    <tbody>
+                        <tr>
+                            <th scope="row">
+                                <label for="facebook"><?php _e('Facebook URL', 'malisafi-mls'); ?></label>
+                            </th>
+                            <td>
+                                <input type="url" name="facebook" id="facebook" class="regular-text" placeholder="https://facebook.com/...">
+                            </td>
+                        </tr>
+                        
+                        <tr>
+                            <th scope="row">
+                                <label for="twitter"><?php _e('Twitter URL', 'malisafi-mls'); ?></label>
+                            </th>
+                            <td>
+                                <input type="url" name="twitter" id="twitter" class="regular-text" placeholder="https://twitter.com/...">
+                            </td>
+                        </tr>
+                        
+                        <tr>
+                            <th scope="row">
+                                <label for="linkedin"><?php _e('LinkedIn URL', 'malisafi-mls'); ?></label>
+                            </th>
+                            <td>
+                                <input type="url" name="linkedin" id="linkedin" class="regular-text" placeholder="https://linkedin.com/in/...">
+                            </td>
+                        </tr>
+                        
+                        <tr>
+                            <th scope="row">
+                                <label for="instagram"><?php _e('Instagram URL', 'malisafi-mls'); ?></label>
+                            </th>
+                            <td>
+                                <input type="url" name="instagram" id="instagram" class="regular-text" placeholder="https://instagram.com/...">
+                            </td>
+                        </tr>
+                        
+                        <tr>
+                            <th scope="row">
+                                <label for="youtube"><?php _e('YouTube URL', 'malisafi-mls'); ?></label>
+                            </th>
+                            <td>
+                                <input type="url" name="youtube" id="youtube" class="regular-text" placeholder="https://youtube.com/...">
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <h2><?php _e('Notification Settings', 'malisafi-mls'); ?></h2>
+            <table class="form-table" role="presentation">
+                <tbody>
                     <tr>
                         <th scope="row">
                             <label for="send_notification"><?php _e('Send Notification', 'malisafi-mls'); ?></label>
@@ -490,6 +709,103 @@ jQuery(document).ready(function($) {
     // Select all checkbox
     $('#cb-select-all').on('change', function() {
         $('input[name="users[]"]').prop('checked', $(this).prop('checked'));
+    });
+    
+    // Show/hide agent fields based on role selection
+    $('#user_role').on('change', function() {
+        var role = $(this).val();
+        var isAgent = role && (role.indexOf('agent') !== -1);
+        
+        if (isAgent) {
+            $('#agent-fields').slideDown(300);
+            // Make agent fields required
+            $('#agent-fields input[type="text"], #agent-fields input[type="number"], #agent-fields select, #agent-fields textarea').each(function() {
+                var $field = $(this);
+                if ($field.siblings('label').find('.agent-required').length || $field.closest('tr').find('.agent-required').length) {
+                    $field.prop('required', true);
+                }
+            });
+            // At least one specialization required
+            $('input[name="specializations[]"]').attr('data-required-group', 'specializations');
+        } else {
+            $('#agent-fields').slideUp(300);
+            // Remove required from agent fields
+            $('#agent-fields input, #agent-fields select, #agent-fields textarea').prop('required', false);
+            $('#agent-fields input[type="checkbox"]').prop('checked', false);
+        }
+    });
+    
+    // Form validation
+    $('#add-user-form').on('submit', function(e) {
+        var isAgent = $('#user_role').val().indexOf('agent') !== -1;
+        
+        if (isAgent) {
+            // Check if at least one specialization is selected
+            if ($('input[name="specializations[]"]:checked').length === 0) {
+                e.preventDefault();
+                alert('<?php _e('Please select at least one specialization.', 'malisafi-mls'); ?>');
+                return false;
+            }
+            
+            // Check bio length
+            var bio = $('#agent_bio').val();
+            if (bio.length < 100) {
+                e.preventDefault();
+                alert('<?php _e('Professional bio must be at least 100 characters.', 'malisafi-mls'); ?>');
+                $('#agent_bio').focus();
+                return false;
+            }
+        }
+        
+        // Check password length
+        var password = $('#password').val();
+        if (password.length < 8) {
+            e.preventDefault();
+            alert('<?php _e('Password must be at least 8 characters long.', 'malisafi-mls'); ?>');
+            $('#password').focus();
+            return false;
+        }
+        
+        return true;
+    });
+    
+    // Bio character counter
+    $('#agent_bio').on('input', function() {
+        var length = $(this).val().length;
+        var minLength = 100;
+        var $description = $(this).siblings('.description');
+        
+        if (length < minLength) {
+            $description.html('<?php _e('Minimum 100 characters.', 'malisafi-mls'); ?> ' + length + '/100');
+            $description.css('color', '#d63638');
+        } else {
+            $description.html(length + ' <?php _e('characters', 'malisafi-mls'); ?>');
+            $description.css('color', '#00a32a');
+        }
+    });
+    
+    // Real-time validation styling
+    $('input[required], select[required], textarea[required]').on('blur', function() {
+        if ($(this).val() === '') {
+            $(this).css('border-color', '#d63638');
+        } else {
+            $(this).css('border-color', '');
+        }
+    });
+    
+    // Email format validation
+    $('#email').on('blur', function() {
+        var email = $(this).val();
+        var emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        
+        if (email && !emailRegex.test(email)) {
+            $(this).css('border-color', '#d63638');
+            $(this).siblings('.description').remove();
+            $(this).after('<p class="description" style="color: #d63638;"><?php _e('Please enter a valid email address.', 'malisafi-mls'); ?></p>');
+        } else {
+            $(this).css('border-color', '');
+            $(this).siblings('.description').remove();
+        }
     });
 });
 </script>
