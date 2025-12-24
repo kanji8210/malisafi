@@ -56,10 +56,7 @@
                     this.updateProgressBar();
                     this.updateNavigationButtons();
                     
-                    // Focus on first input of new step (no scrolling)
-                    setTimeout(() => {
-                        $targetStep.find('input:visible, select:visible').first().focus();
-                    }, 350);
+                    // Focus removed to prevent page jump during form filling
                 });
             },
             
@@ -655,13 +652,7 @@
                     `;
                     currentStepElement.prepend(errorHtml);
                     
-                    // Scroll to error message
-                    setTimeout(() => {
-                        const errorBox = document.querySelector('.validation-error-box');
-                        if (errorBox) {
-                            errorBox.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                        }
-                    }, 100);
+                    // Scroll removed to prevent page jump during form filling
                 }
                 
                 // Enable/disable appropriate button based on step
@@ -835,11 +826,8 @@
                     const checkedSpecializations = $('.specialization-checkbox:checked').length;
                     if (checkedSpecializations === 0) {
                         this.showError('Please select at least one specialization.');
-                        // Scroll to specializations
+                        // Mark error without scrolling to prevent page jump
                         $('.checkbox-group-inline').addClass('error');
-                        $('html, body').animate({
-                            scrollTop: $('.checkbox-group-inline').offset().top - 100
-                        }, 500);
                         return;
                     }
                     
@@ -848,7 +836,7 @@
                     const bioLength = bio ? bio.trim().length : 0;
                     if (bioLength < 100) {
                         this.showError(`Professional Bio must be at least 100 characters. Current: ${bioLength}/100 characters.`);
-                        $('#agent_bio').addClass('error').focus();
+                        $('#agent_bio').addClass('error');
                         return;
                     }
                 }
@@ -952,10 +940,7 @@
                     errorContainer.fadeOut(300);
                 }, 5000);
 
-                // Scroll to error
-                $('html, body').animate({
-                    scrollTop: errorContainer.offset().top - 100
-                }, 300);
+                // Scroll removed to prevent page jump during form filling
             }
         };
 

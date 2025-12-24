@@ -17,6 +17,55 @@ class Malisafi_Agent_Dashboard {
         add_action('admin_menu', array(__CLASS__, 'add_agent_dashboard_menu'));
         add_action('admin_enqueue_scripts', array(__CLASS__, 'enqueue_scripts'));
         add_action('wp_ajax_switch_agent_view', array(__CLASS__, 'ajax_switch_agent_view'));
+        
+        // Allow agents to access WordPress backend
+        add_filter('user_has_cap', array(__CLASS__, 'grant_backend_access'), 10, 4);
+        
+        // Prevent WordPress from blocking agent backend access
+        add_action('admin_init', array(__CLASS__, 'allow_agent_backend_access'));
+    }
+    
+    /**
+     * Allow agent backend access
+     * 
+     * Prevents WordPress from redirecting agents away from wp-admin
+     */
+    public static function allow_agent_backend_access() {
+        $user = wp_get_current_user();
+        
+        if (!$user || !isset($user->roles)) {
+            return;
+        }
+        
+        // Check if user is an agent or other Malisafi role
+        $malisafi_roles = array('malisafi_agent_basic', 'malisafi_agent_premium', 'malisafi_owner', 'malisafi_developer', 'malisafi_client');
+        
+        if (array_intersect($malisafi_roles, $user->roles)) {
+            // Grant minimum capabilities needed for backend access
+            if (!current_user_can('read')) {
+                $user->add_cap('read');
+            }
+        }
+    }
+    
+    /**
+     * Grant backend access to agents
+     * 
+     * WordPress blocks backend access for users without certain capabilities.
+     * This filter ensures agents can access their dashboard in wp-admin.
+     */
+    public static function grant_backend_access($allcaps, $caps, $args, $user) {
+        // Check if user has agent role
+        if (isset($user->roles) && is_array($user->roles)) {
+            $agent_roles = array('malisafi_agent_basic', 'malisafi_agent_premium', 'malisafi_owner', 'malisafi_developer', 'malisafi_client');
+            if (array_intersect($agent_roles, $user->roles)) {
+                // Grant read capability to allow backend access
+                $allcaps['read'] = true;
+                $allcaps['edit_posts'] = true;
+            }
+        }
+        
+        return $allcaps;
     }
     
     /**
