@@ -227,7 +227,7 @@ class User_Creation_Helper {
         $agent_post_id = wp_insert_post(array(
             'post_title' => trim(($user_data['first_name'] ?? '') . ' ' . ($user_data['last_name'] ?? '')),
             'post_type' => 'malisafi_agent',
-            'post_status' => 'pending', // Requires admin approval
+            'post_status' => 'publish', // Changed from 'pending' to 'publish' so agent can access dashboard immediately
             'post_author' => $user_id,
             'meta_input' => array(
                 '_agent_user_id' => $user_id,
@@ -260,10 +260,17 @@ class User_Creation_Helper {
                 '_agent_properties_count' => 0,
                 '_agent_status' => 'active',
             )
-        ));
+        ), true); // Enable error return
         
-        if (!is_wp_error($agent_post_id)) {
+        if (!is_wp_error($agent_post_id) && $agent_post_id > 0) {
             update_user_meta($user_id, 'agent_post_id', $agent_post_id);
+            
+            // Log success for debugging
+            error_log(sprintf('[Malisafi] Agent profile created successfully. User ID: %d, Agent Post ID: %d', $user_id, $agent_post_id));
+        } else {
+            // Log error for debugging
+            $error_message = is_wp_error($agent_post_id) ? $agent_post_id->get_error_message() : 'Unknown error creating agent post';
+            error_log(sprintf('[Malisafi] Failed to create agent profile. User ID: %d, Error: %s', $user_id, $error_message));
         }
         
         // Notify admin about new agent registration

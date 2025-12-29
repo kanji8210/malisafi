@@ -150,8 +150,8 @@
 
             // Property card click
             $(document).on('click', '.property-card-modern', function(e) {
-                if ($(e.target).closest('.property-favorite').length) {
-                    return; // Don't navigate if clicking favorite button
+                if ($(e.target).closest('.property-favorite, .property-favorite-inline, .property-report, .property-report-inline').length) {
+                    return; // Don't navigate if clicking action buttons
                 }
                 const url = $(this).data('url');
                 if (url) {
@@ -159,8 +159,8 @@
                 }
             });
 
-            // Favorite button
-            $(document).on('click', '.property-favorite', function(e) {
+            // Favorite button (both overlay and inline)
+            $(document).on('click', '.property-favorite, .property-favorite-inline', function(e) {
                 e.stopPropagation();
                 
                 // Check if user is logged in
@@ -173,8 +173,11 @@
                 const propertyId = $btn.data('property-id');
                 const isFavorited = $btn.hasClass('favorited');
                 
+                // Find both buttons (overlay and inline) for this property
+                const $allBtns = $('.property-favorite[data-property-id="' + propertyId + '"], .property-favorite-inline[data-property-id="' + propertyId + '"]');
+                
                 // Toggle immediately for better UX
-                $btn.toggleClass('favorited');
+                $allBtns.toggleClass('favorited');
                 
                 // AJAX call to save favorite
                 $.ajax({
@@ -188,16 +191,49 @@
                     success: function(response) {
                         if (!response.success) {
                             // Revert on error
-                            $btn.toggleClass('favorited');
+                            $allBtns.toggleClass('favorited');
                             alert(response.data.message || 'Failed to update favorites');
                         }
                     },
                     error: function() {
                         // Revert on error
-                        $btn.toggleClass('favorited');
+                        $allBtns.toggleClass('favorited');
                         alert('Failed to update favorites. Please try again.');
                     }
                 });
+            });
+
+            // Report button (both overlay and inline)
+            $(document).on('click', '.property-report, .property-report-inline', function(e) {
+                e.stopPropagation();
+                
+                const $btn = $(this);
+                
+                // Check if already reported
+                if ($btn.hasClass('reported')) {
+                    alert('You have already reported this property.');
+                    return;
+                }
+                
+                // Check if user is logged in
+                if (!malisafiFilters.isLoggedIn) {
+                    alert('You must be logged in to report a property. Please login or create an account.');
+                    return;
+                }
+                
+                const propertyId = $(this).data('property-id');
+                
+                // Trigger the report modal (if property-moderation.js is loaded)
+                if (typeof reportModal !== 'undefined' && reportModal.init) {
+                    $('#malisafi-report-modal').data('property-id', propertyId).fadeIn(200);
+                    $('body').addClass('modal-open');
+                } else {
+                    // Fallback if modal not available
+                    const confirmReport = confirm('Do you want to report this property?');
+                    if (confirmReport) {
+                        window.location.href = malisafiFilters.homeUrl + '/report-property/?property_id=' + propertyId;
+                    }
+                }
             });
         }
 

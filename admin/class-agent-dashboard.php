@@ -146,6 +146,7 @@ class Malisafi_Agent_Dashboard {
         
         $args = array(
             'post_type' => 'malisafi_agent',
+            'post_status' => array('publish', 'pending', 'draft'), // Include all statuses
             'meta_query' => array(
                 array(
                     'key' => '_agent_user_id',

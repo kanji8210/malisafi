@@ -1,197 +1,52 @@
-/**
- * Malisafi MLS - Global CSS Variables
- * Centralized color palette and design tokens
- * Independent from WordPress themes
- */
-
 :root {
-    /* ===================================
-       PRIMARY COLOR PALETTE - DARK BLUE THEME
-       =================================== */
-    --mls-dark: #1a3a52;           /* Main dark blue color */
-    --mls-dark-grey: transparent;  /* Transparent backgrounds */
-    --mls-grey: #1a3a52;           /* Dark blue for secondary text */
-    --mls-light-grey: rgba(26, 58, 82, 0.1);  /* Very light blue backgrounds */
-    --mls-grey-green: #1a3a52;     /* Dark blue accent */
-    
-    /* ===================================
-       SEMANTIC COLORS
-       =================================== */
-    --mls-primary: #1a3a52;        /* Dark blue */
-    --mls-primary-dark: #0f2a3f;   /* Darker blue */
-    --mls-primary-light: #2d5575;  /* Lighter blue */
-    --mls-accent: #1a3a52;         /* Dark blue accent */
-    --mls-accent-hover: #0f2a3f;   /* Darker blue on hover */
-    
-    /* Background Colors */
-    --mls-bg-primary: transparent;
-    --mls-bg-secondary: rgba(26, 58, 82, 0.03);
-    --mls-bg-dark: transparent;
-    --mls-bg-darker: transparent;
-    --mls-bg-card: rgba(255, 255, 255, 0.5);
-    --mls-bg-hover: rgba(26, 58, 82, 0.05);
-    --mls-bg-sidebar: transparent;
-    
-    /* Text Colors - ALL DARK BLUE */
-    --mls-text-primary: #1a3a52;   /* Dark blue */
-    --mls-text-secondary: #2d5575; /* Medium blue */
-    --mls-text-muted: #4a7090;     /* Lighter blue */
-    --mls-text-light: #1a3a52;     /* Dark blue (no light text) */
-    --mls-text-inverse: #1a3a52;   /* Dark blue (no white text) */
-    
-    /* Border Colors */
-    --mls-border-light: rgba(26, 58, 82, 0.15);
-    --mls-border-medium: rgba(26, 58, 82, 0.3);
-    --mls-border-dark: #1a3a52;
-    --mls-border-accent: #1a3a52;
-    
-    /* State Colors */
-    --mls-success: #1a3a52;
-    --mls-success-light: #2d5575;
-    --mls-warning: #1a3a52;
-    --mls-danger: #1a3a52;
-    --mls-info: #1a3a52;
-    
-    /* ===================================
-       SHADOWS - DARK BLUE SHADOWS
-       =================================== */
-    --mls-shadow-xs: 0 1px 2px rgba(26, 58, 82, 0.08);
-    --mls-shadow-sm: 0 2px 4px rgba(26, 58, 82, 0.12);
-    --mls-shadow-md: 0 4px 8px rgba(26, 58, 82, 0.15);
-    --mls-shadow-lg: 0 8px 16px rgba(26, 58, 82, 0.18);
-    --mls-shadow-xl: 0 12px 24px rgba(26, 58, 82, 0.22);
-    --mls-shadow-2xl: 0 20px 40px rgba(26, 58, 82, 0.25);
-    
-    /* ===================================
-       SPACING
-       =================================== */
-    --mls-space-xs: 0.25rem;      /* 4px */
-    --mls-space-sm: 0.5rem;       /* 8px */
-    --mls-space-md: 1rem;         /* 16px */
-    --mls-space-lg: 1.5rem;       /* 24px */
-    --mls-space-xl: 2rem;         /* 32px */
-    --mls-space-2xl: 3rem;        /* 48px */
-    --mls-space-3xl: 4rem;        /* 64px */
-    
-    /* ===================================
-       BORDER RADIUS
-       =================================== */
-    --mls-radius-sm: 4px;
-    --mls-radius-md: 6px;
-    --mls-radius-lg: 8px;
-    --mls-radius-xl: 12px;
-    --mls-radius-2xl: 16px;
-    --mls-radius-full: 50%;
-    
-    /* ===================================
-       TYPOGRAPHY
-       =================================== */
-    --mls-font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-    
-    /* Font Sizes */
-    --mls-text-xs: 0.75rem;       /* 12px */
-    --mls-text-sm: 0.875rem;      /* 14px */
-    --mls-text-base: 1rem;        /* 16px */
-    --mls-text-lg: 1.125rem;      /* 18px */
-    --mls-text-xl: 1.25rem;       /* 20px */
-    --mls-text-2xl: 1.5rem;       /* 24px */
-    --mls-text-3xl: 1.875rem;     /* 30px */
-    --mls-text-4xl: 2.25rem;      /* 36px */
-    
-    /* Font Weights */
-    --mls-weight-normal: 400;
-    --mls-weight-medium: 500;
-    --mls-weight-semibold: 600;
-    --mls-weight-bold: 700;
-    
-    /* Line Heights */
-    --mls-leading-tight: 1.25;
-    --mls-leading-normal: 1.5;
-    --mls-leading-relaxed: 1.75;
-    
-    /* ===================================
-       TRANSITIONS
-       =================================== */
-    --mls-transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
-    --mls-transition-base: 250ms cubic-bezier(0.4, 0, 0.2, 1);
-    --mls-transition-slow: 350ms cubic-bezier(0.4, 0, 0.2, 1);
-    
-    /* ===================================
-       Z-INDEX LAYERS
-       =================================== */
-    --mls-z-base: 1;
-    --mls-z-dropdown: 1000;
-    --mls-z-sticky: 1020;
-    --mls-z-fixed: 1030;
-    --mls-z-modal-backdrop: 1040;
-    --mls-z-modal: 1050;
-    --mls-z-popover: 1060;
-    --mls-z-tooltip: 1070;
-    
-    /* ===================================
-       BREAKPOINTS (for reference in JS)
-       =================================== */
-    --mls-breakpoint-sm: 640px;
-    --mls-breakpoint-md: 768px;
-    --mls-breakpoint-lg: 1024px;
-    --mls-breakpoint-xl: 1280px;
-    --mls-breakpoint-2xl: 1536px;
+   /* WordPress Admin Color Scheme */
+   --wp-blue: #007cba;
+   --wp-blue-dark: #005a87;
+   --wp-blue-light: #00a0d2;
+   --wp-gray-0: #f6f7f7;
+   --wp-gray-2: #f0f0f0;
+   --wp-gray-5: #dcdcde;
+   --wp-gray-10: #c3c4c7;
+   --wp-gray-20: #a7aaad;
+   --wp-gray-30: #8c8f94;
+   --wp-gray-40: #787c82;
+   --wp-gray-50: #646970;
+   --wp-gray-60: #50575e;
+   --wp-gray-70: #3c434a;
+   --wp-gray-80: #2c3338;
+   --wp-gray-90: #1d2327;
+   --wp-gray-100: #101517;
+
+   /* Accent Colors */
+   --wp-green: #00a32a;
+   --wp-red: #d63638;
+   --wp-yellow: #f0c33c;
+   --wp-orange: #d54e21;
+
+   /* Spacing */
+   --spacing-xs: 4px;
+   --spacing-sm: 8px;
+   --spacing-md: 12px;
+   --spacing-lg: 16px;
+   --spacing-xl: 24px;
+   --spacing-xxl: 32px;
+
+   /* Border Radius */
+   --radius-sm: 3px;
+   --radius-md: 4px;
+   --radius-lg: 6px;
+
+   /* Shadows */
+   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+   --shadow-md: 0 2px 4px rgba(0, 0, 0, 0.1);
+   --shadow-lg: 0 4px 8px rgba(0, 0, 0, 0.1);
+
+   /* Transitions */
+   --transition-fast: 0.15s ease-in-out;
+   --transition-normal: 0.2s ease-in-out;
+
+   /* Z-index layers */
+   --z-dropdown: 100;
+   --z-modal: 200;
+   --z-tooltip: 300;
 }
-
-/* ===================================
-   GLOBAL RESETS
-   =================================== */
-
-.malisafi-plugin *,
-.malisafi-plugin *::before,
-.malisafi-plugin *::after {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-}
-
-.malisafi-plugin {
-    font-family: var(--mls-font-family);
-    color: var(--mls-text-primary);
-    line-height: var(--mls-leading-normal);
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-}
-
-/* ===================================
-   UTILITY CLASSES
-   =================================== */
-
-/* Text Colors */
-.mls-text-primary { color: var(--mls-text-primary) !important; }
-.mls-text-secondary { color: var(--mls-text-secondary) !important; }
-.mls-text-muted { color: var(--mls-text-muted) !important; }
-.mls-text-accent { color: var(--mls-accent) !important; }
-.mls-text-inverse { color: var(--mls-text-inverse) !important; }
-
-/* Background Colors */
-.mls-bg-primary { background-color: var(--mls-bg-primary) !important; }
-.mls-bg-secondary { background-color: var(--mls-bg-secondary) !important; }
-.mls-bg-dark { background-color: var(--mls-bg-dark) !important; }
-.mls-bg-accent { background-color: var(--mls-accent) !important; }
-
-/* Shadows */
-.mls-shadow-sm { box-shadow: var(--mls-shadow-sm); }
-.mls-shadow-md { box-shadow: var(--mls-shadow-md); }
-.mls-shadow-lg { box-shadow: var(--mls-shadow-lg); }
-.mls-shadow-xl { box-shadow: var(--mls-shadow-xl); }
-
-/* Borders */
-.mls-border { border: 1px solid var(--mls-border-light); }
-.mls-border-accent { border-color: var(--mls-border-accent) !important; }
-
-/* Spacing */
-.mls-mb-sm { margin-bottom: var(--mls-space-sm); }
-.mls-mb-md { margin-bottom: var(--mls-space-md); }
-.mls-mb-lg { margin-bottom: var(--mls-space-lg); }
-.mls-mb-xl { margin-bottom: var(--mls-space-xl); }
-
-.mls-p-sm { padding: var(--mls-space-sm); }
-.mls-p-md { padding: var(--mls-space-md); }
-.mls-p-lg { padding: var(--mls-space-lg); }
-.mls-p-xl { padding: var(--mls-space-xl); }

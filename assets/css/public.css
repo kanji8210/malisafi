@@ -82,6 +82,155 @@
     transform: scale(1.1);
 }
 
+/* Property Action Buttons (Favorite & Report) */
+.property-actions-overlay {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    display: flex;
+    gap: 8px;
+    z-index: 3;
+}
+
+.property-favorite,
+.property-report {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.95);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.property-favorite:hover,
+.property-report:hover {
+    background: rgba(255, 255, 255, 1);
+    transform: scale(1.1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.property-favorite .dashicons,
+.property-report .dashicons {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+    color: currentColor;
+}
+
+.property-favorite.favorited {
+    background: rgba(220, 38, 38, 0.1);
+    border-color: rgba(220, 38, 38, 0.3);
+}
+
+.property-favorite.favorited .dashicons {
+    color: #dc2626;
+}
+
+.property-report .dashicons {
+    color: #dc2626;
+}
+
+.property-report:hover .dashicons {
+    color: #b91c1c;
+}
+
+.property-report.reported {
+    background: rgba(156, 163, 175, 0.2);
+    border-color: rgba(156, 163, 175, 0.4);
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.property-report.reported .dashicons {
+    color: #9ca3af;
+}
+
+.property-report.reported:hover {
+    transform: none;
+}
+
+/* Inline property header with price and actions */
+.property-header-inline {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.property-actions-inline {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+}
+
+.property-favorite-inline,
+.property-report-inline {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: transparent;
+    border: 1px solid rgba(0, 0, 0, 0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    padding: 0;
+}
+
+.property-favorite-inline:hover,
+.property-report-inline:hover {
+    background: rgba(0, 0, 0, 0.05);
+    transform: scale(1.1);
+}
+
+.property-favorite-inline .dashicons,
+.property-report-inline .dashicons {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+    color: currentColor;
+}
+
+.property-favorite-inline.favorited {
+    background: rgba(220, 38, 38, 0.1);
+    border-color: rgba(220, 38, 38, 0.3);
+}
+
+.property-favorite-inline.favorited .dashicons {
+    color: #dc2626;
+}
+
+.property-report-inline .dashicons {
+    color: #dc2626;
+}
+
+.property-report-inline:hover .dashicons {
+    color: #b91c1c;
+}
+
+.property-report-inline.reported {
+    background: rgba(156, 163, 175, 0.1);
+    border-color: rgba(156, 163, 175, 0.3);
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.property-report-inline.reported .dashicons {
+    color: #9ca3af;
+}
+
+.property-report-inline.reported:hover {
+    transform: none;
+    background: rgba(156, 163, 175, 0.1);
+}
+
 .featured-badge {
     position: absolute;
     top: 15px;
@@ -153,12 +302,12 @@
 .property-price {
     font-size: 22px;
     font-weight: 700;
-    color: #dc2626;
+    color: currentColor;
     margin: 8px 0;
 }
 
 .property-location {
-    color: #dc2626;
+    color: currentColor;
     margin: 8px 0;
     display: flex;
     align-items: center;
@@ -167,7 +316,7 @@
 }
 
 .property-location .dashicons {
-    color: #dc2626;
+    color: currentColor;
 }
 
 .property-features {

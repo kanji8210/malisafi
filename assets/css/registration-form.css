@@ -24,7 +24,7 @@
 
 .progress-bar {
     height: 100%;
-    background: linear-gradient(90deg, #1a3a52 0%, #2d5a7b 100%);
+    background: currentColor;
     border-radius: 10px;
     transition: width 0.4s ease;
     box-shadow: 0 2px 8px rgba(26, 58, 82, 0.3);
@@ -34,7 +34,7 @@
     text-align: center;
     font-size: 14px;
     font-weight: 600;
-    color: var(--mls-dark, #1a3a52);
+    color: currentColor;
     margin-bottom: 20px;
 }
 
@@ -75,8 +75,8 @@
     width: 40px;
     height: 40px;
     border-radius: 50%;
-    background: #ffffff;
-    border: 2px solid rgba(26, 58, 82, 0.3);
+    background: transparent;
+    border: 2px solid currentColor;
     color: rgba(26, 58, 82, 0.5);
     display: flex;
     align-items: center;
@@ -95,22 +95,22 @@
 }
 
 .step-item.active .step-number {
-    background: var(--mls-dark, #1a3a52);
-    border-color: var(--mls-dark, #1a3a52);
-    color: #ffffff;
+    background: currentColor;
+    border-color: currentColor;
+    color: inherit;
     box-shadow: 0 4px 12px rgba(26, 58, 82, 0.3);
     transform: scale(1.15);
 }
 
 .step-item.active .step-label {
-    color: var(--mls-dark, #1a3a52);
+    color: currentColor;
     font-weight: 700;
 }
 
 .step-item.completed .step-number {
-    background: #00c853;
-    border-color: #00c853;
-    color: #ffffff;
+    background: currentColor;
+    border-color: currentColor;
+    color: inherit;
     transform: scale(1.05);
 }
 
@@ -120,7 +120,7 @@
 }
 
 .step-item.completed .step-label {
-    color: #00c853;
+    color: currentColor;
     font-weight: 600;
 }
 
@@ -164,7 +164,7 @@
     margin: 0 0 10px 0;
     font-size: 26px;
     font-weight: 600;
-    color: var(--mls-dark, #1a3a52);
+    color: currentColor;
 }
 
 .step-description {
@@ -200,7 +200,7 @@
 input.error,
 select.error,
 textarea.error {
-    border-color: #dc2626 !important;
+    border-color: currentColor !important;
     box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
     animation: shake 0.4s ease;
 }
@@ -213,8 +213,8 @@ textarea.error {
 
 /* Error message box */
 .error-message {
-    background: #fee;
-    border-left: 4px solid #dc2626;
+    background: transparent;
+    border-left: 4px solid currentColor;
     padding: 15px;
     margin: 20px 0;
     border-radius: 8px;

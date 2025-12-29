@@ -65,22 +65,46 @@ $is_new = (time() - $post_date) < (7 * 24 * 60 * 60);
         <?php
         // Check if property is favorited
         $is_favorited = false;
+        $is_reported = false;
+        
         if (is_user_logged_in()) {
             $user_id = get_current_user_id();
+            
+            // Check favorites
             $favorites = get_user_meta($user_id, '_malisafi_favorites', true);
             $favorites = $favorites ? explode(',', $favorites) : array();
             $is_favorited = in_array($property_id, $favorites);
+            
+            // Check if user has already reported this property
+            $reports = get_post_meta($property_id, '_malisafi_reports', true);
+            $reports = $reports ? maybe_unserialize($reports) : array();
+            $user_email = wp_get_current_user()->user_email;
+            
+            foreach ($reports as $report) {
+                if (isset($report['reporter_email']) && $report['reporter_email'] === $user_email) {
+                    $is_reported = true;
+                    break;
+                }
+            }
         }
         ?>
-        <button class="property-favorite<?php echo $is_favorited ? ' favorited' : ''; ?>" data-property-id="<?php echo $property_id; ?>">
-            <span class="dashicons dashicons-heart"></span>
-        </button>
     </div>
     
     <div class="property-card-body">
         
-        <div class="property-price">
-            <?php echo esc_html($formatted_price); ?>
+        <div class="property-header-inline">
+            <div class="property-price">
+                <?php echo esc_html($formatted_price); ?>
+            </div>
+            
+            <div class="property-actions-inline">
+                <button class="property-favorite-inline<?php echo $is_favorited ? ' favorited' : ''; ?>" data-property-id="<?php echo $property_id; ?>" title="<?php echo $is_favorited ? 'Remove from favorites' : 'Add to favorites'; ?>">
+                    <span class="dashicons dashicons-heart"></span>
+                </button>
+                <button class="property-report-inline report-button<?php echo $is_reported ? ' reported' : ''; ?>" data-property-id="<?php echo $property_id; ?>" title="<?php echo $is_reported ? 'Already reported' : 'Report Property'; ?>">
+                    <span class="dashicons dashicons-flag"></span>
+                </button>
+            </div>
         </div>
         
         <h3 class="property-title">
