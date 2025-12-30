@@ -108,7 +108,6 @@ $is_new = (time() - $post_date) < (7 * 24 * 60 * 60);
         
         <?php if ($location) : ?>
         <div class="property-location" style="display: flex !important; gap: 5px !important; align-items: center !important;">
-            <span class="dashicons dashicons-location" style="color: #dc2626 !important; font-size: 20px !important; width: 20px !important; height: 20px !important; display: inline-block !important;"></span>
             <span><?php echo esc_html($location); ?></span>
         </div>
         <?php endif; ?>
