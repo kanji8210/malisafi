@@ -99,17 +99,17 @@ $is_new = (time() - $post_date) < (7 * 24 * 60 * 60);
             
             <div class="property-actions-inline">
                 <button class="property-favorite-inline<?php echo $is_favorited ? ' favorited' : ''; ?>" data-property-id="<?php echo $property_id; ?>" title="<?php echo $is_favorited ? 'Remove from favorites' : 'Add to favorites'; ?>">
-                    <span class="dashicons dashicons-heart"></span>
+                    <span class="dashicons dashicons-heart" style="color: #dc2626 !important;"></span>
                 </button>
                 <button class="property-report-inline report-button<?php echo $is_reported ? ' reported' : ''; ?>" data-property-id="<?php echo $property_id; ?>" title="<?php echo $is_reported ? 'Already reported' : 'Report Property'; ?>">
-                    <span class="dashicons dashicons-flag"></span>
+                    <span class="dashicons dashicons-flag" style="color: #dc2626 !important;"></span>
                 </button>
             </div>
         </div>
         
-        <h3 class="property-title">
+        <h4 class="property-title">
             <?php the_title(); ?>
-        </h3>
+    <h4>
         
         <?php if ($location) : ?>
         <div class="property-location">
@@ -124,7 +124,7 @@ $is_new = (time() - $post_date) < (7 * 24 * 60 * 60);
                 <svg class="feature-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M20 9.556V3h-2v2H6V3H4v6.557C2.81 10.25 2 11.526 2 13v4a1 1 0 0 0 1 1h1v4h2v-4h12v4h2v-4h1a1 1 0 0 0 1-1v-4c0-1.474-.811-2.75-2-3.444zM11 9H6V7h5v2zm7 0h-5V7h5v2z"/>
                 </svg>
-                <span><?php echo esc_html($bedrooms); ?> Bed<?php echo $bedrooms > 1 ? 's' : ''; ?></span>
+                <span><?php echo esc_html($bedrooms); ?></span>
             </div>
             <?php endif; ?>
             
@@ -133,7 +133,7 @@ $is_new = (time() - $post_date) < (7 * 24 * 60 * 60);
                 <svg class="feature-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M21 10H7V7c0-1.103.897-2 2-2s2 .897 2 2h2c0-2.206-1.794-4-4-4S5 4.794 5 7v3H3a1 1 0 0 0-1 1v2c0 2.606 1.674 4.823 4 5.65V22h2v-3h8v3h2v-3.35c2.326-.827 4-3.044 4-5.65v-2a1 1 0 0 0-1-1z"/>
                 </svg>
-                <span><?php echo esc_html($bathrooms); ?> Bath<?php echo $bathrooms > 1 ? 's' : ''; ?></span>
+                <span><?php echo esc_html($bathrooms); ?></span>
             </div>
             <?php endif; ?>
             

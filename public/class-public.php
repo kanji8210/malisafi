@@ -18,6 +18,9 @@ class PublicArea {
      * Enqueue public styles
      */
     public function enqueue_styles() {
+        // Enqueue dashicons globally for property cards
+        wp_enqueue_style('dashicons');
+        
         // Enqueue global variables first
         wp_enqueue_style(
             'malisafi-mls-variables',
@@ -30,7 +33,7 @@ class PublicArea {
         wp_enqueue_style(
             'malisafi-mls-public',
             MALISAFI_MLS_URL . 'assets/css/public.css',
-            array('malisafi-mls-variables'),
+            array('malisafi-mls-variables', 'dashicons'),
             MALISAFI_MLS_VERSION,
             'all'
         );
