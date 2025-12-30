@@ -180,6 +180,20 @@ $current_tab = isset($_GET['tab']) ? sanitize_text_field($_GET['tab']) : 'pendin
                                         <span class="dashicons dashicons-dismiss"></span>
                                         <?php _e('Reject', 'malisafi-mls'); ?>
                                     </button>
+                                    <?php
+                                    $is_featured = get_post_meta($property_id, '_malisafi_featured', true);
+                                    if ($is_featured === '1') :
+                                    ?>
+                                        <button type="button" class="button toggle-featured" data-property-id="<?php echo $property_id; ?>" data-action="remove" style="color: #b4ab74;">
+                                            <span class="dashicons dashicons-star-filled"></span>
+                                            <?php _e('Unfeatured', 'malisafi-mls'); ?>
+                                        </button>
+                                    <?php else : ?>
+                                        <button type="button" class="button toggle-featured" data-property-id="<?php echo $property_id; ?>" data-action="add" style="color: #737d5d;">
+                                            <span class="dashicons dashicons-star-empty"></span>
+                                            <?php _e('Make Featured', 'malisafi-mls'); ?>
+                                        </button>
+                                    <?php endif; ?>
                                     <a href="<?php echo admin_url('admin.php?page=malisafi-properties&action=edit&property_id=' . $property_id); ?>" class="button">
                                         <span class="dashicons dashicons-edit"></span>
                                         <?php _e('Edit', 'malisafi-mls'); ?>
@@ -348,6 +362,20 @@ $current_tab = isset($_GET['tab']) ? sanitize_text_field($_GET['tab']) : 'pendin
                                 <td><?php echo $verified_date ? date_i18n('M j, Y', strtotime($verified_date)) : '—'; ?></td>
                                 <td><?php echo $verified_by ? esc_html($verified_by->display_name) : '—'; ?></td>
                                 <td>
+                                    <?php
+                                    $is_featured_v = get_post_meta($property_id, '_malisafi_featured', true);
+                                    if ($is_featured_v === '1') :
+                                    ?>
+                                        <button type="button" class="button button-small toggle-featured" data-property-id="<?php echo $property_id; ?>" data-action="remove" style="color: #b4ab74;">
+                                            <span class="dashicons dashicons-star-filled"></span>
+                                            <?php _e('Unfeatured', 'malisafi-mls'); ?>
+                                        </button>
+                                    <?php else : ?>
+                                        <button type="button" class="button button-small toggle-featured" data-property-id="<?php echo $property_id; ?>" data-action="add" style="color: #737d5d;">
+                                            <span class="dashicons dashicons-star-empty"></span>
+                                            <?php _e('Make Featured', 'malisafi-mls'); ?>
+                                        </button>
+                                    <?php endif; ?>
                                     <button type="button" class="button button-small unapprove-property" data-property-id="<?php echo $property_id; ?>" style="color: #d63638;">
                                         <span class="dashicons dashicons-undo"></span>
                                         <?php _e('Unapprove', 'malisafi-mls'); ?>
@@ -788,6 +816,41 @@ jQuery(document).ready(function($) {
             }
         });
     });
+    
+    // Toggle Featured status
+    $('.toggle-featured').on('click', function() {
+        var propertyId = $(this).data('property-id');
+        var action = $(this).data('action'); // 'add' or 'remove'
+        var $button = $(this);
+        
+        var confirmMsg = action === 'add' 
+            ? '<?php _e('Make this property featured?', 'malisafi-mls'); ?>'
+            : '<?php _e('Remove featured status from this property?', 'malisafi-mls'); ?>';
+        
+        if (!confirm(confirmMsg)) {
+            return;
+        }
+        
+        $.ajax({
+            url: ajaxurl,
+            type: 'POST',
+            data: {
+                action: 'malisafi_admin_toggle_featured',
+                property_id: propertyId,
+                featured_action: action,
+                nonce: '<?php echo wp_create_nonce('malisafi_admin_featured'); ?>'
+            },
+            success: function(response) {
+                if (response.success) {
+                    location.reload();
+                } else {
+                    alert(response.data.message || '<?php _e('An error occurred.', 'malisafi-mls'); ?>');
+                }
+            },
+            error: function() {
+                alert('<?php _e('An error occurred.', 'malisafi-mls'); ?>');
+            }
+        });
     });
 });
 </script>

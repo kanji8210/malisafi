@@ -422,14 +422,26 @@ class Featured_Properties {
      * AJAX: Admin toggle featured (quick action)
      */
     public function ajax_admin_toggle_featured() {
-        check_ajax_referer('malisafi-admin-nonce', 'nonce');
+        // Check both nonces - from admin list and from moderation page
+        $valid_nonce = false;
+        if (isset($_POST['nonce'])) {
+            if (wp_verify_nonce($_POST['nonce'], 'malisafi-admin-nonce')) {
+                $valid_nonce = true;
+            } elseif (wp_verify_nonce($_POST['nonce'], 'malisafi_admin_featured')) {
+                $valid_nonce = true;
+            }
+        }
+        
+        if (!$valid_nonce) {
+            wp_send_json_error(array('message' => __('Invalid nonce.', 'malisafi-mls')));
+        }
         
         if (!$this->can_manage_featured()) {
             wp_send_json_error(array('message' => __('Unauthorized.', 'malisafi-mls')));
         }
         
         $property_id = intval($_POST['property_id']);
-        $action = sanitize_text_field($_POST['action_type']); // 'add' or 'remove'
+        $action = sanitize_text_field($_POST['action_type'] ?? $_POST['featured_action']); // Support both parameter names
         
         if ($action === 'add') {
             update_post_meta($property_id, '_malisafi_featured', '1');
