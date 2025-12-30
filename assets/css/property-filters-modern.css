@@ -401,22 +401,7 @@
     flex: 1;
 }
 
-/* ===== PROPERTIES GRID ===== */
-.malisafi-properties-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 24px;
-    margin-bottom: 30px;
-}
-
 /* ===== RESPONSIVE ===== */
-
-/* Desktop Large (3 columns + sidebar) */
-@media (min-width: 1025px) {
-    .malisafi-properties-grid {
-        grid-template-columns: repeat(3, 1fr);
-    }
-}
 
 /* Tablet (2 columns + sidebar on side) */
 @media (max-width: 1024px) and (min-width: 769px) {
@@ -426,11 +411,6 @@
 
     .malisafi-filters-sidebar {
         flex: 0 0 260px;
-    }
-
-    .malisafi-properties-grid {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 20px;
     }
 
     .property-search {

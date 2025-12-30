@@ -56,6 +56,33 @@ class PublicArea {
             'all'
         );
         
+        // Enqueue unified property grids styles (must load early for all grids)
+        wp_enqueue_style(
+            'malisafi-mls-property-grids-unified',
+            MALISAFI_MLS_URL . 'assets/css/property-grids-unified.css',
+            array('malisafi-mls-variables'),
+            MALISAFI_MLS_VERSION,
+            'all'
+        );
+        
+        // Enqueue property card modern styles
+        wp_enqueue_style(
+            'malisafi-mls-property-card-modern',
+            MALISAFI_MLS_URL . 'assets/css/property-card-modern.css',
+            array('malisafi-mls-variables', 'malisafi-mls-property-grids-unified'),
+            MALISAFI_MLS_VERSION,
+            'all'
+        );
+        
+        // Enqueue property filters modern styles
+        wp_enqueue_style(
+            'malisafi-mls-property-filters-modern',
+            MALISAFI_MLS_URL . 'assets/css/property-filters-modern.css',
+            array('malisafi-mls-variables', 'malisafi-mls-property-grids-unified'),
+            MALISAFI_MLS_VERSION,
+            'all'
+        );
+        
         // Enqueue moderation styles on single property pages
         if (is_singular('malisafi_property')) {
             wp_enqueue_style('dashicons');

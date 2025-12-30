@@ -225,7 +225,32 @@ public static function register_widgets() {
 ❌ Echo in shortcode callbacks - always return  
 ❌ Modify core WP tables - use custom `mf_` tables  
 ❌ Skip capability checks: `current_user_can('capability')`  
-❌ Use generic "Location" field - must use Kenya counties
+❌ Use generic "Location" field - must use Kenya counties  
+❌ Add wrapper divs between grid container and grid items - causes layout breaks
+
+## Grid Layout Critical Rule
+
+**IMPORTANT**: When using `.malisafi-properties-grid` as grid container:
+- Property cards MUST be **direct children** of `.malisafi-properties-grid`
+- Do NOT add wrapper divs like `.properties-container` or `.malisafi-properties-grid-wrapper` between them
+- Grid CSS in [assets/css/property-grids-unified.css](assets/css/property-grids-unified.css) expects this structure:
+
+```html
+<!-- ✅ CORRECT -->
+<div class="malisafi-properties-grid">
+    <div class="property-card">...</div>
+    <div class="property-card">...</div>
+</div>
+
+<!-- ❌ WRONG - Extra wrapper breaks grid -->
+<div class="malisafi-properties-grid">
+    <div class="properties-container">
+        <div class="property-card">...</div>
+    </div>
+</div>
+```
+
+Reference: [templates/property-filters-modern.php](templates/property-filters-modern.php) for correct implementation
 
 ## Key Files Reference
 

@@ -28,6 +28,7 @@ class Malisafi_Property_Moderation {
         add_action('wp_ajax_nopriv_malisafi_report_property', array(__CLASS__, 'ajax_report_property'));
         add_action('wp_ajax_malisafi_verify_property', array(__CLASS__, 'ajax_verify_property'));
         add_action('wp_ajax_malisafi_reject_property', array(__CLASS__, 'ajax_reject_property'));
+        add_action('wp_ajax_malisafi_unapprove_property', array(__CLASS__, 'ajax_unapprove_property'));
         
         // Post handlers
         add_action('admin_post_malisafi_moderate_property', array(__CLASS__, 'handle_moderation'));
@@ -202,6 +203,45 @@ class Malisafi_Property_Moderation {
         self::notify_owner_rejection($property_id, $reason);
         
         wp_send_json_success(array('message' => __('Property rejected.', 'malisafi-mls')));
+    }
+    
+    /**
+     * AJAX: Unapprove property (revert to pending)
+     */
+    public static function ajax_unapprove_property() {
+        check_ajax_referer('malisafi_moderate_property', 'nonce');
+        
+        if (!current_user_can('moderate_properties')) {
+            wp_send_json_error(array('message' => __('Permission denied.', 'malisafi-mls')));
+        }
+        
+        $property_id = intval($_POST['property_id']);
+        $reason = sanitize_textarea_field($_POST['reason'] ?? '');
+        
+        if (!$property_id) {
+            wp_send_json_error(array('message' => __('Invalid property.', 'malisafi-mls')));
+        }
+        
+        // Remove verification
+        update_post_meta($property_id, '_malisafi_verified', 0);
+        delete_post_meta($property_id, '_malisafi_verified_date');
+        delete_post_meta($property_id, '_malisafi_verified_by');
+        
+        // Add unapproval note
+        update_post_meta($property_id, '_malisafi_unapproved_reason', $reason);
+        update_post_meta($property_id, '_malisafi_unapproved_by', get_current_user_id());
+        update_post_meta($property_id, '_malisafi_unapproved_date', current_time('mysql'));
+        
+        // Change status back to pending
+        wp_update_post(array(
+            'ID' => $property_id,
+            'post_status' => 'pending'
+        ));
+        
+        // Notify property owner
+        self::notify_owner_unapproval($property_id, $reason);
+        
+        wp_send_json_success(array('message' => __('Property approval reverted. Property is now pending review.', 'malisafi-mls')));
     }
     
     /**
@@ -430,6 +470,36 @@ class Malisafi_Property_Moderation {
         }
         
         return $badge . $content;
+    }
+    
+    /**
+     * Notify property owner of unapproval
+     */
+    private static function notify_owner_unapproval($property_id, $reason) {
+        $property = get_post($property_id);
+        $owner = get_user_by('id', $property->post_author);
+        
+        if (!$owner) {
+            return;
+        }
+        
+        $subject = sprintf(__('[Malisafi MLS] Property "%s" approval has been reverted', 'malisafi-mls'), $property->post_title);
+        
+        $message = sprintf(
+            __('Your property "%s" approval has been reverted and is now pending review again.', 'malisafi-mls'),
+            $property->post_title
+        );
+        
+        if ($reason) {
+            $message .= "\n\n" . sprintf(__('Reason: %s', 'malisafi-mls'), $reason);
+        }
+        
+        $message .= "\n\n" . sprintf(
+            __('You can review and update your property here: %s', 'malisafi-mls'),
+            admin_url('admin.php?page=malisafi-my-properties')
+        );
+        
+        wp_mail($owner->user_email, $subject, $message);
     }
     
     /**

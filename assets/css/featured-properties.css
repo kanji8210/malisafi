@@ -72,22 +72,6 @@
     transform: scale(1.1);
 }
 
-/* Featured Badge */
-.featured-badge {
-    position: absolute;
-    top: 12px;
-    right: 12px;
-    background: var(--mls-dark);
-    color: var(--mls-text-inverse);
-    padding: 6px 14px;
-    border-radius: 20px;
-    font-size: 12px;
-    font-weight: 600;
-    text-transform: uppercase;
-    z-index: 2;
-    box-shadow: var(--mls-shadow-md);
-}
-
 /* Featured Content */
 .featured-content {
     padding: var(--mls-space-lg);

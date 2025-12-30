@@ -12,31 +12,29 @@ if (!defined('WPINC')) {
 
 <div class="malisafi-properties-grid">
     <?php if ($properties->have_posts()) : ?>
-        <div class="properties-container">
-            <?php while ($properties->have_posts()) : $properties->the_post(); 
+        <?php while ($properties->have_posts()) : $properties->the_post(); 
                 $property_data = \MalisafiMLS\Property_Manager::get_property_data(get_the_ID());
             ?>
                 <div class="property-card">
                     <?php if (has_post_thumbnail()) : ?>
+
                         <div class="property-image">
                             <a href="<?php the_permalink(); ?>">
                                 <?php the_post_thumbnail('large'); ?>
                             </a>
-                            <?php if ($property_data['featured'] === '1') : ?>
-                                <span class="featured-badge"><?php _e('Featured', 'malisafi-mls'); ?></span>
+                            <?php if (!empty($property_data['status'])) : ?>
+                                <span class="status-badge"><?php echo esc_html(ucfirst(str_replace('-', ' ', $property_data['status']))); ?></span>
                             <?php endif; ?>
                             <?php if (!empty($property_data['setting'])) : ?>
-                                <span class="setting-badge setting-<?php echo esc_attr($property_data['setting']); ?>">
-                                    <?php echo esc_html(malisafi_get_setting_label($property_data['setting'])); ?>
-                                </span>
+                                <span class="setting-badge"><?php echo esc_html(ucfirst($property_data['setting'])); ?></span>
                             <?php endif; ?>
                         </div>
                     <?php endif; ?>
                     
                     <div class="property-content">
-                        <h3 class="property-title">
+                        <h4 class="property-title">
                             <a href="<?php the_permalink(); ?>"><?php the_title(); ?></a>
-                        </h3>
+                        </h4>
                         
                         <?php if (!empty($property_data['price'])) : ?>
                             <div class="property-price">
@@ -57,7 +55,7 @@ if (!defined('WPINC')) {
                                 $location_parts[] = $property_data['county'];
                             }
                             if (!empty($location_parts)) : ?>
-                                <i class="dashicons dashicons-location"></i>
+                                <i class="dashicons dashicons-location" style="color: #dc2626 !important;"></i>
                                 <?php echo esc_html(implode(', ', $location_parts)); ?>
                             <?php endif; ?>
                         </div>
@@ -105,7 +103,6 @@ if (!defined('WPINC')) {
                 'next_text' => __('Next &raquo;', 'malisafi-mls'),
             ));
             ?>
-        </div>
         
         <?php wp_reset_postdata(); ?>
     <?php else : ?>

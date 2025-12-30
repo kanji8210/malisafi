@@ -21,6 +21,7 @@ $bathrooms = get_post_meta($property_id, '_malisafi_bathrooms', true);
 $area = get_post_meta($property_id, '_malisafi_area', true);
 $status = get_post_meta($property_id, '_malisafi_status', true);
 $featured = get_post_meta($property_id, '_malisafi_featured', true);
+$setting = get_post_meta($property_id, '_malisafi_setting', true);
 $city = get_post_meta($property_id, '_malisafi_city', true);
 $state = get_post_meta($property_id, '_malisafi_state', true);
 $location = $city ? $city . ($state ? ', ' . $state : '') : '';
@@ -48,19 +49,13 @@ $is_new = (time() - $post_date) < (7 * 24 * 60 * 60);
     <div class="property-image-wrapper">
         <img src="<?php echo esc_url($image_url); ?>" alt="<?php echo esc_attr(get_the_title()); ?>">
         
-        <div class="property-badges">
-            <?php if ($featured) : ?>
-                <span class="property-badge featured">Featured</span>
-            <?php endif; ?>
-            
-            <?php if ($is_new) : ?>
-                <span class="property-badge new">New</span>
-            <?php endif; ?>
-            
-            <?php if ($status && strtolower($status) === 'hot') : ?>
-                <span class="property-badge hot">Hot Deal</span>
-            <?php endif; ?>
-        </div>
+        <?php if (!empty($status)) : ?>
+            <span class="status-badge"><?php echo esc_html(ucfirst(str_replace('-', ' ', $status))); ?></span>
+        <?php endif; ?>
+        
+        <?php if (!empty($setting)) : ?>
+            <span class="setting-badge"><?php echo esc_html(ucfirst($setting)); ?></span>
+        <?php endif; ?>
         
         <?php
         // Check if property is favorited
@@ -109,14 +104,18 @@ $is_new = (time() - $post_date) < (7 * 24 * 60 * 60);
         
         <h4 class="property-title">
             <?php the_title(); ?>
-    <h4>
+            
         
         <?php if ($location) : ?>
-        <div class="property-location">
-            <span class="dashicons dashicons-location"></span>
+        <div class="property-location" style="display: flex !important; gap: 5px !important; align-items: center !important;">
+            <span class="dashicons dashicons-location" style="color: #dc2626 !important; font-size: 20px !important; width: 20px !important; height: 20px !important; display: inline-block !important;"></span>
             <span><?php echo esc_html($location); ?></span>
         </div>
         <?php endif; ?>
+        
+        <div class="property-excerpt">
+            <?php echo wp_trim_words(get_the_excerpt(), 15); ?>
+        </div>
         
         <div class="property-features">
             <?php if ($bedrooms) : ?>

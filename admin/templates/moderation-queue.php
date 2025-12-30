@@ -348,6 +348,10 @@ $current_tab = isset($_GET['tab']) ? sanitize_text_field($_GET['tab']) : 'pendin
                                 <td><?php echo $verified_date ? date_i18n('M j, Y', strtotime($verified_date)) : '—'; ?></td>
                                 <td><?php echo $verified_by ? esc_html($verified_by->display_name) : '—'; ?></td>
                                 <td>
+                                    <button type="button" class="button button-small unapprove-property" data-property-id="<?php echo $property_id; ?>" style="color: #d63638;">
+                                        <span class="dashicons dashicons-undo"></span>
+                                        <?php _e('Unapprove', 'malisafi-mls'); ?>
+                                    </button>
                                     <a href="<?php echo admin_url('admin.php?page=malisafi-properties&action=edit&property_id=' . $property_id); ?>" class="button button-small">
                                         <?php _e('Edit', 'malisafi-mls'); ?>
                                     </a>
@@ -400,6 +404,24 @@ $current_tab = isset($_GET['tab']) ? sanitize_text_field($_GET['tab']) : 'pendin
         <div class="modal-actions">
             <button type="button" class="button button-primary" id="confirm-reject">
                 <?php _e('Reject Property', 'malisafi-mls'); ?>
+            </button>
+            <button type="button" class="button cancel-modal">
+                <?php _e('Cancel', 'malisafi-mls'); ?>
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Unapprove Property Modal -->
+<div id="unapprove-modal" class="malisafi-modal" style="display: none;">
+    <div class="modal-content">
+        <span class="close-modal">&times;</span>
+        <h2><?php _e('Unapprove Property', 'malisafi-mls'); ?></h2>
+        <p><?php _e('Please provide a reason for reverting this property approval. It will be moved back to pending status and the owner will be notified.', 'malisafi-mls'); ?></p>
+        <textarea id="unapproval-reason" rows="5" style="width: 100%;"></textarea>
+        <div class="modal-actions">
+            <button type="button" class="button button-primary" id="confirm-unapprove" style="background: #d63638; border-color: #d63638;">
+                <?php _e('Unapprove Property', 'malisafi-mls'); ?>
             </button>
             <button type="button" class="button cancel-modal">
                 <?php _e('Cancel', 'malisafi-mls'); ?>
@@ -725,6 +747,47 @@ jQuery(document).ready(function($) {
             $('#rejection-reason').val('');
             currentPropertyId = null;
         }
+        if ($(e.target).is('#unapprove-modal')) {
+            $('#unapprove-modal').hide();
+            $('#unapproval-reason').val('');
+            currentPropertyId = null;
+        }
+    });
+    
+    // Unapprove property - show modal
+    $('.unapprove-property').on('click', function() {
+        currentPropertyId = $(this).data('property-id');
+        $('#unapprove-modal').show();
+    });
+    
+    // Confirm unapprove
+    $('#confirm-unapprove').on('click', function() {
+        var reason = $('#unapproval-reason').val();
+        
+        if (!reason.trim()) {
+            alert('<?php _e('Please provide a reason for unapproving this property.', 'malisafi-mls'); ?>');
+            return;
+        }
+        
+        $.ajax({
+            url: ajaxurl,
+            type: 'POST',
+            data: {
+                action: 'malisafi_unapprove_property',
+                property_id: currentPropertyId,
+                reason: reason,
+                nonce: '<?php echo wp_create_nonce('malisafi_moderate_property'); ?>'
+            },
+            success: function(response) {
+                if (response.success) {
+                    alert(response.data.message);
+                    location.reload();
+                } else {
+                    alert(response.data.message);
+                }
+            }
+        });
+    });
     });
 });
 </script>

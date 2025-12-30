@@ -29,8 +29,13 @@ $column_class = 'featured-col-' . $columns;
                         <div class="featured-image">
                             <a href="<?php the_permalink(); ?>">
                                 <?php the_post_thumbnail('medium'); ?>
-                                <span class="featured-badge">★ <?php _e('Featured', 'malisafi-mls'); ?></span>
                             </a>
+                            <?php if (!empty($property_data['status'])) : ?>
+                                <span class="status-badge"><?php echo esc_html(ucfirst(str_replace('-', ' ', $property_data['status']))); ?></span>
+                            <?php endif; ?>
+                            <?php if (!empty($property_data['setting'])) : ?>
+                                <span class="setting-badge"><?php echo esc_html(ucfirst($property_data['setting'])); ?></span>
+                            <?php endif; ?>
                         </div>
                     <?php endif; ?>
                     
@@ -39,7 +44,7 @@ $column_class = 'featured-col-' . $columns;
                         
                         <?php if (!empty($property_data['location'])) : ?>
                             <div class="property-location">
-                                <span class="dashicons dashicons-location"></span>
+                                <i class="dashicons dashicons-location" style="color: #dc2626 !important;"></i>
                                 <?php echo esc_html($property_data['location']); ?>
                             </div>
                         <?php endif; ?>
