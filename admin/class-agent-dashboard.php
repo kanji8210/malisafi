@@ -97,7 +97,8 @@ class Malisafi_Agent_Dashboard {
                 __('Add Property', 'malisafi-mls'),
                 __('Add Property', 'malisafi-mls'),
                 'edit_posts',
-                'post-new.php?post_type=malisafi_property'
+                'malisafi-property-edit',
+                array(__CLASS__, 'render_property_edit')
             );
             
             add_submenu_page(
@@ -354,5 +355,106 @@ class Malisafi_Agent_Dashboard {
             'ajaxurl' => admin_url('admin-ajax.php'),
             'nonce' => wp_create_nonce('switch_agent_view')
         ));
+    }
+
+    /**
+     * Render property create/edit page (custom handler)
+     */
+    public static function render_property_edit() {
+        // Vérification des droits : agent, owner, developer, moderator
+        $user = wp_get_current_user();
+        $allowed_roles = array('malisafi_agent_basic', 'malisafi_agent_premium', 'malisafi_owner', 'malisafi_developer', 'malisafi_moderator');
+        if (!array_intersect($allowed_roles, $user->roles)) {
+            wp_die(__('You do not have permission to access this page.', 'malisafi-mls'));
+        }
+
+        // Récupérer l'ID de la propriété si édition
+        $property_id = isset($_GET['property_id']) ? intval($_GET['property_id']) : 0;
+
+        // Préparer les variables pour le template
+        $property_title = '';
+        $message = '';
+        $error = '';
+
+        // Soumission du formulaire
+        if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['malisafi_property_edit_nonce']) && wp_verify_nonce($_POST['malisafi_property_edit_nonce'], 'malisafi_property_edit')) {
+            $property_id = isset($_POST['property_id']) ? intval($_POST['property_id']) : 0;
+            $property_title = sanitize_text_field($_POST['property_title'] ?? '');
+            $property_gps = sanitize_text_field($_POST['property_gps'] ?? '');
+
+            if (empty($property_title)) {
+                $error = __('Title is required.', 'malisafi-mls');
+            } else {
+                $post_data = array(
+                    'post_title'   => $property_title,
+                    'post_type'    => 'malisafi_property',
+                    'post_status'  => 'pending', // Par défaut, à ajuster selon le rôle
+                );
+                // Assigner l'auteur à l'utilisateur courant (agent)
+                $post_data['post_author'] = get_current_user_id();
+
+                if ($property_id) {
+                    $post_data['ID'] = $property_id;
+                    $new_id = wp_update_post($post_data, true);
+                    if (is_wp_error($new_id)) {
+                        $error = $new_id->get_error_message();
+                    } else {
+                        // Lier la propriété à l'agent si pas déjà fait
+                        $agent_id = self::get_current_agent_id();
+                        if ($agent_id) {
+                            update_post_meta($new_id, '_property_agent_id', $agent_id);
+                        }
+                        // Sauvegarder le GPS
+                        update_post_meta($new_id, '_property_gps', $property_gps);
+                        $message = __('Property updated successfully.', 'malisafi-mls');
+                        $property_id = $new_id;
+                    }
+                } else {
+                    $new_id = wp_insert_post($post_data, true);
+                    if (is_wp_error($new_id)) {
+                        $error = $new_id->get_error_message();
+                    } else {
+                        // Lier la propriété à l'agent
+                        $agent_id = self::get_current_agent_id();
+                        if ($agent_id) {
+                            update_post_meta($new_id, '_property_agent_id', $agent_id);
+                        }
+                        // Sauvegarder le GPS
+                        update_post_meta($new_id, '_property_gps', $property_gps);
+                        $message = __('Property created successfully.', 'malisafi-mls');
+                        $property_id = $new_id;
+                        // Rediriger vers édition après création
+                        wp_redirect(admin_url('admin.php?page=malisafi-property-edit&property_id=' . $property_id . '&created=1'));
+                        exit;
+                    }
+                }
+            }
+        }
+
+        // Charger les données si édition
+        if ($property_id) {
+            $post = get_post($property_id);
+            if ($post && $post->post_type === 'malisafi_property') {
+                $property_title = $post->post_title;
+                $property_gps = get_post_meta($property_id, '_property_gps', true);
+            }
+        }
+
+        echo '<div class="wrap">';
+        echo '<h1>';
+        if ($property_id) {
+            echo __('Edit Property', 'malisafi-mls');
+        } else {
+            echo __('Add Property', 'malisafi-mls');
+        }
+        echo '</h1>';
+        if (!empty($message)) {
+            echo '<div class="notice notice-success"><p>' . esc_html($message) . '</p></div>';
+        }
+        if (!empty($error)) {
+            echo '<div class="notice notice-error"><p>' . esc_html($error) . '</p></div>';
+        }
+        include plugin_dir_path(dirname(__FILE__)) . 'admin/templates/property-edit-form.php';
+        echo '</div>';
     }
 }

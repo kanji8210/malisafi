@@ -131,7 +131,7 @@ if (!defined('ABSPATH')) {
                             </td>
                             <td><?php echo date_i18n(get_option('date_format'), strtotime($property->post_date)); ?></td>
                             <td>
-                                <a href="<?php echo get_edit_post_link($property->ID); ?>" class="button button-small"><?php _e('Edit', 'malisafi-mls'); ?></a>
+                                <a href="<?php echo admin_url('admin.php?page=malisafi-property-edit&property_id=' . $property->ID); ?>" class="button button-small"><?php _e('Edit', 'malisafi-mls'); ?></a>
                                 <a href="<?php echo get_permalink($property->ID); ?>" class="button button-small" target="_blank"><?php _e('View', 'malisafi-mls'); ?></a>
                             </td>
                         </tr>

@@ -1,14 +1,10 @@
 <?php
+namespace MalisafiMLS;
+
 /**
  * Custom post types and taxonomies
  *
  * @package MalisafiMLS
- */
-
-namespace MalisafiMLS;
-
-/**
- * Post_Types class
  */
 class Post_Types {
     
@@ -29,30 +25,18 @@ class Post_Types {
     public function enqueue_admin_scripts($hook) {
         global $post_type;
         
-        if (('post.php' === $hook || 'post-new.php' === $hook) && 'malisafi_property' === $post_type) {
-            // Enqueue WordPress media uploader
-            wp_enqueue_media();
-            
-            // Enqueue jQuery UI for sortable
-            wp_enqueue_script('jquery-ui-sortable');
-            
-            // Enqueue form handler script
-            wp_enqueue_script(
-                'malisafi-property-form-handler',
-                plugins_url('malisafi/assets/js/property-form-handler.js'),
-                array('jquery', 'jquery-ui-sortable'),
-                '1.0.1',
-                true
-            );
-            
-            // Add inline script to ensure wp.media is available
-            wp_add_inline_script('malisafi-property-form-handler', '
-                if (typeof wp !== "undefined" && typeof wp.media !== "undefined") {
-                    console.log("WordPress Media Library loaded successfully");
-                } else {
-                    console.error("WordPress Media Library not available");
-                }
-            ');
+        if (("post.php" === $hook || "post-new.php" === $hook) && 'malisafi_property' === $post_type) {
+            // Prevent access to classic editor for malisafi_property
+            $redirect_url = add_query_arg('mls_no_editor', '1', admin_url('edit.php?post_type=malisafi_property'));
+            wp_redirect($redirect_url);
+            exit;
+        }
+
+        // Show admin notice if redirected
+        if (isset($_GET['mls_no_editor']) && '1' === $_GET['mls_no_editor']) {
+            add_action('admin_notices', function() {
+                echo '<div class="notice notice-warning is-dismissible"><p><strong>Malisafi MLS :</strong> L\'édition classique est désactivée pour les propriétés. Utilisez le formulaire dédié du plugin pour créer ou modifier une propriété.</p></div>';
+            });
         }
     }
     
@@ -83,7 +67,7 @@ class Post_Types {
             'label' => __('Property', 'malisafi-mls'),
             'description' => __('Real Estate Properties', 'malisafi-mls'),
             'labels' => $labels,
-            'supports' => array('title', 'editor', 'thumbnail', 'excerpt', 'comments', 'author'),
+            'supports' => array('title', 'thumbnail', 'excerpt', 'comments', 'author'),
             'hierarchical' => false,
             'public' => true,
             'show_ui' => true,
@@ -255,31 +239,31 @@ class Post_Types {
         ?>
         <div class="malisafi-meta-fields">
             <p>
-                <label for="malisafi_property_id"><?php _e('Property ID (MLS #):', 'malisafi-mls'); ?></label>
+                <label for="malisafi_property_id"><?php esc_html_e('Property ID (MLS #):', 'malisafi-mls'); ?></label>
                 <input type="text" id="malisafi_property_id" name="malisafi_property_id" value="<?php echo esc_attr($property_id); ?>" class="widefat">
             </p>
             <p>
-                <label for="malisafi_bedrooms"><?php _e('Bedrooms:', 'malisafi-mls'); ?></label>
+                <label for="malisafi_bedrooms"><?php esc_html_e('Bedrooms:', 'malisafi-mls'); ?></label>
                 <input type="number" id="malisafi_bedrooms" name="malisafi_bedrooms" value="<?php echo esc_attr($bedrooms); ?>" min="0" step="1">
             </p>
             <p>
-                <label for="malisafi_bathrooms"><?php _e('Bathrooms:', 'malisafi-mls'); ?></label>
+                <label for="malisafi_bathrooms"><?php esc_html_e('Bathrooms:', 'malisafi-mls'); ?></label>
                 <input type="number" id="malisafi_bathrooms" name="malisafi_bathrooms" value="<?php echo esc_attr($bathrooms); ?>" min="0" step="0.5">
             </p>
             <p>
-                <label for="malisafi_area"><?php _e('Area (sq ft):', 'malisafi-mls'); ?></label>
+                <label for="malisafi_area"><?php esc_html_e('Area (sq ft):', 'malisafi-mls'); ?></label>
                 <input type="number" id="malisafi_area" name="malisafi_area" value="<?php echo esc_attr($area); ?>" min="0">
             </p>
             <p>
-                <label for="malisafi_lot_size"><?php _e('Lot Size (sq ft):', 'malisafi-mls'); ?></label>
+                <label for="malisafi_lot_size"><?php esc_html_e('Lot Size (sq ft):', 'malisafi-mls'); ?></label>
                 <input type="number" id="malisafi_lot_size" name="malisafi_lot_size" value="<?php echo esc_attr($lot_size); ?>" min="0">
             </p>
             <p>
-                <label for="malisafi_year_built"><?php _e('Year Built:', 'malisafi-mls'); ?></label>
+                <label for="malisafi_year_built"><?php esc_html_e('Year Built:', 'malisafi-mls'); ?></label>
                 <input type="number" id="malisafi_year_built" name="malisafi_year_built" value="<?php echo esc_attr($year_built); ?>" min="1800" max="<?php echo date('Y') + 5; ?>">
             </p>
             <p>
-                <label for="malisafi_garage"><?php _e('Garage Spaces:', 'malisafi-mls'); ?></label>
+                <label for="malisafi_garage"><?php esc_html_e('Garage Spaces:', 'malisafi-mls'); ?></label>
                 <input type="number" id="malisafi_garage" name="malisafi_garage" value="<?php echo esc_attr($garage); ?>" min="0">
             </p>
         </div>
@@ -301,21 +285,21 @@ class Post_Types {
         ?>
         <div style="display: flex; gap: 15px; align-items: flex-start;">
             <p style="flex: 1;">
-                <label for="malisafi_price"><?php _e('Price:', 'malisafi-mls'); ?></label>
+                <label for="malisafi_price"><?php esc_html_e('Price:', 'malisafi-mls'); ?></label>
                 <input type="number" id="malisafi_price" name="malisafi_price" value="<?php echo esc_attr($price); ?>" min="0" class="widefat" step="0.01">
             </p>
             <p style="flex: 0 0 120px;">
-                <label for="malisafi_currency"><?php _e('Currency:', 'malisafi-mls'); ?></label>
+                <label for="malisafi_currency"><?php esc_html_e('Currency:', 'malisafi-mls'); ?></label>
                 <select id="malisafi_currency" name="malisafi_currency" class="widefat">
-                    <option value="USD" <?php selected($currency, 'USD'); ?>>USD ($)</option>
-                    <option value="KES" <?php selected($currency, 'KES'); ?>>KES (KSh)</option>
+                    <option value="USD" <?php selected($currency, 'USD'); ?>><?php esc_html_e('USD ($)', 'malisafi-mls'); ?></option>
+                    <option value="KES" <?php selected($currency, 'KES'); ?>><?php esc_html_e('KES (KSh)', 'malisafi-mls'); ?></option>
                 </select>
             </p>
         </div>
         <p>
             <label>
                 <input type="checkbox" name="malisafi_featured" value="1" <?php checked($is_featured, '1'); ?>>
-                <?php _e('Featured Property', 'malisafi-mls'); ?>
+                <?php esc_html_e('Featured Property', 'malisafi-mls'); ?>
             </label>
         </p>
         <?php
@@ -336,37 +320,37 @@ class Post_Types {
         $longitude = get_post_meta($post->ID, '_malisafi_longitude', true);
         ?>
         <div class="notice notice-info inline" style="margin: 10px 0; padding: 10px;">
-            <p><strong><span class="dashicons dashicons-info" style="color: #2271b1;"></span> <?php _e('Privacy Notice:', 'malisafi-mls'); ?></strong></p>
-            <p><?php _e('The exact street address is optional and will <strong>not be shown</strong> to clients on the public website. Only the city and general area will be displayed for privacy and security reasons.', 'malisafi-mls'); ?></p>
+            <p><strong><span class="dashicons dashicons-info" style="color: #2271b1;"></span> <?php esc_html_e('Privacy Notice:', 'malisafi-mls'); ?></strong></p>
+            <p><?php esc_html_e('The exact street address is optional and will not be shown to clients on the public website. Only the city and general area will be displayed for privacy and security reasons.', 'malisafi-mls'); ?></p>
         </div>
         <p>
-            <label for="malisafi_address"><?php _e('Street Address (Optional - For Internal Use Only):', 'malisafi-mls'); ?></label>
+            <label for="malisafi_address"><?php esc_html_e('Street Address (Optional - For Internal Use Only):', 'malisafi-mls'); ?></label>
             <input type="text" id="malisafi_address" name="malisafi_address" value="<?php echo esc_attr($address); ?>" class="widefat" placeholder="<?php esc_attr_e('e.g., 123 Main Street', 'malisafi-mls'); ?>">
-            <small class="description"><?php _e('This address will remain private and is only for your records.', 'malisafi-mls'); ?></small>
+            <small class="description"><?php esc_html_e('This address will remain private and is only for your records.', 'malisafi-mls'); ?></small>
         </p>
         <p>
-            <label for="malisafi_city"><?php _e('City:', 'malisafi-mls'); ?></label>
+            <label for="malisafi_city"><?php esc_html_e('City:', 'malisafi-mls'); ?></label>
             <input type="text" id="malisafi_city" name="malisafi_city" value="<?php echo esc_attr($city); ?>" class="widefat">
         </p>
         <p>
-            <label for="malisafi_state"><?php _e('State/Province:', 'malisafi-mls'); ?></label>
+            <label for="malisafi_state"><?php esc_html_e('State/Province:', 'malisafi-mls'); ?></label>
             <input type="text" id="malisafi_state" name="malisafi_state" value="<?php echo esc_attr($state); ?>" class="widefat">
         </p>
         <p>
-            <label for="malisafi_zip"><?php _e('ZIP/Postal Code:', 'malisafi-mls'); ?></label>
+            <label for="malisafi_zip"><?php esc_html_e('ZIP/Postal Code:', 'malisafi-mls'); ?></label>
             <input type="text" id="malisafi_zip" name="malisafi_zip" value="<?php echo esc_attr($zip); ?>" class="widefat">
         </p>
         <p>
-            <label for="malisafi_country"><?php _e('Country:', 'malisafi-mls'); ?></label>
+            <label for="malisafi_country"><?php esc_html_e('Country:', 'malisafi-mls'); ?></label>
             <input type="text" id="malisafi_country" name="malisafi_country" value="<?php echo esc_attr($country); ?>" class="widefat">
         </p>
         <hr>
         <p>
-            <label for="malisafi_latitude"><?php _e('Latitude:', 'malisafi-mls'); ?></label>
+            <label for="malisafi_latitude"><?php esc_html_e('Latitude:', 'malisafi-mls'); ?></label>
             <input type="text" id="malisafi_latitude" name="malisafi_latitude" value="<?php echo esc_attr($latitude); ?>" class="widefat">
         </p>
         <p>
-            <label for="malisafi_longitude"><?php _e('Longitude:', 'malisafi-mls'); ?></label>
+            <label for="malisafi_longitude"><?php esc_html_e('Longitude:', 'malisafi-mls'); ?></label>
             <input type="text" id="malisafi_longitude" name="malisafi_longitude" value="<?php echo esc_attr($longitude); ?>" class="widefat">
         </p>
         <?php
@@ -393,31 +377,31 @@ class Post_Types {
         ));
         ?>
         <p>
-            <label for="property_agent_id"><strong><?php _e('Assigned Agent:', 'malisafi-mls'); ?></strong></label>
+            <label for="property_agent_id"><strong><?php esc_html_e('Assigned Agent:', 'malisafi-mls'); ?></strong></label>
             <select name="property_agent_id" id="property_agent_id" class="widefat">
-                <option value=""><?php _e('Select Agent Profile...', 'malisafi-mls'); ?></option>
+                <option value=""><?php esc_html_e('Select Agent Profile...', 'malisafi-mls'); ?></option>
                 <?php foreach ($agents as $agent): ?>
-                    <option value="<?php echo $agent->ID; ?>" <?php selected($agent_id, $agent->ID); ?>>
+                    <option value="<?php echo esc_attr($agent->ID); ?>" <?php selected($agent_id, $agent->ID); ?>>
                         <?php echo esc_html($agent->post_title); ?>
                     </option>
                 <?php endforeach; ?>
             </select>
-            <small><?php _e('Link this property to an agent profile', 'malisafi-mls'); ?></small>
+            <small><?php esc_html_e('Link this property to an agent profile', 'malisafi-mls'); ?></small>
         </p>
         
         <hr>
-        <p><em><?php _e('Or enter agent information manually (legacy):', 'malisafi-mls'); ?></em></p>
+        <p><em><?php esc_html_e('Or enter agent information manually (legacy):', 'malisafi-mls'); ?></em></p>
         
         <p>
-            <label for="malisafi_agent_name"><?php _e('Agent Name:', 'malisafi-mls'); ?></label>
+            <label for="malisafi_agent_name"><?php esc_html_e('Agent Name:', 'malisafi-mls'); ?></label>
             <input type="text" id="malisafi_agent_name" name="malisafi_agent_name" value="<?php echo esc_attr($agent_name); ?>" class="widefat">
         </p>
         <p>
-            <label for="malisafi_agent_email"><?php _e('Agent Email:', 'malisafi-mls'); ?></label>
+            <label for="malisafi_agent_email"><?php esc_html_e('Agent Email:', 'malisafi-mls'); ?></label>
             <input type="email" id="malisafi_agent_email" name="malisafi_agent_email" value="<?php echo esc_attr($agent_email); ?>" class="widefat">
         </p>
         <p>
-            <label for="malisafi_agent_phone"><?php _e('Agent Phone:', 'malisafi-mls'); ?></label>
+            <label for="malisafi_agent_phone"><?php esc_html_e('Agent Phone:', 'malisafi-mls'); ?></label>
             <input type="tel" id="malisafi_agent_phone" name="malisafi_agent_phone" value="<?php echo esc_attr($agent_phone); ?>" class="widefat">
         </p>
         <?php
@@ -434,8 +418,8 @@ class Post_Types {
         ?>
         <div class="malisafi-gallery-container">
             <div class="notice notice-info inline" style="margin: 10px 0 15px 0; padding: 10px;">
-                <p><strong><span class="dashicons dashicons-camera"></span> <?php _e('Photo Gallery', 'malisafi-mls'); ?></strong></p>
-                <p><?php _e('Upload multiple photos of the property. The first photo will be used as the featured image. Recommended size: 1200x800px or larger.', 'malisafi-mls'); ?></p>
+                <p><strong><span class="dashicons dashicons-camera"></span> <?php esc_html_e('Photo Gallery', 'malisafi-mls'); ?></strong></p>
+                <p><?php esc_html_e('Upload multiple photos of the property. The first photo will be used as the featured image. Recommended size: 1200x800px or larger.', 'malisafi-mls'); ?></p>
             </div>
             
             <div class="malisafi-gallery-images" style="display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 15px;">
@@ -455,16 +439,16 @@ class Post_Types {
             <p>
                 <button type="button" class="button button-primary button-large malisafi-upload-gallery" style="margin-right: 10px;">
                     <span class="dashicons dashicons-upload" style="margin-top: 3px;"></span>
-                    <?php _e('Add Photos', 'malisafi-mls'); ?>
+                    <?php esc_html_e('Add Photos', 'malisafi-mls'); ?>
                 </button>
                 <button type="button" class="button button-secondary malisafi-clear-gallery">
                     <span class="dashicons dashicons-trash"></span>
-                    <?php _e('Clear All', 'malisafi-mls'); ?>
+                    <?php esc_html_e('Clear All', 'malisafi-mls'); ?>
                 </button>
             </p>
             
             <p class="description">
-                <?php _e('Click "Add Photos" to select multiple images. Drag images to reorder them.', 'malisafi-mls'); ?>
+                <?php esc_html_e('Click "Add Photos" to select multiple images. Drag images to reorder them.', 'malisafi-mls'); ?>
             </p>
         </div>
         
@@ -497,7 +481,7 @@ class Post_Types {
             // Check if wp.media is available
             if (typeof wp === 'undefined' || typeof wp.media === 'undefined') {
                 console.error('WordPress Media Library not loaded');
-                $('.malisafi-upload-gallery').prop('disabled', true).text('<?php _e('Media Library not available', 'malisafi-mls'); ?>');
+                $('.malisafi-upload-gallery').prop('disabled', true).text('<?php esc_html_e('Media Library not available', 'malisafi-mls'); ?>');
                 return;
             }
             
@@ -512,9 +496,9 @@ class Post_Types {
                 }
                 
                 fileFrame = wp.media({
-                    title: '<?php _e('Select Property Photos', 'malisafi-mls'); ?>',
+                    title: '<?php esc_html_e('Select Property Photos', 'malisafi-mls'); ?>',
                     button: {
-                        text: '<?php _e('Add to Gallery', 'malisafi-mls'); ?>'
+                        text: '<?php esc_html_e('Add to Gallery', 'malisafi-mls'); ?>'
                     },
                     multiple: true,
                     library: {
@@ -555,7 +539,7 @@ class Post_Types {
             // Remove image
             $(document).on('click', '.malisafi-remove-image', function(e) {
                 e.preventDefault();
-                if (confirm('<?php _e('Remove this photo from gallery?', 'malisafi-mls'); ?>')) {
+                if (confirm('<?php esc_html_e('Remove this photo from gallery?', 'malisafi-mls'); ?>')) {
                     $(this).closest('.malisafi-gallery-image').fadeOut(300, function() {
                         $(this).remove();
                     });
@@ -565,7 +549,7 @@ class Post_Types {
             // Clear all
             $('.malisafi-clear-gallery').on('click', function(e) {
                 e.preventDefault();
-                if (confirm('<?php _e('Remove all photos from gallery? This cannot be undone.', 'malisafi-mls'); ?>')) {
+                if (confirm('<?php esc_html_e('Remove all photos from gallery? This cannot be undone.', 'malisafi-mls'); ?>')) {
                     $('.malisafi-gallery-images').empty();
                 }
             });
@@ -604,70 +588,82 @@ class Post_Types {
             return;
         }
         
-        // Save property details
-        if (isset($_POST['malisafi_property_details_nonce']) && wp_verify_nonce($_POST['malisafi_property_details_nonce'], 'malisafi_property_details')) {
-            $fields = array('property_id', 'bedrooms', 'bathrooms', 'area', 'lot_size', 'year_built', 'garage');
-            foreach ($fields as $field) {
-                if (isset($_POST['malisafi_' . $field])) {
-                    update_post_meta($post_id, '_malisafi_' . $field, sanitize_text_field($_POST['malisafi_' . $field]));
-                }
-            }
-        }
+        // Check nonces
+        $nonces = array(
+            'malisafi_property_details' => 'malisafi_property_details_nonce',
+            'malisafi_property_pricing' => 'malisafi_property_pricing_nonce',
+            'malisafi_property_location' => 'malisafi_property_location_nonce',
+            'malisafi_property_agent' => 'malisafi_property_agent_nonce',
+            'malisafi_property_gallery' => 'malisafi_property_gallery_nonce'
+        );
         
-        // Save pricing
-        if (isset($_POST['malisafi_property_pricing_nonce']) && wp_verify_nonce($_POST['malisafi_property_pricing_nonce'], 'malisafi_property_pricing')) {
-            if (isset($_POST['malisafi_price'])) {
-                update_post_meta($post_id, '_malisafi_price', sanitize_text_field($_POST['malisafi_price']));
-            }
-            if (isset($_POST['malisafi_currency'])) {
-                update_post_meta($post_id, '_malisafi_currency', sanitize_text_field($_POST['malisafi_currency']));
-            }
-            update_post_meta($post_id, '_malisafi_featured', isset($_POST['malisafi_featured']) ? '1' : '0');
-        }
-        
-        // Save location
-        if (isset($_POST['malisafi_property_location_nonce']) && wp_verify_nonce($_POST['malisafi_property_location_nonce'], 'malisafi_property_location')) {
-            $location_fields = array('address', 'city', 'state', 'zip', 'country', 'county', 'neighbourhood', 'setting', 'latitude', 'longitude');
-            foreach ($location_fields as $field) {
-                if (isset($_POST['malisafi_' . $field])) {
-                    update_post_meta($post_id, '_malisafi_' . $field, sanitize_text_field($_POST['malisafi_' . $field]));
-                }
-            }
-        }
-        
-        // Save agent info
-        if (isset($_POST['malisafi_property_agent_nonce']) && wp_verify_nonce($_POST['malisafi_property_agent_nonce'], 'malisafi_property_agent')) {
-            // Save agent profile link
-            if (isset($_POST['property_agent_id'])) {
-                $agent_id = intval($_POST['property_agent_id']);
-                if ($agent_id > 0) {
-                    update_post_meta($post_id, '_property_agent_id', $agent_id);
-                } else {
-                    delete_post_meta($post_id, '_property_agent_id');
-                }
+        foreach ($nonces as $action => $nonce_name) {
+            if (!isset($_POST[$nonce_name]) || !wp_verify_nonce($_POST[$nonce_name], $action)) {
+                continue;
             }
             
-            // Save legacy agent fields
-            $agent_fields = array('agent_name', 'agent_email', 'agent_phone');
-            foreach ($agent_fields as $field) {
-                if (isset($_POST['malisafi_' . $field])) {
-                    update_post_meta($post_id, '_malisafi_' . $field, sanitize_text_field($_POST['malisafi_' . $field]));
-                }
-            }
-        }
-        
-        // Save gallery
-        if (isset($_POST['malisafi_property_gallery_nonce']) && wp_verify_nonce($_POST['malisafi_property_gallery_nonce'], 'malisafi_property_gallery')) {
-            if (isset($_POST['malisafi_gallery_ids']) && is_array($_POST['malisafi_gallery_ids'])) {
-                $gallery_ids = array_map('intval', $_POST['malisafi_gallery_ids']);
-                update_post_meta($post_id, '_malisafi_gallery_ids', implode(',', $gallery_ids));
-                
-                // Set first image as featured image if no featured image exists
-                if (!empty($gallery_ids) && !has_post_thumbnail($post_id)) {
-                    set_post_thumbnail($post_id, $gallery_ids[0]);
-                }
-            } else {
-                delete_post_meta($post_id, '_malisafi_gallery_ids');
+            switch ($action) {
+                case 'malisafi_property_details':
+                    $fields = array('property_id', 'bedrooms', 'bathrooms', 'area', 'lot_size', 'year_built', 'garage');
+                    foreach ($fields as $field) {
+                        if (isset($_POST['malisafi_' . $field])) {
+                            update_post_meta($post_id, '_malisafi_' . $field, sanitize_text_field($_POST['malisafi_' . $field]));
+                        }
+                    }
+                    break;
+                    
+                case 'malisafi_property_pricing':
+                    if (isset($_POST['malisafi_price'])) {
+                        update_post_meta($post_id, '_malisafi_price', sanitize_text_field($_POST['malisafi_price']));
+                    }
+                    if (isset($_POST['malisafi_currency'])) {
+                        update_post_meta($post_id, '_malisafi_currency', sanitize_text_field($_POST['malisafi_currency']));
+                    }
+                    update_post_meta($post_id, '_malisafi_featured', isset($_POST['malisafi_featured']) ? '1' : '0');
+                    break;
+                    
+                case 'malisafi_property_location':
+                    $location_fields = array('address', 'city', 'state', 'zip', 'country', 'latitude', 'longitude');
+                    foreach ($location_fields as $field) {
+                        if (isset($_POST['malisafi_' . $field])) {
+                            update_post_meta($post_id, '_malisafi_' . $field, sanitize_text_field($_POST['malisafi_' . $field]));
+                        }
+                    }
+                    break;
+                    
+                case 'malisafi_property_agent':
+                    // Save agent profile link
+                    if (isset($_POST['property_agent_id'])) {
+                        $agent_id = intval($_POST['property_agent_id']);
+                        if ($agent_id > 0) {
+                            update_post_meta($post_id, '_property_agent_id', $agent_id);
+                        } else {
+                            delete_post_meta($post_id, '_property_agent_id');
+                        }
+                    }
+                    
+                    // Save legacy agent fields
+                    $agent_fields = array('agent_name', 'agent_email', 'agent_phone');
+                    foreach ($agent_fields as $field) {
+                        if (isset($_POST['malisafi_' . $field])) {
+                            update_post_meta($post_id, '_malisafi_' . $field, sanitize_text_field($_POST['malisafi_' . $field]));
+                        }
+                    }
+                    break;
+                    
+                case 'malisafi_property_gallery':
+                    if (isset($_POST['malisafi_gallery_ids']) && is_array($_POST['malisafi_gallery_ids'])) {
+                        $gallery_ids = array_map('intval', $_POST['malisafi_gallery_ids']);
+                        update_post_meta($post_id, '_malisafi_gallery_ids', implode(',', $gallery_ids));
+                        
+                        // Set first image as featured image if no featured image exists
+                        if (!empty($gallery_ids) && !has_post_thumbnail($post_id)) {
+                            set_post_thumbnail($post_id, $gallery_ids[0]);
+                        }
+                    } else {
+                        delete_post_meta($post_id, '_malisafi_gallery_ids');
+                    }
+                    break;
             }
         }
     }

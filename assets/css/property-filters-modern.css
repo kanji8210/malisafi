@@ -1,3 +1,30 @@
+/* ===== RESULTS HEADER FLEX LAYOUT ===== */
+.results-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    margin-bottom: 18px;
+}
+
+.results-count {
+    font-size: 15px;
+    color: var(--mls-text-primary, #222);
+    margin-left: 0;
+    font-weight: 500;
+}
+
+@media (max-width: 768px) {
+    .results-header {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+    }
+    .results-count {
+        text-align: left;
+        margin-bottom: 4px;
+    }
+}
 /**
  * Property Filters Modern - Responsive Filter System Styles
  * Mobile-first design with collapsible filters
@@ -553,3 +580,21 @@
         gap: 14px;
     }
 }
+
+/* ===== THEME INHERITANCE: use theme font & colors for content, except buttons ===== */
+/* Apply to main plugin containers and children but exclude interactive buttons so their styles remain intact */
+.malisafi-properties-container,
+.malisafi-filters-container,
+.malisafi-properties-grid,
+.no-results,
+.malisafi-properties-container *:not(button):not([type="button"]):not([type="submit"]):not(.search-button):not(.load-more-button):not(.clear-filters-button):not(.filter-toggle-button):not(.advanced-filters-toggle),
+.malisafi-filters-container *:not(button):not([type="button"]):not([type="submit"]):not(.search-button):not(.load-more-button):not(.clear-filters-button):not(.filter-toggle-button):not(.advanced-filters-toggle),
+.malisafi-properties-grid *:not(button):not([type="button"]):not([type="submit"]):not(.search-button):not(.load-more-button):not(.clear-filters-button):not(.filter-toggle-button):not(.advanced-filters-toggle),
+.no-results *:not(button) {
+    color: inherit !important;
+    font-family: inherit !important;
+    font-size: inherit !important;
+    font-weight: inherit !important;
+    line-height: inherit !important;
+}
+

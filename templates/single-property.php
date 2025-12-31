@@ -220,40 +220,28 @@ while (have_posts()) : the_post();
             
             <!-- Price and Key Details -->
             <div class="property-key-details">
-                <div class="property-price-large">
-                    <?php echo esc_html($formatted_price); ?>
-                </div>
-                
-                <div class="property-specs">
+                <div class="property-specs-row">
+                    <div class="spec-icon price-icon" title="<?php echo esc_attr($formatted_price); ?>">
+                        <span class="dashicons dashicons-tag"></span>
+                    </div>
                     <?php if ($bedrooms) : ?>
-                        <div class="spec-item">
+                        <div class="spec-icon" title="<?php echo esc_attr($bedrooms . ' Bedroom' . ($bedrooms > 1 ? 's' : '')); ?>">
                             <span class="dashicons dashicons-admin-home"></span>
-                            <span class="spec-value"><?php echo esc_html($bedrooms); ?></span>
-                            <span class="spec-label">Bedroom<?php echo $bedrooms > 1 ? 's' : ''; ?></span>
                         </div>
                     <?php endif; ?>
-                    
                     <?php if ($bathrooms) : ?>
-                        <div class="spec-item">
+                        <div class="spec-icon" title="<?php echo esc_attr($bathrooms . ' Bathroom' . ($bathrooms > 1 ? 's' : '')); ?>">
                             <span class="dashicons dashicons-admin-appearance"></span>
-                            <span class="spec-value"><?php echo esc_html($bathrooms); ?></span>
-                            <span class="spec-label">Bathroom<?php echo $bathrooms > 1 ? 's' : ''; ?></span>
                         </div>
                     <?php endif; ?>
-                    
                     <?php if ($area) : ?>
-                        <div class="spec-item">
+                        <div class="spec-icon" title="<?php echo esc_attr(number_format($area) . ' sq ft'); ?>">
                             <span class="dashicons dashicons-grid-view"></span>
-                            <span class="spec-value"><?php echo number_format($area); ?></span>
-                            <span class="spec-label">sq ft</span>
                         </div>
                     <?php endif; ?>
-                    
                     <?php if ($garage) : ?>
-                        <div class="spec-item">
+                        <div class="spec-icon" title="<?php echo esc_attr($garage . ' Garage'); ?>">
                             <span class="dashicons dashicons-car"></span>
-                            <span class="spec-value"><?php echo esc_html($garage); ?></span>
-                            <span class="spec-label">Garage</span>
                         </div>
                     <?php endif; ?>
                 </div>

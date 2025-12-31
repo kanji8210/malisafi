@@ -1,3 +1,72 @@
+/* ===== PROPERTY SPECS ROW (ICONS ONLY) ===== */
+.property-specs-row {
+    display: flex;
+    align-items: center;
+    gap: 32px;
+    margin-bottom: var(--mls-space-lg);
+    justify-content: flex-start;
+}
+.spec-icon {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    color: var(--mls-dark, #1e5277);
+    background: transparent;
+    border-radius: 50%;
+    font-size: 28px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+.spec-icon:hover::after {
+    content: attr(title);
+    position: absolute;
+    left: 50%;
+    top: 110%;
+    transform: translateX(-50%);
+    background: #fff;
+    color: var(--mls-dark, #1e5277);
+    border: 1px solid var(--mls-border-light, #e8ebed);
+    border-radius: 6px;
+    padding: 4px 10px;
+    font-size: 13px;
+    white-space: nowrap;
+    box-shadow: 0 2px 8px rgba(30,82,119,0.08);
+    z-index: 10;
+    opacity: 1;
+    pointer-events: none;
+}
+.spec-icon:hover {
+    background: var(--mls-light-grey, #f4f5f6);
+}
+.price-icon {
+    color: #dc2626;
+}
+
+/* ===== BADGE STATUS VISIBILITY ===== */
+.gallery-badges .badge.status {
+    background: #fff;
+    color: #1e5277;
+    border: 2px solid #1e5277;
+    opacity: 1;
+    font-weight: bold;
+    box-shadow: 0 2px 8px rgba(30,82,119,0.10);
+}
+
+/* ===== LOCATION ICON COLOR ===== */
+.property-location .dashicons-location {
+    color: #dc2626 !important;
+}
+
+/* ===== DARK BLUE TEXT FOR MAIN CONTENT ===== */
+.malisafi-single-property,
+.malisafi-single-property .property-title,
+.malisafi-single-property .property-description,
+.malisafi-single-property .property-key-details {
+    color: #1e5277;
+}
 /**
  * Single Property Page Styles
  * Uses global Malisafi MLS color variables - Theme integrated
