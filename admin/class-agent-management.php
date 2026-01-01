@@ -272,6 +272,15 @@ class Malisafi_Agent_Management {
                             <strong><?php echo esc_html($agent_data['name']); ?></strong>
                             <div class="row-actions">
                                 <span><a href="#" class="view-details" data-agent-id="<?php echo esc_attr($agent->ID); ?>"><?php _e('View Details', 'malisafi-mls'); ?></a></span>
+                                <?php
+                                // Lien vers le profil public de l'agent (post_type malisafi_agent)
+                                $agent_post_id = get_user_meta($agent->ID, 'agent_post_id', true);
+                                if ($agent_post_id) {
+                                    $profile_url = get_permalink($agent_post_id);
+                                    echo ' | <span><a href="' . esc_url($profile_url) . '" target="_blank">' . __('View Profile', 'malisafi-mls') . '</a></span>';
+                                    echo ' | <span><a href="' . esc_url($profile_url) . '#rate-agent-modal" class="rate-direct-link" target="_blank">' . __('Rate', 'malisafi-mls') . '</a></span>';
+                                }
+                                ?>
                             </div>
                         </td>
                         <td>

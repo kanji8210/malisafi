@@ -417,7 +417,6 @@ class Database {
             status ENUM('pending', 'approved', 'rejected') DEFAULT 'approved',
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-            
             KEY agent_id (agent_id),
             KEY user_id (user_id),
             KEY idx_agent_rating (agent_id, rating),

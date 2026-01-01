@@ -55,6 +55,7 @@ $ratings_table = $wpdb->prefix . 'mf_agent_ratings';
         $phone = get_post_meta($agent_id, '_malisafi_agent_mobile_phone', true);
         $agency = get_post_meta($agent_id, '_malisafi_agency_name', true);
         $linked_user_id = get_post_meta($agent_id, '_malisafi_linked_user', true);
+        $experience = get_post_meta($agent_id, '_malisafi_years_experience', true);
         
         // Get rating stats
         $rating_stats = $wpdb->get_row($wpdb->prepare(
@@ -64,7 +65,7 @@ $ratings_table = $wpdb->prefix . 'mf_agent_ratings';
             $agent_id
         ));
         
-        $avg_rating = $rating_stats ? round($rating_stats->average, 1) : 0;
+        $avg_rating = ($rating_stats && $rating_stats->average !== null) ? round($rating_stats->average, 1) : 0;
         $total_ratings = $rating_stats ? $rating_stats->total : 0;
         
         // Get property count
@@ -92,45 +93,29 @@ $ratings_table = $wpdb->prefix . 'mf_agent_ratings';
     <div class="agent-card">
         <a href="<?php echo esc_url($profile_url); ?>" class="agent-card-link">
             
-            <div class="agent-card-photo">
-                <?php if (has_post_thumbnail()) : ?>
-                    <?php the_post_thumbnail('medium', array('class' => 'agent-thumbnail')); ?>
-                <?php else : ?>
-                    <img src="<?php echo MALISAFI_MLS_URL . 'assets/images/default-agent.png'; ?>" alt="<?php the_title(); ?>" class="agent-thumbnail">
-                <?php endif; ?>
-            </div>
-            
-            <div class="agent-card-content">
-                <h3 class="agent-card-name"><?php the_title(); ?></h3>
-                
-                <?php if ($agency) : ?>
-                    <p class="agent-card-agency"><?php echo esc_html($agency); ?></p>
-                <?php endif; ?>
-                
-                <div class="agent-card-rating">
-                    <div class="star-rating">
-                        <?php for ($i = 1; $i <= 5; $i++) : ?>
-                            <span class="star <?php echo $i <= round($avg_rating) ? 'filled' : ''; ?>">★</span>
-                        <?php endfor; ?>
+            <div class="agent-card">
+                <a href="<?php echo esc_url($profile_url); ?>" class="agent-card-link">
+                    <div class="agent-card-photo">
+                        <?php if (has_post_thumbnail()) : ?>
+                            <?php the_post_thumbnail('medium', array('class' => 'agent-thumbnail')); ?>
+                        <?php else : ?>
+                            <img src="<?php echo MALISAFI_MLS_URL . 'assets/images/default-agent.png'; ?>" alt="<?php the_title(); ?>" class="agent-thumbnail">
+                        <?php endif; ?>
                     </div>
-                    <span class="rating-number"><?php echo number_format($avg_rating, 1); ?></span>
-                    <span class="rating-count">(<?php echo $total_ratings; ?>)</span>
+                    <div class="agent-card-info">
+                        <h3 class="agent-card-name"><?php the_title(); ?></h3>
+                        <?php if ($agency) : ?><div class="agent-card-agency"><?php echo esc_html($agency); ?></div><?php endif; ?>
+                        <div class="agent-card-meta">
+                            <?php if ($properties_count) : ?><span class="meta-item"><span class="dashicons dashicons-admin-home"></span> <?php echo $properties_count; ?> <?php _e('Properties', 'malisafi-mls'); ?></span><?php endif; ?>
+                            <?php if ($experience) : ?><span class="meta-item"><span class="dashicons dashicons-awards"></span> <?php echo esc_html($experience); ?> <?php _e('yrs', 'malisafi-mls'); ?></span><?php endif; ?>
+                        </div>
+                    </div>
+                </a>
+                <div class="agent-card-actions" style="margin-top:8px;text-align:center;">
+                    <a href="<?php echo esc_url($profile_url); ?>" class="button button-small" target="_blank"><?php _e('Voir le profil', 'malisafi-mls'); ?></a>
+                    <a href="<?php echo esc_url($profile_url); ?>" class="button button-small button-accent" target="_blank"><?php _e('Noter', 'malisafi-mls'); ?></a>
                 </div>
-                
-                <div class="agent-card-stats">
-                    <span class="stat-item">
-                        <span class="dashicons dashicons-admin-home"></span>
-                        <?php echo $properties_count; ?> <?php _e('Properties', 'malisafi-mls'); ?>
-                    </span>
-                </div>
-                
-                <?php if (get_the_excerpt()) : ?>
-                    <p class="agent-card-excerpt"><?php echo wp_trim_words(get_the_excerpt(), 20); ?></p>
-                <?php endif; ?>
-                
             </div>
-            
-        </a>
     </div>
     
     <?php endwhile; ?>

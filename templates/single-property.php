@@ -40,6 +40,16 @@ while (have_posts()) : the_post();
     $author_name = get_the_author_meta('display_name', $author_id);
     $author_email = get_the_author_meta('user_email', $author_id);
     $author_phone = get_user_meta($author_id, 'phone', true);
+
+    // Agent rating (average and total)
+    global $wpdb;
+    $ratings_table = $wpdb->prefix . 'mf_agent_ratings';
+    $rating_stats = $wpdb->get_row($wpdb->prepare(
+        "SELECT AVG(rating) as average, COUNT(*) as total FROM {$ratings_table} WHERE agent_id = %d AND status = 'approved'",
+        $author_id
+    ));
+    $avg_rating = $rating_stats && $rating_stats->average ? round($rating_stats->average, 1) : 0;
+    $total_ratings = $rating_stats ? intval($rating_stats->total) : 0;
     
     // Gallery - load all attached images
     $gallery_ids = get_post_meta($property_id, '_malisafi_gallery_ids', true);
@@ -354,7 +364,45 @@ while (have_posts()) : the_post();
             
             <!-- Agent Contact Card -->
             <div class="agent-contact-card">
+                                <?php
+                                $can_rate = false;
+                                if (is_user_logged_in()) {
+                                    $current_user = wp_get_current_user();
+                                    $user_roles = (array) $current_user->roles;
+                                    // Interdire aux agents, owners, developers de noter
+                                    $forbidden_roles = array('agent_basic', 'agent_premium', 'owner', 'developer');
+                                    if (!array_intersect($forbidden_roles, $user_roles) && $current_user->ID != $author_id) {
+                                        $can_rate = true;
+                                    }
+                                }
+                                ?>
+                                <?php if ($can_rate): ?>
+                                <button class="rate-agent-button" style="margin-bottom:10px;" onclick="document.getElementById('rate-agent-modal').classList.add('open');">
+                                    <span class="dashicons dashicons-star-half"></span> Noter cet agent
+                                </button>
+                                <?php endif; ?>
                 <h3 class="card-title">Contact Agent</h3>
+                <?php if ($avg_rating > 0): ?>
+                <div class="agent-rating-summary" style="margin-bottom:10px;">
+                    <span class="agent-rating-stars" style="color:#f5b301;font-size:1.2em;">
+                        <?php
+                        for ($i = 1; $i <= 5; $i++) {
+                            if ($i <= floor($avg_rating)) {
+                                echo '<span class="dashicons dashicons-star-filled"></span>';
+                            } elseif ($i - $avg_rating < 1) {
+                                echo '<span class="dashicons dashicons-star-half"></span>';
+                            } else {
+                                echo '<span class="dashicons dashicons-star-empty"></span>';
+                            }
+                        }
+                        ?>
+                    </span>
+                    <span class="agent-rating-value" style="margin-left:6px;">
+                        <?php echo esc_html($avg_rating); ?> / 5
+                        (<?php echo esc_html($total_ratings); ?> avis)
+                    </span>
+                </div>
+                <?php endif; ?>
                 
                 <div class="agent-info">
                     <div class="agent-avatar">
@@ -414,6 +462,77 @@ while (have_posts()) : the_post();
             </div>
             
             <!-- Property ID -->
+            <!-- Rate Agent Modal -->
+            <div id="rate-agent-modal" class="malisafi-modal">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3>Noter cet agent</h3>
+                        <button class="modal-close" onclick="document.getElementById('rate-agent-modal').classList.remove('open');">&times;</button>
+                    </div>
+                    <div class="modal-body">
+                        <?php if (!$can_rate): ?>
+                            <p>Vous devez être connecté et ne pas être agent pour noter un agent.</p>
+                        <?php else: ?>
+                        <form id="rate-agent-form" method="post">
+                            <input type="hidden" name="agent_id" value="<?php echo $author_id; ?>">
+                            <div class="form-group">
+                                <label for="rating">Votre note :</label>
+                                <select name="rating" id="rating" required>
+                                    <option value="">Choisir...</option>
+                                    <option value="5">5 - Excellent</option>
+                                    <option value="4">4 - Très bien</option>
+                                    <option value="3">3 - Bien</option>
+                                    <option value="2">2 - Moyen</option>
+                                    <option value="1">1 - Mauvais</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="review_title">Titre de l'avis :</label>
+                                <input type="text" name="review_title" id="review_title" maxlength="255" placeholder="Titre court" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="review_text">Votre avis :</label>
+                                <textarea name="review_text" id="review_text" rows="4" placeholder="Votre expérience..." required></textarea>
+                            </div>
+                            <div class="form-actions">
+                                <button type="button" class="button-secondary modal-close" onclick="document.getElementById('rate-agent-modal').classList.remove('open');">Annuler</button>
+                                <button type="submit" class="button-primary">Envoyer</button>
+                            </div>
+                        </form>
+                        <div id="rate-agent-success" style="display:none;color:var(--mls-accent);margin-top:10px;"></div>
+                        <?php endif; ?>
+                    </div>
+                </div>
+            </div>
+            <script>
+            document.getElementById('rate-agent-form')?.addEventListener('submit', function(e) {
+                e.preventDefault();
+                var form = e.target;
+                var data = new FormData(form);
+                fetch('<?php echo admin_url('admin-ajax.php'); ?>', {
+                    method: 'POST',
+                    credentials: 'same-origin',
+                    body: new URLSearchParams({
+                        action: 'malisafi_rate_agent',
+                        agent_id: data.get('agent_id'),
+                        rating: data.get('rating'),
+                        review_title: data.get('review_title'),
+                        review_text: data.get('review_text'),
+                        nonce: '<?php echo wp_create_nonce('malisafi_agent_nonce'); ?>'
+                    })
+                })
+                .then(r => r.json())
+                .then(resp => {
+                    if (resp.success) {
+                        form.style.display = 'none';
+                        document.getElementById('rate-agent-success').style.display = 'block';
+                        document.getElementById('rate-agent-success').textContent = 'Merci pour votre avis !';
+                    } else {
+                        alert(resp.data?.message || 'Erreur lors de l’envoi.');
+                    }
+                });
+            });
+            </script>
             <div class="property-meta-card">
                 <div class="meta-item">
                     <span class="meta-label">Property ID</span>
