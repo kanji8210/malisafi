@@ -642,14 +642,134 @@ class Dashboard_Shortcodes {
      * Property Submit Form
      */
     public static function property_submit_form($atts) {
-        $login_check = self::require_login();
-        if ($login_check) return $login_check;
-        
+        $user = wp_get_current_user();
+        $allowed_roles = array('malisafi_agent_basic', 'malisafi_agent_premium', 'malisafi_owner', 'malisafi_developer');
+        $has_role = false;
+        foreach ($allowed_roles as $role) {
+            if (in_array($role, $user->roles)) {
+                $has_role = true;
+                break;
+            }
+        }
+        if (!$has_role) {
+            return '<div class="malisafi-access-denied"><p>' . __('You do not have permission to submit a property.', 'malisafi-mls') . '</p></div>';
+        }
+
+        $message = '';
+        $error = '';
+        // Traitement du formulaire
+        if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['malisafi_property_submit_nonce']) && wp_verify_nonce($_POST['malisafi_property_submit_nonce'], 'malisafi_property_submit')) {
+            $title = sanitize_text_field($_POST['property_title'] ?? '');
+            $price = floatval($_POST['property_price'] ?? 0);
+            $currency = sanitize_text_field($_POST['property_currency'] ?? 'KES');
+            $bedrooms = intval($_POST['property_bedrooms'] ?? 0);
+            $bathrooms = intval($_POST['property_bathrooms'] ?? 0);
+            $area = floatval($_POST['property_area'] ?? 0);
+            $county = sanitize_text_field($_POST['property_county'] ?? '');
+            $neighbourhood = sanitize_text_field($_POST['property_neighbourhood'] ?? '');
+            $setting = sanitize_text_field($_POST['property_setting'] ?? '');
+            $description = wp_kses_post($_POST['property_description'] ?? '');
+
+            if (empty($title) || empty($price) || empty($county) || empty($setting)) {
+                $error = __('Please fill all required fields.', 'malisafi-mls');
+            } else {
+                $post_data = array(
+                    'post_title'   => $title,
+                    'post_type'    => 'malisafi_property',
+                    'post_status'  => 'pending',
+                    'post_content' => $description,
+                    'post_author'  => get_current_user_id(),
+                );
+                $new_id = wp_insert_post($post_data, true);
+                if (is_wp_error($new_id)) {
+                    $error = $new_id->get_error_message();
+                } else {
+                    update_post_meta($new_id, '_malisafi_price', $price);
+                    update_post_meta($new_id, '_malisafi_currency', $currency);
+                    update_post_meta($new_id, '_malisafi_bedrooms', $bedrooms);
+                    update_post_meta($new_id, '_malisafi_bathrooms', $bathrooms);
+                    update_post_meta($new_id, '_malisafi_area', $area);
+                    update_post_meta($new_id, '_malisafi_county', $county);
+                    update_post_meta($new_id, '_malisafi_neighbourhood', $neighbourhood);
+                    update_post_meta($new_id, '_malisafi_setting', $setting);
+                    $message = __('Property submitted successfully! It will be reviewed by a moderator.', 'malisafi-mls');
+                }
+            }
+        }
+
         ob_start();
         ?>
         <div class="malisafi-property-submit">
             <h1><?php _e('Submit Property', 'malisafi-mls'); ?></h1>
-            <p><?php _e('Property submission form coming soon...', 'malisafi-mls'); ?></p>
+            <?php if (!empty($message)) : ?>
+                <div class="notice notice-success"><p><?php echo esc_html($message); ?></p></div>
+            <?php endif; ?>
+            <?php if (!empty($error)) : ?>
+                <div class="notice notice-error"><p><?php echo esc_html($error); ?></p></div>
+            <?php endif; ?>
+            <form method="post">
+                <?php wp_nonce_field('malisafi_property_submit', 'malisafi_property_submit_nonce'); ?>
+                <div class="form-group">
+                    <label for="property_title"><?php _e('Title', 'malisafi-mls'); ?> *</label>
+                    <input type="text" name="property_title" id="property_title" class="regular-text" required />
+                </div>
+                <div class="form-group">
+                    <label for="property_price"><?php _e('Price', 'malisafi-mls'); ?> *</label>
+                    <input type="number" name="property_price" id="property_price" class="regular-text" required min="0" step="0.01" />
+                </div>
+                <div class="form-group">
+                    <label for="property_currency"><?php _e('Currency', 'malisafi-mls'); ?></label>
+                    <select name="property_currency" id="property_currency">
+                        <option value="KES">KES (KSh)</option>
+                        <option value="USD">USD ($)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="property_bedrooms"><?php _e('Bedrooms', 'malisafi-mls'); ?></label>
+                    <input type="number" name="property_bedrooms" id="property_bedrooms" class="regular-text" min="0" />
+                </div>
+                <div class="form-group">
+                    <label for="property_bathrooms"><?php _e('Bathrooms', 'malisafi-mls'); ?></label>
+                    <input type="number" name="property_bathrooms" id="property_bathrooms" class="regular-text" min="0" />
+                </div>
+                <div class="form-group">
+                    <label for="property_area"><?php _e('Area (sq ft)', 'malisafi-mls'); ?></label>
+                    <input type="number" name="property_area" id="property_area" class="regular-text" min="0" step="0.01" />
+                </div>
+                <div class="form-group">
+                    <label for="property_county"><?php _e('County', 'malisafi-mls'); ?> *</label>
+                    <select name="property_county" id="property_county" required>
+                        <option value=""><?php _e('Select County', 'malisafi-mls'); ?></option>
+                        <?php
+                        if (function_exists('malisafi_get_kenya_counties')) {
+                            $counties = malisafi_get_kenya_counties();
+                            foreach ($counties as $county) {
+                                echo '<option value="' . esc_attr($county) . '">' . esc_html($county) . '</option>';
+                            }
+                        }
+                        ?>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="property_neighbourhood"><?php _e('Neighbourhood', 'malisafi-mls'); ?></label>
+                    <input type="text" name="property_neighbourhood" id="property_neighbourhood" class="regular-text" />
+                </div>
+                <div class="form-group">
+                    <label for="property_setting"><?php _e('Setting', 'malisafi-mls'); ?> *</label>
+                    <select name="property_setting" id="property_setting" required>
+                        <option value=""><?php _e('Select Setting', 'malisafi-mls'); ?></option>
+                        <option value="urban"><?php _e('Urban', 'malisafi-mls'); ?></option>
+                        <option value="semi-rural"><?php _e('Semi-rural', 'malisafi-mls'); ?></option>
+                        <option value="rural"><?php _e('Rural', 'malisafi-mls'); ?></option>
+                        <option value="isolated"><?php _e('Isolated', 'malisafi-mls'); ?></option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="property_description"><?php _e('Description', 'malisafi-mls'); ?></label>
+                    <textarea name="property_description" id="property_description" rows="5"></textarea>
+                </div>
+                <button type="submit" class="button button-primary"><?php _e('Submit Property', 'malisafi-mls'); ?></button>
+            </form>
         </div>
         <?php
         return ob_get_clean();

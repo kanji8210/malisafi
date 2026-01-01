@@ -146,7 +146,23 @@ if (!defined('ABSPATH')) {
         <?php else: ?>
             <p><?php _e('No properties yet.', 'malisafi-mls'); ?></p>
             <p>
-                <a href="<?php echo admin_url('post-new.php?post_type=malisafi_property'); ?>" class="button button-primary">
+                <?php
+                // Redirection Add Property vers le frontend pour agent/owner/developer
+                $add_property_url = '';
+                if (function_exists('MalisafiMLS\Page_Manager::get_page_url')) {
+                    if (current_user_can('malisafi_agent_basic') || current_user_can('malisafi_agent_premium')) {
+                        $add_property_url = \MalisafiMLS\Page_Manager::get_page_url('agent_add_property');
+                    } elseif (current_user_can('malisafi_owner')) {
+                        $add_property_url = \MalisafiMLS\Page_Manager::get_page_url('owner_add_property');
+                    } elseif (current_user_can('malisafi_developer')) {
+                        $add_property_url = \MalisafiMLS\Page_Manager::get_page_url('developer_add_project');
+                    }
+                }
+                if (!$add_property_url) {
+                    $add_property_url = home_url('/add-property/');
+                }
+                ?>
+                <a href="<?php echo esc_url($add_property_url); ?>" class="button button-primary">
                     <?php _e('Add Your First Property', 'malisafi-mls'); ?>
                 </a>
             </p>
