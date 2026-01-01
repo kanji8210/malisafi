@@ -114,11 +114,86 @@ $ratings_table = $wpdb->prefix . 'mf_agent_ratings';
                 <div class="agent-card-actions" style="margin-top:8px;text-align:center;">
                     <a href="<?php echo esc_url($profile_url); ?>" class="button button-small" target="_blank"><?php _e('Voir le profil', 'malisafi-mls'); ?></a>
                     <a href="<?php echo esc_url($profile_url); ?>" class="button button-small button-accent" target="_blank"><?php _e('Noter', 'malisafi-mls'); ?></a>
+                    <button type="button" class="button button-small button-view-details" 
+                        data-agent-id="<?php echo esc_attr($agent_id); ?>"
+                        data-agent-name="<?php echo esc_attr(get_the_title()); ?>"
+                        data-agent-agency="<?php echo esc_attr($agency); ?>"
+                        data-agent-experience="<?php echo esc_attr($experience); ?>"
+                        data-agent-phone="<?php echo esc_attr($phone); ?>"
+                        data-agent-email="<?php echo esc_attr($email); ?>"
+                        data-agent-rating="<?php echo esc_attr($avg_rating); ?>"
+                        data-agent-total-ratings="<?php echo esc_attr($total_ratings); ?>"
+                        data-agent-photo="<?php echo has_post_thumbnail() ? esc_url(get_the_post_thumbnail_url($agent_id, 'medium')) : MALISAFI_MLS_URL . 'assets/images/default-agent.png'; ?>"
+                    ><?php _e('View details', 'malisafi-mls'); ?></button>
                 </div>
             </div>
     </div>
     
+
     <?php endwhile; ?>
     <?php wp_reset_postdata(); ?>
-    
-</div>
+
+    </div>
+
+    <!-- Agent Details Modal -->
+    <div id="agent-details-modal" class="malisafi-modal" style="display:none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Détails de l'agent</h3>
+                <button class="modal-close" onclick="document.getElementById('agent-details-modal').style.display='none';">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="agent-modal-info">
+                    <div class="agent-avatar" style="margin-bottom:10px;text-align:center;">
+                        <img id="modal-agent-photo" src="" alt="Agent" style="width:80px;height:80px;border-radius:50%;object-fit:cover;">
+                    </div>
+                    <div class="agent-details" style="text-align:center;">
+                        <h4 class="agent-name" id="modal-agent-name" style="margin-bottom:4px;"></h4>
+                        <div class="agent-agency" id="modal-agent-agency" style="margin-bottom:8px;color:var(--mls-text-secondary);"></div>
+                        <div class="agent-experience" id="modal-agent-experience" style="margin-bottom:8px;"></div>
+                        <div class="agent-contact-details" style="margin-bottom:8px;">
+                            <div class="contact-item" id="modal-agent-phone"></div>
+                            <div class="contact-item" id="modal-agent-email"></div>
+                        </div>
+                        <div class="agent-rating-summary" id="modal-agent-rating-summary" style="margin-bottom:10px;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+    document.querySelectorAll('.button-view-details').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            document.getElementById('agent-details-modal').style.display = 'block';
+            document.getElementById('modal-agent-photo').src = btn.dataset.agentPhoto;
+            document.getElementById('modal-agent-name').textContent = btn.dataset.agentName;
+            document.getElementById('modal-agent-agency').textContent = btn.dataset.agentAgency ? btn.dataset.agentAgency : '';
+            document.getElementById('modal-agent-experience').textContent = btn.dataset.agentExperience ? btn.dataset.agentExperience + ' ans d’expérience' : '';
+            document.getElementById('modal-agent-phone').innerHTML = btn.dataset.agentPhone ? '<span class="dashicons dashicons-phone"></span> <a href="tel:' + btn.dataset.agentPhone + '">' + btn.dataset.agentPhone + '</a>' : '';
+            document.getElementById('modal-agent-email').innerHTML = btn.dataset.agentEmail ? '<span class="dashicons dashicons-email"></span> <a href="mailto:' + btn.dataset.agentEmail + '">' + btn.dataset.agentEmail + '</a>' : '';
+            // Rating
+            var rating = parseFloat(btn.dataset.agentRating);
+            var total = parseInt(btn.dataset.agentTotalRatings);
+            var ratingHtml = '';
+            if (rating > 0) {
+                for (var i = 1; i <= 5; i++) {
+                    if (i <= Math.floor(rating)) {
+                        ratingHtml += '<span class="dashicons dashicons-star-filled"></span>';
+                    } else if (i - rating < 1) {
+                        ratingHtml += '<span class="dashicons dashicons-star-half"></span>';
+                    } else {
+                        ratingHtml += '<span class="dashicons dashicons-star-empty"></span>';
+                    }
+                }
+                ratingHtml += ' <span style="margin-left:6px;">' + rating + ' / 5 (' + total + ' avis)</span>';
+            } else {
+                ratingHtml = '<span style="color:var(--mls-text-secondary);">Aucune note</span>';
+            }
+            document.getElementById('modal-agent-rating-summary').innerHTML = ratingHtml;
+        });
+    });
+    // Fermer le modal au clic sur fond
+    document.getElementById('agent-details-modal').addEventListener('click', function(e) {
+        if (e.target === this) this.style.display = 'none';
+    });
+    </script>

@@ -1,74 +1,79 @@
-<?php
-/**
- * Single Property Detail Template
- * Displays full property details with gallery, features, and contact options
- */
-
-if (!defined('ABSPATH')) {
-    exit;
-}
-
-get_header();
-
-while (have_posts()) : the_post();
-    $property_id = get_the_ID();
-    
-    // Get property meta
-    $price = get_post_meta($property_id, '_malisafi_price', true);
-    $currency = get_post_meta($property_id, '_malisafi_currency', true) ?: 'USD';
-    $bedrooms = get_post_meta($property_id, '_malisafi_bedrooms', true);
-    $bathrooms = get_post_meta($property_id, '_malisafi_bathrooms', true);
-    $area = get_post_meta($property_id, '_malisafi_area', true);
-    $status = get_post_meta($property_id, '_malisafi_status', true);
-    $featured = get_post_meta($property_id, '_malisafi_featured', true);
-    
-    // Location data
-    $address = get_post_meta($property_id, '_malisafi_address', true);
-    $city = get_post_meta($property_id, '_malisafi_city', true);
-    $state = get_post_meta($property_id, '_malisafi_state', true);
-    $zip_code = get_post_meta($property_id, '_malisafi_zip_code', true);
-    $country = get_post_meta($property_id, '_malisafi_country', true);
-    
-    // Additional details
-    $year_built = get_post_meta($property_id, '_malisafi_year_built', true);
-    $garage = get_post_meta($property_id, '_malisafi_garage', true);
-    $property_type = wp_get_post_terms($property_id, 'malisafi_property_type', array('fields' => 'names'));
-    $property_location = wp_get_post_terms($property_id, 'malisafi_property_location', array('fields' => 'names'));
-    
-    // Agent/Author info
-    $author_id = get_post_field('post_author', $property_id);
-    $author_name = get_the_author_meta('display_name', $author_id);
-    $author_email = get_the_author_meta('user_email', $author_id);
-    $author_phone = get_user_meta($author_id, 'phone', true);
-
-    // Agent rating (average and total)
-    global $wpdb;
-    $ratings_table = $wpdb->prefix . 'mf_agent_ratings';
-    $rating_stats = $wpdb->get_row($wpdb->prepare(
-        "SELECT AVG(rating) as average, COUNT(*) as total FROM {$ratings_table} WHERE agent_id = %d AND status = 'approved'",
-        $author_id
-    ));
-    $avg_rating = $rating_stats && $rating_stats->average ? round($rating_stats->average, 1) : 0;
-    $total_ratings = $rating_stats ? intval($rating_stats->total) : 0;
-    
-    // Gallery - load all attached images
-    $gallery_ids = get_post_meta($property_id, '_malisafi_gallery_ids', true);
-    
-    // If gallery_ids meta exists, use it
-    if ($gallery_ids) {
-        $gallery_images = array_filter(array_map('trim', explode(',', $gallery_ids)));
-    } else {
-        // Fallback: get all images attached to this post
-        $attachments = get_posts(array(
-            'post_type' => 'attachment',
-            'posts_per_page' => -1,
-            'post_parent' => $property_id,
-            'post_mime_type' => 'image',
-            'orderby' => 'menu_order',
-            'order' => 'ASC'
-        ));
-        
-        $gallery_images = array();
+            <!-- Rate Agent Modal -->
+            <div id="rate-agent-modal" class="malisafi-modal">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3>Noter cet agent</h3>
+                        <button class="modal-close" onclick="document.getElementById('rate-agent-modal').classList.remove('open');">&times;</button>
+                    </div>
+                    <div class="modal-body">
+                        <?php if (!is_user_logged_in()): ?>
+                            <div style="text-align:center;padding:20px 0;">
+                                <p style="margin-bottom:16px;color:var(--mls-accent);font-weight:500;">Vous devez être connecté pour noter un agent.</p>
+                                <a href="<?php echo esc_url(wp_login_url(get_permalink())); ?>" class="button-primary" style="padding:8px 18px;">Se connecter</a>
+                            </div>
+                        <?php elseif (!$can_rate): ?>
+                            <p>Vous ne pouvez pas noter cet agent (rôle ou restriction).</p>
+                        <?php else: ?>
+                        <form id="rate-agent-form" method="post">
+                            <input type="hidden" name="agent_id" value="<?php echo $author_id; ?>">
+                            <div class="form-group">
+                                <label for="rating">Votre note :</label>
+                                <select name="rating" id="rating" required>
+                                    <option value="">Choisir...</option>
+                                    <option value="5">5 - Excellent</option>
+                                    <option value="4">4 - Très bien</option>
+                                    <option value="3">3 - Bien</option>
+                                    <option value="2">2 - Moyen</option>
+                                    <option value="1">1 - Mauvais</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="review_title">Titre de l'avis :</label>
+                                <input type="text" name="review_title" id="review_title" maxlength="255" placeholder="Titre court" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="review_text">Votre avis :</label>
+                                <textarea name="review_text" id="review_text" rows="4" placeholder="Votre expérience..." required></textarea>
+                            </div>
+                            <div class="form-actions">
+                                <button type="button" class="button-secondary modal-close" onclick="document.getElementById('rate-agent-modal').classList.remove('open');">Annuler</button>
+                                <button type="submit" class="button-primary">Envoyer</button>
+                            </div>
+                        </form>
+                        <div id="rate-agent-success" style="display:none;color:var(--mls-accent);margin-top:10px;"></div>
+                        <?php endif; ?>
+                    </div>
+                </div>
+            </div>
+            <script>
+            document.getElementById('rate-agent-form')?.addEventListener('submit', function(e) {
+                e.preventDefault();
+                var form = e.target;
+                var data = new FormData(form);
+                fetch('<?php echo admin_url('admin-ajax.php'); ?>', {
+                    method: 'POST',
+                    credentials: 'same-origin',
+                    body: new URLSearchParams({
+                        action: 'malisafi_rate_agent',
+                        agent_id: data.get('agent_id'),
+                        rating: data.get('rating'),
+                        review_title: data.get('review_title'),
+                        review_text: data.get('review_text'),
+                        nonce: '<?php echo wp_create_nonce('malisafi_agent_nonce'); ?>'
+                    })
+                })
+                .then(r => r.json())
+                .then(resp => {
+                    if (resp.success) {
+                        form.style.display = 'none';
+                        document.getElementById('rate-agent-success').style.display = 'block';
+                        document.getElementById('rate-agent-success').textContent = 'Merci pour votre avis !';
+                    } else {
+                        alert(resp.data?.message || 'Erreur lors de l’envoi.');
+                    }
+                });
+            });
+            </script>
         foreach ($attachments as $attachment) {
             $gallery_images[] = $attachment->ID;
         }
@@ -462,77 +467,60 @@ while (have_posts()) : the_post();
             </div>
             
             <!-- Property ID -->
-            <!-- Rate Agent Modal -->
-            <div id="rate-agent-modal" class="malisafi-modal">
+
+            <!-- View Agent Details Modal -->
+            <div id="view-agent-modal" class="malisafi-modal">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h3>Noter cet agent</h3>
-                        <button class="modal-close" onclick="document.getElementById('rate-agent-modal').classList.remove('open');">&times;</button>
+                        <h3>Détails de l'agent</h3>
+                        <button class="modal-close" onclick="document.getElementById('view-agent-modal').classList.remove('open');">&times;</button>
                     </div>
                     <div class="modal-body">
-                        <?php if (!$can_rate): ?>
-                            <p>Vous devez être connecté et ne pas être agent pour noter un agent.</p>
-                        <?php else: ?>
-                        <form id="rate-agent-form" method="post">
-                            <input type="hidden" name="agent_id" value="<?php echo $author_id; ?>">
-                            <div class="form-group">
-                                <label for="rating">Votre note :</label>
-                                <select name="rating" id="rating" required>
-                                    <option value="">Choisir...</option>
-                                    <option value="5">5 - Excellent</option>
-                                    <option value="4">4 - Très bien</option>
-                                    <option value="3">3 - Bien</option>
-                                    <option value="2">2 - Moyen</option>
-                                    <option value="1">1 - Mauvais</option>
-                                </select>
+                        <div class="agent-modal-info">
+                            <div class="agent-avatar" style="margin-bottom:10px;">
+                                <?php echo get_avatar($author_id, 80); ?>
                             </div>
-                            <div class="form-group">
-                                <label for="review_title">Titre de l'avis :</label>
-                                <input type="text" name="review_title" id="review_title" maxlength="255" placeholder="Titre court" required>
+                            <div class="agent-details">
+                                <h4 class="agent-name" style="margin-bottom:4px;"><?php echo esc_html($author_name); ?></h4>
+                                <p class="agent-role" style="margin-bottom:8px;">Property Agent</p>
+                                <?php if ($avg_rating > 0): ?>
+                                <div class="agent-rating-summary" style="margin-bottom:10px;">
+                                    <span class="agent-rating-stars" style="color:#f5b301;font-size:1.2em;">
+                                        <?php
+                                        for ($i = 1; $i <= 5; $i++) {
+                                            if ($i <= floor($avg_rating)) {
+                                                echo '<span class="dashicons dashicons-star-filled"></span>';
+                                            } elseif ($i - $avg_rating < 1) {
+                                                echo '<span class="dashicons dashicons-star-half"></span>';
+                                            } else {
+                                                echo '<span class="dashicons dashicons-star-empty"></span>';
+                                            }
+                                        }
+                                        ?>
+                                    </span>
+                                    <span class="agent-rating-value" style="margin-left:6px;">
+                                        <?php echo esc_html($avg_rating); ?> / 5
+                                        (<?php echo esc_html($total_ratings); ?> avis)
+                                    </span>
+                                </div>
+                                <?php endif; ?>
+                                <div class="agent-contact-details">
+                                    <?php if ($author_phone) : ?>
+                                        <div class="contact-item">
+                                            <span class="dashicons dashicons-phone"></span>
+                                            <a href="tel:<?php echo esc_attr($author_phone); ?>"><?php echo esc_html($author_phone); ?></a>
+                                        </div>
+                                    <?php endif; ?>
+                                    <div class="contact-item">
+                                        <span class="dashicons dashicons-email"></span>
+                                        <a href="mailto:<?php echo esc_attr($author_email); ?>"><?php echo esc_html($author_email); ?></a>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="form-group">
-                                <label for="review_text">Votre avis :</label>
-                                <textarea name="review_text" id="review_text" rows="4" placeholder="Votre expérience..." required></textarea>
-                            </div>
-                            <div class="form-actions">
-                                <button type="button" class="button-secondary modal-close" onclick="document.getElementById('rate-agent-modal').classList.remove('open');">Annuler</button>
-                                <button type="submit" class="button-primary">Envoyer</button>
-                            </div>
-                        </form>
-                        <div id="rate-agent-success" style="display:none;color:var(--mls-accent);margin-top:10px;"></div>
-                        <?php endif; ?>
+                        </div>
                     </div>
                 </div>
             </div>
-            <script>
-            document.getElementById('rate-agent-form')?.addEventListener('submit', function(e) {
-                e.preventDefault();
-                var form = e.target;
-                var data = new FormData(form);
-                fetch('<?php echo admin_url('admin-ajax.php'); ?>', {
-                    method: 'POST',
-                    credentials: 'same-origin',
-                    body: new URLSearchParams({
-                        action: 'malisafi_rate_agent',
-                        agent_id: data.get('agent_id'),
-                        rating: data.get('rating'),
-                        review_title: data.get('review_title'),
-                        review_text: data.get('review_text'),
-                        nonce: '<?php echo wp_create_nonce('malisafi_agent_nonce'); ?>'
-                    })
-                })
-                .then(r => r.json())
-                .then(resp => {
-                    if (resp.success) {
-                        form.style.display = 'none';
-                        document.getElementById('rate-agent-success').style.display = 'block';
-                        document.getElementById('rate-agent-success').textContent = 'Merci pour votre avis !';
-                    } else {
-                        alert(resp.data?.message || 'Erreur lors de l’envoi.');
-                    }
-                });
-            });
-            </script>
             <div class="property-meta-card">
                 <div class="meta-item">
                     <span class="meta-label">Property ID</span>
