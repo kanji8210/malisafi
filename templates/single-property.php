@@ -118,34 +118,32 @@ while (have_posts()) : the_post();
         <div class="gallery-main-wrapper">
             <div class="gallery-main">
                 <?php if (has_post_thumbnail()) : ?>
-                    <img src="<?php echo get_the_post_thumbnail_url($property_id, 'full'); ?>" alt="<?php echo esc_attr(get_the_title()); ?>" class="main-image" data-current-index="0">
+                    <div class="main-image-badge-wrapper" style="position:relative;">
+                        <img src="<?php echo get_the_post_thumbnail_url($property_id, 'full'); ?>" alt="<?php echo esc_attr(get_the_title()); ?>" class="main-image" data-current-index="0">
+                        <?php if ($status) : ?>
+                            <span class="badge status" style="position:absolute;top:18px;left:18px;z-index:2;">
+                                <?php echo esc_html($status); ?>
+                            </span>
+                        <?php endif; ?>
+                    </div>
                 <?php else : ?>
                     <img src="<?php echo plugins_url('malisafi/assets/images/placeholder-property.svg'); ?>" alt="<?php echo esc_attr(get_the_title()); ?>" class="main-image" data-current-index="0">
                 <?php endif; ?>
-                
+
                 <?php if (!empty($all_images) && count($all_images) > 1) : ?>
                 <button class="gallery-nav gallery-nav-prev" aria-label="Previous Image">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <polyline points="15 18 9 12 15 6"></polyline>
                     </svg>
                 </button>
-                
+
                 <button class="gallery-nav gallery-nav-next" aria-label="Next Image">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <polyline points="9 18 15 12 9 6"></polyline>
                     </svg>
                 </button>
                 <?php endif; ?>
-                
-                <div class="gallery-badges">
-                    <?php if ($featured) : ?>
-                        <span class="badge featured">Featured</span>
-                    <?php endif; ?>
-                    <?php if ($status) : ?>
-                        <span class="badge status"><?php echo esc_html($status); ?></span>
-                    <?php endif; ?>
-                </div>
-                
+
                 <?php if (!empty($all_images) && count($all_images) > 1) : ?>
                 <div class="gallery-counter">
                     <span class="current">1</span> / <span class="total"><?php echo count($all_images); ?></span>
@@ -163,9 +161,15 @@ while (have_posts()) : the_post();
             <?php foreach ($all_images as $index => $img_id) : 
                 $img_url = wp_get_attachment_image_url($img_id, 'medium');
                 if ($img_url) :
+                    $alt_text = get_post_meta($img_id, '_wp_attachment_image_alt', true);
             ?>
-                <div class="thumbnail <?php echo $index === 0 ? 'active' : ''; ?>" data-index="<?php echo $index; ?>" data-image="<?php echo esc_url(wp_get_attachment_image_url($img_id, 'full')); ?>">
+                <div class="thumbnail <?php echo $index === 0 ? 'active' : ''; ?>" data-index="<?php echo $index; ?>" data-image="<?php echo esc_url(wp_get_attachment_image_url($img_id, 'full')); ?>" style="position:relative;">
                     <img src="<?php echo esc_url($img_url); ?>" alt="<?php echo esc_attr(get_the_title() . ' - Image ' . ($index + 1)); ?>">
+                    <?php if ($index !== 0 && !empty($alt_text)) : ?>
+                        <span class="badge alt-badge" style="position:absolute;top:8px;left:8px;z-index:2;background:#fff;color:#1e5277;border:1px solid #1e5277;padding:2px 8px;font-size:12px;border-radius:6px;opacity:0.92;">
+                            <?php echo esc_html($alt_text); ?>
+                        </span>
+                    <?php endif; ?>
                 </div>
             <?php 
                 else:

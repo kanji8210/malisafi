@@ -64,8 +64,28 @@
 .malisafi-single-property,
 .malisafi-single-property .property-title,
 .malisafi-single-property .property-description,
-.malisafi-single-property .property-key-details {
-    color: #1e5277;
+.malisafi-single-property .property-key-details,
+.malisafi-single-property .property-content,
+.malisafi-single-property .property-meta,
+.malisafi-single-property .property-section,
+.malisafi-single-property .property-features,
+.malisafi-single-property .property-location,
+.malisafi-single-property .property-agent,
+.malisafi-single-property .property-contact,
+.malisafi-single-property .property-details,
+.malisafi-single-property .property-summary,
+.malisafi-single-property .property-extra,
+.malisafi-single-property .property-label,
+.malisafi-single-property .property-value {
+    color: var(--mls-dark, #1e5277) !important;
+}
+
+/* Exclure les boutons de la règle de couleur */
+.malisafi-single-property button,
+.malisafi-single-property .button,
+.malisafi-single-property .wp-block-button__link {
+    color: var(--btn-primary-text, #f4f5f6) !important;
+    background: var(--btn-primary-bg, #1e5277) !important;
 }
 /**
  * Single Property Page Styles

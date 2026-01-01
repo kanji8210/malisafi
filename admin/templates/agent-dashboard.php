@@ -157,7 +157,7 @@ if (!defined('ABSPATH')) {
     <div class="malisafi-card">
         <h2><?php _e('Quick Actions', 'malisafi-mls'); ?></h2>
         <div class="quick-actions-grid">
-            <a href="<?php echo admin_url('post-new.php?post_type=malisafi_property'); ?>" class="quick-action-btn">
+            <a href="<?php echo admin_url('admin.php?page=malisafi-property-edit'); ?>" class="quick-action-btn">
                 <span class="dashicons dashicons-plus-alt"></span>
                 <?php _e('Add Property', 'malisafi-mls'); ?>
             </a>
