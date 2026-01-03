@@ -11,7 +11,6 @@ $plugin_url = plugin_dir_url(dirname(__FILE__, 2)); // Go up 2 levels from templ
 // JavaScript
 $js_url = $plugin_url . 'assets/js/malisafi-single-property.js';
 if (file_exists(plugin_dir_path(dirname(__FILE__, 2)) . 'assets/js/malisafi-single-property.js')) {
-    echo '<!-- Loading JS: ' . esc_url($js_url) . ' -->';
     ?>
     <script src="<?php echo esc_url($js_url); ?>?ver=<?php echo time(); ?>" defer></script>
     <script>
@@ -28,7 +27,6 @@ if (file_exists(plugin_dir_path(dirname(__FILE__, 2)) . 'assets/js/malisafi-sing
 // CSS
 $css_url = $plugin_url . 'assets/css/single-property.css';
 if (file_exists(plugin_dir_path(dirname(__FILE__, 2)) . 'assets/css/single-property.css')) {
-    echo '<!-- Loading CSS: ' . esc_url($css_url) . ' -->';
     ?>
     <link rel="stylesheet" href="<?php echo esc_url($css_url); ?>?ver=<?php echo time(); ?>">
     <?php
@@ -45,12 +43,11 @@ while (have_posts()) : the_post();
     $area = get_post_meta($property_id, '_malisafi_area', true);
     $status = get_post_meta($property_id, '_malisafi_status', true);
     $featured = get_post_meta($property_id, '_malisafi_featured', true);
+    $verified = get_post_meta($property_id, '_malisafi_verified', true);
     
     // Location data
-    $address = get_post_meta($property_id, '_malisafi_address', true);
     $city = get_post_meta($property_id, '_malisafi_city', true);
     $state = get_post_meta($property_id, '_malisafi_state', true);
-    $zip_code = get_post_meta($property_id, '_malisafi_zip_code', true);
     $country = get_post_meta($property_id, '_malisafi_country', true);
     
     // Additional details
@@ -142,28 +139,63 @@ while (have_posts()) : the_post();
         <div class="gallery-main-wrapper">
             <div class="gallery-main">
                 <?php if (has_post_thumbnail()) : ?>
-                    <div class="main-image-badge-wrapper" style="position:relative;">
-                        <img src="<?php echo get_the_post_thumbnail_url($property_id, 'full'); ?>" alt="<?php echo esc_attr(get_the_title()); ?>" class="main-image" data-current-index="0">
-                        <?php if ($status) : ?>
-                            <span class="badge status" style="position:absolute;top:18px;left:18px;z-index:2;">
-                                <?php echo esc_html($status); ?>
-                            </span>
-                        <?php endif; ?>
+                    <div class="main-image-container">
+                        <img src="<?php echo get_the_post_thumbnail_url($property_id, 'full'); ?>" 
+                             alt="<?php echo esc_attr(get_the_title()); ?>" 
+                             class="main-image" 
+                             data-current-index="0">
+                        
+                        <!-- Property Badges -->
+                        <div class="gallery-badges">
+                            <?php if ($verified) : ?>
+                                <span class="badge verified">
+                                    <svg class="badge-icon" width="14" height="14" viewBox="0 0 24 24" fill="none">
+                                        <path d="M9 12L11 14L15 10M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" 
+                                              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                    Verified
+                                </span>
+                            <?php endif; ?>
+                            
+                            <?php if ($featured) : ?>
+                                <span class="badge featured">Featured</span>
+                            <?php endif; ?>
+                            
+                            <?php if ($status) : ?>
+                                <span class="badge status"><?php echo esc_html($status); ?></span>
+                            <?php endif; ?>
+                        </div>
                     </div>
                 <?php else : ?>
-                    <img src="<?php echo plugins_url('malisafi/assets/images/placeholder-property.svg'); ?>" alt="<?php echo esc_attr(get_the_title()); ?>" class="main-image" data-current-index="0">
+                    <div class="main-image-container">
+                        <img src="<?php echo plugins_url('malisafi/assets/images/placeholder-property.svg'); ?>" 
+                             alt="<?php echo esc_attr(get_the_title()); ?>" 
+                             class="main-image" 
+                             data-current-index="0">
+                        <?php if ($verified) : ?>
+                            <div class="gallery-badges">
+                                <span class="badge verified">
+                                    <svg class="badge-icon" width="14" height="14" viewBox="0 0 24 24" fill="none">
+                                        <path d="M9 12L11 14L15 10M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" 
+                                              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                    Verified
+                                </span>
+                            </div>
+                        <?php endif; ?>
+                    </div>
                 <?php endif; ?>
 
                 <?php if (!empty($all_images) && count($all_images) > 1) : ?>
                 <button class="gallery-nav gallery-nav-prev" aria-label="Previous Image">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <polyline points="15 18 9 12 15 6"></polyline>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M15 18L9 12L15 6"/>
                     </svg>
                 </button>
 
                 <button class="gallery-nav gallery-nav-next" aria-label="Next Image">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <polyline points="9 18 15 12 9 6"></polyline>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M9 6L15 12L9 18"/>
                     </svg>
                 </button>
                 <?php endif; ?>
@@ -176,23 +208,29 @@ while (have_posts()) : the_post();
             </div>
         </div>
         
-        <?php 
-        // Display thumbnails below if we have images
-        if (!empty($all_images)) : 
-        ?>
+        <?php if (!empty($all_images)) : ?>
         <div class="gallery-thumbnails">
             <?php foreach ($all_images as $index => $img_id) : 
                 $img_url = wp_get_attachment_image_url($img_id, 'medium');
                 if ($img_url) :
                     $alt_text = get_post_meta($img_id, '_wp_attachment_image_alt', true);
+                    // If no alt text exists, use area if available
+                    if (empty($alt_text) && $area) {
+                        $alt_text = number_format($area) . ' sq ft';
+                    }
             ?>
-                <div class="thumbnail <?php echo $index === 0 ? 'active' : ''; ?>" data-index="<?php echo $index; ?>" data-image="<?php echo esc_url(wp_get_attachment_image_url($img_id, 'full')); ?>" style="position:relative;">
-                    <img src="<?php echo esc_url($img_url); ?>" alt="<?php echo esc_attr(get_the_title() . ' - Image ' . ($index + 1)); ?>">
-                    <?php if ($index !== 0 && !empty($alt_text)) : ?>
-                        <span class="badge alt-badge" style="position:absolute;top:8px;left:8px;z-index:2;background:#fff;color:#1e5277;border:1px solid #1e5277;padding:2px 8px;font-size:12px;border-radius:6px;opacity:0.92;">
-                            <?php echo esc_html($alt_text); ?>
-                        </span>
-                    <?php endif; ?>
+                <div class="thumbnail <?php echo $index === 0 ? 'active' : ''; ?>" 
+                     data-index="<?php echo $index; ?>" 
+                     data-image="<?php echo esc_url(wp_get_attachment_image_url($img_id, 'full')); ?>">
+                    <div class="thumbnail-wrapper">
+                        <img src="<?php echo esc_url($img_url); ?>" 
+                             alt="<?php echo esc_attr(get_the_title() . ' - Image ' . ($index + 1)); ?>">
+                        <?php if (!empty($alt_text)) : ?>
+                            <span class="thumbnail-badge area-badge">
+                                <?php echo esc_html($alt_text); ?>
+                            </span>
+                        <?php endif; ?>
+                    </div>
                 </div>
             <?php endif; endforeach; ?>
         </div>
@@ -207,61 +245,161 @@ while (have_posts()) : the_post();
             <!-- Header -->
             <header class="property-header">
                 <div class="property-title-section">
+                    <div class="title-badges">
+                        <?php if ($verified) : ?>
+                            <span class="inline-badge verified-inline">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
+                                    <path d="M9 12L11 14L15 10M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" 
+                                          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                                Verified
+                            </span>
+                        <?php endif; ?>
+                        <?php if ($featured) : ?>
+                            <span class="inline-badge featured-inline">Featured</span>
+                        <?php endif; ?>
+                    </div>
+                    
                     <h1 class="property-title"><?php the_title(); ?></h1>
-                    <?php if ($city || $state) : ?>
-                        <p class="property-location">
-                            <span class="dashicons dashicons-location"></span>
-                            <?php 
-                            $location_parts = array_filter(array($city, $state, $country));
-                            echo esc_html(implode(', ', $location_parts));
-                            ?>
-                        </p>
-                    <?php endif; ?>
                 </div>
                 
                 <div class="property-actions">
-                    <button class="action-button favorite-button <?php echo $is_favorited ? 'favorited' : ''; ?>" data-property-id="<?php echo $property_id; ?>" title="Add to Favorites">
-                        <span class="dashicons dashicons-heart"></span>
+                    <button class="action-button favorite-button <?php echo $is_favorited ? 'favorited' : ''; ?>" 
+                            data-property-id="<?php echo $property_id; ?>"
+                            aria-label="<?php echo $is_favorited ? 'Remove from favorites' : 'Add to favorites'; ?>">
+                        <svg class="action-icon" width="20" height="20" viewBox="0 0 24 24" fill="<?php echo $is_favorited ? 'currentColor' : 'none'; ?>" 
+                             stroke="currentColor" stroke-width="1.5">
+                            <path d="M12 21.35L10.55 20.03C5.4 15.36 2 12.28 2 8.5C2 5.42 4.42 3 7.5 3C9.24 3 10.91 3.81 12 5.09C13.09 3.81 14.76 3 16.5 3C19.58 3 22 5.42 22 8.5C22 12.28 18.6 15.36 13.45 20.04L12 21.35Z"/>
+                        </svg>
                         <span class="action-text"><?php echo $is_favorited ? 'Favorited' : 'Favorite'; ?></span>
                     </button>
-                    <button class="action-button share-button" title="Share">
-                        <span class="dashicons dashicons-share"></span>
+                    
+                    <button class="action-button share-button" aria-label="Share property">
+                        <svg class="action-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <circle cx="18" cy="5" r="3"/>
+                            <circle cx="6" cy="12" r="3"/>
+                            <circle cx="18" cy="19" r="3"/>
+                            <path d="M8.59 13.51L15.42 17.49"/>
+                            <path d="M15.41 6.51L8.59 10.49"/>
+                        </svg>
                         <span class="action-text">Share</span>
                     </button>
-                    <button class="action-button report-button" data-property-id="<?php echo $property_id; ?>" title="Report Property">
-                        <span class="dashicons dashicons-flag"></span>
+                    
+                    <button class="action-button report-button" data-property-id="<?php echo $property_id; ?>" aria-label="Report property">
+                        <svg class="action-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <path d="M14 2H6C4.89543 2 4 2.89543 4 4V20C4 21.1046 4.89543 22 6 22H18C19.1046 22 20 21.1046 20 20V8L14 2Z"/>
+                            <path d="M14 2V8H20"/>
+                            <path d="M12 18V12"/>
+                            <path d="M12 9H12.01"/>
+                        </svg>
                         <span class="action-text">Report</span>
                     </button>
                 </div>
             </header>
             
-            <!-- Price and Key Details -->
-            <div class="property-key-details">
-                <div class="property-specs-row">
-                    <div class="spec-icon price-icon" title="<?php echo esc_attr($formatted_price); ?>">
-                        <span class="dashicons dashicons-tag"></span>
+            <!-- Property Specs - Inline Icons -->
+            <div class="property-specs-inline">
+                
+                <!-- Price -->
+                <div class="spec-item-inline spec-price">
+                    <span class="spec-icon-inline price-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 2L1 21H23L12 2Z"/>
+                            <path d="M12 6V18"/>
+                            <path d="M17 12H7"/>
+                        </svg>
+                    </span>
+                    <div class="spec-text">
+                        <span class="spec-value"><?php echo esc_html($formatted_price); ?></span>
+                        <span class="spec-label">Price</span>
                     </div>
-                    <?php if ($bedrooms) : ?>
-                        <div class="spec-icon" title="<?php echo esc_attr($bedrooms . ' Bedroom' . ($bedrooms > 1 ? 's' : '')); ?>">
-                            <span class="dashicons dashicons-admin-home"></span>
-                        </div>
-                    <?php endif; ?>
-                    <?php if ($bathrooms) : ?>
-                        <div class="spec-icon" title="<?php echo esc_attr($bathrooms . ' Bathroom' . ($bathrooms > 1 ? 's' : '')); ?>">
-                            <span class="dashicons dashicons-admin-appearance"></span>
-                        </div>
-                    <?php endif; ?>
-                    <?php if ($area) : ?>
-                        <div class="spec-icon" title="<?php echo esc_attr(number_format($area) . ' sq ft'); ?>">
-                            <span class="dashicons dashicons-grid-view"></span>
-                        </div>
-                    <?php endif; ?>
-                    <?php if ($garage) : ?>
-                        <div class="spec-icon" title="<?php echo esc_attr($garage . ' Garage'); ?>">
-                            <span class="dashicons dashicons-car"></span>
-                        </div>
-                    <?php endif; ?>
                 </div>
+                
+                <!-- Bedrooms -->
+                <?php if ($bedrooms) : ?>
+                <div class="spec-item-inline spec-bedrooms">
+                    <span class="spec-icon-inline bed-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M20 9.556V3h-2v2H6V3H4v6.557C2.81 10.25 2 11.526 2 13v4a1 1 0 0 0 1 1h1v4h2v-4h12v4h2v-4h1a1 1 0 0 0 1-1v-4c0-1.474-.811-2.75-2-3.444zM11 9H6V7h5v2zm7 0h-5V7h5v2z"/>
+                        </svg>
+                    </span>
+                    <div class="spec-text">
+                        <span class="spec-value"><?php echo esc_html($bedrooms); ?></span>
+                        <span class="spec-label">Bedrooms</span>
+                    </div>
+                </div>
+                <?php endif; ?>
+                
+                <!-- Bathrooms -->
+                <?php if ($bathrooms) : ?>
+                <div class="spec-item-inline spec-bathrooms">
+                    <span class="spec-icon-inline bathtub-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M21 10H7V7c0-1.103.897-2 2-2s2 .897 2 2h2c0-2.206-1.794-4-4-4S5 4.794 5 7v3H3a1 1 0 0 0-1 1v2c0 2.606 1.674 4.823 4 5.65V22h2v-3h8v3h2v-3.35c2.326-.827 4-3.044 4-5.65v-2a1 1 0 0 0-1-1z"/>
+                        </svg>
+                    </span>
+                    <div class="spec-text">
+                        <span class="spec-value"><?php echo esc_html($bathrooms); ?></span>
+                        <span class="spec-label">Bathrooms</span>
+                    </div>
+                </div>
+                <?php endif; ?>
+                
+                <!-- Area -->
+                <?php if ($area) : ?>
+                <div class="spec-item-inline spec-area">
+                    <span class="spec-icon-inline area-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M3 6H21V18H3V6Z"/>
+                            <path d="M3 10H21"/>
+                            <path d="M10 6V18"/>
+                        </svg>
+                    </span>
+                    <div class="spec-text">
+                        <span class="spec-value"><?php echo number_format($area); ?></span>
+                        <span class="spec-label">Sq Ft</span>
+                    </div>
+                </div>
+                <?php endif; ?>
+                
+                <!-- Location -->
+                <?php if ($city || $state) : ?>
+                <div class="spec-item-inline spec-location">
+                    <span class="spec-icon-inline location-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 10C21 17 12 23 12 23C12 23 3 17 3 10C3 7.61305 3.94821 5.32387 5.63604 3.63604C7.32387 1.94821 9.61305 1 12 1C14.3869 1 16.6761 1.94821 18.364 3.63604C20.0518 5.32387 21 7.61305 21 10Z"/>
+                            <path d="M12 13C13.6569 13 15 11.6569 15 10C15 8.34315 13.6569 7 12 7C10.3431 7 9 8.34315 9 10C9 11.6569 10.3431 13 12 13Z"/>
+                        </svg>
+                    </span>
+                    <div class="spec-text">
+                        <span class="spec-value">
+                            <?php 
+                            $location_parts = array_filter(array($city, $state, $country));
+                            echo esc_html(implode(', ', $location_parts));
+                            ?>
+                        </span>
+                        <span class="spec-label">Location</span>
+                    </div>
+                </div>
+                <?php endif; ?>
+                
+                <!-- Garage (optional) -->
+                <?php if ($garage) : ?>
+                <div class="spec-item-inline spec-garage">
+                    <span class="spec-icon-inline garage-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M6 20H18C19.1046 20 20 19.1046 20 18V10C20 8.89543 19.1046 8 18 8H6C4.89543 8 4 8.89543 4 10V18C4 19.1046 4.89543 20 6 20Z"/>
+                            <path d="M8 8V5C8 3.89543 8.89543 3 10 3H14C15.1046 3 16 3.89543 16 5V8"/>
+                            <path d="M8 16H16"/>
+                        </svg>
+                    </span>
+                    <div class="spec-text">
+                        <span class="spec-value"><?php echo esc_html($garage); ?></span>
+                        <span class="spec-label">Garage</span>
+                    </div>
+                </div>
+                <?php endif; ?>
+                
             </div>
             
             <!-- Description -->
@@ -349,7 +487,9 @@ while (have_posts()) : the_post();
                         if ($value) :
                     ?>
                         <div class="feature-item">
-                            <span class="dashicons dashicons-yes-alt"></span>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M20 6L9 17L4 12"/>
+                            </svg>
                             <span><?php echo esc_html($feature_labels[$key]); ?></span>
                         </div>
                     <?php 
@@ -379,17 +519,23 @@ while (have_posts()) : the_post();
                     }
                 }
                 ?>
-                <?php if ($can_rate): ?>
-                <button class="rate-agent-button" style="margin-bottom:10px;">
-                    <span class="dashicons dashicons-star-half"></span> Noter cet agent
-                </button>
-                <?php endif; ?>
                 
-                <h3 class="card-title">Contact Agent</h3>
+                <div class="agent-header">
+                    <h3 class="card-title">Contact Agent</h3>
+                    <?php if ($verified) : ?>
+                        <span class="agent-badge verified-badge">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
+                                <path d="M9 12L11 14L15 10M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" 
+                                      stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                            Verified
+                        </span>
+                    <?php endif; ?>
+                </div>
                 
                 <div class="agent-info">
                     <div class="agent-avatar">
-                        <?php echo get_avatar($author_id, 80); ?>
+                        <?php echo get_avatar($author_id, 64); ?>
                     </div>
                     <div class="agent-details">
                         <h4 class="agent-name"><?php echo esc_html($author_name); ?></h4>
@@ -397,21 +543,45 @@ while (have_posts()) : the_post();
                     </div>
                 </div>
                 
-                <button class="contact-agent-button" data-property-id="<?php echo $property_id; ?>" data-agent-id="<?php echo $author_id; ?>">
-                    <span class="dashicons dashicons-phone"></span>
-                    Show Contact Details
+                <?php if ($can_rate): ?>
+                <button class="rate-agent-button">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/>
+                    </svg>
+                    Rate Agent
+                </button>
+                <?php endif; ?>
+                
+                <button class="contact-agent-button" data-agent-id="<?php echo $author_id; ?>">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path d="M22 16.92V19.92C22 20.47 21.55 20.92 21 20.92H19C18.45 20.92 18 20.47 18 19.92V16.92C18 16.37 18.45 15.92 19 15.92H21C21.55 15.92 22 16.37 22 16.92Z"/>
+                        <path d="M16 8.92V11.92C16 12.47 15.55 12.92 15 12.92H13C12.45 12.92 12 12.47 12 11.92V8.92C12 8.37 12.45 7.92 13 7.92H15C15.55 7.92 16 8.37 16 8.92Z"/>
+                        <path d="M22 12.92V9.92C22 9.37 21.55 8.92 21 8.92H19C18.45 8.92 18 9.37 18 9.92V12.92C18 13.47 18.45 13.92 19 13.92H21C21.55 13.92 22 13.47 22 12.92Z"/>
+                        <path d="M16 16.92V19.92C16 20.47 15.55 20.92 15 20.92H13C12.45 20.92 12 20.47 12 19.92V16.92C12 16.37 12.45 15.92 13 15.92H15C15.55 15.92 16 16.37 16 16.92Z"/>
+                        <path d="M22 4.92V7.92C22 8.47 21.55 8.92 21 8.92H3C2.45 8.92 2 8.47 2 7.92V4.92C2 4.37 2.45 3.92 3 3.92H21C21.55 3.92 22 4.37 22 4.92Z"/>
+                    </svg>
+                    Show Contact
                 </button>
                 
                 <div class="agent-contact-details hidden">
                     <?php if ($author_phone) : ?>
                         <div class="contact-item">
-                            <span class="dashicons dashicons-phone"></span>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                <path d="M22 16.92V19.92C22 20.47 21.55 20.92 21 20.92H19C18.45 20.92 18 20.47 18 19.92V16.92C18 16.37 18.45 15.92 19 15.92H21C21.55 15.92 22 16.37 22 16.92Z"/>
+                                <path d="M16 8.92V11.92C16 12.47 15.55 12.92 15 12.92H13C12.45 12.92 12 12.47 12 11.92V8.92C12 8.37 12.45 7.92 13 7.92H15C15.55 7.92 16 8.37 16 8.92Z"/>
+                                <path d="M22 12.92V9.92C22 9.37 21.55 8.92 21 8.92H19C18.45 8.92 18 9.37 18 9.92V12.92C18 13.47 18.45 13.92 19 13.92H21C21.55 13.92 22 13.47 22 12.92Z"/>
+                                <path d="M16 16.92V19.92C16 20.47 15.55 20.92 15 20.92H13C12.45 20.92 12 20.47 12 19.92V16.92C12 16.37 12.45 15.92 13 15.92H15C15.55 15.92 16 16.37 16 16.92Z"/>
+                                <path d="M22 4.92V7.92C22 8.47 21.55 8.92 21 8.92H3C2.45 8.92 2 8.47 2 7.92V4.92C2 4.37 2.45 3.92 3 3.92H21C21.55 3.92 22 4.37 22 4.92Z"/>
+                            </svg>
                             <a href="tel:<?php echo esc_attr($author_phone); ?>"><?php echo esc_html($author_phone); ?></a>
                         </div>
                     <?php endif; ?>
                     
                     <div class="contact-item">
-                        <span class="dashicons dashicons-email"></span>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <path d="M4 4H20C21.1 4 22 4.9 22 6V18C22 19.1 21.1 20 20 20H4C2.9 20 2 19.1 2 18V6C2 4.9 2.9 4 4 4Z"/>
+                            <path d="M22 6L12 13L2 6"/>
+                        </svg>
                         <a href="mailto:<?php echo esc_attr($author_email); ?>"><?php echo esc_html($author_email); ?></a>
                     </div>
                 </div>
@@ -444,15 +614,22 @@ while (have_posts()) : the_post();
                 </div>
             </div>
             
-            <!-- Property ID -->
+            <!-- Property Meta -->
             <div class="property-meta-card">
-                <div class="meta-item">
-                    <span class="meta-label">Property ID</span>
-                    <span class="meta-value">#<?php echo str_pad($property_id, 6, '0', STR_PAD_LEFT); ?></span>
-                </div>
-                <div class="meta-item">
-                    <span class="meta-label">Published</span>
-                    <span class="meta-value"><?php echo get_the_date(); ?></span>
+                <h3 class="card-title">Property Information</h3>
+                <div class="meta-grid">
+                    <div class="meta-item">
+                        <span class="meta-label">Property ID</span>
+                        <span class="meta-value">#<?php echo str_pad($property_id, 6, '0', STR_PAD_LEFT); ?></span>
+                    </div>
+                    <div class="meta-item">
+                        <span class="meta-label">Published</span>
+                        <span class="meta-value"><?php echo get_the_date('M j, Y'); ?></span>
+                    </div>
+                    <div class="meta-item">
+                        <span class="meta-label">Last Updated</span>
+                        <span class="meta-value"><?php echo get_the_modified_date('M j, Y'); ?></span>
+                    </div>
                 </div>
             </div>
             
@@ -466,45 +643,45 @@ while (have_posts()) : the_post();
 <div id="rate-agent-modal" class="malisafi-modal">
     <div class="modal-content">
         <div class="modal-header">
-            <h3>Noter cet agent</h3>
+            <h3>Rate Agent</h3>
             <button class="modal-close">&times;</button>
         </div>
         <div class="modal-body">
             <?php if (!is_user_logged_in()): ?>
-                <div style="text-align:center;padding:20px 0;">
-                    <p style="margin-bottom:16px;color:var(--mls-accent);font-weight:500;">Vous devez être connecté pour noter un agent.</p>
-                    <a href="<?php echo esc_url(wp_login_url(get_permalink())); ?>" class="button-primary" style="padding:8px 18px;">Se connecter</a>
+                <div class="login-prompt">
+                    <p>You must be logged in to rate an agent.</p>
+                    <a href="<?php echo esc_url(wp_login_url(get_permalink())); ?>" class="button-primary">Login</a>
                 </div>
             <?php elseif (!$can_rate): ?>
-                <p>Vous ne pouvez pas noter cet agent (rôle ou restriction).</p>
+                <p>You cannot rate this agent.</p>
             <?php else: ?>
             <form id="rate-agent-form" method="post">
                 <input type="hidden" name="agent_id" value="<?php echo $author_id; ?>">
                 <div class="form-group">
-                    <label for="rating">Votre note :</label>
+                    <label for="rating">Your Rating:</label>
                     <select name="rating" id="rating" required>
-                        <option value="">Choisir...</option>
+                        <option value="">Choose...</option>
                         <option value="5">5 - Excellent</option>
-                        <option value="4">4 - Très bien</option>
-                        <option value="3">3 - Bien</option>
-                        <option value="2">2 - Moyen</option>
-                        <option value="1">1 - Mauvais</option>
+                        <option value="4">4 - Very Good</option>
+                        <option value="3">3 - Good</option>
+                        <option value="2">2 - Average</option>
+                        <option value="1">1 - Poor</option>
                     </select>
                 </div>
                 <div class="form-group">
-                    <label for="review_title">Titre de l'avis :</label>
-                    <input type="text" name="review_title" id="review_title" maxlength="255" placeholder="Titre court" required>
+                    <label for="review_title">Review Title:</label>
+                    <input type="text" name="review_title" id="review_title" maxlength="255" placeholder="Short title" required>
                 </div>
                 <div class="form-group">
-                    <label for="review_text">Votre avis :</label>
-                    <textarea name="review_text" id="review_text" rows="4" placeholder="Votre expérience..." required></textarea>
+                    <label for="review_text">Your Review:</label>
+                    <textarea name="review_text" id="review_text" rows="4" placeholder="Your experience..." required></textarea>
                 </div>
                 <div class="form-actions">
-                    <button type="button" class="button-secondary modal-close">Annuler</button>
-                    <button type="submit" class="button-primary">Envoyer</button>
+                    <button type="button" class="button-secondary modal-close">Cancel</button>
+                    <button type="submit" class="button-primary">Submit</button>
                 </div>
             </form>
-            <div id="rate-agent-success" style="display:none;color:var(--mls-accent);margin-top:10px;"></div>
+            <div id="rate-agent-success" class="success-message hidden"></div>
             <?php endif; ?>
         </div>
     </div>
