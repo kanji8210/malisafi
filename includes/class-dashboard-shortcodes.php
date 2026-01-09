@@ -163,7 +163,7 @@ class Dashboard_Shortcodes {
                     $args = [
                         'post_type' => 'malisafi_property',
                         'post__in' => $favorites,
-                        'posts_per_page' => -1,
+                        'posts_per_page' => 50, // Limit to 50 favorites at a time for performance
                         'orderby' => 'post__in'
                     ];
                     
@@ -412,7 +412,7 @@ class Dashboard_Shortcodes {
         $args = [
             'post_type' => 'malisafi_property',
             'author' => $current_user->ID,
-            'posts_per_page' => -1,
+            'posts_per_page' => 100, // Limit to 100 properties max for performance
             'post_status' => ['publish', 'pending', 'draft']
         ];
         

@@ -371,8 +371,41 @@ composer install</pre>
             wp_send_json_success(array(
                 'session_id' => $session->id
             ));
-        } catch (Exception $e) {
-            wp_send_json_error(array('message' => $e->getMessage()));
+        } catch (\Stripe\Exception\CardException $e) {
+            error_log('Stripe Card Error: ' . $e->getMessage());
+            wp_send_json_error(array(
+                'message' => __('Your card was declined. Please check your card details or use a different payment method.', 'malisafi-mls')
+            ));
+        } catch (\Stripe\Exception\RateLimitException $e) {
+            error_log('Stripe Rate Limit: ' . $e->getMessage());
+            wp_send_json_error(array(
+                'message' => __('Too many payment requests. Please wait a moment and try again.', 'malisafi-mls')
+            ));
+        } catch (\Stripe\Exception\InvalidRequestException $e) {
+            error_log('Stripe Invalid Request: ' . $e->getMessage());
+            wp_send_json_error(array(
+                'message' => __('Invalid payment request. Please contact support if this persists.', 'malisafi-mls')
+            ));
+        } catch (\Stripe\Exception\AuthenticationException $e) {
+            error_log('Stripe Authentication Error: ' . $e->getMessage());
+            wp_send_json_error(array(
+                'message' => __('Payment service authentication failed. Please contact support.', 'malisafi-mls')
+            ));
+        } catch (\Stripe\Exception\ApiConnectionException $e) {
+            error_log('Stripe Connection Error: ' . $e->getMessage());
+            wp_send_json_error(array(
+                'message' => __('Unable to connect to payment service. Please check your internet connection and try again.', 'malisafi-mls')
+            ));
+        } catch (\Stripe\Exception\ApiErrorException $e) {
+            error_log('Stripe API Error: ' . $e->getMessage());
+            wp_send_json_error(array(
+                'message' => __('Payment service error. Please try again or contact support.', 'malisafi-mls')
+            ));
+        } catch (\Exception $e) {
+            error_log('Stripe Checkout Error: ' . $e->getMessage());
+            wp_send_json_error(array(
+                'message' => __('Unable to process payment. Please try again.', 'malisafi-mls')
+            ));
         }
     }
     
@@ -402,8 +435,16 @@ composer install</pre>
             wp_send_json_success(array(
                 'url' => $session->url
             ));
-        } catch (Exception $e) {
-            wp_send_json_error(array('message' => $e->getMessage()));
+        } catch (\Stripe\Exception\InvalidRequestException $e) {
+            error_log('Stripe Portal Error: ' . $e->getMessage());
+            wp_send_json_error(array(
+                'message' => __('Unable to access customer portal. Please ensure you have an active subscription.', 'malisafi-mls')
+            ));
+        } catch (\Exception $e) {
+            error_log('Stripe Portal Error: ' . $e->getMessage());
+            wp_send_json_error(array(
+                'message' => __('Unable to access customer portal. Please try again later.', 'malisafi-mls')
+            ));
         }
     }
     
@@ -431,8 +472,16 @@ composer install</pre>
             self::update_subscription_status($user_id, 'canceled');
             
             wp_send_json_success(array('message' => __('Subscription cancelled successfully.', 'malisafi-mls')));
-        } catch (Exception $e) {
-            wp_send_json_error(array('message' => $e->getMessage()));
+        } catch (\Stripe\Exception\InvalidRequestException $e) {
+            error_log('Stripe Cancellation Error: ' . $e->getMessage());
+            wp_send_json_error(array(
+                'message' => __('Unable to cancel subscription. It may have already been cancelled.', 'malisafi-mls')
+            ));
+        } catch (\Exception $e) {
+            error_log('Stripe Cancellation Error: ' . $e->getMessage());
+            wp_send_json_error(array(
+                'message' => __('Unable to cancel subscription. Please try again or contact support.', 'malisafi-mls')
+            ));
         }
     }
     

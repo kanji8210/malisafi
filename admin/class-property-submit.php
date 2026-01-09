@@ -21,7 +21,7 @@ class Malisafi_Property_Submit {
     }
     
     /**
-     * Handle property submission
+     * Handle property submission from admin form
      */
     public static function handle_property_submission() {
         // Security check
@@ -32,6 +32,33 @@ class Malisafi_Property_Submit {
         if (!self::can_submit_property($current_user)) {
             wp_die(__('You do not have permission to submit properties.', 'malisafi-mls'));
         }
+        
+        // Validate required fields
+        require_once MALISAFI_MLS_PATH . 'includes/class-validator.php';
+        $validator = new \MalisafiMLS\Validator();
+        
+        // Validate basic info
+        $validator->text($_POST['property_title'] ?? '', 'title', 5, 200, true);
+        $validator->price($_POST['property_price'] ?? '', 'price', true);
+        $validator->in_array($_POST['property_currency'] ?? 'KES', array('KES', 'USD', 'EUR', 'GBP'), 'currency', true);
+        $validator->in_array($_POST['listing_type'] ?? '', array('sale', 'rent', 'lease'), 'listing_type', true);
+        
+        // Validate location
+        $validator->text($_POST['county'] ?? '', 'county', 2, 50, true);
+        $validator->text($_POST['city'] ?? '', 'city', 2, 50, true);
+        
+        if ($validator->fails()) {
+            $error_message = $validator->first_error();
+            $redirect_url = add_query_arg(array(
+                'page' => 'malisafi-properties',
+                'action' => 'add',
+                'error' => urlencode($error_message)
+            ), admin_url('admin.php'));
+            wp_redirect($redirect_url);
+            exit;
+        }
+        
+        $validated = $validator->validated();
         
         // Sanitize and validate input
         $property_data = self::sanitize_property_data($_POST);
@@ -119,83 +146,87 @@ class Malisafi_Property_Submit {
     }
     
     /**
-     * Sanitize property data
+     * Sanitize property data - Updated for new admin form
      */
     private static function sanitize_property_data($data) {
         return array(
             'title' => sanitize_text_field($data['property_title'] ?? ''),
             'description' => wp_kses_post($data['property_description'] ?? ''),
-            'excerpt' => sanitize_textarea_field($data['property_excerpt'] ?? ''),
             
             // Pricing
             'price' => floatval($data['property_price'] ?? 0),
-            'price_suffix' => sanitize_text_field($data['property_price_suffix'] ?? ''),
+            'currency' => sanitize_text_field($data['property_currency'] ?? 'KES'),
+            'listing_type' => sanitize_text_field($data['listing_type'] ?? ''),
             
             // Details
-            'bedrooms' => intval($data['property_bedrooms'] ?? 0),
-            'bathrooms' => floatval($data['property_bathrooms'] ?? 0),
-            'area' => floatval($data['property_area'] ?? 0),
-            'lot_size' => floatval($data['property_lot_size'] ?? 0),
-            'year_built' => intval($data['property_year_built'] ?? 0),
-            'garage' => intval($data['property_garage'] ?? 0),
+            'bedrooms' => intval($data['bedrooms'] ?? 0),
+            'bathrooms' => intval($data['bathrooms'] ?? 0),
+            'size' => floatval($data['size'] ?? 0),
+            'size_unit' => sanitize_text_field($data['size_unit'] ?? 'sqm'),
+            'year_built' => intval($data['year_built'] ?? 0),
+            'condition' => sanitize_text_field($data['condition'] ?? ''),
+            'parking' => intval($data['parking'] ?? 0),
+            'floors' => intval($data['floors'] ?? 1),
             
             // Location
-            'address' => sanitize_text_field($data['property_address'] ?? ''),
-            'city' => sanitize_text_field($data['property_city'] ?? ''),
-            'county' => sanitize_text_field($data['property_county'] ?? ''),
-            'neighbourhood' => sanitize_text_field($data['property_neighbourhood'] ?? ''),
-            'setting' => sanitize_text_field($data['property_setting'] ?? ''),
-            'state' => sanitize_text_field($data['property_state'] ?? ''),
-            'zip' => sanitize_text_field($data['property_zip'] ?? ''),
-            'country' => sanitize_text_field($data['property_country'] ?? 'Kenya'),
-            'latitude' => sanitize_text_field($data['property_latitude'] ?? ''),
-            'longitude' => sanitize_text_field($data['property_longitude'] ?? ''),
+            'address' => sanitize_text_field($data['address'] ?? ''),
+            'county' => sanitize_text_field($data['county'] ?? ''),
+            'city' => sanitize_text_field($data['city'] ?? ''),
+            'area' => sanitize_text_field($data['area'] ?? ''),
+            'gps' => sanitize_text_field($data['property_gps'] ?? ''),
+            'postal_code' => sanitize_text_field($data['postal_code'] ?? ''),
+            
+            // Features & Amenities
+            'features' => isset($data['features']) ? array_map('sanitize_text_field', (array) $data['features']) : array(),
+            'amenities' => isset($data['amenities']) ? array_map('sanitize_text_field', (array) $data['amenities']) : array(),
             
             // Taxonomies
-            'property_type' => isset($data['property_type']) ? array_map('intval', (array) $data['property_type']) : array(),
-            'property_status' => isset($data['property_status']) ? array_map('intval', (array) $data['property_status']) : array(),
-            'property_location' => isset($data['property_location']) ? array_map('intval', (array) $data['property_location']) : array(),
-            'property_features' => isset($data['property_features']) ? array_map('intval', (array) $data['property_features']) : array(),
+            'property_type' => isset($data['property_type']) ? intval($data['property_type']) : 0,
             
             // Agent info
             'agent_name' => sanitize_text_field($data['agent_name'] ?? ''),
             'agent_email' => sanitize_email($data['agent_email'] ?? ''),
             'agent_phone' => sanitize_text_field($data['agent_phone'] ?? ''),
             
+            // Media
+            'video_url' => esc_url_raw($data['video_url'] ?? ''),
+            'virtual_tour' => esc_url_raw($data['virtual_tour'] ?? ''),
+            
             // Additional
-            'video_url' => esc_url_raw($data['property_video_url'] ?? ''),
-            'virtual_tour' => esc_url_raw($data['property_virtual_tour'] ?? ''),
+            'reference_id' => sanitize_text_field($data['reference_id'] ?? ''),
+            'featured' => isset($data['featured']) ? 1 : 0,
         );
     }
     
     /**
-     * Validate property data
+     * Validate property data - Updated for new fields
      */
     private static function validate_property_data($data) {
         $errors = array();
         
-        if (empty($data['title'])) {
-            $errors[] = __('Property title is required.', 'malisafi-mls');
-        }
-        
-        if (empty($data['description'])) {
-            $errors[] = __('Property description is required.', 'malisafi-mls');
+        // Already validated by Validator class, but double check critical fields
+        if (empty($data['title']) || strlen($data['title']) < 5) {
+            $errors[] = __('Property title is required (minimum 5 characters).', 'malisafi-mls');
         }
         
         if (empty($data['price']) || $data['price'] <= 0) {
             $errors[] = __('Valid property price is required.', 'malisafi-mls');
         }
         
-        if (empty($data['address'])) {
-            $errors[] = __('Property address is required.', 'malisafi-mls');
+        if (empty($data['county'])) {
+            $errors[] = __('County is required.', 'malisafi-mls');
         }
         
-        if (empty($data['property_type'])) {
+        if (empty($data['city'])) {
+            $errors[] = __('City is required.', 'malisafi-mls');
+        }
+        
+        if (empty($data['property_type']) || $data['property_type'] === 0) {
             $errors[] = __('Property type is required.', 'malisafi-mls');
         }
         
-        if (empty($data['property_status'])) {
-            $errors[] = __('Property status is required.', 'malisafi-mls');
+        if (empty($data['listing_type'])) {
+            $errors[] = __('Listing type (sale/rent/lease) is required.', 'malisafi-mls');
         }
         
         return $errors;

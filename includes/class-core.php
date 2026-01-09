@@ -43,6 +43,8 @@ class Core {
         require_once MALISAFI_MLS_PATH . 'includes/class-stripe.php';
         require_once MALISAFI_MLS_PATH . 'includes/class-featured-properties.php';
         require_once MALISAFI_MLS_PATH . 'includes/class-shortcodes.php';
+        require_once MALISAFI_MLS_PATH . 'includes/class-cache-manager.php';
+        require_once MALISAFI_MLS_PATH . 'includes/class-validator.php';
         require_once MALISAFI_MLS_PATH . 'includes/class-property-filters-ajax.php';
         require_once MALISAFI_MLS_PATH . 'includes/class-property-actions-ajax.php';
         require_once MALISAFI_MLS_PATH . 'includes/class-agent-actions-ajax.php';
@@ -105,6 +107,17 @@ class Core {
         
         // Initialize agent actions AJAX (ratings, reports)
         Agent_Actions_Ajax::get_instance();
+        
+        // Initialize cache manager
+        Cache_Manager::init();
+        
+        // Initialize property submission system
+        require_once MALISAFI_MLS_PATH . 'includes/class-property-submission.php';
+        Property_Submission::init();
+        
+        // Initialize property access control
+        require_once MALISAFI_MLS_PATH . 'includes/class-property-access-control.php';
+        Property_Access_Control::init();
     }
     
     /**

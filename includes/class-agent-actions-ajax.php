@@ -40,14 +40,14 @@ class Agent_Actions_Ajax {
         if (!is_admin()) {
             wp_enqueue_style(
                 'malisafi-agent-profile',
-                plugins_url('malisafi/assets/css/agent-profile.css'),
+                MALISAFI_MLS_URL . 'assets/css/agent-profile.css',
                 array(),
                 '1.0.0'
             );
             
             wp_enqueue_script(
                 'malisafi-agent-actions',
-                plugins_url('malisafi/assets/js/agent-actions.js'),
+                MALISAFI_MLS_URL . 'assets/js/agent-actions.js',
                 array('jquery'),
                 '1.0.0',
                 true

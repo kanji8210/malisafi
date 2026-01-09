@@ -43,14 +43,14 @@ class Property_Actions_Ajax {
         if (is_singular('malisafi_property')) {
             wp_enqueue_style(
                 'malisafi-single-property',
-                plugins_url('malisafi/assets/css/single-property.css'),
+                MALISAFI_MLS_URL . 'assets/css/single-property.css',
                 array(),
                 '1.0.0'
             );
             
             wp_enqueue_script(
                 'malisafi-single-property',
-                plugins_url('malisafi/assets/js/single-property.js'),
+                MALISAFI_MLS_URL . 'assets/js/single-property.js',
                 array('jquery'),
                 '1.0.0',
                 true

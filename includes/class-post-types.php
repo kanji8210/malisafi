@@ -23,19 +23,46 @@ class Post_Types {
      * Enqueue admin scripts
      */
     public function enqueue_admin_scripts($hook) {
-        global $post_type;
+        global $post_type, $post;
         
+        // Show warning in classic editor but don't block it
         if (("post.php" === $hook || "post-new.php" === $hook) && 'malisafi_property' === $post_type) {
-            // Prevent access to classic editor for malisafi_property
-            $redirect_url = add_query_arg('mls_no_editor', '1', admin_url('edit.php?post_type=malisafi_property'));
-            wp_redirect($redirect_url);
-            exit;
-        }
-
-        // Show admin notice if redirected
-        if (isset($_GET['mls_no_editor']) && '1' === $_GET['mls_no_editor']) {
-            add_action('admin_notices', function() {
-                echo '<div class="notice notice-warning is-dismissible"><p><strong>Malisafi MLS :</strong> L\'édition classique est désactivée pour les propriétés. Utilisez le formulaire dédié du plugin pour créer ou modifier une propriété.</p></div>';
+            add_action('admin_notices', function() use ($post) {
+                $custom_form_url = add_query_arg(
+                    array(
+                        'page' => 'malisafi-properties',
+                        'action' => 'add'
+                    ),
+                    admin_url('admin.php')
+                );
+                
+                if ($post && $post->ID) {
+                    $custom_form_url = add_query_arg('property_id', $post->ID, $custom_form_url);
+                }
+                ?>
+                <div class="notice notice-warning" style="border-left-color: #f56e28;">
+                    <h3 style="margin-top: 10px;">⚠️ <?php _e('Classic Editor Not Recommended', 'malisafi-mls'); ?></h3>
+                    <p>
+                        <strong><?php _e('We strongly recommend using our custom property form instead of the classic editor.', 'malisafi-mls'); ?></strong>
+                    </p>
+                    <p><?php _e('The custom form includes:', 'malisafi-mls'); ?></p>
+                    <ul style="list-style: disc; margin-left: 20px;">
+                        <li><?php _e('All property fields in one place', 'malisafi-mls'); ?></li>
+                        <li><?php _e('Better organization and user experience', 'malisafi-mls'); ?></li>
+                        <li><?php _e('Validation to prevent errors', 'malisafi-mls'); ?></li>
+                        <li><?php _e('Image upload and management', 'malisafi-mls'); ?></li>
+                        <li><?php _e('Features and amenities selection', 'malisafi-mls'); ?></li>
+                    </ul>
+                    <p>
+                        <a href="<?php echo esc_url($custom_form_url); ?>" class="button button-primary" style="margin-right: 10px;">
+                            <?php _e('Use Custom Property Form', 'malisafi-mls'); ?> →
+                        </a>
+                        <button type="button" class="button button-secondary" onclick="this.closest('.notice').style.display='none';">
+                            <?php _e('I understand, continue with classic editor', 'malisafi-mls'); ?>
+                        </button>
+                    </p>
+                </div>
+                <?php
             });
         }
     }

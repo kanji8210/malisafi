@@ -53,26 +53,30 @@ $current_tab = isset($_GET['tab']) ? sanitize_text_field($_GET['tab']) : 'settin
 global $wpdb;
 $subscriptions_table = $wpdb->prefix . 'mf_subscriptions';
 
-$total_subscriptions = $wpdb->get_var("SELECT COUNT(*) FROM {$subscriptions_table} WHERE status = 'active'");
+$total_subscriptions = $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM {$subscriptions_table} WHERE status = %s", 'active'));
 $total_subscriptions = $total_subscriptions !== null ? intval($total_subscriptions) : 0;
 
-$monthly_revenue = $wpdb->get_var("SELECT SUM(
+$monthly_revenue = $wpdb->get_var($wpdb->prepare("SELECT SUM(
     CASE 
-        WHEN plan_type = 'agent_basic' THEN 29.99
-        WHEN plan_type = 'agent_premium' THEN 99.99
-        WHEN plan_type = 'owner_basic' THEN 19.99
-        WHEN plan_type = 'developer' THEN 199.99
+        WHEN plan_type = %s THEN 29.99
+        WHEN plan_type = %s THEN 99.99
+        WHEN plan_type = %s THEN 19.99
+        WHEN plan_type = %s THEN 199.99
         ELSE 0
     END
-) FROM {$subscriptions_table} WHERE status = 'active'");
+) FROM {$subscriptions_table} WHERE status = %s", 
+    'agent_basic', 'agent_premium', 'owner_basic', 'developer', 'active'
+));
 $monthly_revenue = $monthly_revenue !== null ? floatval($monthly_revenue) : 0.0;
 
-$subscriptions_by_plan = $wpdb->get_results("
-    SELECT plan_type, COUNT(*) as count 
+// Get subscription statistics by plan
+$subscriptions_by_plan = $wpdb->get_results($wpdb->prepare(
+    "SELECT plan_type, COUNT(*) as count 
     FROM {$subscriptions_table} 
-    WHERE status = 'active' 
-    GROUP BY plan_type
-");
+    WHERE status = %s 
+    GROUP BY plan_type",
+    'active'
+));
 ?>
 
 <div class="wrap">
@@ -308,13 +312,16 @@ $subscriptions_by_plan = $wpdb->get_results("
             
             <!-- Active Subscriptions List -->
             <?php
-            $active_subscriptions = $wpdb->get_results("
+            // Get active subscriptions with user details
+            $active_subscriptions = $wpdb->get_results($wpdb->prepare("
                 SELECT s.*, u.user_login, u.user_email, u.display_name
                 FROM {$subscriptions_table} s
                 LEFT JOIN {$wpdb->users} u ON s.user_id = u.ID
-                WHERE s.status = 'active'
+                WHERE s.status = %s
                 ORDER BY s.created_at DESC
-            ");
+                LIMIT 100",
+                'active'
+            ));
             ?>
             
             <?php if (!empty($active_subscriptions)) : ?>

@@ -38,16 +38,16 @@ class Property_Filters_Ajax {
             // Modern filters
             wp_enqueue_style(
                 'malisafi-property-filters',
-                plugins_url('malisafi/assets/css/property-filters.css'),
+                MALISAFI_MLS_URL . 'assets/css/property-filters.css',
                 array(),
-                '1.0.1'
+                MALISAFI_MLS_VERSION
             );
             
             wp_enqueue_script(
                 'malisafi-property-filters',
-                plugins_url('malisafi/assets/js/property-filters.js'),
+                MALISAFI_MLS_URL . 'assets/js/property-filters.js',
                 array('jquery'),
-                '1.0.1',
+                MALISAFI_MLS_VERSION,
                 true
             );
             
@@ -101,14 +101,14 @@ class Property_Filters_Ajax {
             // Minimalist filters
             wp_enqueue_style(
                 'malisafi-property-filters-minimalist',
-                plugins_url('malisafi/assets/css/property-filters-minimalist.css'),
+                MALISAFI_MLS_URL . 'assets/css/property-filters-minimalist.css',
                 array(),
                 '1.0.0'
             );
             
             wp_enqueue_script(
                 'malisafi-property-filters-minimalist',
-                plugins_url('malisafi/assets/js/property-filters-minimalist.js'),
+                MALISAFI_MLS_URL . 'assets/js/property-filters-minimalist.js',
                 array('jquery'),
                 '1.0.0',
                 true
@@ -130,14 +130,14 @@ class Property_Filters_Ajax {
         if (strpos($hook, 'malisafi') !== false) {
             wp_enqueue_style(
                 'malisafi-property-filters',
-                plugins_url('malisafi/assets/css/property-filters.css'),
+                MALISAFI_MLS_URL . 'assets/css/property-filters.css',
                 array(),
                 '1.0.0'
             );
             
             wp_enqueue_script(
                 'malisafi-property-filters',
-                plugins_url('malisafi/assets/js/property-filters.js'),
+                MALISAFI_MLS_URL . 'assets/js/property-filters.js',
                 array('jquery'),
                 '1.0.0',
                 true
@@ -164,6 +164,9 @@ class Property_Filters_Ajax {
         $filters = isset($_POST['filters']) ? $_POST['filters'] : array();
         $page = isset($_POST['page']) ? intval($_POST['page']) : 1;
         $per_page = isset($_POST['per_page']) ? intval($_POST['per_page']) : 12;
+        
+        // Enforce maximum limit to prevent performance issues
+        $per_page = min($per_page, 100);
         
         // Build query args
         $args = array(

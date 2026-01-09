@@ -1,0 +1,119 @@
+name: Run Tests
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        php: ['7.4', '8.0', '8.1']
+        wordpress: ['6.0', '6.3', 'latest']
+    
+    name: PHP ${{ matrix.php }} - WordPress ${{ matrix.wordpress }}
+    
+    services:
+      mysql:
+        image: mysql:5.7
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: wordpress_test
+        ports:
+          - 3306:3306
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: mbstring, intl, mysqli
+          coverage: xdebug
+          tools: composer, phpunit
+      
+      - name: Get Composer cache directory
+        id: composer-cache
+        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+      
+      - name: Cache Composer dependencies
+        uses: actions/cache@v3
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: ${{ runner.os }}-composer-
+      
+      - name: Install Composer dependencies
+        run: composer install --prefer-dist --no-progress --no-suggest
+      
+      - name: Install WordPress test suite
+        env:
+          WP_VERSION: ${{ matrix.wordpress }}
+        run: |
+          bash bin/install-wp-tests.sh wordpress_test root root 127.0.0.1 $WP_VERSION
+      
+      - name: Run PHPUnit tests
+        run: composer test
+      
+      - name: Generate code coverage
+        if: matrix.php == '8.1' && matrix.wordpress == 'latest'
+        run: composer test:coverage
+      
+      - name: Upload coverage to Codecov
+        if: matrix.php == '8.1' && matrix.wordpress == 'latest'
+        uses: codecov/codecov-action@v3
+        with:
+          files: ./tests/coverage/clover.xml
+          flags: unittests
+          name: codecov-umbrella
+          fail_ci_if_error: false
+
+  code-quality:
+    runs-on: ubuntu-latest
+    name: Code Quality Checks
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.1'
+          tools: composer, phpcs, phpstan
+      
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-progress
+      
+      - name: Run PHP CodeSniffer
+        run: composer phpcs || true
+      
+      - name: Run PHPStan
+        run: composer phpstan || true
+
+  security:
+    runs-on: ubuntu-latest
+    name: Security Checks
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.1'
+      
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-progress
+      
+      - name: Security check
+        run: composer audit || true

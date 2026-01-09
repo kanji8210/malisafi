@@ -1,0 +1,587 @@
+/**
+ * Property Submission Wizard JavaScript
+ * Handles multi-step form, auto-save, image upload, and validation
+ */
+
+(function($) {
+    'use strict';
+
+    const PropertySubmission = {
+        currentStep: 1,
+        totalSteps: 6,
+        propertyId: 0,
+        formData: {},
+        autoSaveTimeout: null,
+        uploadedImages: [],
+
+        init: function() {
+            this.propertyId = $('#property_id').val() || 0;
+            this.cacheElements();
+            this.bindEvents();
+            this.initImageUpload();
+            
+            // Load draft if editing
+            if (this.propertyId) {
+                this.loadDraft();
+            }
+        },
+
+        cacheElements: function() {
+            this.$form = $('#property-submission-form');
+            this.$steps = $('.wizard-step');
+            this.$progressSteps = $('.progress-step');
+            this.$btnPrev = $('.btn-prev');
+            this.$btnNext = $('.btn-next');
+            this.$btnSubmit = $('.btn-submit');
+            this.$autoSave = $('.autosave-indicator');
+            this.$dropzone = $('#dropzone');
+            this.$gallery = $('#image-gallery');
+        },
+
+        bindEvents: function() {
+            const self = this;
+
+            // Navigation
+            this.$btnNext.on('click', function() {
+                self.nextStep();
+            });
+
+            this.$btnPrev.on('click', function() {
+                self.prevStep();
+            });
+
+            this.$btnSubmit.on('click', function() {
+                self.submitProperty();
+            });
+
+            // Auto-save on input change
+            this.$form.on('input change', 'input, textarea, select', function() {
+                self.scheduleAutoSave();
+            });
+
+            // GPS location
+            $('.btn-get-location').on('click', function() {
+                self.getLocation();
+            });
+
+            // Image browse button
+            $('.btn-browse-images').on('click', function() {
+                $('#image-file-input').click();
+            });
+
+            // File input change
+            $('#image-file-input').on('change', function(e) {
+                self.handleFileSelect(e.target.files);
+            });
+
+            // Prevent form submission
+            this.$form.on('submit', function(e) {
+                e.preventDefault();
+            });
+        },
+
+        nextStep: function() {
+            if (!this.validateStep(this.currentStep)) {
+                return;
+            }
+
+            if (this.currentStep < this.totalSteps) {
+                this.currentStep++;
+                this.updateStep();
+                this.saveStep();
+            }
+        },
+
+        prevStep: function() {
+            if (this.currentStep > 1) {
+                this.currentStep--;
+                this.updateStep();
+            }
+        },
+
+        updateStep: function() {
+            // Update wizard steps display
+            this.$steps.removeClass('active');
+            $('#step-' + this.currentStep).addClass('active');
+
+            // Update progress
+            this.$progressSteps.removeClass('active completed');
+            this.$progressSteps.each(function(index) {
+                const stepNum = index + 1;
+                if (stepNum < PropertySubmission.currentStep) {
+                    $(this).addClass('completed');
+                } else if (stepNum === PropertySubmission.currentStep) {
+                    $(this).addClass('active');
+                }
+            });
+
+            // Update navigation buttons
+            this.$btnPrev.toggle(this.currentStep > 1);
+            this.$btnNext.toggle(this.currentStep < this.totalSteps);
+            this.$btnSubmit.toggle(this.currentStep === this.totalSteps);
+
+            // Update preview if on last step
+            if (this.currentStep === this.totalSteps) {
+                this.updatePreview();
+            }
+
+            // Scroll to top
+            $('html, body').animate({ scrollTop: 0 }, 300);
+        },
+
+        validateStep: function(step) {
+            const $currentStep = $('#step-' + step);
+            const $required = $currentStep.find('[required]');
+            let isValid = true;
+
+            $required.each(function() {
+                if (!this.checkValidity()) {
+                    isValid = false;
+                    $(this).addClass('error');
+                    $(this).focus();
+                    return false;
+                }
+                $(this).removeClass('error');
+            });
+
+            if (!isValid) {
+                this.showError(malisafiSubmission.strings.error || 'Please fill in all required fields');
+            }
+
+            return isValid;
+        },
+
+        scheduleAutoSave: function() {
+            clearTimeout(this.autoSaveTimeout);
+            const self = this;
+            
+            this.autoSaveTimeout = setTimeout(function() {
+                self.saveStep();
+            }, 2000); // Save 2 seconds after last change
+        },
+
+        saveStep: function() {
+            const self = this;
+            const stepData = this.getStepData(this.currentStep);
+
+            this.showAutoSave('saving');
+
+            $.ajax({
+                url: malisafiSubmission.ajaxurl,
+                type: 'POST',
+                data: {
+                    action: 'malisafi_save_property_step',
+                    nonce: malisafiSubmission.nonce,
+                    property_id: this.propertyId,
+                    step: this.getStepName(this.currentStep),
+                    data: stepData
+                },
+                success: function(response) {
+                    if (response.success) {
+                        if (response.data.property_id) {
+                            self.propertyId = response.data.property_id;
+                            $('#property_id').val(self.propertyId);
+                        }
+                        self.showAutoSave('saved');
+                    } else {
+                        self.showAutoSave('error');
+                    }
+                },
+                error: function() {
+                    self.showAutoSave('error');
+                }
+            });
+        },
+
+        getStepName: function(step) {
+            const stepNames = {
+                1: 'basic',
+                2: 'details',
+                3: 'location',
+                4: 'features',
+                5: 'images',
+                6: 'review'
+            };
+            return stepNames[step] || 'basic';
+        },
+
+        getStepData: function(step) {
+            const $step = $('#step-' + step);
+            const data = {};
+
+            $step.find('input, textarea, select').each(function() {
+                const $field = $(this);
+                const name = $field.attr('name');
+                
+                if (!name) return;
+
+                if ($field.attr('type') === 'checkbox') {
+                    if (!data[name]) data[name] = [];
+                    if ($field.is(':checked')) {
+                        data[name].push($field.val());
+                    }
+                } else {
+                    data[name] = $field.val();
+                }
+            });
+
+            return data;
+        },
+
+        showAutoSave: function(status) {
+            const $indicator = this.$autoSave;
+            $indicator.removeClass('saving saved error').addClass(status + ' show');
+
+            const messages = {
+                saving: malisafiSubmission.strings.saving,
+                saved: malisafiSubmission.strings.saved,
+                error: malisafiSubmission.strings.error
+            };
+
+            $indicator.find('.status-text').text(messages[status] || '');
+
+            if (status === 'saved' || status === 'error') {
+                setTimeout(function() {
+                    $indicator.removeClass('show');
+                }, 2000);
+            }
+        },
+
+        // Image Upload Functions
+        initImageUpload: function() {
+            const self = this;
+
+            // Drag and drop
+            this.$dropzone.on('dragover', function(e) {
+                e.preventDefault();
+                $(this).addClass('dragover');
+            });
+
+            this.$dropzone.on('dragleave', function(e) {
+                e.preventDefault();
+                $(this).removeClass('dragover');
+            });
+
+            this.$dropzone.on('drop', function(e) {
+                e.preventDefault();
+                $(this).removeClass('dragover');
+                const files = e.originalEvent.dataTransfer.files;
+                self.handleFileSelect(files);
+            });
+
+            // Make gallery sortable
+            this.$gallery.sortable({
+                update: function() {
+                    self.updateImageOrder();
+                }
+            });
+        },
+
+        handleFileSelect: function(files) {
+            if (files.length === 0) return;
+
+            const formData = new FormData();
+            formData.append('action', 'malisafi_upload_property_images');
+            formData.append('nonce', malisafiSubmission.uploadNonce);
+
+            Array.from(files).forEach(file => {
+                formData.append('images[]', file);
+            });
+
+            this.uploadImages(formData);
+        },
+
+        uploadImages: function(formData) {
+            const self = this;
+
+            $('.upload-progress').show();
+            $('.progress-fill').css('width', '0%');
+
+            $.ajax({
+                url: malisafiSubmission.ajaxurl,
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                xhr: function() {
+                    const xhr = new window.XMLHttpRequest();
+                    xhr.upload.addEventListener('progress', function(e) {
+                        if (e.lengthComputable) {
+                            const percent = Math.round((e.loaded / e.total) * 100);
+                            $('.progress-fill').css('width', percent + '%');
+                            $('.progress-text').text(percent + '%');
+                        }
+                    }, false);
+                    return xhr;
+                },
+                success: function(response) {
+                    $('.upload-progress').hide();
+                    
+                    if (response.success && response.data.images) {
+                        response.data.images.forEach(function(image) {
+                            self.addImageToGallery(image);
+                        });
+                        self.updateImageOrder();
+                    } else {
+                        self.showError(response.data.message || malisafiSubmission.strings.uploadError);
+                    }
+                },
+                error: function() {
+                    $('.upload-progress').hide();
+                    self.showError(malisafiSubmission.strings.uploadError);
+                }
+            });
+        },
+
+        addImageToGallery: function(image) {
+            const isFirst = this.uploadedImages.length === 0;
+            this.uploadedImages.push(image.id);
+
+            const $item = $('<div>')
+                .addClass('gallery-item')
+                .attr('data-id', image.id)
+                .html(
+                    '<img src="' + image.url + '" alt="">' +
+                    '<button type="button" class="delete-btn" data-id="' + image.id + '">×</button>' +
+                    (isFirst ? '<span class="main-badge">Main Photo</span>' : '')
+                );
+
+            this.$gallery.append($item);
+
+            // Bind delete
+            $item.find('.delete-btn').on('click', function() {
+                if (confirm(malisafiSubmission.strings.confirmDelete)) {
+                    PropertySubmission.deleteImage(image.id);
+                }
+            });
+        },
+
+        deleteImage: function(imageId) {
+            const self = this;
+
+            $.ajax({
+                url: malisafiSubmission.ajaxurl,
+                type: 'POST',
+                data: {
+                    action: 'malisafi_delete_property_image',
+                    nonce: malisafiSubmission.nonce,
+                    property_id: this.propertyId,
+                    image_id: imageId
+                },
+                success: function(response) {
+                    if (response.success) {
+                        $('.gallery-item[data-id="' + imageId + '"]').fadeOut(function() {
+                            $(this).remove();
+                            self.uploadedImages = self.uploadedImages.filter(id => id !== imageId);
+                            
+                            // Update main badge
+                            if (self.uploadedImages.length > 0) {
+                                self.$gallery.find('.main-badge').remove();
+                                self.$gallery.find('.gallery-item').first().append('<span class="main-badge">Main Photo</span>');
+                            }
+                        });
+                    }
+                }
+            });
+        },
+
+        updateImageOrder: function() {
+            const order = [];
+            this.$gallery.find('.gallery-item').each(function() {
+                order.push($(this).attr('data-id'));
+            });
+
+            this.uploadedImages = order;
+
+            // Update main badge
+            this.$gallery.find('.main-badge').remove();
+            if (order.length > 0) {
+                this.$gallery.find('.gallery-item').first().append('<span class="main-badge">Main Photo</span>');
+            }
+
+            // Save order
+            if (this.propertyId && order.length > 0) {
+                $.ajax({
+                    url: malisafiSubmission.ajaxurl,
+                    type: 'POST',
+                    data: {
+                        action: 'malisafi_reorder_property_images',
+                        nonce: malisafiSubmission.nonce,
+                        property_id: this.propertyId,
+                        order: order
+                    }
+                });
+            }
+        },
+
+        getLocation: function() {
+            if (!navigator.geolocation) {
+                alert('Geolocation is not supported by your browser');
+                return;
+            }
+
+            $('.btn-get-location').text('Getting location...').prop('disabled', true);
+
+            navigator.geolocation.getCurrentPosition(
+                function(position) {
+                    const lat = position.coords.latitude.toFixed(6);
+                    const lng = position.coords.longitude.toFixed(6);
+                    $('#property_gps').val(lat + ', ' + lng);
+                    $('.btn-get-location').html('<span class="icon">📍</span> Get My Location').prop('disabled', false);
+                },
+                function() {
+                    alert('Unable to retrieve your location');
+                    $('.btn-get-location').html('<span class="icon">📍</span> Get My Location').prop('disabled', false);
+                }
+            );
+        },
+
+        updatePreview: function() {
+            // Basic info
+            $('#preview-title').text($('#property_title').val() || '-');
+            $('#preview-price').text(
+                ($('#property_currency').val() || 'KES') + ' ' +
+                (parseFloat($('#property_price').val()) || 0).toLocaleString()
+            );
+            $('#preview-type').text($('#property_type option:selected').text() || '-');
+            $('#preview-listing').text($('#listing_type option:selected').text() || '-');
+
+            // Details
+            $('#preview-bedrooms').text($('#bedrooms').val() || '0');
+            $('#preview-bathrooms').text($('#bathrooms').val() || '0');
+            $('#preview-size').text(
+                ($('#property_size').val() || '-') + ' ' +
+                ($('#size_unit option:selected').text() || '')
+            );
+            $('#preview-condition').text($('#condition option:selected').text() || '-');
+
+            // Location
+            $('#preview-county').text($('#property_county').val() || '-');
+            $('#preview-city').text($('#property_city').val() || '-');
+
+            // Images
+            const $previewImages = $('#preview-images');
+            $previewImages.empty();
+
+            if (this.uploadedImages.length > 0) {
+                this.$gallery.find('.gallery-item img').each(function() {
+                    $previewImages.append(
+                        $('<img>').attr('src', $(this).attr('src'))
+                    );
+                });
+            } else {
+                $previewImages.html('<p class="no-images">No images uploaded</p>');
+            }
+        },
+
+        submitProperty: function() {
+            const self = this;
+
+            if (!this.validateStep(this.currentStep)) {
+                return;
+            }
+
+            if (this.uploadedImages.length === 0) {
+                this.showError('Please upload at least one image');
+                return;
+            }
+
+            this.$btnSubmit.prop('disabled', true).text(malisafiSubmission.strings.submitting);
+
+            $.ajax({
+                url: malisafiSubmission.ajaxurl,
+                type: 'POST',
+                data: {
+                    action: 'malisafi_submit_property',
+                    nonce: malisafiSubmission.nonce,
+                    property_id: this.propertyId
+                },
+                success: function(response) {
+                    if (response.success) {
+                        self.showSuccess(response.data.message);
+                        
+                        // Redirect to property page
+                        setTimeout(function() {
+                            window.location.href = response.data.redirect;
+                        }, 1500);
+                    } else {
+                        self.showError(response.data.message);
+                        self.$btnSubmit.prop('disabled', false).text(malisafiSubmission.strings.submitProperty);
+                    }
+                },
+                error: function() {
+                    self.showError('An error occurred. Please try again.');
+                    self.$btnSubmit.prop('disabled', false).text(malisafiSubmission.strings.submitProperty);
+                }
+            });
+        },
+
+        loadDraft: function() {
+            const self = this;
+
+            $.ajax({
+                url: malisafiSubmission.ajaxurl,
+                type: 'POST',
+                data: {
+                    action: 'malisafi_get_property_draft',
+                    nonce: malisafiSubmission.nonce,
+                    property_id: this.propertyId
+                },
+                success: function(response) {
+                    if (response.success && response.data.data) {
+                        self.populateForm(response.data.data);
+                    }
+                }
+            });
+        },
+
+        populateForm: function(data) {
+            // Populate all fields
+            for (const key in data) {
+                const $field = $('[name="' + key + '"]');
+                if ($field.length) {
+                    if ($field.attr('type') === 'checkbox') {
+                        if (Array.isArray(data[key])) {
+                            data[key].forEach(function(val) {
+                                $('[name="' + key + '"][value="' + val + '"]').prop('checked', true);
+                            });
+                        }
+                    } else {
+                        $field.val(data[key]);
+                    }
+                }
+            }
+
+            // Load images
+            if (data.gallery_ids) {
+                const imageIds = data.gallery_ids.split(',');
+                // You would need to load image URLs from server
+            }
+        },
+
+        showError: function(message) {
+            const $error = $('<div class="error-message">' + message + '</div>');
+            this.$form.prepend($error);
+            $('html, body').animate({ scrollTop: 0 }, 300);
+            setTimeout(function() {
+                $error.fadeOut(function() {
+                    $(this).remove();
+                });
+            }, 5000);
+        },
+
+        showSuccess: function(message) {
+            const $success = $('<div class="success-message">' + message + '</div>');
+            this.$form.prepend($success);
+            $('html, body').animate({ scrollTop: 0 }, 300);
+        }
+    };
+
+    // Initialize on document ready
+    $(document).ready(function() {
+        if ($('#property-submission-form').length) {
+            PropertySubmission.init();
+        }
+    });
+
+})(jQuery);

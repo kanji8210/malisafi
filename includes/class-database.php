@@ -347,11 +347,30 @@ class Database {
     
     /**
      * Drop all custom tables
+     * 
+     * WARNING: This is a destructive operation that will delete ALL plugin data.
+     * This should ONLY be called during plugin uninstallation, never during deactivation.
+     * 
+     * @param bool $confirm Required confirmation flag to prevent accidental data loss
+     * @return bool|WP_Error True on success, WP_Error on failure or missing confirmation
      */
-    public static function drop_tables() {
+    public static function drop_tables($confirm = false) {
+        // CRITICAL: Require explicit confirmation to prevent accidental data loss
+        if ($confirm !== true || !defined('WP_UNINSTALL_PLUGIN')) {
+            return new \WP_Error(
+                'drop_tables_forbidden',
+                __('Table deletion requires explicit confirmation and can only be executed during plugin uninstall.', 'malisafi-mls')
+            );
+        }
+        
         global $wpdb;
         
+        // Log this critical operation
+        error_log('MALISAFI MLS: Dropping all database tables - this action cannot be undone');
+        
         $tables = array(
+            'mf_agent_reports',
+            'mf_agent_ratings',
             'mf_analytics',
             'mf_property_reports',
             'mf_moderation_queue',
@@ -365,9 +384,17 @@ class Database {
             'mf_subscriptions'
         );
         
+        // Drop tables in reverse order to handle dependencies
         foreach ($tables as $table) {
-            $wpdb->query("DROP TABLE IF EXISTS {$wpdb->prefix}{$table}");
+            $full_table_name = $wpdb->prefix . $table;
+            $result = $wpdb->query($wpdb->prepare("DROP TABLE IF EXISTS %i", $full_table_name));
+            
+            if ($result === false) {
+                error_log("MALISAFI MLS: Failed to drop table {$full_table_name}");
+            }
         }
+        
+        return true;
     }
     
     /**
