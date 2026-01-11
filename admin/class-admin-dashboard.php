@@ -48,7 +48,7 @@ class Malisafi_Admin_Dashboard {
             'malisafi-dashboard',
             __('All Properties', 'malisafi-mls'),
             __('Properties', 'malisafi-mls'),
-            'moderate_properties',
+            'edit_posts', // allow agents to access custom form pages
             'malisafi-properties',
             array(__CLASS__, 'render_properties_list')
         );

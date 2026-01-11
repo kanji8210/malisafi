@@ -89,7 +89,8 @@ class Malisafi_Agent_Dashboard {
                 __('My Properties', 'malisafi-mls'),
                 __('My Properties', 'malisafi-mls'),
                 'read',
-                'edit.php?post_type=malisafi_property&agent_filter=mine'
+                'malisafi-properties',
+                array('Malisafi_Admin_Dashboard', 'render_properties_list')
             );
             
             add_submenu_page(

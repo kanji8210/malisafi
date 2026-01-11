@@ -25,6 +25,9 @@ class Property_Submission {
         // Shortcode for property submission form
         add_shortcode('malisafi_submit_property', array(__CLASS__, 'render_submission_form'));
         
+        // Shortcode for success page
+        add_shortcode('malisafi_property_success', array(__CLASS__, 'render_success_page'));
+        
         // Enqueue scripts and styles
         add_action('wp_enqueue_scripts', array(__CLASS__, 'enqueue_assets'));
     }
@@ -75,6 +78,11 @@ class Property_Submission {
      * Render submission form shortcode
      */
     public static function render_submission_form($atts) {
+        // Check if we should show success page instead
+        if (isset($_GET['submission']) && $_GET['submission'] === 'success' && isset($_GET['property_id'])) {
+            return self::render_success_page();
+        }
+        
         // Check if user is logged in
         if (!is_user_logged_in()) {
             return '<div class="malisafi-notice error"><p>' . 
@@ -409,12 +417,15 @@ class Property_Submission {
             Cache_Manager::invalidate_property_cache($property_id);
         }
         
-        // Get property URL
-        $property_url = get_permalink($property_id);
+        // Get success page URL with property info
+        $success_url = add_query_arg(array(
+            'property_id' => $property_id,
+            'submission' => 'success'
+        ), get_permalink());
         
         wp_send_json_success(array(
             'message' => __('Property submitted successfully!', 'malisafi-mls'),
-            'redirect' => $property_url
+            'redirect' => $success_url
         ));
     }
     
@@ -597,6 +608,15 @@ class Property_Submission {
         }
         
         wp_send_json_success(array('message' => __('Order updated', 'malisafi-mls')));
+    }
+    
+    /**
+     * Render success page for frontend
+     */
+    public static function render_success_page() {
+        ob_start();
+        include MALISAFI_MLS_PATH . 'templates/property-submission-success.php';
+        return ob_get_clean();
     }
     
     /**

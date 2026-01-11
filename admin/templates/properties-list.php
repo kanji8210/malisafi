@@ -76,7 +76,8 @@ if (isset($_GET['error'])) {
             'post_type' => 'malisafi_property',
             'posts_per_page' => 20,
             'paged' => $paged,
-            'post_status' => array('publish', 'pending', 'draft')
+            'post_status' => array('publish', 'pending', 'draft'),
+            'author' => !current_user_can('moderate_properties') ? get_current_user_id() : ''
         );
         
         // Filter by status if selected
@@ -233,8 +234,8 @@ if (isset($_GET['error'])) {
             return;
         }
         
-        // Check if user can edit this property
-        if ($is_edit && !current_user_can('moderate_properties') && $property->post_author != get_current_user_id()) {
+        // Check capability on this specific post
+        if ($is_edit && ! current_user_can('edit_post', $property_id)) {
             wp_die(__('You do not have permission to edit this property.', 'malisafi-mls'));
         }
         ?>
@@ -242,6 +243,11 @@ if (isset($_GET['error'])) {
         <h1><?php echo $is_edit ? __('Edit Property', 'malisafi-mls') : __('Add New Property', 'malisafi-mls'); ?></h1>
         <hr class="wp-header-end">
         
+        <?php 
+            // Use the unified property edit template which fully pre-fills fields
+            include MALISAFI_MLS_PATH . 'admin/templates/property-edit-form.php';
+            return; 
+        ?>
         <form method="post" action="<?php echo admin_url('admin-post.php'); ?>" class="malisafi-property-form" enctype="multipart/form-data">
             <input type="hidden" name="action" value="malisafi_submit_property">
             <?php if ($is_edit) : ?>

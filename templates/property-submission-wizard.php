@@ -282,7 +282,7 @@ $property_id = isset($_GET['property_id']) ? intval($_GET['property_id']) : 0;
                         <?php _e('Get My Location', 'malisafi-mls'); ?>
                     </button>
                 </div>
-                <span class="field-hint"><?php _e('You can adjust coordinates for privacy before saving', 'malisafi-mls'); ?></span>
+                <span class=\"field-hint\"><?php _e('Using your current location helps enable map search and shows your property on the map. You can slightly adjust the coordinates for privacy before saving.', 'malisafi-mls'); ?></span>
             </div>
 
             <div id="property-map" class="property-map"></div>

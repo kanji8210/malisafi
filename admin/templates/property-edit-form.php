@@ -329,7 +329,7 @@ $kenya_counties = array(
                                 📍 <?php _e('Use My Location', 'malisafi-mls'); ?>
                             </button>
                             <p class="description">
-                                <?php _e('GPS coordinates (optional). You can adjust for privacy before saving.', 'malisafi-mls'); ?>
+                                <?php _e('Using your current location helps enable map search and shows your property on the map. You can slightly adjust the coordinates for privacy before saving.', 'malisafi-mls'); ?>
                             </p>
                         </td>
                     </tr>

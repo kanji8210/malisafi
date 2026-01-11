@@ -118,6 +118,19 @@ class Core {
         // Initialize property access control
         require_once MALISAFI_MLS_PATH . 'includes/class-property-access-control.php';
         Property_Access_Control::init();
+        
+        // Initialize redirects to custom editor for properties
+        if (class_exists('MalisafiMLS\\Post_Types') && method_exists('MalisafiMLS\\Post_Types', 'init_redirects')) {
+            \MalisafiMLS\Post_Types::init_redirects();
+        }
+        
+        // Initialize property success page (admin)
+        require_once MALISAFI_MLS_PATH . 'admin/class-property-success.php';
+        Property_Success::init();
+        
+        // Ensure reference IDs exist for properties
+        require_once MALISAFI_MLS_PATH . 'includes/class-reference-id.php';
+        add_action('save_post_malisafi_property', ['MalisafiMLS\\Reference_ID', 'ensure'], 10, 2);
     }
     
     /**

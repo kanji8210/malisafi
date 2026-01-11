@@ -100,7 +100,8 @@ while (have_posts()) : the_post();
     
     // Format price
     $currency_symbol = ($currency === 'KES') ? 'KSh' : '$';
-    $formatted_price = $currency_symbol . ' ' . number_format(floatval($price));
+    $price = is_numeric($price) ? (float) $price : 0.0;
+$formatted_price = $price > 0 ? ($currency_symbol . ' ' . number_format($price)) : __('Price on request', 'malisafi-mls');
     
     // Check if user has favorited this property
     $user_id = get_current_user_id();
@@ -216,7 +217,7 @@ while (have_posts()) : the_post();
                     $alt_text = get_post_meta($img_id, '_wp_attachment_image_alt', true);
                     // If no alt text exists, use area if available
                     if (empty($alt_text) && $area) {
-                        $alt_text = number_format($area) . ' sq ft';
+                        $alt_text = is_numeric($area) ? (number_format((float)$area) . ' sq ft') : '';
                     }
             ?>
                 <div class="thumbnail <?php echo $index === 0 ? 'active' : ''; ?>" 
@@ -356,7 +357,7 @@ while (have_posts()) : the_post();
                         </svg>
                     </span>
                     <div class="spec-text">
-                        <span class="spec-value"><?php echo number_format($area); ?></span>
+                        <span class=\"spec-value\"><?php echo is_numeric($area) ? number_format((float)$area) : ''; ?></span>
                         <span class="spec-label">Sq Ft</span>
                     </div>
                 </div>
@@ -452,7 +453,7 @@ while (have_posts()) : the_post();
                     <?php if ($area) : ?>
                         <div class="detail-item">
                             <span class="detail-label">Area</span>
-                            <span class="detail-value"><?php echo number_format($area); ?> sq ft</span>
+                            <span class=\"detail-value\"><?php echo is_numeric($area) ? number_format((float)$area) . ' sq ft' : ''; ?></span>
                         </div>
                     <?php endif; ?>
                     
