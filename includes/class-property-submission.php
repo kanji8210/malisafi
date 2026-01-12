@@ -512,6 +512,35 @@ class Property_Submission {
                 $errors[] = sprintf(__('File %s is too large (max 10MB)', 'malisafi-mls'), $file['name']);
                 continue;
             }
+
+            // Server-side dimension/orientation validation
+            $img_info = @getimagesize($file['tmp_name']);
+            if (!$img_info) {
+                $errors[] = sprintf(__('Could not read image dimensions for %s', 'malisafi-mls'), $file['name']);
+                continue;
+            }
+            $width = isset($img_info[0]) ? (int)$img_info[0] : 0;
+            $height = isset($img_info[1]) ? (int)$img_info[1] : 0;
+            $is_landscape = $width > $height;
+
+            // Rules:
+            // - Landscape images must be at least 1200x800
+            // - Portrait images are allowed only if >= 1600x2000
+            $min_land_w = 1200; $min_land_h = 800;
+            $min_port_w = 1600; $min_port_h = 2000;
+            $allow_portrait_large = (!$is_landscape) && ($width >= $min_port_w && $height >= $min_port_h);
+
+            if ($is_landscape) {
+                if (!($width >= $min_land_w && $height >= $min_land_h)) {
+                    $errors[] = sprintf(__('Image %s is too small. Minimum %dx%d for landscape.', 'malisafi-mls'), $file['name'], $min_land_w, $min_land_h);
+                    continue;
+                }
+            } else {
+                if (!$allow_portrait_large) {
+                    $errors[] = sprintf(__('Portrait image %s must be at least %dx%d.', 'malisafi-mls'), $file['name'], $min_port_w, $min_port_h);
+                    continue;
+                }
+            }
             
             // Upload
             $upload = wp_handle_upload($file, array('test_form' => false));

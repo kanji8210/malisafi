@@ -38,6 +38,27 @@ class Page_Manager {
             'description' => 'Featured properties showcase',
             'parent' => 0
         ),
+        'submit_property' => array(
+            'title' => 'Submit Property',
+            'slug' => 'submit-property',
+            'shortcode' => '[malisafi_submit_property]',
+            'description' => 'Front-end property submission wizard',
+            'parent' => 0
+        ),
+        'property_submitted' => array(
+            'title' => 'Property Submitted',
+            'slug' => 'property-submitted',
+            'shortcode' => '[malisafi_property_success]',
+            'description' => 'Submission success/confirmation page',
+            'parent' => 0
+        ),
+        'my_properties' => array(
+            'title' => 'My Properties',
+            'slug' => 'my-properties',
+            'shortcode' => '[malisafi_agent_properties]',
+            'description' => 'User/agent properties management page',
+            'parent' => 0
+        ),
         'agents' => array(
             'title' => 'Our Agents',
             'slug' => 'agents',
@@ -101,7 +122,7 @@ class Page_Manager {
         'agent_add_property' => array(
             'title' => 'Add Property',
             'slug' => 'add-property',
-            'shortcode' => '[malisafi_property_submit]',
+            'shortcode' => '[malisafi_submit_property]',
             'description' => 'Property submission form',
             'parent' => 'agent_dashboard'
         ),

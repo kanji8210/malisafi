@@ -42,6 +42,10 @@ class Activator {
         // Flush rewrite rules
         flush_rewrite_rules();
         
+        // Create required pages
+        require_once MALISAFI_MLS_PATH . 'includes/class-page-manager.php';
+        Page_Manager::create_all_pages();
+        
         // Set default options
         self::set_default_options();
         

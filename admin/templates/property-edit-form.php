@@ -420,14 +420,105 @@ $kenya_counties = array(
                 <h2><?php _e('Property Images', 'malisafi-mls'); ?></h2>
             </div>
             <div class="inside">
-                <p class="description">
-                    <strong><?php _e('Note:', 'malisafi-mls'); ?></strong>
-                    <?php _e('For image upload, please use the Media Library or the Featured Image box on the right side.', 'malisafi-mls'); ?>
-                </p>
-                <p class="description">
-                    <?php _e('Set the main property image using the "Featured Image" box. Additional images can be added to the property gallery in a future update.', 'malisafi-mls'); ?>
-                </p>
-                
+                <div class="media-controls" style="margin-bottom: 15px; display:flex; align-items:center; gap:10px;">
+                    <button type="button" class="button button-secondary" id="select-property-images">
+                        <?php _e('Select Images', 'malisafi-mls'); ?>
+                    </button>
+                    <span class="description"><?php _e('Recommended size 1200x800 (landscape). Max 15 images. Drag to reorder. First image will be Featured.', 'malisafi-mls'); ?></span>
+                </div>
+
+                <div id="property-images-container" class="property-images-grid" style="display:flex; flex-wrap:wrap; gap:10px; margin-bottom:10px;">
+                    <?php
+                    if ($property_id) {
+                        $attachments = get_posts(array(
+                            'post_type' => 'attachment',
+                            'posts_per_page' => -1,
+                            'post_parent' => $property_id,
+                            'post_mime_type' => 'image',
+                            'orderby' => 'menu_order ID',
+                            'order' => 'ASC'
+                        ));
+                        foreach ($attachments as $attachment) {
+                            $image_url = wp_get_attachment_image_url($attachment->ID, 'thumbnail');
+                            echo '<div class="property-image-item" data-id="' . $attachment->ID . '" style="position:relative; width:120px; height:120px; border:1px solid #ddd; border-radius:4px; overflow:hidden;">';
+                            echo '<img src="' . esc_url($image_url) . '" style="width:100%; height:100%; object-fit:cover;" />';
+                            echo '<button type="button" class="remove-image button-link" style="position:absolute; top:4px; right:4px; color:#dc2626;">&times;</button>';
+                            echo '</div>';
+                        }
+                    }
+                    ?>
+                </div>
+                <input type="hidden" name="property_images" id="property-images-input" value="">
+
+                <script>
+                jQuery(function($){
+                    var imageIds = [];
+
+                    // Prefill IDs from existing DOM
+                    $('#property-images-container .property-image-item').each(function(){
+                        var id = $(this).data('id');
+                        if (id) imageIds.push(id);
+                    });
+                    updateImageInput();
+
+                    // Open media frame
+                    $('#select-property-images').on('click', function(e){
+                        e.preventDefault();
+                        if (typeof wp === 'undefined' || !wp.media) { alert('Media library not available.'); return; }
+                        var frame = wp.media({
+                            title: '<?php echo esc_js(__('Select Property Images', 'malisafi-mls')); ?>',
+                            button: { text: '<?php echo esc_js(__('Use Images', 'malisafi-mls')); ?>' },
+                            multiple: true
+                        });
+                        frame.on('select', function(){
+                            var selection = frame.state().get('selection');
+                            selection.each(function(attachment){
+                                attachment = attachment.toJSON();
+                                if (imageIds.indexOf(attachment.id) === -1) {
+                                    if (imageIds.length >= 15) { return; }
+                                    imageIds.push(attachment.id);
+                                    var thumbUrl = (attachment.sizes && attachment.sizes.thumbnail) ? attachment.sizes.thumbnail.url : attachment.url;
+                                    var $item = $('<div class="property-image-item" data-id="'+attachment.id+'" style="position:relative; width:120px; height:120px; border:1px solid #ddd; border-radius:4px; overflow:hidden;">'
+                                        + '<img src="'+thumbUrl+'" style="width:100%; height:100%; object-fit:cover;" />'
+                                        + '<button type="button" class="remove-image button-link" style="position:absolute; top:4px; right:4px; color:#dc2626;">&times;</button>'
+                                        + '</div>');
+                                    $('#property-images-container').append($item);\n                                    // ensure single Featured badge\n                                    $('.main-badge').remove();\n                                    $('#property-images-container .property-image-item').first().append('<span class=\"main-badge\" style=\"position:absolute; left:4px; top:4px; background:#2563eb; color:#fff; font-size:11px; padding:2px 6px; border-radius:3px;\">Featured</span>');
+                                }
+                            });
+                            updateImageInput();
+                        });
+                        frame.open();
+                    });
+
+                    // Remove
+                    $(document).on('click', '.remove-image', function(){
+                        var $wrap = $(this).closest('.property-image-item');
+                        var id = $wrap.data('id');
+                        imageIds = imageIds.filter(function(x){ return x !== id; });
+                        $wrap.remove();
+                        updateImageInput();
+                    });
+
+                    // Sortable if available
+                    if ($.fn.sortable) {
+                        $('#property-images-container').sortable({
+                            items: '.property-image-item',
+                            update: function(){
+                                imageIds = [];
+                                $('#property-images-container .property-image-item').each(function(){
+                                    imageIds.push($(this).data('id'));
+                                });
+                                updateImageInput();
+                            }
+                        });
+                    }
+
+                    function updateImageInput(){
+                        $('#property-images-input').val(imageIds.join(','));
+                    }
+                });
+                </script>
+
                 <table class="form-table">
                     <tr>
                         <th scope="row">
