@@ -20,7 +20,7 @@ if (!defined('WPINC')) {
 
                         <div class="property-image">
                             <a href="<?php the_permalink(); ?>">
-                                <?php the_post_thumbnail('large'); ?>
+                                <?php the_post_thumbnail('malisafi_grid'); ?>
                             </a>
                             <?php if (!empty($property_data['status'])) : ?>
                                 <span class="status-badge"><?php echo esc_html(ucfirst(str_replace('-', ' ', $property_data['status']))); ?></span>
@@ -75,10 +75,16 @@ if (!defined('WPINC')) {
                                 </span>
                             <?php endif; ?>
                             
-                            <?php if (!empty($property_data['area'])) : ?>
+                            <?php 
+                            $size = get_post_meta(get_the_ID(), '_malisafi_size', true);
+                            $size_unit = get_post_meta(get_the_ID(), '_malisafi_size_unit', true) ?: 'sqm';
+                            if (!empty($size)) : ?>
                                 <span class="feature">
                                     <i class="dashicons dashicons-grid-view"></i>
-                                    <?php echo esc_html(number_format($property_data['area'])); ?> <?php echo get_option('malisafi_mls_area_unit', 'sqft'); ?>
+                                    <?php 
+                                    $unit_label = $size_unit === 'sqft' ? 'Sq Ft' : ($size_unit === 'sqm' ? 'Sq M' : strtoupper($size_unit));
+                                    echo esc_html(number_format((float)$size) . ' ' . $unit_label);
+                                    ?>
                                 </span>
                             <?php endif; ?>
                         </div>

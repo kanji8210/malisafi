@@ -40,7 +40,12 @@ while (have_posts()) : the_post();
     $currency = get_post_meta($property_id, '_malisafi_currency', true) ?: 'USD';
     $bedrooms = get_post_meta($property_id, '_malisafi_bedrooms', true);
     $bathrooms = get_post_meta($property_id, '_malisafi_bathrooms', true);
-    $area = get_post_meta($property_id, '_malisafi_area', true);
+
+    // Size and area
+    $size = get_post_meta($property_id, '_malisafi_size', true); // numeric floor area
+    $size_unit = get_post_meta($property_id, '_malisafi_size_unit', true) ?: 'sqm';
+    $area_name = get_post_meta($property_id, '_malisafi_area', true); // neighborhood/text area
+
     $status = get_post_meta($property_id, '_malisafi_status', true);
     $featured = get_post_meta($property_id, '_malisafi_featured', true);
     $verified = get_post_meta($property_id, '_malisafi_verified', true);
@@ -85,18 +90,19 @@ while (have_posts()) : the_post();
         }
     }
     
-    // Features
-    $features = array(
-        'pool' => get_post_meta($property_id, '_malisafi_pool', true),
-        'gym' => get_post_meta($property_id, '_malisafi_gym', true),
-        'garden' => get_post_meta($property_id, '_malisafi_garden', true),
-        'balcony' => get_post_meta($property_id, '_malisafi_balcony', true),
-        'parking' => get_post_meta($property_id, '_malisafi_parking', true),
-        'security' => get_post_meta($property_id, '_malisafi_security', true),
-        'elevator' => get_post_meta($property_id, '_malisafi_elevator', true),
-        'furnished' => get_post_meta($property_id, '_malisafi_furnished', true),
-        'air_conditioning' => get_post_meta($property_id, '_malisafi_air_conditioning', true),
-    );
+    // Features and amenities from meta arrays (primary)
+    $features = get_post_meta($property_id, '_malisafi_features', true);
+    $amenities = get_post_meta($property_id, '_malisafi_amenities', true);
+    $features = is_array($features) ? $features : array();
+    $amenities = is_array($amenities) ? $amenities : array();
+
+    // Fallback: use taxonomy terms if meta arrays are empty
+    if (empty($features)) {
+        $feature_terms = wp_get_post_terms($property_id, 'malisafi_property_features', array('fields' => 'names'));
+        if (!is_wp_error($feature_terms) && !empty($feature_terms)) {
+            $features = $feature_terms;
+        }
+    }
     
     // Format price
     $currency_symbol = ($currency === 'KES') ? 'KSh' : '$';
@@ -141,7 +147,7 @@ $formatted_price = $price > 0 ? ($currency_symbol . ' ' . number_format($price))
             <div class="gallery-main">
                 <?php if (has_post_thumbnail()) : ?>
                     <div class="main-image-container">
-                        <img src="<?php echo get_the_post_thumbnail_url($property_id, 'full'); ?>" 
+                        <img src="<?php echo get_the_post_thumbnail_url($property_id, 'malisafi_landscape'); ?>" 
                              alt="<?php echo esc_attr(get_the_title()); ?>" 
                              class="main-image" 
                              data-current-index="0">
@@ -212,17 +218,18 @@ $formatted_price = $price > 0 ? ($currency_symbol . ' ' . number_format($price))
         <?php if (!empty($all_images)) : ?>
         <div class="gallery-thumbnails">
             <?php foreach ($all_images as $index => $img_id) : 
-                $img_url = wp_get_attachment_image_url($img_id, 'medium');
+                $img_url = wp_get_attachment_image_url($img_id, 'malisafi_grid');
                 if ($img_url) :
                     $alt_text = get_post_meta($img_id, '_wp_attachment_image_alt', true);
-                    // If no alt text exists, use area if available
-                    if (empty($alt_text) && $area) {
-                        $alt_text = is_numeric($area) ? (number_format((float)$area) . ' sq ft') : '';
+                    // If no alt text exists, use size if available
+                    if (empty($alt_text) && $size) {
+                        $unit_label = $size_unit === 'sqft' ? 'sq ft' : ($size_unit === 'sqm' ? 'sq m' : $size_unit);
+                        $alt_text = is_numeric($size) ? (number_format((float)$size) . ' ' . $unit_label) : '';
                     }
             ?>
                 <div class="thumbnail <?php echo $index === 0 ? 'active' : ''; ?>" 
                      data-index="<?php echo $index; ?>" 
-                     data-image="<?php echo esc_url(wp_get_attachment_image_url($img_id, 'full')); ?>">
+                     data-image=\"<?php echo esc_url(wp_get_attachment_image_url($img_id, 'malisafi_landscape')); ?>\"
                     <div class="thumbnail-wrapper">
                         <img src="<?php echo esc_url($img_url); ?>" 
                              alt="<?php echo esc_attr(get_the_title() . ' - Image ' . ($index + 1)); ?>">
@@ -347,7 +354,7 @@ $formatted_price = $price > 0 ? ($currency_symbol . ' ' . number_format($price))
                 <?php endif; ?>
                 
                 <!-- Area -->
-                <?php if ($area) : ?>
+                <?php if ($size) : ?>
                 <div class="spec-item-inline spec-area">
                     <span class="spec-icon-inline area-icon">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
@@ -357,8 +364,8 @@ $formatted_price = $price > 0 ? ($currency_symbol . ' ' . number_format($price))
                         </svg>
                     </span>
                     <div class="spec-text">
-                        <span class=\"spec-value\"><?php echo is_numeric($area) ? number_format((float)$area) : ''; ?></span>
-                        <span class="spec-label">Sq Ft</span>
+                        <span class=\"spec-value\"><?php echo is_numeric($size) ? number_format((float)$size) . ' ' . ($size_unit === 'sqft' ? 'sq ft' : ($size_unit === 'sqm' ? 'sq m' : esc_html($size_unit))) : ''; ?></span>
+                        <span class="spec-label"><?php echo $size_unit === 'sqft' ? 'Sq Ft' : ($size_unit === 'sqm' ? 'Sq M' : strtoupper(esc_html($size_unit))); ?></span>
                     </div>
                 </div>
                 <?php endif; ?>
@@ -450,10 +457,10 @@ $formatted_price = $price > 0 ? ($currency_symbol . ' ' . number_format($price))
                         </div>
                     <?php endif; ?>
                     
-                    <?php if ($area) : ?>
+                    <?php if ($size) : ?>
                         <div class="detail-item">
                             <span class="detail-label">Area</span>
-                            <span class=\"detail-value\"><?php echo is_numeric($area) ? number_format((float)$area) . ' sq ft' : ''; ?></span>
+                            <span class=\"detail-value\"><?php echo is_numeric($size) ? number_format((float)$size) . ' ' . ($size_unit === 'sqft' ? 'sq ft' : ($size_unit === 'sqm' ? 'sq m' : esc_html($size_unit))) : ''; ?></span>
                         </div>
                     <?php endif; ?>
                     
@@ -466,12 +473,15 @@ $formatted_price = $price > 0 ? ($currency_symbol . ' ' . number_format($price))
                 </div>
             </section>
             
-            <!-- Features -->
-            <?php if (array_filter($features)) : ?>
+            <!-- Features & Amenities -->
+            <?php 
+            $has_any = !empty($features) || !empty($amenities);
+            if ($has_any) : ?>
             <section class="property-section">
                 <h2 class="section-title">Features & Amenities</h2>
                 <div class="property-features-grid">
                     <?php 
+                    // Map for known feature keys
                     $feature_labels = array(
                         'pool' => 'Swimming Pool',
                         'gym' => 'Gym',
@@ -483,20 +493,38 @@ $formatted_price = $price > 0 ? ($currency_symbol . ' ' . number_format($price))
                         'furnished' => 'Furnished',
                         'air_conditioning' => 'Air Conditioning'
                     );
-                    
-                    foreach ($features as $key => $value) :
-                        if ($value) :
-                    ?>
+
+                    // Normalize features: if associative (key => bool), keep true keys; if list of strings, use them directly
+                    $normalized_features = array();
+                    if (!empty($features)) {
+                        foreach ($features as $k => $v) {
+                            if (is_string($k)) {
+                                if ($v) { $normalized_features[] = isset($feature_labels[$k]) ? $feature_labels[$k] : ucwords(str_replace('_', ' ', $k)); }
+                            } else {
+                                // numeric key => value is label
+                                if (!empty($v)) { $normalized_features[] = is_string($v) ? $v : strval($v); }
+                            }
+                        }
+                    }
+
+                    // Normalize amenities (list of strings expected)
+                    $normalized_amenities = array();
+                    if (!empty($amenities)) {
+                        foreach ($amenities as $am) {
+                            if (!empty($am)) { $normalized_amenities[] = is_string($am) ? ucwords(str_replace('_', ' ', $am)) : strval($am); }
+                        }
+                    }
+
+                    // Render combined list
+                    $items = array_merge($normalized_features, $normalized_amenities);
+                    foreach ($items as $label): ?>
                         <div class="feature-item">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <path d="M20 6L9 17L4 12"/>
                             </svg>
-                            <span><?php echo esc_html($feature_labels[$key]); ?></span>
+                            <span><?php echo esc_html($label); ?></span>
                         </div>
-                    <?php 
-                        endif;
-                    endforeach; 
-                    ?>
+                    <?php endforeach; ?>
                 </div>
             </section>
             <?php endif; ?>

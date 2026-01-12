@@ -59,6 +59,7 @@ class Property_Submission {
                 'ajaxurl' => admin_url('admin-ajax.php'),
                 'nonce' => wp_create_nonce('malisafi_property_submission'),
                 'uploadNonce' => wp_create_nonce('malisafi_upload_images'),
+                'uploadsEnabled' => true,
                 'strings' => array(
                     'saving' => __('Saving...', 'malisafi-mls'),
                     'saved' => __('Saved', 'malisafi-mls'),
@@ -453,7 +454,7 @@ class Property_Submission {
             $errors['county'] = __('County is required', 'malisafi-mls');
         }
         
-        // Check images
+        // Require at least one image via front-end gallery upload
         $gallery = get_post_meta($property_id, '_malisafi_gallery_ids', true);
         if (empty($gallery)) {
             $errors['images'] = __('At least one image is required', 'malisafi-mls');
@@ -534,8 +535,8 @@ class Property_Submission {
             
             $uploaded_ids[] = array(
                 'id' => $attachment_id,
-                'url' => wp_get_attachment_image_url($attachment_id, 'medium'),
-                'thumb' => wp_get_attachment_image_url($attachment_id, 'thumbnail')
+                'url' => wp_get_attachment_image_url($attachment_id, 'malisafi_grid') ?: wp_get_attachment_image_url($attachment_id, 'medium'),
+                'thumb' => wp_get_attachment_image_url($attachment_id, 'malisafi_thumb') ?: wp_get_attachment_image_url($attachment_id, 'thumbnail')
             );
         }
         

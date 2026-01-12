@@ -389,7 +389,7 @@ $property_id = isset($_GET['property_id']) ? intval($_GET['property_id']) : 0;
         <!-- Step 5: Images -->
         <div class="wizard-step" id="step-5">
             <h2><?php _e('Property Images', 'malisafi-mls'); ?></h2>
-            <p class="step-description"><?php _e('Upload high-quality images of your property (minimum 1 image required)', 'malisafi-mls'); ?></p>
+            <p class="step-description"><?php _e('Upload high-quality images of your property (minimum 1 image required). Landscape images at least 1200x800 are recommended.', 'malisafi-mls'); ?></p>
             
             <!-- Drag & Drop Upload Area -->
             <div class="image-upload-area" id="dropzone">

@@ -15,10 +15,25 @@ class Post_Types {
         // Enqueue media uploader
         add_action('admin_enqueue_scripts', array($this, 'enqueue_admin_scripts'));
         
+        // Register custom image sizes for consistent landscape presentation
+        add_action('after_setup_theme', array($this, 'register_image_sizes'));
+        
         // Add template filter for single property page
         add_filter('single_template', array($this, 'load_single_property_template'));
     }
     
+    /**
+     * Register image sizes
+     * Ensures featured and gallery images are consistently landscape and cropped
+     */
+    public function register_image_sizes() {
+        if (function_exists('add_image_size')) {
+            add_image_size('malisafi_landscape', 1200, 800, true); // Featured/full display
+            add_image_size('malisafi_grid', 600, 400, true);       // Gallery grid and cards
+            add_image_size('malisafi_thumb', 300, 200, true);      // Small thumbnails
+        }
+    }
+
     /**
      * Enqueue admin scripts
      */

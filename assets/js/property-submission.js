@@ -249,6 +249,13 @@
 
         // Image Upload Functions
         initImageUpload: function() {
+            if (malisafiSubmission.uploadsEnabled !== true) {
+                // Hide upload UI and show a notice if a placeholder area exists
+                $('#dropzone').hide();
+                $('.upload-progress').hide();
+                $('#image-gallery').hide();
+                return;
+            }
             const self = this;
 
             // Drag and drop
@@ -271,6 +278,19 @@
 
             // Make gallery sortable
             this.$gallery.sortable({
+                update: () => {
+                    // Enforce main badge and ensure not exceeding 15 items
+                    const $items = this.$gallery.find('.gallery-item');
+                    if ($items.length > 15) {
+                        // remove overflow items from DOM and state
+                        $items.slice(15).remove();
+                        this.uploadedImages = this.uploadedImages.slice(0, 15);
+                        this.showError('Maximum 15 images allowed. Extra images were ignored.');
+                    }
+                    // Reapply main badge
+                    this.$gallery.find('.main-badge').remove();
+                    this.$gallery.find('.gallery-item').first().append('<span class="main-badge">Main Photo</span>');
+                },
                 update: function() {
                     self.updateImageOrder();
                 }
@@ -278,18 +298,58 @@
         },
 
         handleFileSelect: function(files) {
-            if (files.length === 0) return;
+            if (!files || files.length === 0) return;
 
-            const formData = new FormData();
-            formData.append('action', 'malisafi_upload_property_images');
-            formData.append('nonce', malisafiSubmission.uploadNonce);
+            const remainingSlots = Math.max(0, 15 - this.uploadedImages.length);
+            if (remainingSlots === 0) {
+                this.showError('You can upload up to 15 images per listing.');
+                return;
+            }
 
-            Array.from(files).forEach(file => {
-                formData.append('images[]', file);
-            });
-
-            this.uploadImages(formData);
+            const inputFiles = Array.from(files).slice(0, remainingSlots);
+            const self = this;
+            this.validateImageFiles(inputFiles, { minWidth: 1200, minHeight: 800, landscape: true })
+                .then(function(validFiles) {
+                    if (!validFiles.length) {
+                        self.showError('No valid images to upload. Use landscape images at least 1200x800.');
+                        return;
+                    }
+                    const formData = new FormData();
+                    formData.append('action', 'malisafi_upload_property_images');
+                    formData.append('nonce', malisafiSubmission.uploadNonce);
+                    validFiles.forEach(function(file) { formData.append('images[]', file); });
+                    self.uploadImages(formData);
+                })
+                .catch(function() {
+                    self.showError('Could not validate selected images.');
+                });
         },
+
+       validateImageFiles: function(files, opts) {
+           const minWidth = opts && opts.minWidth ? opts.minWidth : 0;
+           const minHeight = opts && opts.minHeight ? opts.minHeight : 0;
+           const requireLandscape = opts && opts.landscape === true;
+
+           const checks = files.map(function(file) {
+               return new Promise(function(resolve) {
+                   const img = new Image();
+                   const url = URL.createObjectURL(file);
+                   img.onload = function() {
+                       const isLandscape = img.width > img.height;
+                       const okLandscape = !requireLandscape || isLandscape;
+                       const okSize = img.width >= minWidth && img.height >= minHeight;
+                       URL.revokeObjectURL(url);
+                       resolve(okLandscape && okSize ? file : null);
+                   };
+                   img.onerror = function() {
+                       URL.revokeObjectURL(url);
+                       resolve(null);
+                   };
+                   img.src = url;
+               });
+           });
+           return Promise.all(checks).then(function(results) { return results.filter(Boolean); });
+       },
 
         uploadImages: function(formData) {
             const self = this;
@@ -334,6 +394,11 @@
         },
 
         addImageToGallery: function(image) {
+            // Enforce cap at 15 items
+            if (this.uploadedImages.length >= 15) {
+                this.showError('Maximum 15 images allowed. Extra images were ignored.');
+                return;
+            }
             const isFirst = this.uploadedImages.length === 0;
             this.uploadedImages.push(image.id);
 
@@ -481,7 +546,9 @@
                 return;
             }
 
-            if (this.uploadedImages.length === 0) {
+            if (malisafiSubmission.uploadsEnabled !== true) {
+                // Skip image requirement when uploads are disabled
+            } else if (this.uploadedImages.length === 0) {
                 this.showError('Please upload at least one image');
                 return;
             }

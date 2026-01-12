@@ -18,7 +18,8 @@ if (empty($currency)) {
 }
 $bedrooms = get_post_meta($property_id, '_malisafi_bedrooms', true);
 $bathrooms = get_post_meta($property_id, '_malisafi_bathrooms', true);
-$area = get_post_meta($property_id, '_malisafi_area', true);
+$size = get_post_meta($property_id, '_malisafi_size', true);
+$size_unit = get_post_meta($property_id, '_malisafi_size_unit', true) ?: 'sqm';
 $status = get_post_meta($property_id, '_malisafi_status', true);
 $featured = get_post_meta($property_id, '_malisafi_featured', true);
 $setting = get_post_meta($property_id, '_malisafi_setting', true);
@@ -27,7 +28,7 @@ $state = get_post_meta($property_id, '_malisafi_state', true);
 $location = $city ? $city . ($state ? ', ' . $state : '') : '';
 
 // Get featured image
-$image_url = get_the_post_thumbnail_url($property_id, 'large');
+$image_url = get_the_post_thumbnail_url($property_id, 'malisafi_grid');
 if (!$image_url) {
     $image_url = plugins_url('malisafi/assets/images/placeholder-property.svg');
 }
@@ -135,10 +136,15 @@ $is_new = (time() - $post_date) < (7 * 24 * 60 * 60);
             </div>
             <?php endif; ?>
             
-            <?php if ($area) : ?>
+            <?php if ($size) : ?>
             <div class="property-feature">
                 <span class="dashicons dashicons-editor-expand"></span>
-                <span><?php echo number_format(floatval($area)); ?> sq ft</span>
+                <span>
+                    <?php 
+                    $unit_label = $size_unit === 'sqft' ? 'Sq Ft' : ($size_unit === 'sqm' ? 'Sq M' : strtoupper($size_unit));
+                    echo esc_html(number_format((float)$size) . ' ' . $unit_label);
+                    ?>
+                </span>
             </div>
             <?php endif; ?>
         </div>

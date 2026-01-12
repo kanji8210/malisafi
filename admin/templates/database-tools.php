@@ -23,6 +23,32 @@ if (isset($_POST['malisafi_repair_database']) && check_admin_referer('malisafi_r
     echo '<div class="notice notice-success is-dismissible"><p>' . __('Database tables have been checked and repaired successfully!', 'malisafi-mls') . '</p></div>';
 }
 
+// Regenerate thumbnails
+if (isset($_POST['malisafi_regenerate_thumbnails']) && check_admin_referer('malisafi_regenerate_thumbnails')) {
+require_once ABSPATH . 'wp-admin/includes/image.php';
+$attachments = get_posts(array(
+    'post_type' => 'attachment',
+    'post_mime_type' => 'image',
+    'posts_per_page' => -1,
+    'post_status' => 'inherit',
+    'fields' => 'ids',
+));
+
+$processed = 0;
+foreach ($attachments as $attachment_id) {
+    $file = get_attached_file($attachment_id);
+    if ($file && file_exists($file)) {
+        $metadata = wp_generate_attachment_metadata($attachment_id, $file);
+        if (!is_wp_error($metadata) && !empty($metadata)) {
+            wp_update_attachment_metadata($attachment_id, $metadata);
+            $processed++;
+        }
+    }
+}
+
+echo '<div class="notice notice-success is-dismissible"><p>' . sprintf(__('Regenerated thumbnails for %d images.', 'malisafi-mls'), $processed) . '</p></div>';
+}
+
 // Check table status
 global $wpdb;
 $tables_status = array();
@@ -111,6 +137,18 @@ foreach ($table_names as $table => $label) {
         </form>
     </div>
     
+    <div class="card" style="margin-top: 20px;">
+        <h2><?php _e('Regenerate Thumbnails', 'malisafi-mls'); ?></h2>
+        <p><?php _e('Use this tool after changing image sizes to regenerate thumbnails for all existing images. This may take a while on large libraries.', 'malisafi-mls'); ?></p>
+        <form method="post" onsubmit="return confirm('<?php esc_attr_e('Regenerate thumbnails for all images? This may take a while.', 'malisafi-mls'); ?>');">
+            <?php wp_nonce_field('malisafi_regenerate_thumbnails'); ?>
+            <button type="submit" name="malisafi_regenerate_thumbnails" class="button button-secondary">
+                <span class="dashicons dashicons-image-rotate" style="margin-top: 3px;"></span>
+                <?php _e('Regenerate All Thumbnails', 'malisafi-mls'); ?>
+            </button>
+        </form>
+    </div>
+
     <div class="card" style="margin-top: 20px;">
         <h2><?php _e('Database Information', 'malisafi-mls'); ?></h2>
         <table class="form-table">
