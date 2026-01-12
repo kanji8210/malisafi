@@ -24,13 +24,32 @@ if (!defined('ABSPATH')) {
     
     <!-- Debug Stats Display -->
     <div style="background: #fff3cd; border: 1px solid #ffc107; padding: 15px; margin: 20px 0; border-radius: 4px;">
-        <h3 style="margin-top: 0; color: #856404;">📊 Property Stats Debug</h3>
-        <p style="margin: 5px 0;"><strong>Properties linked to this agent:</strong> <?php echo $total_properties; ?></p>
+        <h3 style="margin-top: 0; color: #856404;">📊 Property Stats (Comprehensive Query)</h3>
+        <p style="margin: 5px 0;"><strong>Total Properties:</strong> <?php echo $total_properties; ?></p>
         <p style="margin: 5px 0;"><strong>Active (Published):</strong> <?php echo $active_listings; ?></p>
         <p style="margin: 5px 0;"><strong>Pending Approval:</strong> <?php echo $pending_properties; ?></p>
-        <p style="margin: 5px 0;"><strong>Total View:</strong> <?php echo ($total_properties); ?></p>
         <?php 
         global $wpdb;
+        if (isset($linked_user_id) && $linked_user_id):
+            // Show breakdown
+            $by_author_only = (int) $wpdb->get_var($wpdb->prepare(
+                "SELECT COUNT(*) FROM {$wpdb->posts} WHERE post_type = 'malisafi_property' AND post_author = %d",
+                $linked_user_id
+            ));
+            $by_meta_only = (int) $wpdb->get_var($wpdb->prepare(
+                "SELECT COUNT(DISTINCT pm.post_id) FROM {$wpdb->postmeta} pm
+                INNER JOIN {$wpdb->posts} p ON pm.post_id = p.ID
+                WHERE pm.meta_key IN ('_malisafi_agent_id', '_property_agent_id')
+                AND pm.meta_value = %d AND p.post_type = 'malisafi_property' AND p.post_author != %d",
+                $agent_id, $linked_user_id
+            ));
+        ?>
+        <p style="margin: 5px 0; font-size: 12px; color: #666;">
+            <em>Linked by post_author: <?php echo $by_author_only; ?> | Linked by meta only: <?php echo $by_meta_only; ?></em>
+        </p>
+        <?php endif; ?>
+        
+        <?php 
         if (isset($linked_user_id) && $linked_user_id): 
             // Show what the query is actually finding
             $all_by_author = $wpdb->get_results($wpdb->prepare(

@@ -194,8 +194,92 @@ class Malisafi_Agent_Dashboard {
         // Get linked user ID for this agent
         $linked_user_id = get_post_meta($agent_id, '_malisafi_linked_user', true);
         
-        // Get statistics - count properties by author (linked user) or by meta _malisafi_agent_id
+        // COMPREHENSIVE QUERY: Count ALL properties that could belong to this agent
+        // Method 1: By post_author matching linked user
+        // Method 2: By _malisafi_agent_id meta matching agent post ID
+        // Method 3: By old _property_agent_id meta (legacy)
+        
         if ($linked_user_id) {
+            // Primary: Count by post_author
+            $by_author = (int) $wpdb->get_var($wpdb->prepare(
+                "SELECT COUNT(*) FROM {$wpdb->posts} 
+                WHERE post_type = 'malisafi_property' 
+                AND post_author = %d",
+                $linked_user_id
+            ));
+            
+            // Secondary: Count by meta (might have some that aren't author-linked yet)
+            $by_meta = (int) $wpdb->get_var($wpdb->prepare(
+                "SELECT COUNT(DISTINCT pm.post_id) 
+                FROM {$wpdb->postmeta} pm
+                INNER JOIN {$wpdb->posts} p ON pm.post_id = p.ID
+                WHERE pm.meta_key IN ('_malisafi_agent_id', '_property_agent_id')
+                AND pm.meta_value = %d
+                AND p.post_type = 'malisafi_property'
+                AND p.post_author != %d",
+                $agent_id,
+                $linked_user_id
+            ));
+            
+            $total_properties = $by_author + $by_meta;
+            
+            // Get counts by status (combine both methods)
+            $active_listings = (int) $wpdb->get_var($wpdb->prepare(
+                "SELECT COUNT(DISTINCT p.ID) FROM {$wpdb->posts} p
+                LEFT JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id AND pm.meta_key IN ('_malisafi_agent_id', '_property_agent_id')
+                WHERE p.post_type = 'malisafi_property'
+                AND p.post_status = 'publish'
+                AND (p.post_author = %d OR pm.meta_value = %d)",
+                $linked_user_id,
+                $agent_id
+            ));
+            
+            $pending_properties = (int) $wpdb->get_var($wpdb->prepare(
+                "SELECT COUNT(DISTINCT p.ID) FROM {$wpdb->posts} p
+                LEFT JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id AND pm.meta_key IN ('_malisafi_agent_id', '_property_agent_id')
+                WHERE p.post_type = 'malisafi_property'
+                AND p.post_status = 'pending'
+                AND (p.post_author = %d OR pm.meta_value = %d)",
+                $linked_user_id,
+                $agent_id
+            ));
+        } else {
+            // No linked user - only use meta
+            $total_properties = (int) $wpdb->get_var($wpdb->prepare(
+                "SELECT COUNT(DISTINCT pm.post_id) 
+                FROM {$wpdb->postmeta} pm
+                INNER JOIN {$wpdb->posts} p ON pm.post_id = p.ID
+                WHERE pm.meta_key IN ('_malisafi_agent_id', '_property_agent_id')
+                AND pm.meta_value = %d
+                AND p.post_type = 'malisafi_property'",
+                $agent_id
+            ));
+            
+            $active_listings = (int) $wpdb->get_var($wpdb->prepare(
+                "SELECT COUNT(DISTINCT pm.post_id) 
+                FROM {$wpdb->postmeta} pm
+                INNER JOIN {$wpdb->posts} p ON pm.post_id = p.ID
+                WHERE pm.meta_key IN ('_malisafi_agent_id', '_property_agent_id')
+                AND pm.meta_value = %d
+                AND p.post_type = 'malisafi_property'
+                AND p.post_status = 'publish'",
+                $agent_id
+            ));
+            
+            $pending_properties = (int) $wpdb->get_var($wpdb->prepare(
+                "SELECT COUNT(DISTINCT pm.post_id) 
+                FROM {$wpdb->postmeta} pm
+                INNER JOIN {$wpdb->posts} p ON pm.post_id = p.ID
+                WHERE pm.meta_key IN ('_malisafi_agent_id', '_property_agent_id')
+                AND pm.meta_value = %d
+                AND p.post_type = 'malisafi_property'
+                AND p.post_status = 'pending'",
+                $agent_id
+            ));
+        }
+        
+        // Get statistics - count properties by author (linked user) or by meta _malisafi_agent_id
+        if (false && $linked_user_id) {
             // Count by post_author (most efficient)
             $total_properties = (int) $wpdb->get_var($wpdb->prepare(
                 "SELECT COUNT(*) FROM {$wpdb->posts} 
@@ -256,27 +340,29 @@ class Malisafi_Agent_Dashboard {
             ));
         }
         
-        // Get recent properties
+        // Get recent properties (comprehensive - all linked properties)
         if ($linked_user_id) {
             $recent_properties = $wpdb->get_results($wpdb->prepare(
-                "SELECT ID, post_title, post_status, post_date
-                FROM {$wpdb->posts}
-                WHERE post_type = 'malisafi_property'
-                AND post_author = %d
-                ORDER BY post_date DESC
-                LIMIT 5",
-                $linked_user_id
+                "SELECT DISTINCT p.ID, p.post_title, p.post_status, p.post_date
+                FROM {$wpdb->posts} p
+                LEFT JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id AND pm.meta_key IN ('_malisafi_agent_id', '_property_agent_id')
+                WHERE p.post_type = 'malisafi_property'
+                AND (p.post_author = %d OR pm.meta_value = %d)
+                ORDER BY p.post_date DESC
+                LIMIT 10",
+                $linked_user_id,
+                $agent_id
             ));
         } else {
             $recent_properties = $wpdb->get_results($wpdb->prepare(
-                "SELECT p.ID, p.post_title, p.post_status, p.post_date
+                "SELECT DISTINCT p.ID, p.post_title, p.post_status, p.post_date
                 FROM {$wpdb->postmeta} pm
                 INNER JOIN {$wpdb->posts} p ON pm.post_id = p.ID
-                WHERE pm.meta_key = '_malisafi_agent_id' 
+                WHERE pm.meta_key IN ('_malisafi_agent_id', '_property_agent_id')
                 AND pm.meta_value = %d
                 AND p.post_type = 'malisafi_property'
                 ORDER BY p.post_date DESC
-                LIMIT 5",
+                LIMIT 10",
                 $agent_id
             ));
         }
@@ -428,12 +514,28 @@ class Malisafi_Agent_Dashboard {
             return;
         }
         
+        // Enqueue WordPress media library for image uploads
+        wp_enqueue_media();
+        
         wp_enqueue_style('malisafi-agent-dashboard', plugin_dir_url(dirname(__FILE__)) . 'assets/css/agent-dashboard.css', array(), '1.0.0');
         wp_enqueue_script('malisafi-agent-dashboard', plugin_dir_url(dirname(__FILE__)) . 'assets/js/agent-dashboard.js', array('jquery'), '1.0.0', true);
+        
+        // Also enqueue admin.js for property edit form functionality
+        wp_enqueue_style('malisafi-mls-admin', plugin_dir_url(dirname(__FILE__)) . 'assets/css/admin.css', array(), '1.0.0');
+        wp_enqueue_script('malisafi-mls-admin', plugin_dir_url(dirname(__FILE__)) . 'assets/js/admin.js', array('jquery'), '1.0.0', false);
         
         wp_localize_script('malisafi-agent-dashboard', 'malisafiAgent', array(
             'ajaxurl' => admin_url('admin-ajax.php'),
             'nonce' => wp_create_nonce('switch_agent_view')
+        ));
+        
+        wp_localize_script('malisafi-mls-admin', 'malisafi_admin', array(
+            'ajaxurl' => admin_url('admin-ajax.php'),
+            'nonce' => wp_create_nonce('malisafi_mls_nonce'),
+            'strings' => array(
+                'media_select_title' => __('Select Property Images', 'malisafi-mls'),
+                'media_select_button' => __('Use Images', 'malisafi-mls')
+            )
         ));
     }
 
