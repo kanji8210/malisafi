@@ -158,14 +158,29 @@ $kenya_counties = array(
                     
                     <tr>
                         <th scope="row">
-                            <label for="reference_id"><?php _e('Reference ID', 'malisafi-mls'); ?></label>
+                            <label for="reference_id"><?php _e('Property ID (MLS #)', 'malisafi-mls'); ?></label>
                         </th>
                         <td>
-                            <input type="text" name="reference_id" id="reference_id" 
-                                   value="<?php echo esc_attr($property_meta['reference_id'] ?? ''); ?>" 
-                                   class="regular-text" 
-                                   placeholder="<?php esc_attr_e('e.g., PROP-2026-001', 'malisafi-mls'); ?>" />
-                            <p class="description"><?php _e('Internal reference number (optional)', 'malisafi-mls'); ?></p>
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <input type="text" name="reference_id" id="reference_id" 
+                                       value="<?php echo esc_attr($property_meta['reference_id'] ?? ''); ?>" 
+                                       class="regular-text" readonly style="flex: 1;" 
+                                       placeholder="<?php esc_attr_e('Not generated yet', 'malisafi-mls'); ?>">
+                                <button type="button" id="generate-reference-id" class="button button-secondary" 
+                                        <?php echo !empty($property_meta['reference_id']) ? 'disabled' : ''; ?>>
+                                    <span class="dashicons dashicons-admin-network" style="margin-top: 3px;"></span>
+                                    <?php _e('Generate ID', 'malisafi-mls'); ?>
+                                </button>
+                            </div>
+                            <p class="description">
+                                <?php 
+                                if (empty($property_meta['reference_id'])) {
+                                    _e('Click "Generate ID" to create a unique property identifier, or save to auto-generate.', 'malisafi-mls'); 
+                                } else {
+                                    _e('Unique property identifier (auto-generated format: PROP-YYYYMMDD-ID)', 'malisafi-mls'); 
+                                }
+                                ?>
+                            </p>
                         </td>
                     </tr>
                 </table>
@@ -451,80 +466,6 @@ $kenya_counties = array(
                 <input type="hidden" name="property_images" id="property-images-input" value="">
 
                 <!-- Script moved to assets/js/admin.js -->
-                <script>
-                jQuery(function($){});
-                    var imageIds = [];
-
-                    // Prefill IDs from existing DOM
-                    $('#property-images-container .property-image-item').each(function(){
-                        var id = $(this).data('id');
-                        if (id) imageIds.push(id);
-                    });
-                    updateImageInput();
-
-                    // Open media frame
-                    $('#select-property-images').on('click', function(e){
-                        e.preventDefault();
-                        if (typeof wp === 'undefined' || !wp.media) { alert('Media library not available.'); return; }
-                        var frame = wp.media({
-                            title: '<?php echo esc_js(__('Select Property Images', 'malisafi-mls')); ?>',
-                            button: { text: '<?php echo esc_js(__('Use Images', 'malisafi-mls')); ?>' },
-                            multiple: true
-                        });
-                        frame.on('select', function(){
-                            var selection = frame.state().get('selection');
-                            selection.each(function(attachment){
-                                attachment = attachment.toJSON();
-                                if (imageIds.indexOf(attachment.id) === -1) {
-                                    if (imageIds.length >= 15) { return; }
-                                    imageIds.push(attachment.id);
-                                    var thumbUrl = (attachment.sizes && attachment.sizes.thumbnail) ? attachment.sizes.thumbnail.url : attachment.url;
-                                    var $item = $('<div class="property-image-item" data-id="'+attachment.id+'" style="position:relative;width:120px;height:120px;border:1px solid #ddd;border-radius:4px;overflow:hidden;">'
-                                        + '<img src="'+thumbUrl+'" style="width:100%;height:100%;object-fit:cover;" />'
-                                        + '<button type="button" class="remove-image button-link" style="position:absolute;top:4px;right:4px;color:#dc2626;">&times;</button>'
-                                        + '</div>');
-                                    $('#property-images-container').append($item);
-                                    // ensure single Featured badge
-                                    $('.main-badge').remove();
-                                    $('#property-images-container .property-image-item').first().append('<span class="main-badge" style="position:absolute;left:4px;top:4px;background:#2563eb;color:#fff;font-size:11px;padding:2px 6px;border-radius:3px;">Featured</span>');
-                                }
-                            });
-                            updateImageInput();
-                        });
-                        frame.open();
-                    });
-
-                    // Remove
-                    $(document).on('click', '.remove-image', function(){
-                        var $wrap = $(this).closest('.property-image-item');
-                        var id = $wrap.data('id');
-                        imageIds = imageIds.filter(function(x){ return x !== id; });
-                        $wrap.remove();
-                        updateImageInput();
-                    });
-
-                    // Sortable if available
-                    if ($.fn.sortable) {
-                        $('#property-images-container').sortable({
-                            items: '.property-image-item',
-                            update: function(){
-                                imageIds = [];
-                                $('#property-images-container .property-image-item').each(function(){
-                                    imageIds.push($(this).data('id'));
-                                });
-                                // reapply Featured badge to first item
-                                $('.main-badge').remove();
-                                $('#property-images-container .property-image-item').first().append('<span class="main-badge" style="position:absolute;left:4px;top:4px;background:#2563eb;color:#fff;font-size:11px;padding:2px 6px;border-radius:3px;">Featured</span>');
-                                updateImageInput();
-                            }
-                        });
-                    }
-
-                    function updateImageInput(){
-                        $('#property-images-input').val(imageIds.join(','));
-                    }
-                });
-                </script>
 
                 <table class="form-table">
                     <tr>
@@ -653,6 +594,45 @@ $kenya_counties = array(
 </style>
 
 <script>
+jQuery(document).ready(function($){
+    // Generate Reference ID button
+    $('#generate-reference-id').on('click', function(){
+        var $btn = $(this);
+        var $input = $('#reference_id');
+        var propertyId = <?php echo $property_id ? $property_id : 0; ?>;
+        
+        if (!propertyId) {
+            alert('<?php echo esc_js(__('Please save the property first before generating a reference ID.', 'malisafi-mls')); ?>');
+            return;
+        }
+        
+        $btn.prop('disabled', true).text('<?php echo esc_js(__('Generating...', 'malisafi-mls')); ?>');
+        
+        $.ajax({
+            url: ajaxurl,
+            type: 'POST',
+            data: {
+                action: 'malisafi_generate_reference_id',
+                property_id: propertyId,
+                nonce: '<?php echo wp_create_nonce('malisafi_generate_ref_id'); ?>'
+            },
+            success: function(response){
+                if (response.success) {
+                    $input.val(response.data.reference_id);
+                    $btn.replaceWith('<span style="color: #46b450;"><span class="dashicons dashicons-yes-alt"></span> ' + response.data.message + '</span>');
+                } else {
+                    alert(response.data.message || '<?php echo esc_js(__('Failed to generate reference ID.', 'malisafi-mls')); ?>');
+                    $btn.prop('disabled', false).html('<span class="dashicons dashicons-admin-network" style="margin-top: 3px;"></span> <?php echo esc_js(__('Generate ID', 'malisafi-mls')); ?>');
+                }
+            },
+            error: function(){
+                alert('<?php echo esc_js(__('Error generating reference ID.', 'malisafi-mls')); ?>');
+                $btn.prop('disabled', false).html('<span class="dashicons dashicons-admin-network" style="margin-top: 3px;"></span> <?php echo esc_js(__('Generate ID', 'malisafi-mls')); ?>');
+            }
+        });
+    });
+});
+
 function malisafiGetLocation() {
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(function(position) {

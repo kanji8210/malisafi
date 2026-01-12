@@ -321,22 +321,46 @@ class Agent_Post_Type {
     public function render_statistics_metabox($post) {
         global $wpdb;
         
-        // Count properties by agent
-        $total_properties = $wpdb->get_var($wpdb->prepare(
-            "SELECT COUNT(*) FROM {$wpdb->postmeta} WHERE meta_key = '_property_agent_id' AND meta_value = %d",
-            $post->ID
-        ));
+        // Get linked user ID for this agent
+        $linked_user_id = get_post_meta($post->ID, '_malisafi_linked_user', true);
         
-        // Count active listings
-        $active_listings = $wpdb->get_var($wpdb->prepare(
-            "SELECT COUNT(DISTINCT pm.post_id) 
-            FROM {$wpdb->postmeta} pm
-            INNER JOIN {$wpdb->posts} p ON pm.post_id = p.ID
-            WHERE pm.meta_key = '_property_agent_id' 
-            AND pm.meta_value = %d
-            AND p.post_status = 'publish'",
-            $post->ID
-        ));
+        // Count properties by agent
+        if ($linked_user_id) {
+            $total_properties = (int) $wpdb->get_var($wpdb->prepare(
+                "SELECT COUNT(*) FROM {$wpdb->posts} 
+                WHERE post_type = 'malisafi_property' 
+                AND post_author = %d",
+                $linked_user_id
+            ));
+            
+            $active_listings = (int) $wpdb->get_var($wpdb->prepare(
+                "SELECT COUNT(*) FROM {$wpdb->posts} 
+                WHERE post_type = 'malisafi_property' 
+                AND post_author = %d
+                AND post_status = 'publish'",
+                $linked_user_id
+            ));
+        } else {
+            $total_properties = (int) $wpdb->get_var($wpdb->prepare(
+                "SELECT COUNT(DISTINCT pm.post_id) FROM {$wpdb->postmeta} pm
+                INNER JOIN {$wpdb->posts} p ON pm.post_id = p.ID
+                WHERE pm.meta_key = '_malisafi_agent_id' 
+                AND pm.meta_value = %d
+                AND p.post_type = 'malisafi_property'",
+                $post->ID
+            ));
+            
+            $active_listings = (int) $wpdb->get_var($wpdb->prepare(
+                "SELECT COUNT(DISTINCT pm.post_id) 
+                FROM {$wpdb->postmeta} pm
+                INNER JOIN {$wpdb->posts} p ON pm.post_id = p.ID
+                WHERE pm.meta_key = '_malisafi_agent_id' 
+                AND pm.meta_value = %d
+                AND p.post_type = 'malisafi_property'
+                AND p.post_status = 'publish'",
+                $post->ID
+            ));
+        }
         
         $total_views = get_post_meta($post->ID, '_agent_total_views', true) ?: 0;
         $total_leads = get_post_meta($post->ID, '_agent_total_leads', true) ?: 0;
@@ -464,10 +488,24 @@ class Agent_Post_Type {
                 
             case 'properties':
                 global $wpdb;
-                $count = $wpdb->get_var($wpdb->prepare(
-                    "SELECT COUNT(*) FROM {$wpdb->postmeta} WHERE meta_key = '_property_agent_id' AND meta_value = %d",
-                    $post_id
-                ));
+                $linked_user_id = get_post_meta($post_id, '_malisafi_linked_user', true);
+                if ($linked_user_id) {
+                    $count = (int) $wpdb->get_var($wpdb->prepare(
+                        "SELECT COUNT(*) FROM {$wpdb->posts} 
+                        WHERE post_type = 'malisafi_property' 
+                        AND post_author = %d",
+                        $linked_user_id
+                    ));
+                } else {
+                    $count = (int) $wpdb->get_var($wpdb->prepare(
+                        "SELECT COUNT(DISTINCT pm.post_id) FROM {$wpdb->postmeta} pm
+                        INNER JOIN {$wpdb->posts} p ON pm.post_id = p.ID
+                        WHERE pm.meta_key = '_malisafi_agent_id' 
+                        AND pm.meta_value = %d
+                        AND p.post_type = 'malisafi_property'",
+                        $post_id
+                    ));
+                }
                 echo intval($count) . ' ' . __('properties', 'malisafi-mls');
                 break;
                 

@@ -404,7 +404,7 @@ class Post_Types {
     public function render_agent_meta_box($post) {
         wp_nonce_field('malisafi_property_agent', 'malisafi_property_agent_nonce');
         
-        $agent_id = get_post_meta($post->ID, '_property_agent_id', true);
+        $agent_id = get_post_meta($post->ID, '_malisafi_agent_id', true);
         $agent_name = get_post_meta($post->ID, '_malisafi_agent_name', true);
         $agent_email = get_post_meta($post->ID, '_malisafi_agent_email', true);
         $agent_phone = get_post_meta($post->ID, '_malisafi_agent_phone', true);
@@ -678,9 +678,9 @@ class Post_Types {
                     if (isset($_POST['property_agent_id'])) {
                         $agent_id = intval($_POST['property_agent_id']);
                         if ($agent_id > 0) {
-                            update_post_meta($post_id, '_property_agent_id', $agent_id);
+                            update_post_meta($post_id, '_malisafi_agent_id', $agent_id);
                         } else {
-                            delete_post_meta($post_id, '_property_agent_id');
+                            delete_post_meta($post_id, '_malisafi_agent_id');
                         }
                     }
                     

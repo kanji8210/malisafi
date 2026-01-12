@@ -23,6 +23,13 @@ if (isset($_POST['malisafi_repair_database']) && check_admin_referer('malisafi_r
     echo '<div class="notice notice-success is-dismissible"><p>' . __('Database tables have been checked and repaired successfully!', 'malisafi-mls') . '</p></div>';
 }
 
+// Generate missing reference IDs
+if (isset($_POST['malisafi_generate_reference_ids']) && check_admin_referer('malisafi_generate_reference_ids')) {
+    require_once MALISAFI_MLS_PATH . 'includes/class-reference-id.php';
+    $count = \MalisafiMLS\Reference_ID::generate_missing_ids();
+    echo '<div class="notice notice-success is-dismissible"><p>' . sprintf(__('Generated reference IDs for %d properties.', 'malisafi-mls'), $count) . '</p></div>';
+}
+
 // Regenerate thumbnails
 if (isset($_POST['malisafi_regenerate_thumbnails']) && check_admin_referer('malisafi_regenerate_thumbnails')) {
 require_once ABSPATH . 'wp-admin/includes/image.php';
@@ -137,6 +144,18 @@ foreach ($table_names as $table => $label) {
         </form>
     </div>
     
+    <div class="card" style="margin-top: 20px;">
+        <h2><?php _e('Generate Property Reference IDs', 'malisafi-mls'); ?></h2>
+        <p><?php _e('Generate MLS# reference IDs for all properties that are missing them. This will add a unique PROP-YYYYMMDD-ID format to each property.', 'malisafi-mls'); ?></p>
+        <form method="post" onsubmit="return confirm('<?php esc_attr_e('Generate reference IDs for all properties missing them?', 'malisafi-mls'); ?>');">
+            <?php wp_nonce_field('malisafi_generate_reference_ids'); ?>
+            <button type="submit" name="malisafi_generate_reference_ids" class="button button-primary">
+                <span class="dashicons dashicons-admin-network" style="margin-top: 3px;"></span>
+                <?php _e('Generate Missing Reference IDs', 'malisafi-mls'); ?>
+            </button>
+        </form>
+    </div>
+
     <div class="card" style="margin-top: 20px;">
         <h2><?php _e('Regenerate Thumbnails', 'malisafi-mls'); ?></h2>
         <p><?php _e('Use this tool after changing image sizes to regenerate thumbnails for all existing images. This may take a while on large libraries.', 'malisafi-mls'); ?></p>

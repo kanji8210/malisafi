@@ -22,6 +22,87 @@ if (!defined('ABSPATH')) {
         <?php endif; ?>
     </h1>
     
+    <!-- Debug Stats Display -->
+    <div style="background: #fff3cd; border: 1px solid #ffc107; padding: 15px; margin: 20px 0; border-radius: 4px;">
+        <h3 style="margin-top: 0; color: #856404;">📊 Property Stats Debug</h3>
+        <p style="margin: 5px 0;"><strong>Properties linked to this agent:</strong> <?php echo $total_properties; ?></p>
+        <p style="margin: 5px 0;"><strong>Active (Published):</strong> <?php echo $active_listings; ?></p>
+        <p style="margin: 5px 0;"><strong>Pending Approval:</strong> <?php echo $pending_properties; ?></p>
+        <p style="margin: 5px 0;"><strong>Total View:</strong> <?php echo ($total_properties); ?></p>
+        <?php 
+        global $wpdb;
+        if (isset($linked_user_id) && $linked_user_id): 
+            // Show what the query is actually finding
+            $all_by_author = $wpdb->get_results($wpdb->prepare(
+                "SELECT ID, post_title, post_status FROM {$wpdb->posts} 
+                WHERE post_type = 'malisafi_property' 
+                AND post_author = %d
+                ORDER BY post_date DESC
+                LIMIT 10",
+                $linked_user_id
+            ));
+        ?>
+        <p style="margin: 5px 0; font-size: 12px; color: #666;">
+            <em>Counting method: By post_author (User ID: <?php echo $linked_user_id; ?>)</em>
+        </p>
+        <details style="margin-top: 10px;">
+            <summary style="cursor: pointer; color: #856404;">Show property details</summary>
+            <div style="max-height: 200px; overflow: auto; background: white; padding: 10px; margin-top: 10px;">
+                <?php if ($all_by_author): ?>
+                <table style="width: 100%; font-size: 12px;">
+                    <tr><th>ID</th><th>Title</th><th>Status</th></tr>
+                    <?php foreach ($all_by_author as $prop): ?>
+                    <tr>
+                        <td><?php echo $prop->ID; ?></td>
+                        <td><?php echo esc_html($prop->post_title); ?></td>
+                        <td><?php echo $prop->post_status; ?></td>
+                    </tr>
+                    <?php endforeach; ?>
+                </table>
+                <?php else: ?>
+                <p>No properties found by post_author.</p>
+                <?php endif; ?>
+            </div>
+        </details>
+        <?php else: 
+            // Show what the query is finding by meta
+            $all_by_meta = $wpdb->get_results($wpdb->prepare(
+                "SELECT p.ID, p.post_title, p.post_status 
+                FROM {$wpdb->postmeta} pm
+                INNER JOIN {$wpdb->posts} p ON pm.post_id = p.ID
+                WHERE pm.meta_key = '_malisafi_agent_id' 
+                AND pm.meta_value = %d
+                AND p.post_type = 'malisafi_property'
+                ORDER BY p.post_date DESC
+                LIMIT 10",
+                $agent_id
+            ));
+        ?>
+        <p style="margin: 5px 0; font-size: 12px; color: #666;">
+            <em>Counting method: By _malisafi_agent_id meta (Agent ID: <?php echo $agent_id; ?>)</em>
+        </p>
+        <details style="margin-top: 10px;">
+            <summary style="cursor: pointer; color: #856404;">Show property details</summary>
+            <div style="max-height: 200px; overflow: auto; background: white; padding: 10px; margin-top: 10px;">
+                <?php if ($all_by_meta): ?>
+                <table style="width: 100%; font-size: 12px;">
+                    <tr><th>ID</th><th>Title</th><th>Status</th></tr>
+                    <?php foreach ($all_by_meta as $prop): ?>
+                    <tr>
+                        <td><?php echo $prop->ID; ?></td>
+                        <td><?php echo esc_html($prop->post_title); ?></td>
+                        <td><?php echo $prop->post_status; ?></td>
+                    </tr>
+                    <?php endforeach; ?>
+                </table>
+                <?php else: ?>
+                <p>No properties found by _malisafi_agent_id meta.</p>
+                <?php endif; ?>
+            </div>
+        </details>
+        <?php endif; ?>
+    </div>
+    
     <!-- Status Badge -->
     <div class="agent-status-badge status-<?php echo esc_attr($agent_status); ?>">
         <?php
@@ -185,9 +266,18 @@ if (!defined('ABSPATH')) {
                 <span class="dashicons dashicons-admin-users"></span>
                 <?php _e('Edit Profile', 'malisafi-mls'); ?>
             </a>
-            <a href="<?php echo admin_url('edit.php?post_type=malisafi_property&post_status=pending'); ?>" class="quick-action-btn">
+            <a href="<?php 
+                if (isset($linked_user_id) && $linked_user_id) {
+                    echo admin_url('edit.php?post_type=malisafi_property&post_status=pending&author=' . $linked_user_id);
+                } else {
+                    echo admin_url('edit.php?post_type=malisafi_property&post_status=pending');
+                }
+            ?>" class="quick-action-btn">
                 <span class="dashicons dashicons-clock"></span>
                 <?php _e('Pending Properties', 'malisafi-mls'); ?>
+                <?php if ($pending_properties > 0): ?>
+                    <span class="count" style="background: #d63638; color: #fff; border-radius: 10px; padding: 2px 8px; margin-left: 8px; font-size: 12px;"><?php echo $pending_properties; ?></span>
+                <?php endif; ?>
             </a>
         </div>
     </div>

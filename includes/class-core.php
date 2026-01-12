@@ -130,7 +130,7 @@ class Core {
         
         // Ensure reference IDs exist for properties
         require_once MALISAFI_MLS_PATH . 'includes/class-reference-id.php';
-        add_action('save_post_malisafi_property', ['MalisafiMLS\\Reference_ID', 'ensure'], 10, 2);
+        Reference_ID::init();
     }
     
     /**

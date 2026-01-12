@@ -68,22 +68,16 @@ $ratings_table = $wpdb->prefix . 'mf_agent_ratings';
         $avg_rating = ($rating_stats && $rating_stats->average !== null) ? round($rating_stats->average, 1) : 0;
         $total_ratings = $rating_stats ? $rating_stats->total : 0;
         
-        // Get property count
+        // Get property count (optimized with direct SQL COUNT)
         $properties_count = 0;
         if ($linked_user_id) {
-            $properties_count = get_posts(array(
-                'post_type' => 'malisafi_property',
-                'post_status' => 'publish',
-                'meta_query' => array(
-                    array(
-                        'key' => '_malisafi_agent_id',
-                        'value' => $linked_user_id
-                    )
-                ),
-                'fields' => 'ids',
-                'posts_per_page' => -1
+            $properties_count = (int) $wpdb->get_var($wpdb->prepare(
+                "SELECT COUNT(*) FROM {$wpdb->posts} 
+                WHERE post_type = 'malisafi_property' 
+                AND post_author = %d
+                AND post_status = 'publish'",
+                $linked_user_id
             ));
-            $properties_count = is_array($properties_count) ? count($properties_count) : 0;
         }
         
         // Agent profile URL
