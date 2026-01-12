@@ -1175,8 +1175,15 @@ class Dashboard_Shortcodes {
     }
     
     private static function get_user_properties_count($user_id) {
-        $count = wp_count_posts('malisafi_property');
-        return $count->publish + $count->draft + $count->pending;
+        global $wpdb;
+        $statuses = array('publish','pending','draft');
+        $placeholders = implode(',', array_fill(0, count($statuses), '%s'));
+        $sql = $wpdb->prepare(
+            "SELECT COUNT(*) FROM {$wpdb->posts} WHERE post_type = %s AND post_author = %d AND post_status IN ($placeholders)",
+            array_merge(array('malisafi_property', $user_id), $statuses)
+        );
+        $count = (int) $wpdb->get_var($sql);
+        return $count;
     }
     
     private static function get_user_projects_count($user_id) {

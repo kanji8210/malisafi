@@ -217,6 +217,8 @@ $formatted_price = $price > 0 ? ($currency_symbol . ' ' . number_format($price))
         
         <?php if (!empty($all_images)) : ?>
         <div class="gallery-thumbnails">
+           <button class="thumbs-nav thumbs-prev" aria-label="Scroll left" type="button">&#10094;</button>
+           <button class="thumbs-nav thumbs-next" aria-label="Scroll right" type="button">&#10095;</button>
             <?php foreach ($all_images as $index => $img_id) : 
                 $img_url = wp_get_attachment_image_url($img_id, 'malisafi_grid');
                 if ($img_url) :
@@ -228,8 +230,9 @@ $formatted_price = $price > 0 ? ($currency_symbol . ' ' . number_format($price))
                     }
             ?>
                 <div class="thumbnail <?php echo $index === 0 ? 'active' : ''; ?>" 
+                     role="button" tabindex="0" aria-selected="<?php echo $index === 0 ? 'true' : 'false'; ?>"
                      data-index="<?php echo $index; ?>" 
-                     data-image=\"<?php echo esc_url(wp_get_attachment_image_url($img_id, 'malisafi_landscape')); ?>\"
+                     data-image="<?php echo esc_url(wp_get_attachment_image_url($img_id, 'malisafi_landscape')); ?>">
                     <div class="thumbnail-wrapper">
                         <img src="<?php echo esc_url($img_url); ?>" 
                              alt="<?php echo esc_attr(get_the_title() . ' - Image ' . ($index + 1)); ?>">

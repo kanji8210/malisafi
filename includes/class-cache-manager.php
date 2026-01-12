@@ -74,7 +74,7 @@ class Cache_Manager {
                 );
                 
                 // Get property counts
-                $counts = wp_count_posts('malisafi_property', $user_id);
+                // Note: avoid global counts; filtering per-user is done at call sites using direct queries
                 if ($counts) {
                     $stats['total'] = ($counts->publish ?? 0) + ($counts->pending ?? 0) + ($counts->draft ?? 0);
                     $stats['active'] = $counts->publish ?? 0;

@@ -450,8 +450,9 @@ $kenya_counties = array(
                 </div>
                 <input type="hidden" name="property_images" id="property-images-input" value="">
 
+                <!-- Script moved to assets/js/admin.js -->
                 <script>
-                jQuery(function($){
+                jQuery(function($){});
                     var imageIds = [];
 
                     // Prefill IDs from existing DOM
@@ -478,11 +479,14 @@ $kenya_counties = array(
                                     if (imageIds.length >= 15) { return; }
                                     imageIds.push(attachment.id);
                                     var thumbUrl = (attachment.sizes && attachment.sizes.thumbnail) ? attachment.sizes.thumbnail.url : attachment.url;
-                                    var $item = $('<div class="property-image-item" data-id="'+attachment.id+'" style="position:relative; width:120px; height:120px; border:1px solid #ddd; border-radius:4px; overflow:hidden;">'
-                                        + '<img src="'+thumbUrl+'" style="width:100%; height:100%; object-fit:cover;" />'
-                                        + '<button type="button" class="remove-image button-link" style="position:absolute; top:4px; right:4px; color:#dc2626;">&times;</button>'
+                                    var $item = $('<div class="property-image-item" data-id="'+attachment.id+'" style="position:relative;width:120px;height:120px;border:1px solid #ddd;border-radius:4px;overflow:hidden;">'
+                                        + '<img src="'+thumbUrl+'" style="width:100%;height:100%;object-fit:cover;" />'
+                                        + '<button type="button" class="remove-image button-link" style="position:absolute;top:4px;right:4px;color:#dc2626;">&times;</button>'
                                         + '</div>');
-                                    $('#property-images-container').append($item);\n                                    // ensure single Featured badge\n                                    $('.main-badge').remove();\n                                    $('#property-images-container .property-image-item').first().append('<span class=\"main-badge\" style=\"position:absolute; left:4px; top:4px; background:#2563eb; color:#fff; font-size:11px; padding:2px 6px; border-radius:3px;\">Featured</span>');
+                                    $('#property-images-container').append($item);
+                                    // ensure single Featured badge
+                                    $('.main-badge').remove();
+                                    $('#property-images-container .property-image-item').first().append('<span class="main-badge" style="position:absolute;left:4px;top:4px;background:#2563eb;color:#fff;font-size:11px;padding:2px 6px;border-radius:3px;">Featured</span>');
                                 }
                             });
                             updateImageInput();
@@ -508,6 +512,9 @@ $kenya_counties = array(
                                 $('#property-images-container .property-image-item').each(function(){
                                     imageIds.push($(this).data('id'));
                                 });
+                                // reapply Featured badge to first item
+                                $('.main-badge').remove();
+                                $('#property-images-container .property-image-item').first().append('<span class="main-badge" style="position:absolute;left:4px;top:4px;background:#2563eb;color:#fff;font-size:11px;padding:2px 6px;border-radius:3px;">Featured</span>');
                                 updateImageInput();
                             }
                         });

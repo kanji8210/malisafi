@@ -223,7 +223,7 @@ class Malisafi_Dashboard_Widgets {
             'total_properties' => $wpdb->get_var("SELECT COUNT(*) FROM {$prefix}mf_properties"),
             'pending_moderation' => $wpdb->get_var("SELECT COUNT(*) FROM {$prefix}mf_properties WHERE status = 'pending_review'"),
             'active_agents' => $wpdb->get_var("SELECT COUNT(*) FROM {$prefix}mf_subscriptions WHERE status = 'active' AND plan_type LIKE 'agent_%'"),
-            'total_inquiries' => $wpdb->get_var("SELECT COUNT(*) FROM {$prefix}mf_inquiries WHERE DATE(created_at) = CURDATE()"),
+            'total_inquiries' => $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM {$prefix}mf_inquiries WHERE DATE(created_at) = CURDATE()")), // global daily inquiries
         );
         
         // Check if template exists
@@ -296,10 +296,10 @@ class Malisafi_Dashboard_Widgets {
         $prefix = $wpdb->prefix;
         
         // Get pending count from custom table
-        $pending_count = $wpdb->get_var("SELECT COUNT(*) FROM {$prefix}mf_properties WHERE status = 'pending_review'");
+        $pending_count = (int) $wpdb->get_var("SELECT COUNT(*) FROM {$prefix}mf_properties WHERE status = 'pending_review'"); // legacy table global
         
         // Also check WordPress posts with pending status
-        $wp_pending = wp_count_posts('malisafi_property');
+        $wp_pending_count = (int) $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->posts} WHERE post_type = 'malisafi_property' AND post_status = 'pending'");
         $wp_pending_count = isset($wp_pending->pending) ? $wp_pending->pending : 0;
         
         // Use the higher count (in case data is in either location)

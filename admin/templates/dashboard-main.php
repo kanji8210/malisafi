@@ -14,11 +14,14 @@ $current_user = wp_get_current_user();
 $user_roles = $current_user->roles;
 
 // Get user's properties count
-$user_properties = wp_count_posts('malisafi_property');
-$total_properties = 0;
-if ($user_properties) {
-    $total_properties = $user_properties->publish + $user_properties->draft + $user_properties->pending;
-}
+global $wpdb;
+$statuses = array('publish','pending','draft');
+$placeholders = implode(',', array_fill(0, count($statuses), '%s'));
+$sql = $wpdb->prepare(
+    "SELECT COUNT(*) FROM {$wpdb->posts} WHERE post_type = %s AND post_author = %d AND post_status IN ($placeholders)",
+    array_merge(array('malisafi_property', $current_user->ID), $statuses)
+);
+$total_properties = (int) $wpdb->get_var($sql);
 
 // Check capabilities
 $can_view_analytics = current_user_can('view_property_analytics');

@@ -254,7 +254,11 @@ class Malisafi_Shortcodes {
         ));
         
         if ($limits) {
-            $current_listings = wp_count_posts('property')->publish;
+            global $wpdb;
+$current_listings = (int) $wpdb->get_var($wpdb->prepare(
+    "SELECT COUNT(*) FROM {$wpdb->posts} WHERE post_type = %s AND post_status = 'publish'",
+    'malisafi_property'
+));
             $can_submit = $limits->max_listings == -1 || $current_listings < $limits->max_listings;
             
             if (!$can_submit) {

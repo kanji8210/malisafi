@@ -19,9 +19,12 @@
             var $thumbnail = $thumbnails.eq(index);
             var imageUrl = $thumbnail.data('image');
             
-            $('.gallery-main .main-image').attr('src', imageUrl).attr('data-current-index', index);
-            $thumbnails.removeClass('active');
-            $thumbnail.addClass('active');
+            var $img = $('.gallery-main .main-image');
+            $img.stop(true, true).fadeOut(150, function(){
+                $img.attr('src', imageUrl).attr('data-current-index', index).fadeIn(150);
+            });
+            $thumbnails.removeClass('active').attr('aria-selected', 'false');
+            $thumbnail.addClass('active').attr('aria-selected', 'true');
             
             // Update counter
             $('.gallery-counter .current').text(index + 1);
@@ -34,6 +37,16 @@
             }
         }
         
+        // Thumbnail strip scroll buttons
+        $('.thumbs-prev').on('click', function(){
+            var $c = $('.gallery-thumbnails');
+            $c.animate({ scrollLeft: Math.max(0, $c.scrollLeft() - ($c.width() || 300)) }, 250);
+        });
+        $('.thumbs-next').on('click', function(){
+            var $c = $('.gallery-thumbnails');
+            $c.animate({ scrollLeft: $c.scrollLeft() + ($c.width() || 300) }, 250);
+        });
+
         // Gallery Thumbnails Click
         $thumbnails.on('click', function() {
             var index = $(this).data('index');
@@ -52,7 +65,7 @@
             changeImage(currentIndex + 1);
         });
         
-        // Keyboard navigation
+        // Keyboard and focus navigation
         $(document).on('keydown', function(e) {
             if ($('.property-gallery').length) {
                 var currentIndex = parseInt($('.gallery-main .main-image').attr('data-current-index')) || 0;
@@ -60,7 +73,19 @@
                     changeImage(currentIndex - 1);
                 } else if (e.keyCode === 39) { // Right arrow
                     changeImage(currentIndex + 1);
+                } else if (e.keyCode === 36) { // Home
+                    changeImage(0);
+                } else if (e.keyCode === 35) { // End
+                    changeImage(totalImages - 1);
                 }
+            }
+        });
+        // Allow Enter/Space on thumbnails
+        $thumbnails.attr('tabindex','0').on('keydown', function(e){
+            if (e.keyCode === 13 || e.keyCode === 32) { // Enter or Space
+                e.preventDefault();
+                var index = $(this).data('index');
+                changeImage(index);
             }
         });
         
