@@ -111,7 +111,7 @@ class Login_Customizer {
         }
         
         // Check if user has a Malisafi role (but not admin/moderator)
-        $malisafi_roles = array('malisafi_agent_basic', 'malisafi_agent_premium', 'malisafi_owner', 'malisafi_developer', 'malisafi_client');
+        $malisafi_roles = array('malisafi_agent_basic', 'malisafi_agent_premium', 'malisafi_owner', 'malisafi_developer', 'malisafi_client', 'malisafi_hunter');
         $has_malisafi_role = array_intersect($malisafi_roles, $user->roles);
         
         if (!$has_malisafi_role) {
@@ -123,34 +123,55 @@ class Login_Customizer {
             return;
         }
         
-        // Get current page
-        global $pagenow;
+        // Allow specific wp-admin pages for Malisafi roles to avoid redirect loops
+        // Whitelist: Agent dashboard and property management pages, media, profile, admin-post
+        $allowed_pages = array(
+            'malisafi-agent-dashboard',
+            'malisafi-properties'
+        );
         
-        // Allow access to agent dashboard and related pages
-        if (isset($_GET['page']) && strpos($_GET['page'], 'malisafi-agent-') === 0) {
-            return;
+        $pagenow = isset($GLOBALS['pagenow']) ? $GLOBALS['pagenow'] : '';
+        $page_param = isset($_GET['page']) ? sanitize_text_field($_GET['page']) : '';
+        
+        // Allow admin.php with specific Malisafi pages
+        if ($pagenow === 'admin.php' && in_array($page_param, $allowed_pages, true)) {
+            return; // allow access
         }
         
-        // Block access to main WP dashboard (index.php) and redirect to Malisafi dashboard
-        if ($pagenow === 'index.php' || ($pagenow === 'admin.php' && !isset($_GET['page']))) {
-            // Determine redirect URL based on user role
-            $redirect_url = '';
-            
-            if (in_array('malisafi_agent_basic', $user->roles) || in_array('malisafi_agent_premium', $user->roles)) {
-                $redirect_url = admin_url('admin.php?page=malisafi-agent-dashboard');
-            } elseif (in_array('malisafi_owner', $user->roles)) {
-                $redirect_url = Page_Manager::get_page_url('owner_dashboard');
-            } elseif (in_array('malisafi_developer', $user->roles)) {
-                $redirect_url = Page_Manager::get_page_url('developer_dashboard');
-            } elseif (in_array('malisafi_client', $user->roles)) {
-                $redirect_url = Page_Manager::get_page_url('client_dashboard');
-            }
-            
-            if (!empty($redirect_url)) {
-                wp_redirect($redirect_url);
-                exit;
-            }
+        // Allow media library and profile for uploads/profile edits
+        if ($pagenow === 'upload.php' || $pagenow === 'media-new.php' || $pagenow === 'profile.php' || $pagenow === 'admin-post.php') {
+            return; // allow access
         }
+        
+        // Otherwise, redirect to appropriate FRONTEND dashboard
+        $redirect_url = '';
+        if (in_array('malisafi_agent_basic', $user->roles) || in_array('malisafi_agent_premium', $user->roles)) {
+            $redirect_url = self::get_page_url('agent_dashboard');
+        } elseif (in_array('malisafi_owner', $user->roles)) {
+            $redirect_url = self::get_page_url('owner_dashboard');
+        } elseif (in_array('malisafi_developer', $user->roles)) {
+            $redirect_url = self::get_page_url('developer_dashboard');
+        } elseif (in_array('malisafi_client', $user->roles)) {
+            $redirect_url = self::get_page_url('client_dashboard');
+        } elseif (in_array('malisafi_hunter', $user->roles)) {
+            $redirect_url = self::get_page_url('hunter_dashboard');
+        }
+        if (empty($redirect_url)) {
+            $redirect_url = home_url('/');
+        }
+        wp_redirect($redirect_url);
+        exit;
+    }
+    
+    /**
+     * Get page URL helper
+     */
+    private static function get_page_url($key) {
+        if (class_exists('MalisafiMLS\Page_Manager')) {
+            return \MalisafiMLS\Page_Manager::get_page_url($key);
+        }
+        // Fallback
+        return home_url('/dashboard/');
     }
     
     /**
@@ -459,21 +480,24 @@ class Login_Customizer {
             return $redirect_to;
         }
         
-        // Determine dashboard URL based on user role
+        // Admins and moderators go to WP admin
+        if (in_array('administrator', $user->roles) || in_array('malisafi_moderator', $user->roles)) {
+            return admin_url();
+        }
+        
+        // Determine dashboard URL based on user role - ALL go to FRONTEND
         $dashboard_url = '';
         
         if (in_array('malisafi_agent_basic', $user->roles) || in_array('malisafi_agent_premium', $user->roles)) {
-            // Redirect agents to backend agent dashboard
-            $dashboard_url = admin_url('admin.php?page=malisafi-agent-dashboard');
+            $dashboard_url = self::get_page_url('agent_dashboard');
         } elseif (in_array('malisafi_owner', $user->roles)) {
-            $dashboard_url = Page_Manager::get_page_url('owner_dashboard');
+            $dashboard_url = self::get_page_url('owner_dashboard');
         } elseif (in_array('malisafi_developer', $user->roles)) {
-            $dashboard_url = Page_Manager::get_page_url('developer_dashboard');
+            $dashboard_url = self::get_page_url('developer_dashboard');
         } elseif (in_array('malisafi_client', $user->roles)) {
-            $dashboard_url = Page_Manager::get_page_url('client_dashboard');
-        } elseif (in_array('administrator', $user->roles) || in_array('malisafi_moderator', $user->roles)) {
-            // Admins and moderators go to WP admin
-            return admin_url();
+            $dashboard_url = self::get_page_url('client_dashboard');
+        } elseif (in_array('malisafi_hunter', $user->roles)) {
+            $dashboard_url = self::get_page_url('hunter_dashboard');
         }
         
         // If we found a dashboard URL, use it; otherwise use default redirect

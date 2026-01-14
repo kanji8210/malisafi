@@ -567,15 +567,24 @@ class Malisafi_Agent_Dashboard {
             if (empty($property_title)) {
                 $error = __('Title is required.', 'malisafi-mls');
             } else {
+                // Determine status: pending for agents/owners/developers, publish for moderators/admins
+                $post_status = current_user_can('moderate_properties') ? 'publish' : 'pending';
+                
                 $post_data = array(
                     'post_title'   => $property_title,
                     'post_type'    => 'malisafi_property',
-                    'post_status'  => 'pending', // Par défaut, à ajuster selon le rôle
+                    'post_status'  => $post_status,
                 );
                 // Assigner l'auteur à l'utilisateur courant (agent)
                 $post_data['post_author'] = get_current_user_id();
 
                 if ($property_id) {
+                    // EDITING EXISTING PROPERTY
+                    // Force status to pending if agent is editing (not admin/moderator)
+                    if (!current_user_can('moderate_properties')) {
+                        $post_data['post_status'] = 'pending';
+                    }
+                    
                     $post_data['ID'] = $property_id;
                     $new_id = wp_update_post($post_data, true);
                     if (is_wp_error($new_id)) {
@@ -588,7 +597,13 @@ class Malisafi_Agent_Dashboard {
                         }
                         // Sauvegarder le GPS
                         update_post_meta($new_id, '_property_gps', $property_gps);
-                        $message = __('Property updated successfully.', 'malisafi-mls');
+                        
+                        // Add notice if property went to pending
+                        if (!current_user_can('moderate_properties')) {
+                            $message = __('Property updated successfully. It has been sent for approval.', 'malisafi-mls');
+                        } else {
+                            $message = __('Property updated successfully.', 'malisafi-mls');
+                        }
                         $property_id = $new_id;
                     }
                 } else {

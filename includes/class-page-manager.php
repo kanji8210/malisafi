@@ -122,8 +122,8 @@ class Page_Manager {
         'agent_add_property' => array(
             'title' => 'Add Property',
             'slug' => 'add-property',
-            'shortcode' => '[malisafi_submit_property]',
-            'description' => 'Property submission form',
+            'shortcode' => '[malisafi_agent_add_property]',
+            'description' => 'Property submission form (redirects to backend)',
             'parent' => 'agent_dashboard'
         ),
         'agent_leads' => array(
@@ -364,24 +364,29 @@ class Page_Manager {
             }
         }
         
-        if (!empty($missing_pages) && count($missing_pages) > 3) {
+        if (!empty($missing_pages)) {
+            // Don't show on the pages management page itself
             $screen = get_current_screen();
-            if ($screen && $screen->id === 'toplevel_page_malisafi-dashboard') {
-                ?>
-                <div class="notice notice-warning is-dismissible">
-                    <p>
-                        <strong><?php _e('MalisafiMLS:', 'malisafi-mls'); ?></strong> 
-                        <?php printf(
-                            __('%d required pages are missing. ', 'malisafi-mls'),
-                            count($missing_pages)
-                        ); ?>
-                        <a href="<?php echo admin_url('admin.php?page=malisafi-pages'); ?>" class="button button-primary">
-                            <?php _e('Manage Pages', 'malisafi-mls'); ?>
-                        </a>
-                    </p>
-                </div>
-                <?php
+            if ($screen && $screen->id === 'malisafi_page_malisafi-pages') {
+                return;
             }
+            
+            // Show prominent notice on all admin pages
+            ?>
+            <div class="notice notice-warning is-dismissible">
+                <p>
+                    <strong><?php _e('Malisafi MLS:', 'malisafi-mls'); ?></strong> 
+                    <?php printf(
+                        __('%d dashboard page%s missing. The Malisafi Bar links may not work correctly.', 'malisafi-mls'),
+                        count($missing_pages),
+                        count($missing_pages) > 1 ? 's are' : ' is'
+                    ); ?>
+                    <a href="<?php echo admin_url('admin.php?page=malisafi-pages'); ?>" class="button button-primary" style="margin-left: 10px;">
+                        <?php _e('Create Missing Pages Now', 'malisafi-mls'); ?>
+                    </a>
+                </p>
+            </div>
+            <?php
         }
     }
     

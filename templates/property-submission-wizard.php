@@ -80,6 +80,19 @@ $property_id = isset($_GET['property_id']) ? intval($_GET['property_id']) : 0;
                 <span class="field-hint"><?php _e('Minimum 20 characters recommended', 'malisafi-mls'); ?></span>
             </div>
 
+            <div class="form-row">
+                <label for="reference_id">
+                    <?php _e('Property ID (MLS #)', 'malisafi-mls'); ?>
+                </label>
+                <div class="gps-input-group">
+                    <input type="text" id="reference_id" name="reference_id" class="form-control" placeholder="<?php esc_attr_e('Not generated yet', 'malisafi-mls'); ?>" readonly>
+                    <button type="button" class="btn btn-secondary btn-generate-ref" title="<?php esc_attr_e('Generate ID', 'malisafi-mls'); ?>">
+                        <?php _e('Generate ID', 'malisafi-mls'); ?>
+                    </button>
+                </div>
+                <span class="field-hint"><?php _e('Click "Generate ID" to create a unique property identifier, or it will auto-generate on save.', 'malisafi-mls'); ?></span>
+            </div>
+
             <div class="form-row-group">
                 <div class="form-row">
                     <label for="property_price" class="required">
@@ -207,6 +220,21 @@ $property_id = isset($_GET['property_id']) ? intval($_GET['property_id']) : 0;
                     </select>
                 </div>
             </div>
+
+            <div class="form-row-group">
+                <div class="form-row">
+                    <label for="agent_name"><?php _e('Agent/Contact Name', 'malisafi-mls'); ?></label>
+                    <input type="text" id="agent_name" name="agent_name" class="form-control" placeholder="<?php esc_attr_e('e.g., John Doe', 'malisafi-mls'); ?>">
+                </div>
+                <div class="form-row">
+                    <label for="agent_email"><?php _e('Agent Email', 'malisafi-mls'); ?></label>
+                    <input type="email" id="agent_email" name="agent_email" class="form-control" placeholder="agent@example.com">
+                </div>
+            </div>
+            <div class="form-row">
+                <label for="agent_phone"><?php _e('Agent Phone', 'malisafi-mls'); ?></label>
+                <input type="text" id="agent_phone" name="agent_phone" class="form-control" placeholder="<?php esc_attr_e('+254700000000', 'malisafi-mls'); ?>">
+            </div>
         </div>
 
         <!-- Step 3: Location -->
@@ -232,14 +260,11 @@ $property_id = isset($_GET['property_id']) ? intval($_GET['property_id']) : 0;
                     </label>
                     <select id="property_county" name="county" class="form-control" required>
                         <option value=""><?php _e('Select county...', 'malisafi-mls'); ?></option>
-                        <option value="Nairobi">Nairobi</option>
-                        <option value="Mombasa">Mombasa</option>
-                        <option value="Kiambu">Kiambu</option>
-                        <option value="Nakuru">Nakuru</option>
-                        <option value="Kisumu">Kisumu</option>
-                        <option value="Uasin Gishu">Uasin Gishu</option>
-                        <option value="Kajiado">Kajiado</option>
-                        <option value="Machakos">Machakos</option>
+                        <?php if (function_exists('malisafi_get_kenya_counties')): 
+                            $counties = malisafi_get_kenya_counties();
+                            foreach ($counties as $county): ?>
+                                <option value="<?php echo esc_attr($county); ?>"><?php echo esc_html($county); ?></option>
+                            <?php endforeach; endif; ?>
                     </select>
                 </div>
 

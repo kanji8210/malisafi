@@ -14,7 +14,7 @@ class Property_Submission {
      * Initialize
      */
     public static function init() {
-        // AJAX handlers
+        // AJAX handlersproperty su
         add_action('wp_ajax_malisafi_save_property_step', array(__CLASS__, 'ajax_save_property_step'));
         add_action('wp_ajax_malisafi_submit_property', array(__CLASS__, 'ajax_submit_property'));
         add_action('wp_ajax_malisafi_upload_property_images', array(__CLASS__, 'ajax_upload_images'));
@@ -59,6 +59,7 @@ class Property_Submission {
                 'ajaxurl' => admin_url('admin-ajax.php'),
                 'nonce' => wp_create_nonce('malisafi_property_submission'),
                 'uploadNonce' => wp_create_nonce('malisafi_upload_images'),
+                'refNonce' => wp_create_nonce('malisafi_generate_ref_id'),
                 'uploadsEnabled' => true,
                 'strings' => array(
                     'saving' => __('Saving...', 'malisafi-mls'),
@@ -119,7 +120,14 @@ class Property_Submission {
         }
         
         $user = wp_get_current_user();
-        $allowed_roles = array('administrator', 'malisafi_agent', 'malisafi_agent_premium', 'malisafi_owner', 'malisafi_developer');
+        $allowed_roles = array(
+            'administrator', 
+            'malisafi_moderator',
+            'malisafi_agent_basic', 
+            'malisafi_agent_premium', 
+            'malisafi_owner', 
+            'malisafi_developer'
+        );
         
         return array_intersect($allowed_roles, $user->roles) !== array();
     }

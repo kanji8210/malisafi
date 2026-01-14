@@ -44,6 +44,7 @@ class Dashboard_Shortcodes {
         
         // Common Shortcodes
         add_shortcode('malisafi_property_submit', [__CLASS__, 'property_submit_form']);
+        add_shortcode('malisafi_agent_add_property', [__CLASS__, 'agent_add_property']);
         add_shortcode('malisafi_login', [__CLASS__, 'login_form']);
         add_shortcode('malisafi_register', [__CLASS__, 'register_form']);
         add_shortcode('malisafi_account', [__CLASS__, 'account_page']);
@@ -302,16 +303,62 @@ class Dashboard_Shortcodes {
      * Agent Dashboard - Redirect to backend
      */
     public static function agent_dashboard($atts) {
-        $login_check = self::require_login('agent_basic');
-        if ($login_check) return $login_check;
+        // Check if user is logged in first
+        if (!is_user_logged_in()) {
+            return self::require_login();
+        }
         
-        // Redirect to backend agent dashboard
+        // Check if user has agent role
+        $user = wp_get_current_user();
+        $is_agent = in_array('malisafi_agent_basic', $user->roles) || in_array('malisafi_agent_premium', $user->roles);
+        
+        if (!$is_agent) {
+            return '<div class="malisafi-access-denied">
+                <p>' . __('You do not have permission to access this page.', 'malisafi-mls') . '</p>
+                <p>' . __('This page is for agents only.', 'malisafi-mls') . '</p>
+            </div>';
+        }
+        
+        // Redirect to backend agent dashboard (server-side to avoid loops)
         $backend_url = admin_url('admin.php?page=malisafi-agent-dashboard');
+        wp_safe_redirect($backend_url);
+        exit;
+    }
+    
+    /**
+     * Agent Properties - Redirect to backend
+     */
+    public static function agent_properties($atts) {
+        return self::agent_dashboard($atts);
+    }
+    
+    /**
+     * Agent Add Property - Redirect to backend form
+     */
+    public static function agent_add_property($atts) {
+        // Check if user is logged in first
+        if (!is_user_logged_in()) {
+            return self::require_login();
+        }
+        
+        // Check if user has agent role
+        $user = wp_get_current_user();
+        $is_agent = in_array('malisafi_agent_basic', $user->roles) || in_array('malisafi_agent_premium', $user->roles);
+        
+        if (!$is_agent) {
+            return '<div class="malisafi-access-denied">
+                <p>' . __('You do not have permission to access this page.', 'malisafi-mls') . '</p>
+                <p>' . __('This page is for agents only.', 'malisafi-mls') . '</p>
+            </div>';
+        }
+        
+        // Redirect to backend property form
+        $backend_url = admin_url('admin.php?page=malisafi-properties&action=add');
         
         ob_start();
         ?>
-        <div class="malisafi-agent-dashboard-redirect">
-            <p><?php _e('Redirecting to your agent dashboard...', 'malisafi-mls'); ?></p>
+        <div class="malisafi-agent-add-property-redirect">
+            <p><?php _e('Redirecting to property submission form...', 'malisafi-mls'); ?></p>
             <script>
                 window.location.href = '<?php echo esc_js($backend_url); ?>';
             </script>
@@ -319,13 +366,6 @@ class Dashboard_Shortcodes {
         </div>
         <?php
         return ob_get_clean();
-    }
-    
-    /**
-     * Agent Properties
-     */
-    public static function agent_properties($atts) {
-        return self::agent_dashboard($atts);
     }
     
     /**
@@ -346,8 +386,21 @@ class Dashboard_Shortcodes {
      * Owner Dashboard
      */
     public static function owner_dashboard($atts) {
-        $login_check = self::require_login('owner');
-        if ($login_check) return $login_check;
+        // Check if user is logged in first
+        if (!is_user_logged_in()) {
+            return self::require_login();
+        }
+        
+        // Check if user has owner role
+        $user = wp_get_current_user();
+        $is_owner = in_array('malisafi_owner', $user->roles);
+        
+        if (!$is_owner) {
+            return '<div class="malisafi-access-denied">
+                <p>' . __('You do not have permission to access this page.', 'malisafi-mls') . '</p>
+                <p>' . __('This page is for property owners only.', 'malisafi-mls') . '</p>
+            </div>';
+        }
         
         $current_user = wp_get_current_user();
         
@@ -404,8 +457,20 @@ class Dashboard_Shortcodes {
      * Owner Properties
      */
     public static function owner_properties($atts) {
-        $login_check = self::require_login('owner');
-        if ($login_check) return $login_check;
+        // Check if user is logged in first
+        if (!is_user_logged_in()) {
+            return self::require_login();
+        }
+        
+        // Check if user has owner role
+        $user = wp_get_current_user();
+        $is_owner = in_array('malisafi_owner', $user->roles);
+        
+        if (!$is_owner) {
+            return '<div class="malisafi-access-denied">
+                <p>' . __('You do not have permission to access this page.', 'malisafi-mls') . '</p>
+            </div>';
+        }
         
         $current_user = wp_get_current_user();
         
@@ -482,8 +547,20 @@ class Dashboard_Shortcodes {
      * Owner Inquiries
      */
     public static function owner_inquiries($atts) {
-        $login_check = self::require_login('owner');
-        if ($login_check) return $login_check;
+        // Check if user is logged in first
+        if (!is_user_logged_in()) {
+            return self::require_login();
+        }
+        
+        // Check if user has owner role
+        $user = wp_get_current_user();
+        $is_owner = in_array('malisafi_owner', $user->roles);
+        
+        if (!$is_owner) {
+            return '<div class="malisafi-access-denied">
+                <p>' . __('You do not have permission to access this page.', 'malisafi-mls') . '</p>
+            </div>';
+        }
         
         global $wpdb;
         $current_user = wp_get_current_user();
@@ -551,8 +628,20 @@ class Dashboard_Shortcodes {
      * Developer Dashboard
      */
     public static function developer_dashboard($atts) {
-        $login_check = self::require_login('developer');
-        if ($login_check) return $login_check;
+        // Check if user is logged in first
+        if (!is_user_logged_in()) {
+            return self::require_login();
+        }
+        
+        // Check if user has developer role
+        $user = wp_get_current_user();
+        $is_developer = in_array('malisafi_developer', $user->roles);
+        
+        if (!$is_developer) {
+            return '<div class="malisafi-access-denied">
+                <p>' . __('You do not have permission to access this page.', 'malisafi-mls') . '</p>
+            </div>';
+        }
         
         $current_user = wp_get_current_user();
         
@@ -608,8 +697,20 @@ class Dashboard_Shortcodes {
      * Developer Projects
      */
     public static function developer_projects($atts) {
-        $login_check = self::require_login('developer');
-        if ($login_check) return $login_check;
+        // Check if user is logged in first
+        if (!is_user_logged_in()) {
+            return self::require_login();
+        }
+        
+        // Check if user has developer role
+        $user = wp_get_current_user();
+        $is_developer = in_array('malisafi_developer', $user->roles);
+        
+        if (!$is_developer) {
+            return '<div class="malisafi-access-denied">
+                <p>' . __('You do not have permission to access this page.', 'malisafi-mls') . '</p>
+            </div>';
+        }
         
         ob_start();
         ?>
@@ -625,8 +726,20 @@ class Dashboard_Shortcodes {
      * Developer Analytics
      */
     public static function developer_analytics($atts) {
-        $login_check = self::require_login('developer');
-        if ($login_check) return $login_check;
+        // Check if user is logged in first
+        if (!is_user_logged_in()) {
+            return self::require_login();
+        }
+        
+        // Check if user has developer role
+        $user = wp_get_current_user();
+        $is_developer = in_array('malisafi_developer', $user->roles);
+        
+        if (!$is_developer) {
+            return '<div class="malisafi-access-denied">
+                <p>' . __('You do not have permission to access this page.', 'malisafi-mls') . '</p>
+            </div>';
+        }
         
         ob_start();
         ?>

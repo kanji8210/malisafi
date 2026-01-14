@@ -136,12 +136,14 @@ class Malisafi_Property_Submit {
             return 'publish';
         }
         
-        // Premium agents can publish directly
-        if (in_array('malisafi_agent_premium', $user->roles)) {
+        // All agents (including premium) must go through approval
+        // Premium agents can be given direct publish rights via settings if needed
+        $allow_premium_auto_publish = get_option('malisafi_allow_premium_auto_publish', false);
+        if ($allow_premium_auto_publish && in_array('malisafi_agent_premium', $user->roles)) {
             return 'publish';
         }
         
-        // Others go to pending review
+        // Others go to pending review (including all agents by default)
         return 'pending';
     }
     
@@ -257,6 +259,23 @@ class Malisafi_Property_Submit {
      * Update existing property
      */
     private static function update_property($property_id, $data, $status) {
+        // Get current property
+        $current_property = get_post($property_id);
+        if (!$current_property) {
+            return new \WP_Error('invalid_property', __('Property not found.', 'malisafi-mls'));
+        }
+        
+        // Check if user is editing their own property
+        $current_user = wp_get_current_user();
+        $is_own_property = ($current_property->post_author == $current_user->ID);
+        
+        // Force status to pending if agent/owner/developer is editing
+        // Only admins and moderators can keep published status
+        if ($is_own_property && !current_user_can('moderate_properties')) {
+            // Property was edited by agent/owner/developer - force to pending
+            $status = 'pending';
+        }
+        
         $property_data = array(
             'ID' => $property_id,
             'post_title' => $data['title'],
