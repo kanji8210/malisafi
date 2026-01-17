@@ -111,6 +111,7 @@ require_once MALISAFI_MLS_PATH . 'includes/default-terms.php';
  */
 require_once MALISAFI_MLS_PATH . 'includes/class-agent-post-type.php';
 require_once MALISAFI_MLS_PATH . 'admin/class-agent-dashboard.php';
+require_once MALISAFI_MLS_PATH . 'admin/class-agent-ratings-admin.php';
 
 /**
  * Load page manager

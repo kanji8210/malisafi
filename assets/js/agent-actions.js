@@ -183,6 +183,20 @@
             $('.agent-rating-form').slideToggle();
         });
         
+        // Cancel review button
+        $('.cancel-review').on('click', function() {
+            $('#reviewModal').fadeOut();
+            $('.agent-rating-form')[0].reset();
+            $('.star-rating-input .star').removeClass('active');
+        });
+        
+        // Character counter for review textarea
+        $('textarea[name="review_text"]').on('input', function() {
+            const length = $(this).val().length;
+            const counter = $(this).siblings('.char-count').find('.current');
+            counter.text(length);
+        });
+        
         // ==========================
         // Show Report Modal
         // ==========================

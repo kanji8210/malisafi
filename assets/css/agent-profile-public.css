@@ -497,6 +497,433 @@
     background: var(--mls-dark, #3a4034);
 }
 
+/* ==================================
+   REVIEW MODAL STYLES
+   ================================== */
+.malisafi-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 999999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(4px);
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+.malisafi-modal .modal-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.malisafi-modal .modal-content {
+    position: relative;
+    background: #fff;
+    border-radius: 12px;
+    padding: 40px;
+    max-width: 600px;
+    width: 90%;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    z-index: 1;
+    animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(50px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.malisafi-modal .modal-close {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    font-size: 32px;
+    color: #999;
+    cursor: pointer;
+    line-height: 1;
+    transition: color 0.3s;
+    background: none;
+    border: none;
+    padding: 0;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.malisafi-modal .modal-close:hover {
+    color: #333;
+}
+
+.malisafi-modal h2 {
+    margin: 0 0 30px 0;
+    font-size: 28px;
+    color: var(--mls-dark, #3a4034);
+}
+
+.malisafi-modal .form-group {
+    margin-bottom: 24px;
+}
+
+.malisafi-modal .form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: var(--mls-dark, #3a4034);
+    font-size: 15px;
+}
+
+.malisafi-modal .form-group input[type="text"],
+.malisafi-modal .form-group textarea {
+    width: 100%;
+    padding: 12px 16px;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 15px;
+    font-family: inherit;
+    transition: all 0.3s;
+}
+
+.malisafi-modal .form-group input[type="text"]:focus,
+.malisafi-modal .form-group textarea:focus {
+    outline: none;
+    border-color: var(--mls-accent, #737d5d);
+    box-shadow: 0 0 0 3px rgba(115, 125, 93, 0.1);
+}
+
+.malisafi-modal .form-group textarea {
+    resize: vertical;
+    min-height: 120px;
+}
+
+.malisafi-modal .char-count {
+    display: block;
+    margin-top: 6px;
+    font-size: 13px;
+    color: #999;
+    text-align: right;
+}
+
+.malisafi-modal .char-count .current {
+    color: var(--mls-accent, #737d5d);
+    font-weight: 600;
+}
+
+/* Star Rating Input */
+.star-rating-input {
+    display: flex;
+    flex-direction: row-reverse;
+    justify-content: flex-end;
+    gap: 8px;
+    font-size: 40px;
+    line-height: 1;
+}
+
+.star-rating-input input[type="radio"] {
+    display: none;
+}
+
+.star-rating-input .star {
+    cursor: pointer;
+    color: #ddd;
+    transition: all 0.2s;
+    user-select: none;
+}
+
+.star-rating-input .star:hover,
+.star-rating-input .star.active {
+    color: #ffa500;
+    transform: scale(1.1);
+}
+
+.star-rating-input:hover .star:hover ~ .star {
+    color: #ffa500;
+}
+
+/* Form Actions */
+.form-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 30px;
+    justify-content: flex-end;
+}
+
+.form-actions .button {
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+    border: 2px solid transparent;
+}
+
+.form-actions .cancel-review {
+    background: #f5f5f5;
+    color: #666;
+    border-color: #e0e0e0;
+}
+
+.form-actions .cancel-review:hover {
+    background: #e0e0e0;
+}
+
+.form-actions .submit-rating {
+    background: var(--mls-accent, #737d5d);
+    color: #fff;
+}
+
+.form-actions .submit-rating:hover {
+    background: var(--mls-dark, #3a4034);
+}
+
+.form-actions .submit-rating:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* ==================================
+   REVIEW DISPLAY STYLES
+   ================================== */
+.review-item {
+    border-bottom: 1px solid #e0e0e0;
+    padding: 20px 0;
+}
+
+.review-item:last-child {
+    border-bottom: none;
+}
+
+.review-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--mls-dark, #3a4034);
+    margin: 12px 0 8px;
+}
+
+.verified-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: #28a745;
+    color: #fff;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+    margin-left: 8px;
+}
+
+.verified-badge .dashicons {
+    font-size: 14px;
+    width: 14px;
+    height: 14px;
+}
+
+/* Helpful Votes */
+.review-helpful {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 16px;
+    padding-top: 12px;
+    border-top: 1px solid #f0f0f0;
+}
+
+.review-helpful .helpful-label {
+    font-size: 14px;
+    color: #666;
+}
+
+.helpful-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    background: #f5f5f5;
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    font-size: 13px;
+    color: #666;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.helpful-btn:hover:not(:disabled) {
+    background: var(--mls-grey-green, #c5d3b6);
+    border-color: var(--mls-accent, #737d5d);
+    color: var(--mls-dark, #3a4034);
+}
+
+.helpful-btn:disabled,
+.helpful-btn.voted {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.helpful-btn .dashicons {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+}
+
+.helpful-btn .helpful-yes-count,
+.helpful-btn .helpful-no-count {
+    font-weight: 600;
+    color: var(--mls-accent, #737d5d);
+}
+
+/* Agent Response */
+.agent-response {
+    background: #f9f9f9;
+    border-left: 4px solid var(--mls-accent, #737d5d);
+    padding: 16px;
+    margin-top: 16px;
+    border-radius: 6px;
+}
+
+.agent-response .response-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+    color: var(--mls-accent, #737d5d);
+    font-size: 14px;
+}
+
+.agent-response .response-header .dashicons {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+}
+
+.agent-response .response-date {
+    color: #999;
+    font-weight: normal;
+    margin-left: auto;
+}
+
+.agent-response p {
+    margin: 0;
+    color: #555;
+    line-height: 1.6;
+}
+
+/* ==================================
+   NOTIFICATION MESSAGES
+   ================================== */
+.malisafi-message {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    padding: 16px 20px;
+    max-width: 400px;
+    z-index: 1000000;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    animation: slideInRight 0.3s ease;
+}
+
+@keyframes slideInRight {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+.malisafi-message-success {
+    border-left: 4px solid #28a745;
+}
+
+.malisafi-message-error {
+    border-left: 4px solid #dc3545;
+}
+
+.malisafi-message .message-icon {
+    font-size: 24px;
+    flex-shrink: 0;
+}
+
+.malisafi-message-success .message-icon {
+    color: #28a745;
+}
+
+.malisafi-message-error .message-icon {
+    color: #dc3545;
+}
+
+.malisafi-message .message-text {
+    flex: 1;
+    font-size: 15px;
+    color: #333;
+}
+
+.malisafi-message .message-close {
+    background: none;
+    border: none;
+    font-size: 20px;
+    color: #999;
+    cursor: pointer;
+    padding: 0;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.3s;
+}
+
+.malisafi-message .message-close:hover {
+    color: #333;
+}
+
+/* Loading animation for dashicons-update */
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.dashicons.spin {
+    animation: spin 1s linear infinite;
+}
+
 /* Message Boxes */
 .message-box {
     padding: 12px 20px;
@@ -543,4 +970,30 @@
     .properties-grid {
         grid-template-columns: 1fr;
     }
-}
+    
+    .malisafi-modal .modal-content {
+        padding: 30px 20px;
+        max-width: 95%;
+    }
+    
+    .star-rating-input {
+        font-size: 32px;
+    }
+    
+    .malisafi-message {
+        top: 10px;
+        right: 10px;
+        left: 10px;
+        max-width: none;
+    }
+    
+    .review-helpful {
+        flex-wrap: wrap;
+    }
+    
+    .form-actions {
+        flex-direction: column-reverse;
+    }
+    
+    .form-actions .button {
+        width: 100%;

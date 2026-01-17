@@ -27,6 +27,8 @@ class Agent_Profile_Ajax {
         add_action('wp_ajax_save_agent_profile', array($this, 'save_profile'));
         add_action('wp_ajax_submit_agent_review', array($this, 'submit_review'));
         add_action('wp_ajax_nopriv_submit_agent_review', array($this, 'submit_review'));
+        add_action('wp_ajax_malisafi_rate_agent', array($this, 'submit_review')); // Alias for compatibility
+        add_action('wp_ajax_malisafi_helpful_review', array($this, 'vote_helpful'));
     }
     
     /**
@@ -174,16 +176,45 @@ class Agent_Profile_Ajax {
      * Submit agent review
      */
     public function submit_review() {
+        // Verify nonce
+        check_ajax_referer('agent_actions_nonce', 'nonce');
+        
         if (!is_user_logged_in()) {
             wp_send_json_error(array('message' => __('You must be logged in to submit a review.', 'malisafi-mls')));
         }
         
         $agent_id = isset($_POST['agent_id']) ? intval($_POST['agent_id']) : 0;
         $rating = isset($_POST['rating']) ? intval($_POST['rating']) : 0;
-        $comment = isset($_POST['comment']) ? sanitize_textarea_field($_POST['comment']) : '';
+        $review_title = isset($_POST['review_title']) ? sanitize_text_field($_POST['review_title']) : '';
+        $review_text = isset($_POST['review_text']) ? sanitize_textarea_field($_POST['review_text']) : '';
+        $property_id = isset($_POST['property_id']) ? intval($_POST['property_id']) : null;
         
+        // Validation
         if (!$agent_id || $rating < 1 || $rating > 5) {
             wp_send_json_error(array('message' => __('Invalid rating data.', 'malisafi-mls')));
+        }
+        
+        if (strlen($review_text) < 10) {
+            wp_send_json_error(array('message' => __('Review must be at least 10 characters long.', 'malisafi-mls')));
+        }
+        
+        $current_user_id = get_current_user_id();
+        
+        // Get agent's linked user ID
+        $agent_user_id = get_post_meta($agent_id, '_agent_user_id', true);
+        
+        // Cannot rate yourself
+        if ($current_user_id == $agent_user_id) {
+            wp_send_json_error(array('message' => __('You cannot rate yourself.', 'malisafi-mls')));
+        }
+        
+        // Agents cannot rate other agents
+        $current_user = wp_get_current_user();
+        $is_agent = in_array('malisafi_agent_basic', $current_user->roles) || 
+                   in_array('malisafi_agent_premium', $current_user->roles);
+        
+        if ($is_agent) {
+            wp_send_json_error(array('message' => __('Agents cannot rate other agents.', 'malisafi-mls')));
         }
         
         global $wpdb;
@@ -193,11 +224,20 @@ class Agent_Profile_Ajax {
         $existing = $wpdb->get_var($wpdb->prepare(
             "SELECT id FROM $table_name WHERE agent_id = %d AND user_id = %d",
             $agent_id,
-            get_current_user_id()
+            $current_user_id
         ));
         
         if ($existing) {
-            wp_send_json_error(array('message' => __('You have already reviewed this agent.', 'malisafi-mls')));
+            wp_send_json_error(array('message' => __('You have already reviewed this agent. Each user can only submit one review per agent.', 'malisafi-mls')));
+        }
+        
+        // Check if user is verified client (has worked with this agent)
+        $verified_client = false;
+        if ($property_id) {
+            $property_agent_id = get_post_meta($property_id, '_property_agent', true);
+            if ($property_agent_id == $agent_id) {
+                $verified_client = true;
+            }
         }
         
         // Insert review
@@ -205,21 +245,112 @@ class Agent_Profile_Ajax {
             $table_name,
             array(
                 'agent_id' => $agent_id,
-                'user_id' => get_current_user_id(),
+                'user_id' => $current_user_id,
                 'rating' => $rating,
-                'comment' => $comment,
-                'status' => 'pending', // Requires approval
+                'review_title' => $review_title,
+                'review_text' => $review_text,
+                'property_id' => $property_id,
+                'verified_client' => $verified_client,
+                'status' => 'approved', // Auto-approve for now, can be changed to 'pending'
                 'created_at' => current_time('mysql')
             ),
-            array('%d', '%d', '%d', '%s', '%s', '%s')
+            array('%d', '%d', '%d', '%s', '%s', '%d', '%d', '%s', '%s')
         );
         
         if ($inserted) {
+            // Clear cache if cache manager exists
+            if (class_exists('MalisafiMLS\Cache_Manager')) {
+                \MalisafiMLS\Cache_Manager::clear_agent_cache($agent_id);
+            }
+            
+            // Calculate new average rating
+            $avg_rating = $wpdb->get_var($wpdb->prepare(
+                "SELECT AVG(rating) FROM $table_name WHERE agent_id = %d AND status = 'approved'",
+                $agent_id
+            ));
+            
+            $total_ratings = $wpdb->get_var($wpdb->prepare(
+                "SELECT COUNT(*) FROM $table_name WHERE agent_id = %d AND status = 'approved'",
+                $agent_id
+            ));
+            
+            // Update agent meta with rating
+            update_post_meta($agent_id, '_malisafi_agent_rating', round($avg_rating, 2));
+            update_post_meta($agent_id, '_malisafi_agent_rating_count', $total_ratings);
+            
             wp_send_json_success(array(
-                'message' => __('Thank you! Your review has been submitted and is pending approval.', 'malisafi-mls')
+                'message' => __('Thank you! Your review has been submitted successfully.', 'malisafi-mls'),
+                'average_rating' => round($avg_rating, 1),
+                'total_ratings' => $total_ratings
             ));
         } else {
             wp_send_json_error(array('message' => __('Failed to submit review. Please try again.', 'malisafi-mls')));
+        }
+    }
+    
+    /**
+     * Vote on review helpfulness
+     */
+    public function vote_helpful() {
+        // Verify nonce
+        check_ajax_referer('agent_actions_nonce', 'nonce');
+        
+        if (!is_user_logged_in()) {
+            wp_send_json_error(array('message' => __('You must be logged in to vote.', 'malisafi-mls')));
+        }
+        
+        $review_id = isset($_POST['review_id']) ? intval($_POST['review_id']) : 0;
+        $helpful = isset($_POST['helpful']) ? (bool)$_POST['helpful'] : true;
+        
+        if (!$review_id) {
+            wp_send_json_error(array('message' => __('Invalid review ID.', 'malisafi-mls')));
+        }
+        
+        global $wpdb;
+        $table_name = $wpdb->prefix . 'mf_agent_ratings';
+        
+        // Get current review
+        $review = $wpdb->get_row($wpdb->prepare(
+            "SELECT * FROM $table_name WHERE id = %d",
+            $review_id
+        ));
+        
+        if (!$review) {
+            wp_send_json_error(array('message' => __('Review not found.', 'malisafi-mls')));
+        }
+        
+        // Check if user already voted on this review (using user meta)
+        $vote_key = 'review_helpful_' . $review_id;
+        $existing_vote = get_user_meta(get_current_user_id(), $vote_key, true);
+        
+        if ($existing_vote) {
+            wp_send_json_error(array('message' => __('You have already voted on this review.', 'malisafi-mls')));
+        }
+        
+        // Update vote count
+        $field = $helpful ? 'helpful_count' : 'not_helpful_count';
+        $updated = $wpdb->query($wpdb->prepare(
+            "UPDATE $table_name SET $field = $field + 1 WHERE id = %d",
+            $review_id
+        ));
+        
+        if ($updated !== false) {
+            // Save user's vote
+            update_user_meta(get_current_user_id(), $vote_key, $helpful ? 'yes' : 'no');
+            
+            // Get updated counts
+            $updated_review = $wpdb->get_row($wpdb->prepare(
+                "SELECT helpful_count, not_helpful_count FROM $table_name WHERE id = %d",
+                $review_id
+            ));
+            
+            wp_send_json_success(array(
+                'message' => __('Thank you for your feedback!', 'malisafi-mls'),
+                'helpful_count' => intval($updated_review->helpful_count),
+                'not_helpful_count' => intval($updated_review->not_helpful_count)
+            ));
+        } else {
+            wp_send_json_error(array('message' => __('Failed to record vote. Please try again.', 'malisafi-mls')));
         }
     }
 }
