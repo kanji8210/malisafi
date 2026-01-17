@@ -280,15 +280,28 @@
         padding: 14px 20px !important;
     }
     
-    /* Stack all controls vertically */
+    /* 2 columns layout for controls */
     .filter-controls {
-        grid-template-columns: 1fr;
+        grid-template-columns: 1fr 1fr;
         gap: 12px;
     }
     
-    .filter-control-search,
-    .filter-search-btn {
+    /* Row 1: Property Type + City/County */
+    .filter-control:nth-child(1) {
         grid-column: 1;
+    }
+    
+    .filter-control:nth-child(2) {
+        grid-column: 2;
+    }
+    
+    /* Row 2: Search + Button */
+    .filter-control-search {
+        grid-column: 1;
+    }
+    
+    .filter-search-btn {
+        grid-column: 2;
     }
     
     .filter-row-status {
