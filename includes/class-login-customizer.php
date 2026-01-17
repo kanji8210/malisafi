@@ -25,6 +25,9 @@ class Login_Customizer {
         add_action('login_head', [__CLASS__, 'add_favicon']);
         add_filter('login_errors', [__CLASS__, 'custom_login_errors']);
         add_action('login_footer', [__CLASS__, 'add_custom_footer']);
+        add_action('login_head', [__CLASS__, 'inject_logo_css']);
+        add_action('login_footer', [__CLASS__, 'add_register_link']);
+        add_filter('show_admin_bar', [__CLASS__, 'filter_admin_bar']);
         add_filter('login_redirect', [__CLASS__, 'redirect_to_dashboard'], 10, 3);
         add_action('admin_bar_menu', [__CLASS__, 'add_dashboard_link'], 999);
         
@@ -543,5 +546,71 @@ class Login_Customizer {
                 ]
             ]);
         }
+    }
+
+    /**
+     * Dynamically inject site logo into login page
+     */
+    public static function inject_logo_css() {
+        $logo_url = self::get_site_logo_url();
+        if (!$logo_url) {
+            return;
+        }
+        echo '<style>#login h1 a{background-image:url(' . esc_url($logo_url) . ') !important;background-size:contain;background-repeat:no-repeat;text-indent:-9999px;height:100px;}#login h1 a::before,#login h1 a::after{content:none !important;}</style>';
+    }
+
+    /**
+     * Get the best available site logo URL
+     */
+    private static function get_site_logo_url() {
+        // Prefer theme custom logo
+        $custom_logo_id = function_exists('get_theme_mod') ? get_theme_mod('custom_logo') : 0;
+        if ($custom_logo_id) {
+            $image = wp_get_attachment_image_src($custom_logo_id, 'full');
+            if (!empty($image[0])) {
+                return $image[0];
+            }
+        }
+        // Fallback: site icon
+        if (function_exists('has_site_icon') && has_site_icon()) {
+            $icon = get_site_icon_url(128);
+            if ($icon) {
+                return $icon;
+            }
+        }
+        return '';
+    }
+
+    /**
+     * Add Register link below the login form
+     */
+    public static function add_register_link() {
+        $register_url = '';
+        if (class_exists('MalisafiMLS\\Page_Manager')) {
+            $register_url = \MalisafiMLS\Page_Manager::get_page_url('register');
+        }
+        if (empty($register_url) && get_option('users_can_register')) {
+            $register_url = wp_registration_url();
+        }
+        if (!empty($register_url)) {
+            echo '<div class="malisafi-login-footer" style="margin-top:15px">'
+                . '<a class="button" href="' . esc_url($register_url) . '">' . esc_html__('Create an account', 'malisafi-mls') . '</a>'
+                . '</div>';
+        }
+    }
+
+    /**
+     * Hide WordPress admin bar for Malisafi roles (non-admin/moderator)
+     */
+    public static function filter_admin_bar($show) {
+        $user = wp_get_current_user();
+        if (!$user || !isset($user->roles)) {
+            return $show;
+        }
+        if (in_array('administrator', $user->roles) || in_array('malisafi_moderator', $user->roles)) {
+            return $show;
+        }
+        $roles = array('malisafi_agent_basic','malisafi_agent_premium','malisafi_owner','malisafi_developer','malisafi_client');
+        return array_intersect($roles, $user->roles) ? false : $show;
     }
 }
