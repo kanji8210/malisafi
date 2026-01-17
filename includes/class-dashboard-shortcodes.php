@@ -32,6 +32,9 @@ class Dashboard_Shortcodes {
         add_shortcode('malisafi_agent_leads', [__CLASS__, 'agent_leads']);
         add_shortcode('malisafi_agent_profile', [__CLASS__, 'agent_profile']);
         
+        
+        // Public Agent Profile View
+        add_shortcode('malisafi_agent_profile_view', [__CLASS__, 'agent_profile_public']);
         // Owner Dashboard Shortcodes
         add_shortcode('malisafi_owner_dashboard', [__CLASS__, 'owner_dashboard']);
         add_shortcode('malisafi_owner_properties', [__CLASS__, 'owner_properties']);
@@ -1454,4 +1457,30 @@ class Dashboard_Shortcodes {
         
         return add_query_arg($params, $url);
     }
+    
+    /**
+     * Public Agent Profile View
+     */
+    public static function agent_profile_public($atts) {
+            $atts = shortcode_atts(array(
+                'agent_id' => isset($_GET['agent_id']) ? intval($_GET['agent_id']) : 0
+            ), $atts);
+        
+            if (empty($atts['agent_id'])) {
+                return '<div class="malisafi-error">' . __('Agent ID is required.', 'malisafi-mls') . '</div>';
+            }
+    
+        
+            // Enqueue styles
+            wp_enqueue_style(
+                'agent-profile-public',
+                MALISAFI_MLS_URL . 'assets/css/agent-profile-public.css',
+                array(),
+                MALISAFI_MLS_VERSION
+            );
+        
+            ob_start();
+            include MALISAFI_MLS_PATH . 'templates/agent-profile-public.php';
+            return ob_get_clean();
+        }
 }

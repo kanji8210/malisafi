@@ -48,6 +48,7 @@ class Core {
         require_once MALISAFI_MLS_PATH . 'includes/class-property-filters-ajax.php';
         require_once MALISAFI_MLS_PATH . 'includes/class-property-actions-ajax.php';
         require_once MALISAFI_MLS_PATH . 'includes/class-agent-actions-ajax.php';
+            require_once MALISAFI_MLS_PATH . 'includes/class-agent-profile-ajax.php';
         require_once MALISAFI_MLS_PATH . 'includes/class-login-customizer.php';
         require_once MALISAFI_MLS_PATH . 'includes/class-page-manager.php';
         require_once MALISAFI_MLS_PATH . 'includes/class-registration-handler.php';
