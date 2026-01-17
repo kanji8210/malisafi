@@ -103,6 +103,24 @@
     background: var(--sidebar-hover);
 }
 
+/* Toggle Icon Animation */
+.sidebar-toggle-icon {
+    font-size: 24px;
+    transition: transform var(--transition-speed) ease;
+}
+
+.agent-sidebar:not(.collapsed) .sidebar-toggle-icon::before {
+    content: '\f341'; /* dashicons-arrow-left-alt2 */
+}
+
+.agent-sidebar.collapsed .sidebar-toggle-icon::before {
+    content: '\f343'; /* dashicons-arrow-right-alt2 */
+}
+
+.sidebar-toggle:hover {
+    background: var(--sidebar-hover);
+}
+
 .sidebar-toggle .dashicons {
     font-size: 20px;
     width: 20px;

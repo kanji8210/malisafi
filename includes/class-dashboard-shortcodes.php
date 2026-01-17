@@ -823,6 +823,8 @@ class Dashboard_Shortcodes {
             $zip_code = sanitize_text_field($_POST['property_zip_code'] ?? '');
             $property_type = intval($_POST['property_type'] ?? 0);
             $property_status_tax = intval($_POST['property_status_tax'] ?? 0);
+            $latitude = floatval($_POST['property_latitude'] ?? 0);
+            $longitude = floatval($_POST['property_longitude'] ?? 0);
             
             $features = array(
                 'pool' => !empty($_POST['feature_pool']) ? 1 : 0,
@@ -871,6 +873,8 @@ class Dashboard_Shortcodes {
                     update_post_meta($new_id, '_malisafi_garage', $garage);
                     update_post_meta($new_id, '_malisafi_address', $address);
                     update_post_meta($new_id, '_malisafi_zip_code', $zip_code);
+                    update_post_meta($new_id, '_malisafi_latitude', $latitude);
+                    update_post_meta($new_id, '_malisafi_longitude', $longitude);
                     foreach ($features as $key => $val) {
                         update_post_meta($new_id, '_malisafi_' . $key, $val);
                     }
@@ -1178,6 +1182,41 @@ class Dashboard_Shortcodes {
                     </div>
                 </div>
                 
+                <!-- GPS Location Section -->
+                <div class="form-section">
+                    <div class="form-section-header">
+                        <h3 class="form-section-title">
+                            <span class="dashicons dashicons-location-alt"></span>
+                            <?php _e('GPS Coordinates', 'malisafi-mls'); ?>
+                        </h3>
+                        <p class="form-section-description"><?php _e('Set property location using GPS coordinates', 'malisafi-mls'); ?></p>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group full-width">
+                            <button type="button" class="button button-secondary" id="getGpsLocation" style="margin-bottom: 15px;">
+                                <span class="dashicons dashicons-location" style="margin-right: 5px; vertical-align: middle;"></span>
+                                <?php _e('Get Current Location', 'malisafi-mls'); ?>
+                            </button>
+                            <small><?php _e('Uses your device\'s GPS to automatically fill coordinates', 'malisafi-mls'); ?></small>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row two-col">
+                        <div class="form-group">
+                            <label for="property_latitude"><?php _e('Latitude', 'malisafi-mls'); ?></label>
+                            <input type="number" name="property_latitude" id="property_latitude" step="0.000001" placeholder="<?php esc_attr_e('e.g. -1.286389', 'malisafi-mls'); ?>" />
+                            <small><?php _e('Manual entry or automatic via GPS button above', 'malisafi-mls'); ?></small>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="property_longitude"><?php _e('Longitude', 'malisafi-mls'); ?></label>
+                            <input type="number" name="property_longitude" id="property_longitude" step="0.000001" placeholder="<?php esc_attr_e('e.g. 36.816666', 'malisafi-mls'); ?>" />
+                            <small><?php _e('Manual entry or automatic via GPS button above', 'malisafi-mls'); ?></small>
+                        </div>
+                    </div>
+                </div>
+                
                 <!-- Images Section -->
                 <div class="form-section">
                     <div class="form-section-header">
@@ -1206,6 +1245,68 @@ class Dashboard_Shortcodes {
                 </div>
             </form>
         </div>
+        
+        <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const getGpsButton = document.getElementById('getGpsLocation');
+            const latInput = document.getElementById('property_latitude');
+            const lngInput = document.getElementById('property_longitude');
+            
+            if (getGpsButton) {
+                getGpsButton.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    // Check if geolocation is supported
+                    if (!navigator.geolocation) {
+                        alert('<?php _e('Geolocation is not supported by your browser', 'malisafi-mls'); ?>');\n                        return;
+                    }
+                    
+                    // Show loading state
+                    const originalText = getGpsButton.innerHTML;
+                    getGpsButton.innerHTML = '<span class=\"dashicons dashicons-update\" style=\"animation: spin 1s linear infinite; display: inline-block; margin-right: 5px;\"></span><?php _e('Getting location...', 'malisafi-mls'); ?>';\n                    getGpsButton.disabled = true;
+                    
+                    // Get current position
+                    navigator.geolocation.getCurrentPosition(
+                        function(position) {
+                            const lat = position.coords.latitude.toFixed(6);
+                            const lng = position.coords.longitude.toFixed(6);
+                            
+                            latInput.value = lat;
+                            lngInput.value = lng;
+                            
+                            // Reset button
+                            getGpsButton.innerHTML = originalText;
+                            getGpsButton.disabled = false;
+                            
+                            // Show success message
+                            alert('<?php _e('Location found! Coordinates: ', 'malisafi-mls'); ?>' + lat + ', ' + lng);
+                        },
+                        function(error) {
+                            let errorMsg = '<?php _e('Unable to get location', 'malisafi-mls'); ?>';\n                            \n                            if (error.code === 1) {
+                                errorMsg = '<?php _e('Permission denied. Please enable location services.', 'malisafi-mls'); ?>';\n                            } else if (error.code === 2) {
+                                errorMsg = '<?php _e('Position unavailable. Please try again.', 'malisafi-mls'); ?>';\n                            } else if (error.code === 3) {
+                                errorMsg = '<?php _e('Request timeout. Please try again.', 'malisafi-mls'); ?>';\n                            }
+                            \n                            alert(errorMsg);
+                            \n                            // Reset button
+                            getGpsButton.innerHTML = originalText;
+                            getGpsButton.disabled = false;
+                        },
+                        {
+                            enableHighAccuracy: true,
+                            timeout: 10000,
+                            maximumAge: 0
+                        }
+                    );
+                });
+            }
+        });
+        </script>
+        <style>
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        </style>
         <?php
         return ob_get_clean();
     }

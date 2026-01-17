@@ -60,7 +60,7 @@ $current_page = isset($_GET['section']) ? sanitize_text_field($_GET['section']) 
                 <span class="brand-text">Malisafi</span>
             </div>
             <button class="sidebar-toggle" id="sidebarToggle" aria-label="Toggle Sidebar">
-                <span class="dashicons dashicons-menu"></span>
+                <span class="dashicons dashicons-arrow-left-alt2 sidebar-toggle-icon"></span>
             </button>
         </div>
 
