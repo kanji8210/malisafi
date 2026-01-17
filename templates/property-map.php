@@ -46,12 +46,14 @@ if (!empty($atts['location'])) {
 // Query properties
 $properties_query = new WP_Query($query_args);
 $properties = array();
+$total_properties = $properties_query->post_count;
+$properties_with_coords = 0;
 
 if ($properties_query->have_posts()) {
     foreach ($properties_query->posts as $property_id) {
         // Get GPS coordinates
-        $latitude = get_post_meta($property_id, '_property_latitude', true);
-        $longitude = get_post_meta($property_id, '_property_longitude', true);
+        $latitude = get_post_meta($property_id, '_malisafi_latitude', true);
+        $longitude = get_post_meta($property_id, '_malisafi_longitude', true);
         
         // If no GPS coordinates, try to geocode from location taxonomy
         if (empty($latitude) || empty($longitude)) {
@@ -102,13 +104,18 @@ if ($properties_query->have_posts()) {
         
         // Only add properties with valid coordinates
         if (!empty($latitude) && !empty($longitude)) {
+            // Get property data
+            $price = get_post_meta($property_id, '_malisafi_price', true);
+            $currency = get_post_meta($property_id, '_malisafi_currency', true) ?: 'USD';
+            
             $property_data = array(
                 'id' => $property_id,
                 'title' => get_the_title($property_id),
                 'url' => get_permalink($property_id),
                 'lat' => (float)$latitude,
                 'lng' => (float)$longitude,
-                'price' => get_post_meta($property_id, '_property_price', true),
+                'price' => $price,
+                'currency' => $currency,
                 'image' => get_the_post_thumbnail_url($property_id, 'thumbnail')
             );
             
@@ -125,10 +132,16 @@ if ($properties_query->have_posts()) {
             }
             
             $properties[] = $property_data;
+            $properties_with_coords++;
         }
     }
     
     wp_reset_postdata();
+}
+
+// Debug info (only for admins)
+if (current_user_can('manage_options') && $total_properties > 0) {
+    echo '<!-- Map Debug: Total properties queried: ' . $total_properties . ', Properties with coordinates: ' . $properties_with_coords . ' -->';
 }
 
 // Enqueue Leaflet CSS and JS (open source alternative to Google Maps)
@@ -165,10 +178,16 @@ $map_height = (int)$atts['height'];
 
 <div class="malisafi-property-map-container">
     <?php if (!empty($properties)): ?>
-        <div id="malisafi-property-map" style="height: <?php echo esc_attr($map_height); ?>px;"></div>
-        <div class="map-property-count">
-            <?php printf(_n('%s property found', '%s properties found', count($properties), 'malisafi-mls'), number_format_i18n(count($properties))); ?>
+        <div class="map-controls">
+            <div class="map-property-count">
+                <?php printf(_n('%s property found', '%s properties found', count($properties), 'malisafi-mls'), number_format_i18n(count($properties))); ?>
+            </div>
+            <button id="fullscreen-map-btn" class="fullscreen-btn" title="<?php _e('Fullscreen View', 'malisafi-mls'); ?>">
+                <span class="dashicons dashicons-fullscreen-alt"></span>
+                <span class="btn-text"><?php _e('Fullscreen', 'malisafi-mls'); ?></span>
+            </button>
         </div>
+        <div id="malisafi-property-map" style="height: <?php echo esc_attr($map_height); ?>px;"></div>
     <?php else: ?>
         <div class="no-properties-message">
             <p><?php _e('No properties found with valid locations.', 'malisafi-mls'); ?></p>

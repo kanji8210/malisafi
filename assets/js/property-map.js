@@ -54,7 +54,8 @@
             // Format price
             var formattedPrice = 'N/A';
             if (property.price) {
-                formattedPrice = 'KES ' + parseFloat(property.price).toLocaleString('en-KE');
+                var currencySymbol = property.currency === 'KES' ? 'KSh' : '$';
+                formattedPrice = currencySymbol + ' ' + parseFloat(property.price).toLocaleString('en-KE');
             }
 
             // Create popup content
@@ -116,6 +117,56 @@
             var group = new L.featureGroup(markers);
             map.fitBounds(group.getBounds().pad(0.1));
         }
+
+        // Fullscreen functionality
+        $('#fullscreen-map-btn').on('click', function() {
+            var mapContainer = $('#malisafi-property-map');
+            var btn = $(this);
+            
+            if (!document.fullscreenElement) {
+                // Enter fullscreen
+                if (mapContainer[0].requestFullscreen) {
+                    mapContainer[0].requestFullscreen();
+                } else if (mapContainer[0].webkitRequestFullscreen) {
+                    mapContainer[0].webkitRequestFullscreen();
+                } else if (mapContainer[0].msRequestFullscreen) {
+                    mapContainer[0].msRequestFullscreen();
+                }
+                
+                btn.find('.dashicons').removeClass('dashicons-fullscreen-alt').addClass('dashicons-fullscreen-exit-alt');
+                btn.find('.btn-text').text('Exit Fullscreen');
+                
+                // Fix map display after entering fullscreen
+                setTimeout(function() {
+                    map.invalidateSize();
+                }, 100);
+            } else {
+                // Exit fullscreen
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                } else if (document.webkitExitFullscreen) {
+                    document.webkitExitFullscreen();
+                } else if (document.msExitFullscreen) {
+                    document.msExitFullscreen();
+                }
+                
+                btn.find('.dashicons').removeClass('dashicons-fullscreen-exit-alt').addClass('dashicons-fullscreen-alt');
+                btn.find('.btn-text').text('Fullscreen');
+            }
+        });
+
+        // Listen for fullscreen change events
+        $(document).on('fullscreenchange webkitfullscreenchange mozfullscreenchange msfullscreenchange', function() {
+            if (!document.fullscreenElement) {
+                $('#fullscreen-map-btn .dashicons').removeClass('dashicons-fullscreen-exit-alt').addClass('dashicons-fullscreen-alt');
+                $('#fullscreen-map-btn .btn-text').text('Fullscreen');
+                
+                // Fix map display after exiting fullscreen
+                setTimeout(function() {
+                    map.invalidateSize();
+                }, 100);
+            }
+        });
     });
 
 })(jQuery);
