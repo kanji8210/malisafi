@@ -398,20 +398,8 @@ class Dashboard_Shortcodes {
             </div>';
         }
         
-        // Redirect to backend property form
-        $backend_url = admin_url('admin.php?page=malisafi-properties&action=add');
-        
-        ob_start();
-        ?>
-        <div class="malisafi-agent-add-property-redirect">
-            <p><?php _e('Redirecting to property submission form...', 'malisafi-mls'); ?></p>
-            <script>
-                window.location.href = '<?php echo esc_js($backend_url); ?>';
-            </script>
-            <p><a href="<?php echo esc_url($backend_url); ?>"><?php _e('Click here if not redirected', 'malisafi-mls'); ?></a></p>
-        </div>
-        <?php
-        return ob_get_clean();
+        // Display the custom property submit form for agents
+        return self::property_submit_form(array('role' => 'agent'));
     }
     
     /**
