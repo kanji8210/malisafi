@@ -23,6 +23,22 @@ class Malisafi_Agent_Dashboard {
         
         // Prevent WordPress from blocking agent backend access
         add_action('admin_init', array(__CLASS__, 'allow_agent_backend_access'));
+        
+        // Handle view clearing
+        add_action('admin_init', array(__CLASS__, 'handle_clear_agent_view'));
+    }
+    
+    /**
+     * Handle clearing agent view
+     */
+    public static function handle_clear_agent_view() {
+        if (isset($_GET['clear_agent_view']) && isset($_GET['_wpnonce']) && wp_verify_nonce($_GET['_wpnonce'], 'clear_agent_view')) {
+            delete_user_meta(get_current_user_id(), '_viewing_as_agent_id');
+            
+            // Use wp_safe_redirect with exit - NO OUTPUT BEFORE THIS
+            wp_safe_redirect(remove_query_arg(array('clear_agent_view', '_wpnonce')));
+            exit;
+        }
     }
     
     /**
@@ -90,7 +106,7 @@ class Malisafi_Agent_Dashboard {
                 __('My Properties', 'malisafi-mls'),
                 'read',
                 'malisafi-properties',
-                array('Malisafi_Admin_Dashboard', 'render_properties_list')
+                array(__CLASS__, 'render_properties_list')
             );
             
             add_submenu_page(
@@ -123,12 +139,47 @@ class Malisafi_Agent_Dashboard {
     }
     
     /**
+     * Render properties list
+     */
+    public static function render_properties_list() {
+        $agent_id = self::get_current_agent_id();
+        
+        if (!$agent_id) {
+            echo '<div class="wrap">';
+            echo '<h1>' . __('Access Denied', 'malisafi-mls') . '</h1>';
+            echo '<div class="notice notice-error"><p>' . __('No agent profile found.', 'malisafi-mls') . '</p></div>';
+            echo '</div>';
+            return;
+        }
+        
+        if ($template = self::get_template_path('properties-list.php')) {
+            include $template;
+        }
+    }
+    
+    /**
      * Check if current user is an agent
      */
     private static function is_agent_role() {
         $user = wp_get_current_user();
         $agent_roles = array('malisafi_agent_basic', 'malisafi_agent_premium');
         return array_intersect($agent_roles, $user->roles) ? true : false;
+    }
+    
+    /**
+     * Get template path
+     */
+    private static function get_template_path($template_name) {
+        $template = plugin_dir_path(dirname(__FILE__)) . 'admin/templates/' . $template_name;
+        
+        // Check if template exists
+        if (!file_exists($template)) {
+            // Fallback to simple output
+            echo '<div class="notice notice-warning"><p>' . sprintf(__('Template file %s not found.', 'malisafi-mls'), $template_name) . '</p></div>';
+            return false;
+        }
+        
+        return $template;
     }
     
     /**
@@ -148,7 +199,7 @@ class Malisafi_Agent_Dashboard {
         
         $args = array(
             'post_type' => 'malisafi_agent',
-            'post_status' => array('publish', 'pending', 'draft'), // Include all statuses
+            'post_status' => array('publish', 'pending', 'draft'),
             'meta_query' => array(
                 array(
                     'key' => '_agent_user_id',
@@ -168,6 +219,11 @@ class Malisafi_Agent_Dashboard {
      * Render agent dashboard
      */
     public static function render_agent_dashboard() {
+        // Start output buffering to prevent header errors
+        if (!ob_get_level()) {
+            ob_start();
+        }
+        
         $agent_id = self::get_current_agent_id();
         
         if (!$agent_id) {
@@ -186,6 +242,8 @@ class Malisafi_Agent_Dashboard {
             echo '<div class="notice notice-info"><p>' . $user_info . '</p></div>';
             echo '<p><a href="' . admin_url() . '" class="button button-primary">' . __('Return to Dashboard', 'malisafi-mls') . '</a></p>';
             echo '</div>';
+            
+            ob_end_flush();
             return;
         }
         
@@ -195,35 +253,17 @@ class Malisafi_Agent_Dashboard {
         $linked_user_id = get_post_meta($agent_id, '_malisafi_linked_user', true);
         
         // COMPREHENSIVE QUERY: Count ALL properties that could belong to this agent
-        // Method 1: By post_author matching linked user
-        // Method 2: By _malisafi_agent_id meta matching agent post ID
-        // Method 3: By old _property_agent_id meta (legacy)
-        
         if ($linked_user_id) {
-            // Primary: Count by post_author
-            $by_author = (int) $wpdb->get_var($wpdb->prepare(
-                "SELECT COUNT(*) FROM {$wpdb->posts} 
-                WHERE post_type = 'malisafi_property' 
-                AND post_author = %d",
-                $linked_user_id
+            // Count by both post_author and meta
+            $total_properties = (int) $wpdb->get_var($wpdb->prepare(
+                "SELECT COUNT(DISTINCT p.ID) FROM {$wpdb->posts} p
+                LEFT JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id AND pm.meta_key IN ('_malisafi_agent_id', '_property_agent_id')
+                WHERE p.post_type = 'malisafi_property'
+                AND (p.post_author = %d OR pm.meta_value = %d)",
+                $linked_user_id,
+                $agent_id
             ));
             
-            // Secondary: Count by meta (might have some that aren't author-linked yet)
-            $by_meta = (int) $wpdb->get_var($wpdb->prepare(
-                "SELECT COUNT(DISTINCT pm.post_id) 
-                FROM {$wpdb->postmeta} pm
-                INNER JOIN {$wpdb->posts} p ON pm.post_id = p.ID
-                WHERE pm.meta_key IN ('_malisafi_agent_id', '_property_agent_id')
-                AND pm.meta_value = %d
-                AND p.post_type = 'malisafi_property'
-                AND p.post_author != %d",
-                $agent_id,
-                $linked_user_id
-            ));
-            
-            $total_properties = $by_author + $by_meta;
-            
-            // Get counts by status (combine both methods)
             $active_listings = (int) $wpdb->get_var($wpdb->prepare(
                 "SELECT COUNT(DISTINCT p.ID) FROM {$wpdb->posts} p
                 LEFT JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id AND pm.meta_key IN ('_malisafi_agent_id', '_property_agent_id')
@@ -278,69 +318,7 @@ class Malisafi_Agent_Dashboard {
             ));
         }
         
-        // Get statistics - count properties by author (linked user) or by meta _malisafi_agent_id
-        if (false && $linked_user_id) {
-            // Count by post_author (most efficient)
-            $total_properties = (int) $wpdb->get_var($wpdb->prepare(
-                "SELECT COUNT(*) FROM {$wpdb->posts} 
-                WHERE post_type = 'malisafi_property' 
-                AND post_author = %d
-                AND post_status IN ('publish','pending','draft')",
-                $linked_user_id
-            ));
-            
-            $active_listings = (int) $wpdb->get_var($wpdb->prepare(
-                "SELECT COUNT(*) FROM {$wpdb->posts} 
-                WHERE post_type = 'malisafi_property' 
-                AND post_author = %d
-                AND post_status = 'publish'",
-                $linked_user_id
-            ));
-            
-            $pending_properties = (int) $wpdb->get_var($wpdb->prepare(
-                "SELECT COUNT(*) FROM {$wpdb->posts} 
-                WHERE post_type = 'malisafi_property' 
-                AND post_author = %d
-                AND post_status = 'pending'",
-                $linked_user_id
-            ));
-        } else {
-            // Fallback: count by meta _malisafi_agent_id if no linked user
-            $total_properties = (int) $wpdb->get_var($wpdb->prepare(
-                "SELECT COUNT(DISTINCT pm.post_id) 
-                FROM {$wpdb->postmeta} pm
-                INNER JOIN {$wpdb->posts} p ON pm.post_id = p.ID
-                WHERE pm.meta_key = '_malisafi_agent_id' 
-                AND pm.meta_value = %d
-                AND p.post_type = 'malisafi_property'
-                AND p.post_status IN ('publish','pending','draft')",
-                $agent_id
-            ));
-            
-            $active_listings = (int) $wpdb->get_var($wpdb->prepare(
-                "SELECT COUNT(DISTINCT pm.post_id) 
-                FROM {$wpdb->postmeta} pm
-                INNER JOIN {$wpdb->posts} p ON pm.post_id = p.ID
-                WHERE pm.meta_key = '_malisafi_agent_id' 
-                AND pm.meta_value = %d
-                AND p.post_type = 'malisafi_property'
-                AND p.post_status = 'publish'",
-                $agent_id
-            ));
-            
-            $pending_properties = (int) $wpdb->get_var($wpdb->prepare(
-                "SELECT COUNT(DISTINCT pm.post_id) 
-                FROM {$wpdb->postmeta} pm
-                INNER JOIN {$wpdb->posts} p ON pm.post_id = p.ID
-                WHERE pm.meta_key = '_malisafi_agent_id' 
-                AND pm.meta_value = %d
-                AND p.post_type = 'malisafi_property'
-                AND p.post_status = 'pending'",
-                $agent_id
-            ));
-        }
-        
-        // Get recent properties (comprehensive - all linked properties)
+        // Get recent properties
         if ($linked_user_id) {
             $recent_properties = $wpdb->get_results($wpdb->prepare(
                 "SELECT DISTINCT p.ID, p.post_title, p.post_status, p.post_date
@@ -384,13 +362,22 @@ class Malisafi_Agent_Dashboard {
             }
         }
         
-        include plugin_dir_path(dirname(__FILE__)) . 'admin/templates/agent-dashboard.php';
+        if ($template = self::get_template_path('agent-dashboard.php')) {
+            include $template;
+        }
+        
+        ob_end_flush();
     }
     
     /**
      * Render agent profile
      */
     public static function render_agent_profile() {
+        // Start output buffering
+        if (!ob_get_level()) {
+            ob_start();
+        }
+        
         $agent_id = self::get_current_agent_id();
         
         if (!$agent_id) {
@@ -409,16 +396,27 @@ class Malisafi_Agent_Dashboard {
             echo '<div class="notice notice-info"><p>' . $user_info . '</p></div>';
             echo '<p><a href="' . admin_url() . '" class="button button-primary">' . __('Return to Dashboard', 'malisafi-mls') . '</a></p>';
             echo '</div>';
+            
+            ob_end_flush();
             return;
         }
         
-        include plugin_dir_path(dirname(__FILE__)) . 'admin/templates/agent-profile.php';
+        if ($template = self::get_template_path('agent-profile.php')) {
+            include $template;
+        }
+        
+        ob_end_flush();
     }
     
     /**
      * Render agent leads
      */
     public static function render_agent_leads() {
+        // Start output buffering
+        if (!ob_get_level()) {
+            ob_start();
+        }
+        
         $agent_id = self::get_current_agent_id();
         
         if (!$agent_id) {
@@ -437,6 +435,8 @@ class Malisafi_Agent_Dashboard {
             echo '<div class="notice notice-info"><p>' . $user_info . '</p></div>';
             echo '<p><a href="' . admin_url() . '" class="button button-primary">' . __('Return to Dashboard', 'malisafi-mls') . '</a></p>';
             echo '</div>';
+            
+            ob_end_flush();
             return;
         }
         
@@ -451,9 +451,7 @@ class Malisafi_Agent_Dashboard {
         
         $leads = array();
         if ($table_exists) {
-            // Get leads for this agent's properties from legacy table
             if ($linked_user_id) {
-                // Query by post_author
                 $leads = $wpdb->get_results($wpdb->prepare(
                     "SELECT l.*, p.post_title as property_title
                     FROM {$table_name} l
@@ -465,7 +463,6 @@ class Malisafi_Agent_Dashboard {
                     $linked_user_id
                 ));
             } else {
-                // Query by meta _malisafi_agent_id
                 $leads = $wpdb->get_results($wpdb->prepare(
                     "SELECT l.*, p.post_title as property_title
                     FROM {$table_name} l
@@ -480,9 +477,12 @@ class Malisafi_Agent_Dashboard {
                 ));
             }
         }
-        // If no legacy table or using comment-based leads system, $leads remains empty array
         
-        include plugin_dir_path(dirname(__FILE__)) . 'admin/templates/agent-leads.php';
+        if ($template = self::get_template_path('agent-leads.php')) {
+            include $template;
+        }
+        
+        ob_end_flush();
     }
     
     /**
@@ -517,13 +517,24 @@ class Malisafi_Agent_Dashboard {
         // Enqueue WordPress media library for image uploads
         wp_enqueue_media();
         
-        wp_enqueue_style('malisafi-agent-dashboard', plugin_dir_url(dirname(__FILE__)) . 'assets/css/agent-dashboard.css', array(), '1.0.0');
-        wp_enqueue_script('malisafi-agent-dashboard', plugin_dir_url(dirname(__FILE__)) . 'assets/js/agent-dashboard.js', array('jquery'), '1.0.0', true);
+        // Check if files exist before enqueueing
+        $plugin_dir = plugin_dir_url(dirname(__FILE__));
         
-        // Also enqueue admin.js for property edit form functionality
-        wp_enqueue_style('malisafi-mls-admin', plugin_dir_url(dirname(__FILE__)) . 'assets/css/admin.css', array(), '1.0.0');
-        wp_enqueue_script('malisafi-mls-admin', plugin_dir_url(dirname(__FILE__)) . 'assets/js/admin.js', array('jquery'), '1.0.0', false);
+        // Enqueue CSS
+        $css_files = array(
+            'agent-dashboard' => 'assets/css/agent-dashboard.css',
+            'malisafi-mls-admin' => 'assets/css/admin.css'
+        );
         
+        foreach ($css_files as $handle => $file) {
+            wp_enqueue_style($handle, $plugin_dir . $file, array(), '1.0.0');
+        }
+        
+        // Enqueue JS
+        wp_enqueue_script('malisafi-agent-dashboard', $plugin_dir . 'assets/js/agent-dashboard.js', array('jquery'), '1.0.0', true);
+        wp_enqueue_script('malisafi-mls-admin', $plugin_dir . 'assets/js/admin.js', array('jquery'), '1.0.0', false);
+        
+        // Localize scripts
         wp_localize_script('malisafi-agent-dashboard', 'malisafiAgent', array(
             'ajaxurl' => admin_url('admin-ajax.php'),
             'nonce' => wp_create_nonce('switch_agent_view')
@@ -543,22 +554,19 @@ class Malisafi_Agent_Dashboard {
      * Render property create/edit page (custom handler)
      */
     public static function render_property_edit() {
-        // Vérification des droits : agent, owner, developer, moderator
+        // Check if output buffering is needed
+        if (!ob_get_level()) {
+            ob_start();
+        }
+        
+        // Check permissions FIRST
         $user = wp_get_current_user();
         $allowed_roles = array('malisafi_agent_basic', 'malisafi_agent_premium', 'malisafi_owner', 'malisafi_developer', 'malisafi_moderator');
         if (!array_intersect($allowed_roles, $user->roles)) {
             wp_die(__('You do not have permission to access this page.', 'malisafi-mls'));
         }
 
-        // Récupérer l'ID de la propriété si édition
-        $property_id = isset($_GET['property_id']) ? intval($_GET['property_id']) : 0;
-
-        // Préparer les variables pour le template
-        $property_title = '';
-        $message = '';
-        $error = '';
-
-        // Soumission du formulaire
+        // Handle form submission BEFORE any output
         if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['malisafi_property_edit_nonce']) && wp_verify_nonce($_POST['malisafi_property_edit_nonce'], 'malisafi_property_edit')) {
             $property_id = isset($_POST['property_id']) ? intval($_POST['property_id']) : 0;
             $property_title = sanitize_text_field($_POST['property_title'] ?? '');
@@ -567,69 +575,68 @@ class Malisafi_Agent_Dashboard {
             if (empty($property_title)) {
                 $error = __('Title is required.', 'malisafi-mls');
             } else {
-                // Determine status: pending for agents/owners/developers, publish for moderators/admins
                 $post_status = current_user_can('moderate_properties') ? 'publish' : 'pending';
-                
                 $post_data = array(
                     'post_title'   => $property_title,
                     'post_type'    => 'malisafi_property',
                     'post_status'  => $post_status,
+                    'post_author'  => get_current_user_id()
                 );
-                // Assigner l'auteur à l'utilisateur courant (agent)
-                $post_data['post_author'] = get_current_user_id();
 
                 if ($property_id) {
-                    // EDITING EXISTING PROPERTY
-                    // Force status to pending if agent is editing (not admin/moderator)
+                    // Editing existing property
                     if (!current_user_can('moderate_properties')) {
                         $post_data['post_status'] = 'pending';
                     }
                     
                     $post_data['ID'] = $property_id;
                     $new_id = wp_update_post($post_data, true);
+                    
                     if (is_wp_error($new_id)) {
                         $error = $new_id->get_error_message();
                     } else {
-                        // Lier la propriété à l'agent si pas déjà fait
                         $agent_id = self::get_current_agent_id();
                         if ($agent_id) {
                             update_post_meta($new_id, '_malisafi_agent_id', $agent_id);
                         }
-                        // Sauvegarder le GPS
                         update_post_meta($new_id, '_property_gps', $property_gps);
-                        
-                        // Add notice if property went to pending
-                        if (!current_user_can('moderate_properties')) {
-                            $message = __('Property updated successfully. It has been sent for approval.', 'malisafi-mls');
-                        } else {
-                            $message = __('Property updated successfully.', 'malisafi-mls');
-                        }
                         $property_id = $new_id;
+                        $message = !current_user_can('moderate_properties') 
+                            ? __('Property updated successfully. It has been sent for approval.', 'malisafi-mls')
+                            : __('Property updated successfully.', 'malisafi-mls');
                     }
                 } else {
+                    // Creating new property - DO REDIRECT IMMEDIATELY
                     $new_id = wp_insert_post($post_data, true);
+                    
                     if (is_wp_error($new_id)) {
                         $error = $new_id->get_error_message();
                     } else {
-                        // Lier la propriété à l'agent
                         $agent_id = self::get_current_agent_id();
                         if ($agent_id) {
                             update_post_meta($new_id, '_malisafi_agent_id', $agent_id);
                         }
-                        // Sauvegarder le GPS
                         update_post_meta($new_id, '_property_gps', $property_gps);
-                        $message = __('Property created successfully.', 'malisafi-mls');
-                        $property_id = $new_id;
-                        // Rediriger vers édition après création
-                        wp_redirect(admin_url('admin.php?page=malisafi-property-edit&property_id=' . $property_id . '&created=1'));
-                        exit;
+                        
+                        // CRITICAL: Redirect immediately with NO output before
+                        wp_safe_redirect(
+                            admin_url('admin.php?page=malisafi-property-edit&property_id=' . $new_id . '&created=1')
+                        );
+                        exit; // Stop execution immediately
                     }
                 }
             }
         }
 
-        // Charger les données si édition
-        if ($property_id) {
+        // Get property ID if editing (after POST handling)
+        $property_id = isset($_GET['property_id']) ? intval($_GET['property_id']) : 0;
+
+        // Initialize variables
+        $property_title = '';
+        $property_gps = '';
+        
+        // Load existing data if editing (only if not just redirected)
+        if ($property_id && empty($_POST)) {
             $post = get_post($property_id);
             if ($post && $post->post_type === 'malisafi_property') {
                 $property_title = $post->post_title;
@@ -637,21 +644,35 @@ class Malisafi_Agent_Dashboard {
             }
         }
 
+        // Check for created parameter
+        if (isset($_GET['created']) && $_GET['created'] == 1) {
+            $message = __('Property created successfully.', 'malisafi-mls');
+        }
+
+        // NOW output HTML
         echo '<div class="wrap">';
         echo '<h1>';
-        if ($property_id) {
-            echo __('Edit Property', 'malisafi-mls');
-        } else {
-            echo __('Add Property', 'malisafi-mls');
-        }
+        echo $property_id ? __('Edit Property', 'malisafi-mls') : __('Add Property', 'malisafi-mls');
         echo '</h1>';
+        
         if (!empty($message)) {
             echo '<div class="notice notice-success"><p>' . esc_html($message) . '</p></div>';
         }
         if (!empty($error)) {
             echo '<div class="notice notice-error"><p>' . esc_html($error) . '</p></div>';
         }
-        include plugin_dir_path(dirname(__FILE__)) . 'admin/templates/property-edit-form.php';
+        
+        // Include template
+        $template_path = plugin_dir_path(dirname(__FILE__)) . 'admin/templates/property-edit-form.php';
+        if (file_exists($template_path)) {
+            include $template_path;
+        } else {
+            echo '<div class="notice notice-error"><p>' . __('Property edit form template not found.', 'malisafi-mls') . '</p></div>';
+        }
+        
         echo '</div>';
+        
+        // Clean output buffer
+        ob_end_flush();
     }
 }

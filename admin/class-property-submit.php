@@ -402,39 +402,19 @@ class Malisafi_Property_Submit {
         if (empty($_FILES['file'])) {
             wp_send_json_error(array('message' => __('No file uploaded.', 'malisafi-mls')));
         }
-        
-        require_once(ABSPATH . 'wp-admin/includes/file.php');
-        require_once(ABSPATH . 'wp-admin/includes/media.php');
-        require_once(ABSPATH . 'wp-admin/includes/image.php');
-        
-        $file = $_FILES['file'];
-        $upload = wp_handle_upload($file, array('test_form' => false));
-        
-        if (isset($upload['error'])) {
-            wp_send_json_error(array('message' => $upload['error']));
-        }
-        
-        $attachment = array(
-            'post_mime_type' => $upload['type'],
-            'post_title' => sanitize_file_name($file['name']),
-            'post_content' => '',
-            'post_status' => 'inherit'
-        );
-        
-        $attachment_id = wp_insert_attachment($attachment, $upload['file']);
-        
-        if (is_wp_error($attachment_id)) {
-            wp_send_json_error(array('message' => $attachment_id->get_error_message()));
-        }
-        
-        $attach_data = wp_generate_attachment_metadata($attachment_id, $upload['file']);
-        wp_update_attachment_metadata($attachment_id, $attach_data);
-        
-        wp_send_json_success(array(
-            'id' => $attachment_id,
-            'url' => wp_get_attachment_url($attachment_id),
-            'thumb' => wp_get_attachment_image_url($attachment_id, 'thumbnail')
+        $result = \MalisafiMLS\Image_Handler::upload_single($_FILES['file'], array(
+            'validate_dimensions' => false,
+            'size_map' => array(
+                'url' => 'full',
+                'thumb' => 'thumbnail',
+            ),
         ));
+
+        if (is_wp_error($result)) {
+            wp_send_json_error(array('message' => $result->get_error_message()));
+        }
+
+        wp_send_json_success($result);
     }
     
     /**
@@ -448,12 +428,14 @@ class Malisafi_Property_Submit {
         if (!current_user_can('delete_post', $image_id)) {
             wp_send_json_error(array('message' => __('Permission denied.', 'malisafi-mls')));
         }
-        
-        if (wp_delete_attachment($image_id, true)) {
-            wp_send_json_success();
-        } else {
-            wp_send_json_error(array('message' => __('Failed to delete image.', 'malisafi-mls')));
+
+        $deleted = \MalisafiMLS\Image_Handler::delete_image($image_id);
+
+        if (is_wp_error($deleted)) {
+            wp_send_json_error(array('message' => $deleted->get_error_message()));
         }
+
+        wp_send_json_success();
     }
     
     /**

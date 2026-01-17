@@ -488,106 +488,16 @@ class Property_Submission {
         if (empty($_FILES['images'])) {
             wp_send_json_error(array('message' => __('No images uploaded', 'malisafi-mls')));
         }
-        
-        require_once ABSPATH . 'wp-admin/includes/file.php';
-        require_once ABSPATH . 'wp-admin/includes/image.php';
-        
-        $uploaded_ids = array();
-        $errors = array();
-        
-        // Handle multiple files
-        $files = $_FILES['images'];
-        $file_count = count($files['name']);
-        
-        for ($i = 0; $i < $file_count; $i++) {
-            $file = array(
-                'name' => $files['name'][$i],
-                'type' => $files['type'][$i],
-                'tmp_name' => $files['tmp_name'][$i],
-                'error' => $files['error'][$i],
-                'size' => $files['size'][$i]
-            );
-            
-            // Validate file
-            $allowed_types = array('image/jpeg', 'image/png', 'image/webp');
-            if (!in_array($file['type'], $allowed_types)) {
-                $errors[] = sprintf(__('Invalid file type for %s', 'malisafi-mls'), $file['name']);
-                continue;
-            }
-            
-            // Max 10MB
-            if ($file['size'] > 10 * 1024 * 1024) {
-                $errors[] = sprintf(__('File %s is too large (max 10MB)', 'malisafi-mls'), $file['name']);
-                continue;
-            }
+        $result = Image_Handler::upload_multiple($_FILES['images']);
 
-            // Server-side dimension/orientation validation
-            $img_info = @getimagesize($file['tmp_name']);
-            if (!$img_info) {
-                $errors[] = sprintf(__('Could not read image dimensions for %s', 'malisafi-mls'), $file['name']);
-                continue;
-            }
-            $width = isset($img_info[0]) ? (int)$img_info[0] : 0;
-            $height = isset($img_info[1]) ? (int)$img_info[1] : 0;
-            $is_landscape = $width > $height;
-
-            // Rules:
-            // - Landscape images must be at least 1200x800
-            // - Portrait images are allowed only if >= 1600x2000
-            $min_land_w = 1200; $min_land_h = 800;
-            $min_port_w = 1600; $min_port_h = 2000;
-            $allow_portrait_large = (!$is_landscape) && ($width >= $min_port_w && $height >= $min_port_h);
-
-            if ($is_landscape) {
-                if (!($width >= $min_land_w && $height >= $min_land_h)) {
-                    $errors[] = sprintf(__('Image %s is too small. Minimum %dx%d for landscape.', 'malisafi-mls'), $file['name'], $min_land_w, $min_land_h);
-                    continue;
-                }
-            } else {
-                if (!$allow_portrait_large) {
-                    $errors[] = sprintf(__('Portrait image %s must be at least %dx%d.', 'malisafi-mls'), $file['name'], $min_port_w, $min_port_h);
-                    continue;
-                }
-            }
-            
-            // Upload
-            $upload = wp_handle_upload($file, array('test_form' => false));
-            
-            if (isset($upload['error'])) {
-                $errors[] = $upload['error'];
-                continue;
-            }
-            
-            // Create attachment
-            $attachment_id = wp_insert_attachment(array(
-                'post_mime_type' => $upload['type'],
-                'post_title' => sanitize_file_name($file['name']),
-                'post_content' => '',
-                'post_status' => 'inherit'
-            ), $upload['file']);
-            
-            // Generate metadata
-            $metadata = wp_generate_attachment_metadata($attachment_id, $upload['file']);
-            wp_update_attachment_metadata($attachment_id, $metadata);
-            
-            $uploaded_ids[] = array(
-                'id' => $attachment_id,
-                'url' => wp_get_attachment_image_url($attachment_id, 'malisafi_grid') ?: wp_get_attachment_image_url($attachment_id, 'medium'),
-                'thumb' => wp_get_attachment_image_url($attachment_id, 'malisafi_thumb') ?: wp_get_attachment_image_url($attachment_id, 'thumbnail')
-            );
+        if (!empty($result['images'])) {
+            wp_send_json_success($result);
         }
-        
-        if (!empty($uploaded_ids)) {
-            wp_send_json_success(array(
-                'images' => $uploaded_ids,
-                'errors' => $errors
-            ));
-        } else {
-            wp_send_json_error(array(
-                'message' => __('Upload failed', 'malisafi-mls'),
-                'errors' => $errors
-            ));
-        }
+
+        wp_send_json_error(array(
+            'message' => __('Upload failed', 'malisafi-mls'),
+            'errors' => $result['errors']
+        ));
     }
     
     /**
@@ -604,18 +514,16 @@ class Property_Submission {
         
         // Verify ownership through property
         $property_id = isset($_POST['property_id']) ? intval($_POST['property_id']) : 0;
-        if ($property_id) {
-            $property = get_post($property_id);
-            if (!$property || $property->post_author != get_current_user_id()) {
-                wp_send_json_error(array('message' => __('Permission denied', 'malisafi-mls')));
-            }
+        $deleted = Image_Handler::delete_image($image_id, array(
+            'property_id' => $property_id,
+            'user_id' => get_current_user_id(),
+        ));
+
+        if (is_wp_error($deleted)) {
+            wp_send_json_error(array('message' => $deleted->get_error_message()));
         }
-        
-        if (wp_delete_attachment($image_id, true)) {
-            wp_send_json_success(array('message' => __('Image deleted', 'malisafi-mls')));
-        } else {
-            wp_send_json_error(array('message' => __('Failed to delete image', 'malisafi-mls')));
-        }
+
+        wp_send_json_success(array('message' => __('Image deleted', 'malisafi-mls')));
     }
     
     /**

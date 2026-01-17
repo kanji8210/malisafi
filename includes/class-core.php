@@ -51,7 +51,6 @@ class Core {
         require_once MALISAFI_MLS_PATH . 'includes/class-login-customizer.php';
         require_once MALISAFI_MLS_PATH . 'includes/class-page-manager.php';
         require_once MALISAFI_MLS_PATH . 'includes/class-registration-handler.php';
-        require_once MALISAFI_MLS_PATH . 'includes/class-agent-navigation.php';
         require_once MALISAFI_MLS_PATH . 'includes/class-malisafi-bar.php';
         require_once MALISAFI_MLS_PATH . 'includes/class-property-approval-workflow.php';
         require_once MALISAFI_MLS_PATH . 'admin/class-admin.php';
@@ -68,9 +67,6 @@ class Core {
         
         // Initialize role manager
         \Malisafi_Roles_Manager::init();
-        
-        // Initialize agent navigation (custom bar, hide admin elements)
-        \Malisafi_Agent_Navigation::init();
         
         // Initialize Malisafi Bar (frontend white-labeled navigation)
         Malisafi_Bar::init();

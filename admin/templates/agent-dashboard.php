@@ -250,23 +250,6 @@ if (!defined('ABSPATH')) {
                     </a>
                 <?php endif; ?>
             </form>
-            
-            <?php
-            // Handle switch agent view
-            if (isset($_GET['view_as_agent']) && isset($_GET['switch_agent_nonce']) && wp_verify_nonce($_GET['switch_agent_nonce'], 'switch_agent_view')) {
-                $new_agent_id = intval($_GET['view_as_agent']);
-                if ($new_agent_id) {
-                    update_user_meta(get_current_user_id(), '_viewing_as_agent_id', $new_agent_id);
-                    echo '<script>window.location.href = "' . admin_url('admin.php?page=malisafi-agent-dashboard') . '";</script>';
-                }
-            }
-            
-            // Handle clear agent view
-            if (isset($_GET['clear_agent_view']) && isset($_GET['_wpnonce']) && wp_verify_nonce($_GET['_wpnonce'], 'clear_agent_view')) {
-                delete_user_meta(get_current_user_id(), '_viewing_as_agent_id');
-                echo '<script>window.location.href = "' . admin_url('admin.php?page=malisafi-dashboard') . '";</script>';
-            }
-            ?>
         </div>
     <?php endif; ?>
 </div>
