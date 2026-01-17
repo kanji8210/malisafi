@@ -176,14 +176,17 @@ Parameters:
 - type          : Filter by property type
 - status        : Filter by property status
 - location      : Filter by location
-- count         : Number of properties to show (default: all)
-- height        : Map height in pixels (default: 500)
+- count         : Number of properties to show (default: 100, use -1 for all)
+- height        : Map height in pixels (default: 600)
 - zoom          : Initial zoom level (1-20, default: 12)
 - cluster       : Enable marker clustering (yes/no - default: yes)
 
 Examples:
-[malisafi_property_map height="600" zoom="10"]
-[malisafi_property_map location="new-york" cluster="yes"]
+[malisafi_property_map]
+[malisafi_property_map count="50" height="600" zoom="10"]
+[malisafi_property_map count="-1" cluster="yes"]
+[malisafi_property_map location="nairobi" count="30"]
+[malisafi_property_map status="for-sale" type="apartment" count="20"]
 
 
 7. PROPERTY COMPARISON TABLE

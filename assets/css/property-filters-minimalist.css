@@ -238,5 +238,99 @@
 }
 
 /* ==========================
+   Mobile Responsive Styles
+   ========================== */
+
+/* Tablets and below (max-width: 992px) */
+@media screen and (max-width: 992px) {
+    .filter-controls {
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+    }
+    
+    .filter-control-search {
+        grid-column: 1 / -1; /* Full width */
+    }
+    
+    .filter-search-btn {
+        grid-column: 1 / -1; /* Full width */
+        justify-content: center;
+    }
+}
+
+/* Mobile devices (max-width: 768px) */
+@media screen and (max-width: 768px) {
+    .malisafi-minimalist-wrapper {
+        padding: 15px;
+    }
+    
+    .malisafi-minimalist-filters {
+        padding: 20px 15px;
+    }
+    
+    /* Stack status buttons vertically */
+    .status-buttons {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .status-btn {
+        width: 100%;
+        text-align: center;
+        padding: 14px 20px !important;
+    }
+    
+    /* Stack all controls vertically */
+    .filter-controls {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+    
+    .filter-control-search,
+    .filter-search-btn {
+        grid-column: 1;
+    }
+    
+    .filter-row-status {
+        padding-bottom: 15px;
+    }
+    
+    .filter-row-controls {
+        padding-top: 15px;
+    }
+}
+
+/* Small mobile devices (max-width: 480px) */
+@media screen and (max-width: 480px) {
+    .malisafi-minimalist-wrapper {
+        padding: 10px;
+    }
+    
+    .malisafi-minimalist-filters {
+        padding: 15px 10px;
+    }
+    
+    .status-btn {
+        font-size: 14px !important;
+        padding: 12px 16px !important;
+    }
+    
+    .filter-select,
+    .filter-search-input,
+    .filter-search-btn {
+        font-size: 14px !important;
+        padding: 10px 14px !important;
+    }
+    
+    .filter-search-input {
+        padding-right: 40px !important;
+    }
+    
+    .filter-search-btn {
+        padding: 12px 20px !important;
+    }
+}
+
+/* ==========================
    Results Header
    ========================== */
