@@ -27,6 +27,9 @@
     min-height: 100vh;
     background: var(--content-bg);
     position: relative;
+    width: 100%;
+    margin: 0;
+    padding: 0;
 }
 
 /* ===========================
@@ -39,13 +42,11 @@
     color: var(--sidebar-text);
     display: flex;
     flex-direction: column;
-    position: fixed;
-    left: 0;
-    top: 0;
-    bottom: 0;
+    flex-shrink: 0;
     z-index: 1000;
     transition: width var(--transition-speed) ease;
     overflow: hidden;
+    min-height: 100vh;
 }
 
 .agent-sidebar.collapsed {
@@ -298,14 +299,11 @@
 
 .agent-main-content {
     flex: 1;
-    margin-left: var(--sidebar-width);
     padding: 30px;
-    transition: margin-left var(--transition-speed);
+    transition: flex var(--transition-speed);
     min-height: 100vh;
-}
-
-.agent-sidebar.collapsed + .agent-main-content {
-    margin-left: var(--sidebar-collapsed-width);
+    width: 100%;
+    overflow-x: hidden;
 }
 
 /* Dashboard Header */
@@ -623,4 +621,43 @@
         width: 100%;
         justify-content: flex-end;
     }
+}
+
+/* ===========================
+   WORDPRESS PAGE INTEGRATION
+   =========================== */
+
+/* Ensure dashboard takes full page width */
+#post,
+.post,
+[role="main"],
+main {
+    max-width: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+/* Ensure no extra containers constrain the sidebar */
+.wp-block-column,
+.entry-content,
+.page-content,
+.site-content {
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+/* Dashboard within page context */
+.malisafi-agent-dashboard-modern {
+    max-width: 100% !important;
+}
+
+/* Responsive width adjustment for sidebar */
+.malisafi-agent-dashboard-modern {
+    width: 100vw;
+    position: relative;
+    left: 50%;
+    right: 50%;
+    margin-left: -50vw;
+    margin-right: -50vw;
 }
