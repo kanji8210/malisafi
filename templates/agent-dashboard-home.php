@@ -72,7 +72,7 @@ if (!defined('ABSPATH')) {
     <div class="quick-actions">
         <h2><?php _e('Quick Actions', 'malisafi-mls'); ?></h2>
         <div class="actions-grid">
-            <a href="<?php echo admin_url('admin.php?page=malisafi-property-edit'); ?>" class="action-card primary">
+            <a href="<?php echo esc_url(\MalisafiMLS\Page_Manager::get_page_url('agent_add_property')); ?>" class="action-card primary">
                 <span class="dashicons dashicons-plus-alt"></span>
                 <span><?php _e('Add New Property', 'malisafi-mls'); ?></span>
             </a>
@@ -140,7 +140,7 @@ if (!defined('ABSPATH')) {
             <div class="empty-state">
                 <span class="dashicons dashicons-admin-home"></span>
                 <p><?php _e('You haven\'t listed any properties yet.', 'malisafi-mls'); ?></p>
-                <a href="<?php echo admin_url('admin.php?page=malisafi-property-edit'); ?>" class="button button-primary">
+                <a href="<?php echo esc_url(\MalisafiMLS\Page_Manager::get_page_url('agent_add_property')); ?>" class="button button-primary">
                     <?php _e('Add Your First Property', 'malisafi-mls'); ?>
                 </a>
             </div>

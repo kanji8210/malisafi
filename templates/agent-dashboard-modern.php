@@ -82,7 +82,7 @@ $current_page = isset($_GET['section']) ? sanitize_text_field($_GET['section']) 
                 <?php endif; ?>
             </a>
 
-            <a href="<?php echo esc_url(admin_url('admin.php?page=malisafi-property-edit')); ?>" 
+            <a href="<?php echo esc_url(\MalisafiMLS\Page_Manager::get_page_url('agent_add_property')); ?>" 
                class="nav-item"
                data-tooltip="Add Property">
                 <span class="nav-icon dashicons dashicons-plus-alt"></span>
