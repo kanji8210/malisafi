@@ -134,11 +134,11 @@ class Page_Manager {
             'parent' => 'agent_dashboard'
         ),
         'agent_profile' => array(
-            'title' => 'My Profile',
+            'title' => 'Agent Profile',
             'slug' => 'agent-profile',
-            'shortcode' => '[malisafi_agent_profile]',
-            'description' => 'Agent profile editor',
-            'parent' => 'agent_dashboard'
+            'shortcode' => '[malisafi_agent_profile_view]',
+            'description' => 'Public agent profile viewer',
+            'parent' => 0
         ),
         
         // Owner Dashboard Pages
@@ -230,7 +230,38 @@ class Page_Manager {
      */
     public static function init() {
         add_action('admin_init', array(__CLASS__, 'check_pages_status'));
+        add_action('admin_init', array(__CLASS__, 'migrate_pages'));
         add_action('admin_notices', array(__CLASS__, 'pages_status_notice'));
+    }
+    
+    /**
+     * Migrate pages to use correct shortcodes
+     * This runs once to fix any pages with old shortcodes
+     */
+    public static function migrate_pages() {
+        // Check if migration has already run
+        $migration_version = get_option('malisafi_pages_migration_version', '0');
+        $current_migration = '1.0'; // Increment this when adding new migrations
+        
+        if (version_compare($migration_version, $current_migration, '>=')) {
+            return; // Already migrated
+        }
+        
+        // Migration 1.0: Fix agent-profile page shortcode
+        $agent_profile_id = get_option('malisafi_page_agent_profile');
+        if ($agent_profile_id && ($page = get_post($agent_profile_id))) {
+            // Check if page has old shortcode
+            if ($page->post_content === '[malisafi_agent_profile]') {
+                wp_update_post(array(
+                    'ID' => $agent_profile_id,
+                    'post_content' => '[malisafi_agent_profile_view]',
+                    'post_title' => 'Agent Profile' // Update title too
+                ));
+            }
+        }
+        
+        // Mark migration as complete
+        update_option('malisafi_pages_migration_version', $current_migration);
     }
     
     /**
@@ -285,7 +316,14 @@ class Page_Manager {
     private static function create_page($key, $page_config) {
         // Check if page already exists
         $existing_id = get_option('malisafi_page_' . $key);
-        if ($existing_id && get_post($existing_id)) {
+        if ($existing_id && ($page = get_post($existing_id))) {
+            // Page exists, check if shortcode needs updating
+            if ($page->post_content !== $page_config['shortcode']) {
+                wp_update_post(array(
+                    'ID' => $existing_id,
+                    'post_content' => $page_config['shortcode']
+                ));
+            }
             return $existing_id;
         }
         

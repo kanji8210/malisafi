@@ -63,6 +63,22 @@ class Core {
         require_once MALISAFI_MLS_PATH . 'admin/class-agent-management.php';
         require_once MALISAFI_MLS_PATH . 'public/class-public.php';
         
+        // Analytics classes
+        require_once MALISAFI_MLS_PATH . 'includes/analytics/class-analytics-database.php';
+        require_once MALISAFI_MLS_PATH . 'includes/analytics/class-analytics-tracker.php';
+        require_once MALISAFI_MLS_PATH . 'includes/analytics/class-analytics-core.php';
+        require_once MALISAFI_MLS_PATH . 'includes/analytics/class-analytics-properties.php';
+        require_once MALISAFI_MLS_PATH . 'includes/analytics/class-analytics-advanced.php';
+        require_once MALISAFI_MLS_PATH . 'includes/analytics/class-analytics-admin.php';
+        
+        // Fraud reporting system
+        require_once MALISAFI_MLS_PATH . 'includes/class-fraud-report-ajax.php';
+        require_once MALISAFI_MLS_PATH . 'includes/class-fraud-report-shortcode.php';
+        require_once MALISAFI_MLS_PATH . 'admin/class-admin-fraud-reports.php';
+        
+        // Agent settings AJAX handler
+        require_once MALISAFI_MLS_PATH . 'includes/ajax/class-agent-settings-ajax.php';
+        
         $this->loader = new Loader();
         
         // Initialize role manager
@@ -79,6 +95,12 @@ class Core {
         
         // Initialize agent management
         \Malisafi_Agent_Management::init();
+        
+        // Initialize analytics tracker
+        \MalisafiMLS\Analytics\Analytics_Tracker::init();
+        
+        // Initialize analytics admin
+        \MalisafiMLS\Analytics\Analytics_Admin::init();
         
         // Initialize dashboard widgets
         \Malisafi_Dashboard_Widgets::init();
@@ -163,6 +185,9 @@ class Core {
         $this->loader->add_action('init', $post_types, 'register_taxonomies');
         $this->loader->add_action('add_meta_boxes', $post_types, 'add_property_meta_boxes');
         $this->loader->add_action('save_post', $post_types, 'save_property_meta', 10, 2);
+        
+        // Analytics tracker
+        \MalisafiMLS\Analytics\Analytics_Tracker::init();
     }
     
     /**

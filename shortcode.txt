@@ -19,7 +19,8 @@ Parameters:
 - status        : Filter by property status slug (e.g., "for-sale", "for-rent")
 - location      : Filter by location slug (e.g., "new-york", "downtown")
 - featured      : Show only featured properties (any value to enable)
-- count         : Number of properties to display (default: 12)
+- count         : Number of properties to display (default: 21)
+- offset        : Skip this many properties (default: 0, useful for pagination)
 - orderby       : Order by field (date, price, title, rand, etc.)
 - order         : Sort order (ASC or DESC, default: DESC)
 
@@ -28,6 +29,8 @@ Examples:
 [malisafi_properties type="house" status="for-sale" count="6"]
 [malisafi_properties featured="1" count="3"]
 [malisafi_properties location="downtown" count="12"]
+[malisafi_properties count="12" offset="5"] <!-- Skip first 5, show next 12 -->
+[malisafi_properties type="apartment" count="6" offset="0" orderby="price"]
 
 
 2. PROPERTY SEARCH FORM
@@ -506,7 +509,7 @@ Parameters:
 
 31. PROPERTY SUBSCRIPTION
 -------------------------
-[malisafi_property_alerts]
+
 
 Description: Subscribe to property alerts form
 Parameters:

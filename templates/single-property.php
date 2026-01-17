@@ -570,7 +570,27 @@ $formatted_price = $price > 0 ? ($currency_symbol . ' ' . number_format($price))
                         <?php echo get_avatar($author_id, 64); ?>
                     </div>
                     <div class="agent-details">
-                        <h4 class="agent-name"><?php echo esc_html($author_name); ?></h4>
+                        <?php 
+                        // Get agent post ID if exists
+                        global $wpdb;
+                        $agent_post_id = $wpdb->get_var($wpdb->prepare(
+                            "SELECT ID FROM {$wpdb->posts} WHERE post_type = 'malisafi_agent' AND ID IN (
+                                SELECT post_id FROM {$wpdb->postmeta} WHERE meta_key = '_agent_user_id' AND meta_value = %d
+                            ) LIMIT 1",
+                            $author_id
+                        ));
+                        
+                        if ($agent_post_id): 
+                            $agent_profile_url = add_query_arg('agent_id', $agent_post_id, home_url('/agent-profile/'));
+                        ?>
+                            <h4 class="agent-name">
+                                <a href="<?php echo esc_url($agent_profile_url); ?>" class="agent-link">
+                                    <?php echo esc_html($author_name); ?>
+                                </a>
+                            </h4>
+                        <?php else: ?>
+                            <h4 class="agent-name"><?php echo esc_html($author_name); ?></h4>
+                        <?php endif; ?>
                         <p class="agent-role">Property Agent</p>
                     </div>
                 </div>

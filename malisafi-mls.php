@@ -50,6 +50,8 @@ define('MALISAFI_MLS_VERSION', '1.0.0');
 define('MALISAFI_MLS_PATH', plugin_dir_path(__FILE__));
 define('MALISAFI_MLS_URL', plugin_dir_url(__FILE__));
 define('MALISAFI_MLS_BASENAME', plugin_basename(__FILE__));
+define('MALISAFI_MLS_PLUGIN_DIR', plugin_dir_path(__FILE__)); // Alias for compatibility
+define('MALISAFI_MLS_PLUGIN_URL', plugin_dir_url(__FILE__)); // Alias for compatibility
 
 /**
  * Autoloader

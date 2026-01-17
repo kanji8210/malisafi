@@ -807,6 +807,17 @@
     color: var(--mls-gray-900);
 }
 
+.agent-name .agent-link {
+    color: var(--mls-gray-900);
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+.agent-name .agent-link:hover {
+    color: var(--mls-primary);
+    text-decoration: none;
+}
+
 .agent-role {
     font-size: 0.95rem;
     color: var(--mls-gray-600);

@@ -8,6 +8,18 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
+// Get shortcode attributes (set by shortcode handler)
+$shortcode_atts = isset($atts) ? $atts : array(
+    'type'      => '',
+    'status'    => '',
+    'location'  => '',
+    'featured'  => '',
+    'count'     => 21,
+    'offset'    => 0,
+    'orderby'   => 'date',
+    'order'     => 'DESC',
+);
+
 // Get filter options
 $property_types = get_terms(array('taxonomy' => 'malisafi_property_type', 'hide_empty' => true));
 $locations = get_terms(array('taxonomy' => 'malisafi_property_location', 'hide_empty' => true));
@@ -27,12 +39,62 @@ $features = array(
     'air_conditioning' => 'Air Conditioning'
 );
 
-// Get initial properties - Show 21 by default
+// Build WP_Query args from shortcode attributes
 $args = array(
     'post_type' => 'malisafi_property',
-    'posts_per_page' => 21,
+    'posts_per_page' => intval($shortcode_atts['count']),
+    'offset' => intval($shortcode_atts['offset']),
     'post_status' => 'publish',
+    'orderby' => sanitize_text_field($shortcode_atts['orderby']),
+    'order' => strtoupper(sanitize_text_field($shortcode_atts['order'])),
 );
+
+// Add taxonomy filters if specified
+$tax_query = array();
+
+if (!empty($shortcode_atts['type'])) {
+    $tax_query[] = array(
+        'taxonomy' => 'malisafi_property_type',
+        'field' => 'slug',
+        'terms' => sanitize_text_field($shortcode_atts['type']),
+    );
+}
+
+if (!empty($shortcode_atts['status'])) {
+    $tax_query[] = array(
+        'taxonomy' => 'malisafi_property_status',
+        'field' => 'slug',
+        'terms' => sanitize_text_field($shortcode_atts['status']),
+    );
+}
+
+if (!empty($shortcode_atts['location'])) {
+    $tax_query[] = array(
+        'taxonomy' => 'malisafi_property_location',
+        'field' => 'slug',
+        'terms' => sanitize_text_field($shortcode_atts['location']),
+    );
+}
+
+if (count($tax_query) > 1) {
+    $tax_query['relation'] = 'AND';
+}
+
+if (!empty($tax_query)) {
+    $args['tax_query'] = $tax_query;
+}
+
+// Add featured filter if specified
+if (!empty($shortcode_atts['featured'])) {
+    $args['meta_query'] = array(
+        array(
+            'key' => '_malisafi_featured',
+            'value' => '1',
+            'compare' => '=',
+        ),
+    );
+}
+
 $properties_query = new WP_Query($args);
 $total_properties = $properties_query->found_posts;
 ?>

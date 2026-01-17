@@ -4,6 +4,14 @@
  * Uses global color variables
  */
 
+/* Global: Remove all underlines from dashboard links */
+.malisafi-client-dashboard a,
+.malisafi-owner-dashboard a,
+.malisafi-developer-dashboard a,
+.malisafi-agent-dashboard-modern a {
+    text-decoration: none !important;
+}
+
 /* General Dashboard Layout */
 .malisafi-client-dashboard,
 .malisafi-owner-dashboard,
@@ -85,6 +93,7 @@
 .stat-card a:hover {
     background: var(--mls-accent-hover);
     transform: translateY(-1px);
+    text-decoration: none;
 }
 
 /* Quick Actions */
@@ -123,6 +132,7 @@
     border-color: var(--mls-accent);
     color: var(--mls-accent);
     transform: translateY(-2px);
+    text-decoration: none;
 }
 
 .action-button.primary {
@@ -179,7 +189,8 @@
 }
 
 .recent-properties a:hover {
-    text-decoration: underline;
+    text-decoration: none;
+    opacity: 0.8;
 }
 
 /* Login Required / Access Denied */
@@ -268,6 +279,7 @@
 
 .property-card h3 a:hover {
     color: var(--mls-accent);
+    text-decoration: none;
 }
 
 .property-card .price {
@@ -544,7 +556,8 @@
 }
 
 .account-actions a:hover {
-    text-decoration: underline;
+    text-decoration: none;
+    opacity: 0.8;
 }
 
 /* Responsive */

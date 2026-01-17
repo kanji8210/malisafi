@@ -72,16 +72,6 @@ $current_page = isset($_GET['section']) ? sanitize_text_field($_GET['section']) 
                 <span class="nav-text"><?php _e('Dashboard', 'malisafi-mls'); ?></span>
             </a>
 
-            <a href="<?php echo esc_url(add_query_arg('section', 'properties')); ?>" 
-               class="nav-item <?php echo $current_page === 'properties' ? 'active' : ''; ?>"
-               data-tooltip="My Properties">
-                <span class="nav-icon dashicons dashicons-admin-home"></span>
-                <span class="nav-text"><?php _e('My Properties', 'malisafi-mls'); ?></span>
-                <?php if ($total_properties > 0): ?>
-                    <span class="nav-badge"><?php echo $total_properties; ?></span>
-                <?php endif; ?>
-            </a>
-
             <a href="<?php echo esc_url(\MalisafiMLS\Page_Manager::get_page_url('agent_add_property')); ?>" 
                class="nav-item"
                data-tooltip="Add Property">
@@ -139,9 +129,6 @@ $current_page = isset($_GET['section']) ? sanitize_text_field($_GET['section']) 
         switch ($current_page) {
             case 'dashboard':
                 include __DIR__ . '/agent-dashboard-home.php';
-                break;
-            case 'properties':
-                include __DIR__ . '/agent-dashboard-properties.php';
                 break;
             case 'leads':
                 include __DIR__ . '/agent-dashboard-leads.php';

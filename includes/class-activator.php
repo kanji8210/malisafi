@@ -25,6 +25,10 @@ class Activator {
         require_once MALISAFI_MLS_PATH . 'includes/class-database.php';
         Database::create_tables();
         
+        // Create analytics tables
+        require_once MALISAFI_MLS_PATH . 'includes/analytics/class-analytics-migration.php';
+        Analytics\Analytics_Migration::create_all_tables();
+        
         // Initialize custom roles and capabilities
         require_once MALISAFI_MLS_PATH . 'includes/class-role-manager.php';
         \Malisafi_Roles_Manager::create_roles();

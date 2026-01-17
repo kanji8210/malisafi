@@ -281,11 +281,24 @@ $current_listings = (int) $wpdb->get_var($wpdb->prepare(
     
     /**
      * Modern properties listing with filters
-     * Shortcode: [malisafi_properties_modern]
+     * Shortcode: [malisafi_properties_modern] or [malisafi_properties]
      *
+     * @param array $atts Shortcode attributes
      * @return string
      */
-    public static function properties_with_filters() {
+    public static function properties_with_filters($atts = array()) {
+        // Extract shortcode attributes with defaults
+        $atts = shortcode_atts(array(
+            'type'      => '',
+            'status'    => '',
+            'location'  => '',
+            'featured'  => '',
+            'count'     => 21,
+            'offset'    => 0,
+            'orderby'   => 'date',
+            'order'     => 'DESC',
+        ), $atts, 'malisafi_properties');
+        
         ob_start();
         
         // Include the modern properties template

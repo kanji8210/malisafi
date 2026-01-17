@@ -155,6 +155,33 @@ $total_properties = wp_count_posts('malisafi_property');
                         <span class="dashicons dashicons-email-alt"></span>
                         <?php _e('Send Message', 'malisafi-mls'); ?>
                     </button>
+                    
+                    <?php 
+                    // Check if user can rate this agent
+                    $current_user = wp_get_current_user();
+                    $can_rate = false;
+                    
+                    // User must be logged in
+                    if ($current_user->ID) {
+                        // Cannot rate yourself
+                        if ($current_user->ID != $linked_user_id) {
+                            // Agents cannot rate other agents
+                            $is_agent = in_array('malisafi_agent_basic', $current_user->roles) || 
+                                       in_array('malisafi_agent_premium', $current_user->roles);
+                            
+                            if (!$is_agent) {
+                                $can_rate = true;
+                            }
+                        }
+                    }
+                    ?>
+                    
+                    <?php if ($can_rate): ?>
+                        <button class="contact-btn rate-agent" id="writeReviewBtn">
+                            <span class="dashicons dashicons-star-filled"></span>
+                            <?php _e('Rate Agent', 'malisafi-mls'); ?>
+                        </button>
+                    <?php endif; ?>
                 <?php endif; ?>
             </div>
         </div>
@@ -244,8 +271,19 @@ $total_properties = wp_count_posts('malisafi_property');
     <div class="agent-reviews">
         <h2><?php _e('Client Reviews', 'malisafi-mls'); ?></h2>
         
-        <?php if (is_user_logged_in()): ?>
+        <?php 
+        // Check if user can write review (already checked above)
+        if (is_user_logged_in() && isset($can_rate) && $can_rate): 
+        ?>
             <button class="button" id="writeReviewBtn"><?php _e('Write a Review', 'malisafi-mls'); ?></button>
+        <?php elseif (is_user_logged_in()): ?>
+            <?php 
+            $current_user = wp_get_current_user();
+            if ($current_user->ID == $linked_user_id): ?>
+                <p class="rate-notice"><?php _e('You cannot rate yourself.', 'malisafi-mls'); ?></p>
+            <?php else: ?>
+                <p class="rate-notice"><?php _e('Only clients can rate agents.', 'malisafi-mls'); ?></p>
+            <?php endif; ?>
         <?php endif; ?>
 
         <div id="reviewsList">

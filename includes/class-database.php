@@ -48,6 +48,9 @@ class Database {
         
         // Agent Ratings and Reports
         self::create_agent_ratings_table($charset_collate);
+        
+        // Analytics Tables
+        self::create_analytics_tables($charset_collate);
         self::create_agent_reports_table($charset_collate);
         
         // Analytics and Tracking
@@ -517,13 +520,40 @@ class Database {
             'mf_saved_searches' => 'create_saved_searches_table',
             'mf_favorites' => 'create_favorites_table',
             'mf_moderation_queue' => 'create_moderation_queue_table',
-            'mf_analytics' => 'create_analytics_table'
+            'mf_analytics' => 'create_analytics_table',
+            // New analytics tables
+            'mf_user_activity' => 'create_analytics_tables',
+            'mf_property_views' => 'create_analytics_tables',
+            'mf_property_interactions' => 'create_analytics_tables',
+            'mf_search_analytics' => 'create_analytics_tables',
+            'mf_submission_funnel' => 'create_analytics_tables',
+            'mf_fraud_detection' => 'create_analytics_tables',
+            'mf_revenue_tracking' => 'create_analytics_tables',
+            'mf_system_health' => 'create_analytics_tables'
         );
         
+        $analytics_created = false;
         foreach ($tables as $table => $method) {
             if (!self::table_exists($table)) {
-                self::$method($charset_collate);
+                // For analytics tables, call once
+                if ($method === 'create_analytics_tables' && !$analytics_created) {
+                    self::$method($charset_collate);
+                    $analytics_created = true;
+                } elseif ($method !== 'create_analytics_tables') {
+                    self::$method($charset_collate);
+                }
             }
         }
+    }
+    
+    /**
+     * Create all analytics tables
+     */
+    private static function create_analytics_tables($charset_collate) {
+        // Load Analytics_Database class
+        require_once MALISAFI_MLS_PATH . 'includes/analytics/class-analytics-database.php';
+        
+        // Create all analytics tables
+        \MalisafiMLS\Analytics\Analytics_Database::create_tables();
     }
 }
