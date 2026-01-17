@@ -821,6 +821,9 @@ class Dashboard_Shortcodes {
             $garage = intval($_POST['property_garage'] ?? 0);
             $address = sanitize_text_field($_POST['property_address'] ?? '');
             $zip_code = sanitize_text_field($_POST['property_zip_code'] ?? '');
+            $property_type = intval($_POST['property_type'] ?? 0);
+            $property_status_tax = intval($_POST['property_status_tax'] ?? 0);
+            
             $features = array(
                 'pool' => !empty($_POST['feature_pool']) ? 1 : 0,
                 'gym' => !empty($_POST['feature_gym']) ? 1 : 0,
@@ -847,6 +850,15 @@ class Dashboard_Shortcodes {
                 if (is_wp_error($new_id)) {
                     $error = $new_id->get_error_message();
                 } else {
+                    // Set taxonomies
+                    if ($property_type > 0) {
+                        wp_set_object_terms($new_id, $property_type, 'malisafi_property_type');
+                    }
+                    if ($property_status_tax > 0) {
+                        wp_set_object_terms($new_id, $property_status_tax, 'malisafi_property_status');
+                    }
+                    
+                    // Set meta fields
                     update_post_meta($new_id, '_malisafi_price', $price);
                     update_post_meta($new_id, '_malisafi_currency', $currency);
                     update_post_meta($new_id, '_malisafi_bedrooms', $bedrooms);
@@ -909,116 +921,289 @@ class Dashboard_Shortcodes {
             }
         }
 
+        // Enqueue form styles
+        wp_enqueue_style('malisafi-property-submit-form', MALISAFI_MLS_URL . 'assets/css/property-submit-form.css', array(), MALISAFI_MLS_VERSION);
+        
+        // Get property types and statuses for dropdowns
+        $property_types = get_terms(array('taxonomy' => 'malisafi_property_type', 'hide_empty' => false));
+        $property_statuses = get_terms(array('taxonomy' => 'malisafi_property_status', 'hide_empty' => false));
+        
         ob_start();
         ?>
         <div class="malisafi-property-submit">
-            <h1><?php _e('Submit Property', 'malisafi-mls'); ?></h1>
-            <p class="form-guidance"><?php _e('Please fill in all required fields. Your property will be reviewed before publication.', 'malisafi-mls'); ?></p>
             <?php if (!empty($message)) : ?>
                 <div class="notice notice-success"><p><?php echo esc_html($message); ?></p></div>
             <?php endif; ?>
             <?php if (!empty($error)) : ?>
                 <div class="notice notice-error"><p><?php echo esc_html($error); ?></p></div>
             <?php endif; ?>
+            
             <form method="post" enctype="multipart/form-data" autocomplete="off">
                 <?php wp_nonce_field('malisafi_property_submit', 'malisafi_property_submit_nonce'); ?>
-                <div class="form-group">
-                    <label for="property_title"><?php _e('Title', 'malisafi-mls'); ?> *</label>
-                    <input type="text" name="property_title" id="property_title" class="regular-text" required placeholder="e.g. 3 Bedroom Apartment in Kilimani" />
-                    <small><?php _e('A clear, descriptive title helps attract buyers.', 'malisafi-mls'); ?></small>
+                
+                <!-- Basic Information Section -->
+                <div class="form-section">
+                    <div class="form-section-header">
+                        <h3 class="form-section-title">
+                            <span class="dashicons dashicons-admin-home"></span>
+                            <?php _e('Basic Information', 'malisafi-mls'); ?>
+                        </h3>
+                        <p class="form-section-description"><?php _e('Provide the essential details about your property', 'malisafi-mls'); ?></p>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group full-width">
+                            <label for="property_title"><?php _e('Property Title', 'malisafi-mls'); ?> <span class="required">*</span></label>
+                            <input type="text" name="property_title" id="property_title" required placeholder="<?php esc_attr_e('e.g. Luxury 3 Bedroom Apartment in Kilimani', 'malisafi-mls'); ?>" />
+                            <small><?php _e('A clear, descriptive title helps attract potential buyers', 'malisafi-mls'); ?></small>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row two-col">
+                        <div class="form-group">
+                            <label for="property_type"><?php _e('Property Type', 'malisafi-mls'); ?> <span class="required">*</span></label>
+                            <select name="property_type" id="property_type" required>
+                                <option value=""><?php _e('Select Type', 'malisafi-mls'); ?></option>
+                                <?php if (!empty($property_types) && !is_wp_error($property_types)) : ?>
+                                    <?php foreach ($property_types as $type) : ?>
+                                        <option value="<?php echo esc_attr($type->term_id); ?>"><?php echo esc_html($type->name); ?></option>
+                                    <?php endforeach; ?>
+                                <?php endif; ?>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="property_status_tax"><?php _e('Property Status', 'malisafi-mls'); ?> <span class="required">*</span></label>
+                            <select name="property_status_tax" id="property_status_tax" required>
+                                <option value=""><?php _e('Select Status', 'malisafi-mls'); ?></option>
+                                <?php if (!empty($property_statuses) && !is_wp_error($property_statuses)) : ?>
+                                    <?php foreach ($property_statuses as $status) : ?>
+                                        <option value="<?php echo esc_attr($status->term_id); ?>"><?php echo esc_html($status->name); ?></option>
+                                    <?php endforeach; ?>
+                                <?php endif; ?>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group full-width">
+                            <label for="property_description"><?php _e('Description', 'malisafi-mls'); ?></label>
+                            <textarea name="property_description" id="property_description" rows="5" placeholder="<?php esc_attr_e('Describe the property, key features, nearby amenities, etc.', 'malisafi-mls'); ?>"></textarea>
+                            <small><?php _e('Provide detailed information about the property to help buyers make informed decisions', 'malisafi-mls'); ?></small>
+                        </div>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label for="property_price"><?php _e('Price', 'malisafi-mls'); ?> *</label>
-                    <input type="number" name="property_price" id="property_price" class="regular-text" required min="0" step="0.01" placeholder="e.g. 12000000" />
-                    <small><?php _e('Enter the total price in numbers only.', 'malisafi-mls'); ?></small>
+                
+                <!-- Pricing Section -->
+                <div class="form-section">
+                    <div class="form-section-header">
+                        <h3 class="form-section-title">
+                            <span class="dashicons dashicons-money-alt"></span>
+                            <?php _e('Pricing Information', 'malisafi-mls'); ?>
+                        </h3>
+                        <p class="form-section-description"><?php _e('Set the price for your property', 'malisafi-mls'); ?></p>
+                    </div>
+                    
+                    <div class="form-row two-col">
+                        <div class="form-group">
+                            <label for="property_price"><?php _e('Price', 'malisafi-mls'); ?> <span class="required">*</span></label>
+                            <input type="number" name="property_price" id="property_price" required min="0" step="0.01" placeholder="<?php esc_attr_e('e.g. 12000000', 'malisafi-mls'); ?>" />
+                            <small><?php _e('Enter the total price in numbers only', 'malisafi-mls'); ?></small>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="property_currency"><?php _e('Currency', 'malisafi-mls'); ?></label>
+                            <select name="property_currency" id="property_currency">
+                                <option value="KES">KES (KSh)</option>
+                                <option value="USD">USD ($)</option>
+                            </select>
+                        </div>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label for="property_currency"><?php _e('Currency', 'malisafi-mls'); ?></label>
-                    <select name="property_currency" id="property_currency">
-                        <option value="KES">KES (KSh)</option>
-                        <option value="USD">USD ($)</option>
-                    </select>
+                
+                <!-- Property Details Section -->
+                <div class="form-section">
+                    <div class="form-section-header">
+                        <h3 class="form-section-title">
+                            <span class="dashicons dashicons-admin-settings"></span>
+                            <?php _e('Property Details', 'malisafi-mls'); ?>
+                        </h3>
+                        <p class="form-section-description"><?php _e('Specify the size and features of your property', 'malisafi-mls'); ?></p>
+                    </div>
+                    
+                    <div class="form-row three-col">
+                        <div class="form-group">
+                            <label for="property_bedrooms"><?php _e('Bedrooms', 'malisafi-mls'); ?></label>
+                            <input type="number" name="property_bedrooms" id="property_bedrooms" min="0" placeholder="<?php esc_attr_e('e.g. 3', 'malisafi-mls'); ?>" />
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="property_bathrooms"><?php _e('Bathrooms', 'malisafi-mls'); ?></label>
+                            <input type="number" name="property_bathrooms" id="property_bathrooms" min="0" step="0.5" placeholder="<?php esc_attr_e('e.g. 2', 'malisafi-mls'); ?>" />
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="property_garage"><?php _e('Garage Spaces', 'malisafi-mls'); ?></label>
+                            <input type="number" name="property_garage" id="property_garage" min="0" placeholder="<?php esc_attr_e('e.g. 2', 'malisafi-mls'); ?>" />
+                        </div>
+                    </div>
+                    
+                    <div class="form-row two-col">
+                        <div class="form-group">
+                            <label for="property_area"><?php _e('Area (sq ft)', 'malisafi-mls'); ?></label>
+                            <input type="number" name="property_area" id="property_area" min="0" step="0.01" placeholder="<?php esc_attr_e('e.g. 1200', 'malisafi-mls'); ?>" />
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="property_year_built"><?php _e('Year Built', 'malisafi-mls'); ?></label>
+                            <input type="number" name="property_year_built" id="property_year_built" min="1800" max="<?php echo date('Y') + 5; ?>" placeholder="<?php esc_attr_e('e.g. 2015', 'malisafi-mls'); ?>" />
+                        </div>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label for="property_bedrooms"><?php _e('Bedrooms', 'malisafi-mls'); ?></label>
-                    <input type="number" name="property_bedrooms" id="property_bedrooms" class="regular-text" min="0" placeholder="e.g. 3" />
+                
+                <!-- Location Section -->
+                <div class="form-section">
+                    <div class="form-section-header">
+                        <h3 class="form-section-title">
+                            <span class="dashicons dashicons-location"></span>
+                            <?php _e('Location', 'malisafi-mls'); ?>
+                        </h3>
+                        <p class="form-section-description"><?php _e('Provide location details for your property', 'malisafi-mls'); ?></p>
+                    </div>
+                    
+                    <div class="form-row two-col">
+                        <div class="form-group">
+                            <label for="property_county"><?php _e('County', 'malisafi-mls'); ?> <span class="required">*</span></label>
+                            <select name="property_county" id="property_county" required>
+                                <option value=""><?php _e('Select County', 'malisafi-mls'); ?></option>
+                                <?php
+                                if (function_exists('malisafi_get_kenya_counties')) {
+                                    $counties = malisafi_get_kenya_counties();
+                                    foreach ($counties as $county) {
+                                        echo '<option value="' . esc_attr($county) . '">' . esc_html($county) . '</option>';
+                                    }
+                                }
+                                ?>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="property_neighbourhood"><?php _e('Neighbourhood/Estate', 'malisafi-mls'); ?></label>
+                            <input type="text" name="property_neighbourhood" id="property_neighbourhood" placeholder="<?php esc_attr_e('e.g. Kilimani, Lavington', 'malisafi-mls'); ?>" />
+                        </div>
+                    </div>
+                    
+                    <div class="form-row two-col">
+                        <div class="form-group">
+                            <label for="property_setting"><?php _e('Setting', 'malisafi-mls'); ?> <span class="required">*</span></label>
+                            <select name="property_setting" id="property_setting" required>
+                                <option value=""><?php _e('Select Setting', 'malisafi-mls'); ?></option>
+                                <option value="urban"><?php _e('Urban', 'malisafi-mls'); ?></option>
+                                <option value="semi-rural"><?php _e('Semi-rural', 'malisafi-mls'); ?></option>
+                                <option value="rural"><?php _e('Rural', 'malisafi-mls'); ?></option>
+                                <option value="isolated"><?php _e('Isolated', 'malisafi-mls'); ?></option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="property_zip_code"><?php _e('Postal Code', 'malisafi-mls'); ?></label>
+                            <input type="text" name="property_zip_code" id="property_zip_code" placeholder="<?php esc_attr_e('e.g. 00100', 'malisafi-mls'); ?>" />
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group full-width">
+                            <label for="property_address"><?php _e('Street Address', 'malisafi-mls'); ?> <span class="required">*</span></label>
+                            <input type="text" name="property_address" id="property_address" required placeholder="<?php esc_attr_e('e.g. 123 Riverside Drive', 'malisafi-mls'); ?>" />
+                            <small><?php _e('For privacy, only general location will be displayed publicly', 'malisafi-mls'); ?></small>
+                        </div>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label for="property_bathrooms"><?php _e('Bathrooms', 'malisafi-mls'); ?></label>
-                    <input type="number" name="property_bathrooms" id="property_bathrooms" class="regular-text" min="0" placeholder="e.g. 2" />
+                
+                <!-- Amenities Section -->
+                <div class="form-section">
+                    <div class="form-section-header">
+                        <h3 class="form-section-title">
+                            <span class="dashicons dashicons-star-filled"></span>
+                            <?php _e('Features & Amenities', 'malisafi-mls'); ?>
+                        </h3>
+                        <p class="form-section-description"><?php _e('Select all the features and amenities available in your property', 'malisafi-mls'); ?></p>
+                    </div>
+                    
+                    <div class="checkbox-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" name="feature_pool" />
+                            <span><?php _e('Swimming Pool', 'malisafi-mls'); ?></span>
+                        </label>
+                        
+                        <label class="checkbox-label">
+                            <input type="checkbox" name="feature_gym" />
+                            <span><?php _e('Gym/Fitness Center', 'malisafi-mls'); ?></span>
+                        </label>
+                        
+                        <label class="checkbox-label">
+                            <input type="checkbox" name="feature_garden" />
+                            <span><?php _e('Garden', 'malisafi-mls'); ?></span>
+                        </label>
+                        
+                        <label class="checkbox-label">
+                            <input type="checkbox" name="feature_balcony" />
+                            <span><?php _e('Balcony/Terrace', 'malisafi-mls'); ?></span>
+                        </label>
+                        
+                        <label class="checkbox-label">
+                            <input type="checkbox" name="feature_parking" />
+                            <span><?php _e('Parking Space', 'malisafi-mls'); ?></span>
+                        </label>
+                        
+                        <label class="checkbox-label">
+                            <input type="checkbox" name="feature_security" />
+                            <span><?php _e('24/7 Security', 'malisafi-mls'); ?></span>
+                        </label>
+                        
+                        <label class="checkbox-label">
+                            <input type="checkbox" name="feature_elevator" />
+                            <span><?php _e('Elevator/Lift', 'malisafi-mls'); ?></span>
+                        </label>
+                        
+                        <label class="checkbox-label">
+                            <input type="checkbox" name="feature_furnished" />
+                            <span><?php _e('Furnished', 'malisafi-mls'); ?></span>
+                        </label>
+                        
+                        <label class="checkbox-label">
+                            <input type="checkbox" name="feature_air_conditioning" />
+                            <span><?php _e('Air Conditioning', 'malisafi-mls'); ?></span>
+                        </label>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label for="property_area"><?php _e('Area (sq ft)', 'malisafi-mls'); ?></label>
-                    <input type="number" name="property_area" id="property_area" class="regular-text" min="0" step="0.01" placeholder="e.g. 1200" />
+                
+                <!-- Images Section -->
+                <div class="form-section">
+                    <div class="form-section-header">
+                        <h3 class="form-section-title">
+                            <span class="dashicons dashicons-format-image"></span>
+                            <?php _e('Property Images', 'malisafi-mls'); ?>
+                        </h3>
+                        <p class="form-section-description"><?php _e('Upload high-quality images of your property', 'malisafi-mls'); ?></p>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group full-width">
+                            <label for="property_images"><?php _e('Images', 'malisafi-mls'); ?></label>
+                            <input type="file" name="property_images[]" id="property_images" multiple accept="image/*" />
+                            <small><?php _e('Upload multiple images (JPG, PNG). The first image will be used as the main photo. Maximum 10 images recommended.', 'malisafi-mls'); ?></small>
+                        </div>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label for="property_county"><?php _e('County', 'malisafi-mls'); ?> *</label>
-                    <select name="property_county" id="property_county" required>
-                        <option value=""><?php _e('Select County', 'malisafi-mls'); ?></option>
-                        <?php
-                        if (function_exists('malisafi_get_kenya_counties')) {
-                            $counties = malisafi_get_kenya_counties();
-                            foreach ($counties as $county) {
-                                echo '<option value="' . esc_attr($county) . '">' . esc_html($county) . '</option>';
-                            }
-                        }
-                        ?>
-                    </select>
-                    <small><?php _e('Required. Select the county in Kenya.', 'malisafi-mls'); ?></small>
+                
+                <!-- Submit Button -->
+                <div class="form-actions">
+                    <button type="submit" class="button button-primary">
+                        <span class="dashicons dashicons-yes"></span>
+                        <?php _e('Submit Property', 'malisafi-mls'); ?>
+                    </button>
                 </div>
-                <div class="form-group">
-                    <label for="property_neighbourhood"><?php _e('Neighbourhood', 'malisafi-mls'); ?></label>
-                    <input type="text" name="property_neighbourhood" id="property_neighbourhood" class="regular-text" placeholder="e.g. Kilimani, Lavington" />
-                </div>
-                <div class="form-group">
-                    <label for="property_setting"><?php _e('Setting', 'malisafi-mls'); ?> *</label>
-                    <select name="property_setting" id="property_setting" required>
-                        <option value=""><?php _e('Select Setting', 'malisafi-mls'); ?></option>
-                        <option value="urban"><?php _e('Urban', 'malisafi-mls'); ?></option>
-                        <option value="semi-rural"><?php _e('Semi-rural', 'malisafi-mls'); ?></option>
-                        <option value="rural"><?php _e('Rural', 'malisafi-mls'); ?></option>
-                        <option value="isolated"><?php _e('Isolated', 'malisafi-mls'); ?></option>
-                    </select>
-                    <small><?php _e('Required. Choose the environment type.', 'malisafi-mls'); ?></small>
-                </div>
-                <div class="form-group">
-                    <label for="property_address"><?php _e('Address', 'malisafi-mls'); ?> *</label>
-                    <input type="text" name="property_address" id="property_address" class="regular-text" required placeholder="e.g. 123 Riverside Drive" />
-                </div>
-                <div class="form-group">
-                    <label for="property_zip_code"><?php _e('Zip Code', 'malisafi-mls'); ?></label>
-                    <input type="text" name="property_zip_code" id="property_zip_code" class="regular-text" placeholder="e.g. 00100" />
-                </div>
-                <div class="form-group">
-                    <label for="property_year_built"><?php _e('Year Built', 'malisafi-mls'); ?></label>
-                    <input type="text" name="property_year_built" id="property_year_built" class="regular-text" placeholder="e.g. 2015" />
-                </div>
-                <div class="form-group">
-                    <label for="property_garage"><?php _e('Garage (number of cars)', 'malisafi-mls'); ?></label>
-                    <input type="number" name="property_garage" id="property_garage" class="regular-text" min="0" placeholder="e.g. 2" />
-                </div>
-                <div class="form-group">
-                    <label for="property_description"><?php _e('Description', 'malisafi-mls'); ?></label>
-                    <textarea name="property_description" id="property_description" rows="5" placeholder="Describe the property, features, nearby amenities, etc."></textarea>
-                </div>
-                <div class="form-group">
-                    <label for="property_images"><?php _e('Property Images', 'malisafi-mls'); ?></label>
-                    <input type="file" name="property_images[]" id="property_images" multiple accept="image/*" />
-                    <small><?php _e('Upload high quality images (JPG, PNG, max 10 images). The first image will be used as the main photo.', 'malisafi-mls'); ?></small>
-                </div>
-                <fieldset class="form-group">
-                    <legend><?php _e('Features & Amenities', 'malisafi-mls'); ?></legend>
-                    <label><input type="checkbox" name="feature_pool" /> <?php _e('Swimming Pool', 'malisafi-mls'); ?></label>
-                    <label><input type="checkbox" name="feature_gym" /> <?php _e('Gym', 'malisafi-mls'); ?></label>
-                    <label><input type="checkbox" name="feature_garden" /> <?php _e('Garden', 'malisafi-mls'); ?></label>
-                    <label><input type="checkbox" name="feature_balcony" /> <?php _e('Balcony', 'malisafi-mls'); ?></label>
-                    <label><input type="checkbox" name="feature_parking" /> <?php _e('Parking', 'malisafi-mls'); ?></label>
-                    <label><input type="checkbox" name="feature_security" /> <?php _e('24/7 Security', 'malisafi-mls'); ?></label>
-                    <label><input type="checkbox" name="feature_elevator" /> <?php _e('Elevator', 'malisafi-mls'); ?></label>
-                    <label><input type="checkbox" name="feature_furnished" /> <?php _e('Furnished', 'malisafi-mls'); ?></label>
-                    <label><input type="checkbox" name="feature_air_conditioning" /> <?php _e('Air Conditioning', 'malisafi-mls'); ?></label>
-                </fieldset>
-                <button type="submit" class="button button-primary"><?php _e('Submit Property', 'malisafi-mls'); ?></button>
             </form>
         </div>
         <?php
