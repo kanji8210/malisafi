@@ -338,8 +338,10 @@ class Malisafi_Property_Moderation {
     public static function get_pending_verification($args = array()) {
         $defaults = array(
             'post_type' => 'malisafi_property',
-            'post_status' => array('publish', 'pending'),
+            'post_status' => array('publish', 'pending', 'draft'),
             'posts_per_page' => 20,
+            'orderby' => 'date',
+            'order' => 'DESC',
             'meta_query' => array(
                 'relation' => 'OR',
                 array(

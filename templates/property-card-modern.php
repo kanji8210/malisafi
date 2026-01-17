@@ -113,10 +113,6 @@ $is_new = (time() - $post_date) < (7 * 24 * 60 * 60);
         </div>
         <?php endif; ?>
         
-        <div class="property-excerpt">
-            <?php echo wp_trim_words(get_the_excerpt(), 15); ?>
-        </div>
-        
         <div class="property-features">
             <?php if ($bedrooms) : ?>
             <div class="property-feature">

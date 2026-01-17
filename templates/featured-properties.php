@@ -79,16 +79,6 @@ $column_class = 'featured-col-' . $columns;
                                 <?php endif; ?>
                             </div>
                         <?php endif; ?>
-                        
-                        <?php if ($show_excerpt && has_excerpt()) : ?>
-                            <div class="property-excerpt">
-                                <?php echo wp_trim_words(get_the_excerpt(), 20); ?>
-                            </div>
-                        <?php endif; ?>
-                        
-                        <a href="<?php the_permalink(); ?>" class="view-details-btn">
-                            <?php _e('View Details', 'malisafi-mls'); ?>
-                        </a>
                     </div>
                 </div>
             <?php endwhile; ?>

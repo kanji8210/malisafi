@@ -51,7 +51,7 @@ $rating_count = $wpdb->get_var($wpdb->prepare(
     $agent_id
 ));
 
-// Get agent properties
+// Get agent properties (published only for display)
 $properties = get_posts([
     'post_type' => 'malisafi_property',
     'author' => $linked_user_id,
@@ -61,7 +61,16 @@ $properties = get_posts([
     'order' => 'DESC'
 ]);
 
-$total_properties = wp_count_posts('malisafi_property');
+// Count all agent properties (published + pending)
+$total_published = $wpdb->get_var($wpdb->prepare(
+    "SELECT COUNT(*) FROM {$wpdb->posts} WHERE post_type = 'malisafi_property' AND post_author = %d AND post_status = 'publish'",
+    $linked_user_id
+));
+$total_pending = $wpdb->get_var($wpdb->prepare(
+    "SELECT COUNT(*) FROM {$wpdb->posts} WHERE post_type = 'malisafi_property' AND post_author = %d AND post_status = 'pending'",
+    $linked_user_id
+));
+$total_properties = intval($total_published) + intval($total_pending);
 ?>
 
 <div class="malisafi-agent-profile-public">
@@ -190,8 +199,15 @@ $total_properties = wp_count_posts('malisafi_property');
     <!-- Agent Stats -->
     <div class="agent-stats">
         <div class="stat-item">
-            <div class="stat-value"><?php echo count($properties); ?></div>
-            <div class="stat-label"><?php _e('Active Listings', 'malisafi-mls'); ?></div>
+            <div class="stat-value"><?php echo $total_properties; ?></div>
+            <div class="stat-label">
+                <?php _e('Active Listings', 'malisafi-mls'); ?>
+                <?php if ($total_pending > 0): ?>
+                    <small style="display: block; font-size: 11px; color: #999; margin-top: 4px;">
+                        <?php printf(__('%d published, %d pending', 'malisafi-mls'), $total_published, $total_pending); ?>
+                    </small>
+                <?php endif; ?>
+            </div>
         </div>
         <div class="stat-item">
             <div class="stat-value"><?php echo $rating_count; ?></div>

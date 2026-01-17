@@ -88,14 +88,6 @@ if (!defined('WPINC')) {
                                 </span>
                             <?php endif; ?>
                         </div>
-                        
-                        <div class="property-excerpt">
-                            <?php echo wp_trim_words(get_the_excerpt(), 20); ?>
-                        </div>
-                        
-                        <a href="<?php the_permalink(); ?>" class="view-details-btn">
-                            <?php _e('View Details', 'malisafi-mls'); ?>
-                        </a>
                     </div>
                 </div>
             <?php endwhile; ?>
