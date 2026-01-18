@@ -65,7 +65,40 @@ Examples:
 USER SHORTCODES (IMPLEMENTED)
 ==============================================
 
-4. AGENT PROFILE
+4. USER MENU (HEADER)
+---------------------
+[malisafi_user_menu]
+
+Description: Display user menu in header with logout option
+
+Parameters:
+- show_avatar   : Show user avatar (yes/no - default: yes)
+- show_dashboard: Show dashboard link (yes/no - default: yes)
+- login_text    : Custom login button text (default: "Login")
+- register_text : Custom register button text (default: "Register")
+
+Examples:
+[malisafi_user_menu]
+[malisafi_user_menu show_avatar="no"]
+[malisafi_user_menu login_text="Sign In" register_text="Sign Up"]
+
+Features (Logged In):
+- Displays "Howdy, [User Name]"
+- User avatar (optional)
+- Dropdown menu with:
+  * Dashboard link (role-specific)
+  * Add Property (for agents)
+  * My Properties (for agents)
+  * My Account
+  * Logout option
+  
+Features (Logged Out):
+- Login button
+- Register button
+- Auto-redirect to current page after login
+
+
+5. AGENT PROFILE
 ----------------
 [malisafi_agent id="123"]
 
@@ -87,7 +120,7 @@ Features:
 - Report agent functionality
 
 
-5. AGENTS LIST
+6. AGENTS LIST
 --------------
 [malisafi_agents]
 
@@ -105,7 +138,7 @@ Examples:
 [malisafi_agents featured="true" per_page="6"]
 
 
-6. PROPERTIES WITH MINIMALIST FILTERS
+7. PROPERTIES WITH MINIMALIST FILTERS
 --------------------------------------
 [malisafi_properties_minimalist]
 
@@ -129,7 +162,7 @@ Features:
 FUTURE SHORTCODES (PLANNED)
 ==============================================
 
-7. SINGLE PROPERTY
+8. SINGLE PROPERTY
 ------------------
 [malisafi_property id="123"]
 

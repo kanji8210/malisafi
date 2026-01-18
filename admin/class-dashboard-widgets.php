@@ -218,12 +218,12 @@ class Malisafi_Dashboard_Widgets {
         
         $prefix = $wpdb->prefix;
         
-        // Get statistics from custom tables
+        // Get statistics - Use wp_posts for properties (custom post type)
         $stats = array(
-            'total_properties' => $wpdb->get_var("SELECT COUNT(*) FROM {$prefix}mf_properties"),
-            'pending_moderation' => $wpdb->get_var("SELECT COUNT(*) FROM {$prefix}mf_properties WHERE status = 'pending_review'"),
+            'total_properties' => $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->posts} WHERE post_type = 'malisafi_property' AND post_status IN ('publish', 'pending', 'draft')"),
+            'pending_moderation' => $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->posts} WHERE post_type = 'malisafi_property' AND post_status = 'pending'"),
             'active_agents' => $wpdb->get_var("SELECT COUNT(*) FROM {$prefix}mf_subscriptions WHERE status = 'active' AND plan_type LIKE 'agent_%'"),
-            'total_inquiries' => $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM {$prefix}mf_inquiries WHERE DATE(created_at) = CURDATE()")), // global daily inquiries
+            'total_inquiries' => $wpdb->get_var("SELECT COUNT(*) FROM {$prefix}mf_inquiries WHERE DATE(created_at) = CURDATE()"),
         );
         
         // Check if template exists

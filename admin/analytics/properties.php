@@ -220,8 +220,8 @@ $conversion_metrics = Analytics_Properties::get_conversion_metrics($days);
     <div class="malisafi-stat-card" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 30px;">
         <h3 style="margin-top: 0; color: #737d5d;"><?php _e('Performance by Location (Kenya Counties)', 'malisafi-mls'); ?></h3>
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px;">
-            <div>
-                <canvas id="geoChart" style="height: 350px;"></canvas>
+            <div style="height: 350px; position: relative;">
+                <canvas id="geoChart"></canvas>
             </div>
             <div style="max-height: 400px; overflow-y: auto;">
                 <table style="width: 100%; border-collapse: collapse;">
@@ -260,12 +260,16 @@ $conversion_metrics = Analytics_Properties::get_conversion_metrics($days);
     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 30px;">
         <div class="malisafi-stat-card">
             <h3 style="margin-top: 0; color: #737d5d;"><?php _e('Traffic Sources', 'malisafi-mls'); ?></h3>
-            <canvas id="trafficChart" style="height: 250px;"></canvas>
+            <div style="height: 250px; position: relative;">
+                <canvas id="trafficChart"></canvas>
+            </div>
         </div>
 
         <div class="malisafi-stat-card">
             <h3 style="margin-top: 0; color: #737d5d;"><?php _e('Device Breakdown', 'malisafi-mls'); ?></h3>
-            <canvas id="deviceChart" style="height: 250px;"></canvas>
+            <div style="height: 250px; position: relative;">
+                <canvas id="deviceChart"></canvas>
+            </div>
         </div>
     </div>
 

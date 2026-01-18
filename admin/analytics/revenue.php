@@ -116,8 +116,8 @@ $subscription_counts = $wpdb->get_results("
     <div class="malisafi-stat-card" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 30px;">
         <h3 style="margin-top: 0; color: #737d5d;"><?php _e('Revenue by Transaction Type', 'malisafi-mls'); ?></h3>
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px;">
-            <div>
-                <canvas id="revenueByTypeChart" style="height: 300px;"></canvas>
+            <div style="height: 300px; position: relative;">
+                <canvas id="revenueByTypeChart"></canvas>
             </div>
             <div>
                 <table style="width: 100%; border-collapse: collapse;">
@@ -162,8 +162,8 @@ $subscription_counts = $wpdb->get_results("
     <div class="malisafi-stat-card" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 30px;">
         <h3 style="margin-top: 0; color: #737d5d;"><?php _e('Subscription Analytics', 'malisafi-mls'); ?></h3>
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px;">
-            <div>
-                <canvas id="subscriptionChart" style="height: 300px;"></canvas>
+            <div style="height: 300px; position: relative;">
+                <canvas id="subscriptionChart"></canvas>
             </div>
             <div>
                 <table style="width: 100%; border-collapse: collapse;">

@@ -94,6 +94,7 @@ $dropoff_points = Analytics_Core::get_dropoff_points($days);
     <!-- Top Contributors Section -->
     <div class="malisafi-stat-card" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 30px;">
         <h3 style="margin-top: 0; color: #737d5d;"><?php _e('Top Contributors', 'malisafi-mls'); ?></h3>
+        <div style="max-height: 600px; overflow-y: auto;">
         <table style="width: 100%; border-collapse: collapse;">
             <thead>
                 <tr style="border-bottom: 2px solid #e5e7eb;">
@@ -141,6 +142,7 @@ $dropoff_points = Analytics_Core::get_dropoff_points($days);
                 <?php endif; ?>
             </tbody>
         </table>
+        </div>
     </div>
 
     <!-- Form Submission Funnel Dropoff -->

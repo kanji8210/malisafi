@@ -27,6 +27,7 @@ class Malisafi_Shortcodes {
         add_shortcode('malisafi_agent', array(__CLASS__, 'agent_profile')); // Single agent profile
         add_shortcode('malisafi_agents', array(__CLASS__, 'agents_list')); // Agents listing
         add_shortcode('malisafi_add_property', array(__CLASS__, 'add_property_page')); // Add property with permission checks
+        add_shortcode('malisafi_user_menu', array(__CLASS__, 'user_menu')); // User menu with logout
     }
     
     /**
@@ -516,6 +517,128 @@ $current_listings = (int) $wpdb->get_var($wpdb->prepare(
         
         // Include the add property page template
         include MALISAFI_MLS_PATH . 'templates/add-property-page.php';
+        
+        return ob_get_clean();
+    }
+    
+    /**
+     * User menu shortcode for header
+     * Shows logged in user name with logout option
+     *
+     * @param array $atts Shortcode attributes
+     * @return string
+     */
+    public static function user_menu($atts) {
+        $atts = shortcode_atts(array(
+            'show_avatar' => 'yes',
+            'show_dashboard' => 'yes',
+            'login_text' => __('Login', 'malisafi-mls'),
+            'register_text' => __('Register', 'malisafi-mls')
+        ), $atts);
+        
+        // Enqueue styles
+        wp_enqueue_style(
+            'malisafi-user-menu',
+            MALISAFI_MLS_URL . 'assets/css/user-menu.css',
+            array('malisafi-mls-variables'),
+            MALISAFI_MLS_VERSION
+        );
+        
+        ob_start();
+        
+        if (is_user_logged_in()) {
+            $current_user = wp_get_current_user();
+            $display_name = !empty($current_user->display_name) ? $current_user->display_name : $current_user->user_login;
+            $logout_url = wp_logout_url(home_url());
+            $dashboard_url = '';
+            
+            // Get dashboard URL based on user role
+            $user_roles = $current_user->roles;
+            if (in_array('malisafi_agent_basic', $user_roles) || in_array('malisafi_agent_premium', $user_roles)) {
+                $dashboard_url = home_url('/agent-dashboard/');
+            } elseif (in_array('administrator', $user_roles) || in_array('malisafi_moderator', $user_roles)) {
+                $dashboard_url = admin_url();
+            } else {
+                $dashboard_url = home_url('/my-account/');
+            }
+            
+            ?>
+            <div class="malisafi-user-menu logged-in">
+                <div class="user-menu-trigger">
+                    <?php if ($atts['show_avatar'] === 'yes') : ?>
+                        <div class="user-avatar">
+                            <?php echo get_avatar($current_user->ID, 32); ?>
+                        </div>
+                    <?php endif; ?>
+                    <span class="user-greeting">
+                        <?php printf(__('Howdy, %s', 'malisafi-mls'), '<strong>' . esc_html($display_name) . '</strong>'); ?>
+                    </span>
+                    <span class="menu-arrow">▼</span>
+                </div>
+                
+                <div class="user-menu-dropdown">
+                    <ul class="user-menu-list">
+                        <?php if ($atts['show_dashboard'] === 'yes' && !empty($dashboard_url)) : ?>
+                            <li>
+                                <a href="<?php echo esc_url($dashboard_url); ?>">
+                                    <span class="dashicons dashicons-dashboard"></span>
+                                    <?php _e('Dashboard', 'malisafi-mls'); ?>
+                                </a>
+                            </li>
+                        <?php endif; ?>
+                        
+                        <?php if (in_array('malisafi_agent_basic', $user_roles) || in_array('malisafi_agent_premium', $user_roles)) : ?>
+                            <li>
+                                <a href="<?php echo home_url('/add-property/'); ?>">
+                                    <span class="dashicons dashicons-plus-alt"></span>
+                                    <?php _e('Add Property', 'malisafi-mls'); ?>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="<?php echo home_url('/agent-dashboard/?tab=properties'); ?>">
+                                    <span class="dashicons dashicons-admin-home"></span>
+                                    <?php _e('My Properties', 'malisafi-mls'); ?>
+                                </a>
+                            </li>
+                        <?php endif; ?>
+                        
+                        <li>
+                            <a href="<?php echo home_url('/my-account/'); ?>">
+                                <span class="dashicons dashicons-admin-users"></span>
+                                <?php _e('My Account', 'malisafi-mls'); ?>
+                            </a>
+                        </li>
+                        
+                        <li class="menu-divider"></li>
+                        
+                        <li>
+                            <a href="<?php echo esc_url($logout_url); ?>" class="logout-link">
+                                <span class="dashicons dashicons-exit"></span>
+                                <?php _e('Logout', 'malisafi-mls'); ?>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <?php
+        } else {
+            // User not logged in
+            $login_url = wp_login_url(get_permalink());
+            $register_url = home_url('/register/');
+            
+            ?>
+            <div class="malisafi-user-menu logged-out">
+                <a href="<?php echo esc_url($login_url); ?>" class="user-menu-login">
+                    <span class="dashicons dashicons-admin-users"></span>
+                    <?php echo esc_html($atts['login_text']); ?>
+                </a>
+                <a href="<?php echo esc_url($register_url); ?>" class="user-menu-register">
+                    <span class="dashicons dashicons-welcome-add-page"></span>
+                    <?php echo esc_html($atts['register_text']); ?>
+                </a>
+            </div>
+            <?php
+        }
         
         return ob_get_clean();
     }

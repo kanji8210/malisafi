@@ -8,6 +8,27 @@
 if (!defined('ABSPATH')) {
     exit;
 }
+
+// Debug: Vérifier si les variables sont définies
+if (!isset($total_properties)) {
+    error_log('MALISAFI DEBUG: $total_properties not defined in agent-dashboard-home.php');
+    $total_properties = 0;
+}
+if (!isset($published)) {
+    error_log('MALISAFI DEBUG: $published not defined in agent-dashboard-home.php');
+    $published = 0;
+}
+if (!isset($pending)) {
+    error_log('MALISAFI DEBUG: $pending not defined in agent-dashboard-home.php');
+    $pending = 0;
+}
+if (!isset($recent_properties)) {
+    error_log('MALISAFI DEBUG: $recent_properties not defined in agent-dashboard-home.php');
+    $recent_properties = [];
+}
+
+// Debug: Log actual values
+error_log('MALISAFI DEBUG: Dashboard stats - Total: ' . $total_properties . ', Published: ' . $published . ', Pending: ' . $pending);
 ?>
 
 <div class="dashboard-home">
