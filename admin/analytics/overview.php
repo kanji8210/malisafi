@@ -18,23 +18,46 @@ if (!defined('ABSPATH')) {
 // Check if tables exist
 if (!Analytics_Migration::tables_exist()) {
     ?>
-    <div class="wrap">
-        <div class="notice notice-error">
-            <p>
-                <strong><?php _e('Analytics Tables Not Found', 'malisafi-mls'); ?></strong><br>
-                <?php _e('The analytics database tables have not been created yet. Click the button below to create them.', 'malisafi-mls'); ?>
+    <div class="wrap" style="margin: 20px;">
+        <div class="notice notice-error" style="padding: 30px; border-left: 5px solid #dc3545;">
+            <h2 style="margin-top: 0; color: #dc3545;">
+                ⚠️ <?php _e('Analytics Tables Not Found', 'malisafi-mls'); ?>
+            </h2>
+            <p style="font-size: 16px; line-height: 1.6;">
+                <strong><?php _e('The analytics system cannot display statistics because the required database tables have not been created yet.', 'malisafi-mls'); ?></strong>
             </p>
-            <button type="button" class="button button-primary" id="malisafi-create-tables-btn" style="margin-top: 10px;">
-                <?php _e('Create Analytics Tables Now', 'malisafi-mls'); ?>
-            </button>
+            <p style="font-size: 14px; color: #666;">
+                <?php _e('This is normal for a first-time setup. Click the button below to automatically create all 9 analytics tables:', 'malisafi-mls'); ?>
+            </p>
+            <ul style="font-size: 14px; color: #666; margin: 15px 0; padding-left: 25px;">
+                <li><?php _e('User Activity Tracking', 'malisafi-mls'); ?> (wp_mf_user_activity)</li>
+                <li><?php _e('Property Views Analytics', 'malisafi-mls'); ?> (wp_mf_property_views)</li>
+                <li><?php _e('Property Interactions', 'malisafi-mls'); ?> (wp_mf_property_interactions)</li>
+                <li><?php _e('Search Analytics', 'malisafi-mls'); ?> (wp_mf_search_analytics)</li>
+                <li><?php _e('Submission Funnel', 'malisafi-mls'); ?> (wp_mf_submission_funnel)</li>
+                <li><?php _e('Fraud Detection', 'malisafi-mls'); ?> (wp_mf_fraud_detection)</li>
+                <li><?php _e('Fraud Reports', 'malisafi-mls'); ?> (wp_mf_fraud_reports)</li>
+                <li><?php _e('Revenue Tracking', 'malisafi-mls'); ?> (wp_mf_revenue_tracking)</li>
+                <li><?php _e('System Health', 'malisafi-mls'); ?> (wp_mf_system_health)</li>
+            </ul>
+            <p>
+                <button type="button" class="button button-primary button-hero" id="malisafi-create-tables-btn" style="margin-top: 20px; background: #737d5d; border-color: #737d5d; padding: 15px 30px; font-size: 16px; height: auto;">
+                    🔧 <?php _e('Create Analytics Tables Now', 'malisafi-mls'); ?>
+                </button>
+                <span id="table-creation-status" style="margin-left: 15px; font-weight: bold;"></span>
+            </p>
         </div>
     </div>
     
     <script>
     document.getElementById('malisafi-create-tables-btn').addEventListener('click', function() {
         const btn = this;
+        const statusEl = document.getElementById('table-creation-status');
+        
         btn.disabled = true;
-        btn.textContent = '<?php _e('Creating tables...', 'malisafi-mls'); ?>';
+        btn.textContent = '⏳ <?php _e('Creating tables...', 'malisafi-mls'); ?>';
+        statusEl.textContent = '';
+        statusEl.style.color = '#0073aa';
         
         fetch(ajaxurl, {
             method: 'POST',
@@ -46,18 +69,24 @@ if (!Analytics_Migration::tables_exist()) {
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                alert('<?php _e('Tables created successfully! Reloading...', 'malisafi-mls'); ?>');
-                location.reload();
+                statusEl.textContent = '✅ ' + '<?php _e('Success! Reloading page...', 'malisafi-mls'); ?>';
+                statusEl.style.color = '#28a745';
+                setTimeout(function() {
+                    location.reload();
+                }, 1500);
             } else {
-                alert('Error: ' + (data.data?.message || 'Unknown error'));
+                const errorMsg = data.data?.message || '<?php _e('Unknown error', 'malisafi-mls'); ?>';
+                statusEl.textContent = '❌ Error: ' + errorMsg;
+                statusEl.style.color = '#dc3545';
                 btn.disabled = false;
-                btn.textContent = '<?php _e('Create Analytics Tables Now', 'malisafi-mls'); ?>';
+                btn.textContent = '🔧 <?php _e('Create Analytics Tables Now', 'malisafi-mls'); ?>';
             }
         })
         .catch(error => {
-            alert('Error: ' + error);
+            statusEl.textContent = '❌ Error: ' + error;
+            statusEl.style.color = '#dc3545';
             btn.disabled = false;
-            btn.textContent = '<?php _e('Create Analytics Tables Now', 'malisafi-mls'); ?>';
+            btn.textContent = '🔧 <?php _e('Create Analytics Tables Now', 'malisafi-mls'); ?>';
         });
     });
     </script>
@@ -68,13 +97,30 @@ if (!Analytics_Migration::tables_exist()) {
 // Get date range from query params
 $days = isset($_GET['days']) ? intval($_GET['days']) : 30;
 
+error_log('════════════════════════════════════════════');
+error_log('📊 [Analytics Overview] Page Loaded');
+error_log('📅 [Days Filter]: ' . $days);
+error_log('════════════════════════════════════════════');
+
 // Get overview stats
 $stats = Analytics_Core::get_overview_stats($days);
+error_log('📊 [Overview Stats Retrieved]: ' . print_r($stats, true));
+
 $properties_by_role = Analytics_Core::get_properties_by_role($days);
+error_log('👥 [Properties by Role Count]: ' . count($properties_by_role));
+
 $login_frequency = Analytics_Core::get_login_frequency($days);
+error_log('🔐 [Login Frequency Count]: ' . count($login_frequency));
+
 $submission_funnel = Analytics_Core::get_submission_funnel($days);
+error_log('📝 [Submission Funnel Count]: ' . count($submission_funnel));
+
 $activity_trends = Analytics_Core::get_activity_trends($days);
+error_log('📈 [Activity Trends Count]: ' . count($activity_trends));
+
 $top_properties = Analytics_Properties::get_top_properties('views', 5);
+error_log('🏆 [Top Properties Count]: ' . count($top_properties));
+error_log('════════════════════════════════════════════');
 ?>
 
 <div class="wrap malisafi-analytics-wrapper">

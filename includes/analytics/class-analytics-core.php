@@ -149,6 +149,8 @@ class Analytics_Core {
     public static function get_top_contributors($role = 'all', $limit = 10) {
         global $wpdb;
         
+        error_log('🔍 [Top Contributors] Role: ' . $role . ', Limit: ' . $limit);
+        
         $sql = "
             SELECT 
                 u.ID as user_id,
@@ -179,7 +181,16 @@ class Analytics_Core {
             LIMIT %d
         ";
         
-        return $wpdb->get_results($wpdb->prepare($sql, $limit));
+        $query = $wpdb->prepare($sql, $limit);
+        error_log('🔍 [Top Contributors Query]: ' . $query);
+        
+        $results = $wpdb->get_results($query);
+        error_log('✅ [Top Contributors Result Count]: ' . count($results));
+        if ($wpdb->last_error) {
+            error_log('❌ [Top Contributors Error]: ' . $wpdb->last_error);
+        }
+        
+        return $results;
     }
 
     /**
@@ -213,37 +224,65 @@ class Analytics_Core {
         
         $stats = [];
         
+        // DEBUG: Log table check
+        error_log('🔍 [Analytics Overview] Checking stats for last ' . $days . ' days');
+        error_log('🔍 [Analytics Overview] Table prefix: ' . $wpdb->prefix);
+        
         // Total active users
-        $stats['active_users'] = $wpdb->get_var($wpdb->prepare("
+        $active_users_query = $wpdb->prepare("
             SELECT COUNT(DISTINCT user_id)
             FROM {$wpdb->prefix}mf_user_activity
             WHERE created_at >= DATE_SUB(NOW(), INTERVAL %d DAY)
-        ", $days));
+        ", $days);
+        error_log('🔍 [Active Users Query]: ' . $active_users_query);
+        $stats['active_users'] = $wpdb->get_var($active_users_query);
+        error_log('✅ [Active Users Result]: ' . ($stats['active_users'] ?? 'NULL'));
+        if ($wpdb->last_error) {
+            error_log('❌ [Active Users Error]: ' . $wpdb->last_error);
+        }
         
         // Total properties added
-        $stats['properties_added'] = $wpdb->get_var($wpdb->prepare("
+        $properties_query = $wpdb->prepare("
             SELECT COUNT(*)
             FROM {$wpdb->prefix}mf_properties
             WHERE created_at >= DATE_SUB(NOW(), INTERVAL %d DAY)
-        ", $days));
+        ", $days);
+        error_log('🔍 [Properties Added Query]: ' . $properties_query);
+        $stats['properties_added'] = $wpdb->get_var($properties_query);
+        error_log('✅ [Properties Added Result]: ' . ($stats['properties_added'] ?? 'NULL'));
+        if ($wpdb->last_error) {
+            error_log('❌ [Properties Added Error]: ' . $wpdb->last_error);
+        }
         
         // Total property views
-        $stats['total_views'] = $wpdb->get_var($wpdb->prepare("
+        $views_query = $wpdb->prepare("
             SELECT COUNT(*)
             FROM {$wpdb->prefix}mf_property_views
             WHERE created_at >= DATE_SUB(NOW(), INTERVAL %d DAY)
-        ", $days));
+        ", $days);
+        error_log('🔍 [Total Views Query]: ' . $views_query);
+        $stats['total_views'] = $wpdb->get_var($views_query);
+        error_log('✅ [Total Views Result]: ' . ($stats['total_views'] ?? 'NULL'));
+        if ($wpdb->last_error) {
+            error_log('❌ [Total Views Error]: ' . $wpdb->last_error);
+        }
         
         // Total inquiries
-        $stats['total_inquiries'] = $wpdb->get_var($wpdb->prepare("
+        $inquiries_query = $wpdb->prepare("
             SELECT COUNT(*)
             FROM {$wpdb->prefix}mf_property_interactions
             WHERE interaction_type = 'inquiry'
             AND created_at >= DATE_SUB(NOW(), INTERVAL %d DAY)
-        ", $days));
+        ", $days);
+        error_log('🔍 [Total Inquiries Query]: ' . $inquiries_query);
+        $stats['total_inquiries'] = $wpdb->get_var($inquiries_query);
+        error_log('✅ [Total Inquiries Result]: ' . ($stats['total_inquiries'] ?? 'NULL'));
+        if ($wpdb->last_error) {
+            error_log('❌ [Total Inquiries Error]: ' . $wpdb->last_error);
+        }
         
         // Avg properties per user
-        $stats['avg_properties_per_user'] = $wpdb->get_var($wpdb->prepare("
+        $avg_properties_query = $wpdb->prepare("
             SELECT ROUND(AVG(property_count), 2)
             FROM (
                 SELECT COUNT(*) as property_count
@@ -251,20 +290,34 @@ class Analytics_Core {
                 WHERE created_at >= DATE_SUB(NOW(), INTERVAL %d DAY)
                 GROUP BY author_id
             ) as subquery
-        ", $days));
+        ", $days);
+        error_log('🔍 [Avg Properties Query]: ' . $avg_properties_query);
+        $stats['avg_properties_per_user'] = $wpdb->get_var($avg_properties_query);
+        error_log('✅ [Avg Properties Result]: ' . ($stats['avg_properties_per_user'] ?? 'NULL'));
+        if ($wpdb->last_error) {
+            error_log('❌ [Avg Properties Error]: ' . $wpdb->last_error);
+        }
         
         // Funnel completion rate
-        $funnel_stats = $wpdb->get_row($wpdb->prepare("
+        $funnel_query = $wpdb->prepare("
             SELECT 
                 COUNT(DISTINCT session_id) as total_sessions,
                 COUNT(DISTINCT CASE WHEN completed = 1 THEN session_id END) as completed_sessions
             FROM {$wpdb->prefix}mf_submission_funnel
             WHERE created_at >= DATE_SUB(NOW(), INTERVAL %d DAY)
-        ", $days));
+        ", $days);
+        error_log('🔍 [Funnel Stats Query]: ' . $funnel_query);
+        $funnel_stats = $wpdb->get_row($funnel_query);
+        error_log('✅ [Funnel Stats Result]: ' . print_r($funnel_stats, true));
+        if ($wpdb->last_error) {
+            error_log('❌ [Funnel Stats Error]: ' . $wpdb->last_error);
+        }
         
         $stats['funnel_completion_rate'] = $funnel_stats && $funnel_stats->total_sessions > 0
             ? round(($funnel_stats->completed_sessions / $funnel_stats->total_sessions) * 100, 2)
             : 0;
+        
+        error_log('📊 [Final Stats]: ' . print_r($stats, true));
         
         return $stats;
     }
