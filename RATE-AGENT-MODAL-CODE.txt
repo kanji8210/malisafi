@@ -1,0 +1,192 @@
+<!-- ADD THIS CODE AFTER THE EXISTING AGENT DETAILS MODAL AND BEFORE THE "<?php else :" TAG -->
+
+<!-- Rate Agent Modal -->
+<div id="rate-agent-modal" class="malisafi-modal" style="display:none;">
+    <div class="modal-content" style="max-width:500px;">
+        <div class="modal-header">
+            <h3><?php _e('Rate Agent', 'malisafi-mls'); ?></h3>
+            <button class="modal-close" onclick="document.getElementById('rate-agent-modal').style.display='none';">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div id="rate-agent-content">
+                <p style="text-align:center;margin-bottom:20px;">
+                    <?php _e('Rating', 'malisafi-mls'); ?>: <strong id="rating-agent-name"></strong>
+                </p>
+                
+                <?php if (is_user_logged_in()): ?>
+                    <form class="agent-rating-form" id="quick-rating-form">
+                        <input type="hidden" name="agent_id" id="rating-agent-id" value="">
+                        
+                        <div class="form-group" style="margin-bottom:20px;">
+                            <label style="display:block;margin-bottom:10px;font-weight:600;"><?php _e('Your Rating *', 'malisafi-mls'); ?></label>
+                            <div class="star-rating-input" style="display:flex;justify-content:center;gap:10px;font-size:32px;direction:rtl;">
+                                <input type="radio" name="rating" value="5" id="star5" style="display:none;" required>
+                                <label for="star5" class="star" data-rating="5" style="cursor:pointer;color:#ddd;">★</label>
+                                <input type="radio" name="rating" value="4" id="star4" style="display:none;">
+                                <label for="star4" class="star" data-rating="4" style="cursor:pointer;color:#ddd;">★</label>
+                                <input type="radio" name="rating" value="3" id="star3" style="display:none;">
+                                <label for="star3" class="star" data-rating="3" style="cursor:pointer;color:#ddd;">★</label>
+                                <input type="radio" name="rating" value="2" id="star2" style="display:none;">
+                                <label for="star2" class="star" data-rating="2" style="cursor:pointer;color:#ddd;">★</label>
+                                <input type="radio" name="rating" value="1" id="star1" style="display:none;">
+                                <label for="star1" class="star" data-rating="1" style="cursor:pointer;color:#ddd;">★</label>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group" style="margin-bottom:15px;">
+                            <label style="display:block;margin-bottom:5px;"><?php _e('Review Title', 'malisafi-mls'); ?></label>
+                            <input type="text" name="review_title" placeholder="<?php esc_attr_e('e.g., Great service!', 'malisafi-mls'); ?>" maxlength="100" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:4px;">
+                        </div>
+                        
+                        <div class="form-group" style="margin-bottom:20px;">
+                            <label style="display:block;margin-bottom:5px;"><?php _e('Your Review *', 'malisafi-mls'); ?></label>
+                            <textarea name="review_text" rows="4" placeholder="<?php esc_attr_e('Share your experience...', 'malisafi-mls'); ?>" required maxlength="500" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:4px;"></textarea>
+                            <small style="color:#666;"><span class="char-count">0</span> / 500 <?php _e('characters', 'malisafi-mls'); ?></small>
+                        </div>
+                        
+                        <div class="form-actions" style="text-align:right;">
+                            <button type="button" class="button" onclick="document.getElementById('rate-agent-modal').style.display='none';" style="margin-right:10px;"><?php _e('Cancel', 'malisafi-mls'); ?></button>
+                            <button type="submit" class="button button-primary submit-rating"><?php _e('Submit Review', 'malisafi-mls'); ?></button>
+                        </div>
+                    </form>
+                <?php else: ?>
+                    <p style="text-align:center;padding:20px;">
+                        <?php _e('Please log in to rate this agent.', 'malisafi-mls'); ?>
+                    </p>
+                    <div style="text-align:center;">
+                        <a href="<?php echo wp_login_url(get_permalink()); ?>" class="button button-primary"><?php _e('Login', 'malisafi-mls'); ?></a>
+                    </div>
+                <?php endif; ?>
+            </div>
+            <div id="rate-agent-success" style="display:none;text-align:center;padding:20px;">
+                <span class="dashicons dashicons-yes-alt" style="font-size:48px;color:#10b981;width:48px;height:48px;"></span>
+                <h4 style="margin-top:10px;"><?php _e('Thank you for your review!', 'malisafi-mls'); ?></h4>
+                <p><?php _e('Your review has been submitted and will be visible after approval.', 'malisafi-mls'); ?></p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Rate Agent Modal
+document.querySelectorAll('.button-rate-agent').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+        var agentId = btn.dataset.agentId;
+        var agentName = btn.dataset.agentName;
+        
+        document.getElementById('rating-agent-id').value = agentId;
+        document.getElementById('rating-agent-name').textContent = agentName;
+        document.getElementById('rate-agent-content').style.display = 'block';
+        document.getElementById('rate-agent-success').style.display = 'none';
+        document.getElementById('rate-agent-modal').style.display = 'block';
+        
+        // Reset form
+        var form = document.getElementById('quick-rating-form');
+        if (form) form.reset();
+        document.querySelectorAll('.star-rating-input .star').forEach(function(star) {
+            star.style.color = '#ddd';
+        });
+    });
+});
+
+// Star rating interaction
+document.querySelectorAll('.star-rating-input .star').forEach(function(star) {
+    star.addEventListener('click', function() {
+        var rating = parseInt(this.dataset.rating);
+        document.getElementById('star' + rating).checked = true;
+        
+        // Highlight stars
+        document.querySelectorAll('.star-rating-input .star').forEach(function(s) {
+            var sRating = parseInt(s.dataset.rating);
+            if (sRating <= rating) {
+                s.style.color = '#ffa500';
+            } else {
+                s.style.color = '#ddd';
+            }
+        });
+    });
+    
+    star.addEventListener('mouseenter', function() {
+        var rating = parseInt(this.dataset.rating);
+        document.querySelectorAll('.star-rating-input .star').forEach(function(s) {
+            var sRating = parseInt(s.dataset.rating);
+            if (sRating <= rating) {
+                s.style.color = '#ffa500';
+            } else {
+                s.style.color = '#ddd';
+            }
+        });
+    });
+});
+
+var starContainer = document.querySelector('.star-rating-input');
+if (starContainer) {
+    starContainer.addEventListener('mouseleave', function() {
+        var checked = document.querySelector('.star-rating-input input:checked');
+        var rating = checked ? parseInt(checked.value) : 0;
+        document.querySelectorAll('.star-rating-input .star').forEach(function(s) {
+            var sRating = parseInt(s.dataset.rating);
+            if (sRating <= rating) {
+                s.style.color = '#ffa500';
+            } else {
+                s.style.color = '#ddd';
+            }
+        });
+    });
+}
+
+// Character count
+var reviewText = document.querySelector('textarea[name="review_text"]');
+if (reviewText) {
+    reviewText.addEventListener('input', function() {
+        var charCount = document.querySelector('.char-count');
+        if (charCount) charCount.textContent = this.value.length;
+    });
+}
+
+// Form submission
+var ratingForm = document.getElementById('quick-rating-form');
+if (ratingForm) {
+    ratingForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        var submitBtn = this.querySelector('.submit-rating');
+        var originalText = submitBtn.textContent;
+        submitBtn.disabled = true;
+        submitBtn.textContent = '<?php _e('Submitting...', 'malisafi-mls'); ?>';
+        
+        var formData = new FormData(this);
+        formData.append('action', 'malisafi_rate_agent');
+        formData.append('nonce', '<?php echo wp_create_nonce('malisafi_agent_nonce'); ?>');
+        
+        fetch('<?php echo admin_url('admin-ajax.php'); ?>', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                document.getElementById('rate-agent-content').style.display = 'none';
+                document.getElementById('rate-agent-success').style.display = 'block';
+                setTimeout(function() {
+                    document.getElementById('rate-agent-modal').style.display = 'none';
+                }, 3000);
+            } else {
+                alert(data.data.message || '<?php _e('Error submitting review', 'malisafi-mls'); ?>');
+                submitBtn.disabled = false;
+                submitBtn.textContent = originalText;
+            }
+        })
+        .catch(error => {
+            alert('<?php _e('Error submitting review', 'malisafi-mls'); ?>');
+            submitBtn.disabled = false;
+            submitBtn.textContent = originalText;
+        });
+    });
+}
+
+// Close modal when clicking on background
+document.getElementById('rate-agent-modal').addEventListener('click', function(e) {
+    if (e.target === this) this.style.display = 'none';
+});
+</script>

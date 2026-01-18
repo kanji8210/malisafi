@@ -232,10 +232,12 @@ class Malisafi_Registration_Handler {
         self::send_welcome_email($user_id, $email, $first_name, $account_type);
         
         // Determine redirect URL based on account type
-        $redirect_url = home_url('/dashboard');
+        $redirect_url = home_url('/my-favorites'); // Default to favorites for clients
         
         if ($account_type === 'agent' || $account_type === 'owner' || $account_type === 'developer') {
             $redirect_url = home_url('/agent-dashboard');
+        } elseif ($account_type === 'client') {
+            $redirect_url = home_url('/my-favorites');
         }
         
         wp_send_json_success(array(
@@ -300,12 +302,20 @@ class Malisafi_Registration_Handler {
         
         $account_type_label = $account_types[$account_type] ?? __('User', 'malisafi-mls');
         
+        // Determine dashboard URL based on account type
+        $dashboard_url = home_url('/dashboard');
+        if ($account_type === 'client') {
+            $dashboard_url = home_url('/my-favorites');
+        } elseif ($account_type === 'agent' || $account_type === 'owner' || $account_type === 'developer') {
+            $dashboard_url = home_url('/agent-dashboard');
+        }
+        
         $message = sprintf(
             __('Hello %s,', 'malisafi-mls') . "\n\n" .
-            __('Welcome to %s! Your account has been successfully created.', 'malisafi-mls') . "\n\n" .
+            __('Welcome to %s! Your account has been successfully created and you are now logged in.', 'malisafi-mls') . "\n\n" .
             __('Account Type: %s', 'malisafi-mls') . "\n" .
             __('Email: %s', 'malisafi-mls') . "\n\n" .
-            __('You can now log in to your dashboard and start exploring:', 'malisafi-mls') . "\n" .
+            __('You can access your account here:', 'malisafi-mls') . "\n" .
             '%s' . "\n\n" .
             __('If you have any questions, feel free to contact us.', 'malisafi-mls') . "\n\n" .
             __('Best regards,', 'malisafi-mls') . "\n" .
@@ -314,7 +324,7 @@ class Malisafi_Registration_Handler {
             get_bloginfo('name'),
             $account_type_label,
             $email,
-            home_url('/dashboard'),
+            $dashboard_url,
             get_bloginfo('name')
         );
         

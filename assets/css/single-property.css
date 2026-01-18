@@ -821,7 +821,40 @@
 .agent-role {
     font-size: 0.95rem;
     color: var(--mls-gray-600);
-    margin: 0;
+    margin: 0 0 12px 0;
+}
+
+.view-profile-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.9rem;
+    color: var(--mls-primary);
+    text-decoration: none;
+    font-weight: 500;
+    padding: 6px 12px;
+    border-radius: var(--mls-radius-sm);
+    background: var(--mls-gray-50);
+    border: 1px solid var(--mls-gray-200);
+    transition: all var(--mls-transition-fast);
+}
+
+.view-profile-link:hover {
+    background: var(--mls-primary);
+    color: white;
+    border-color: var(--mls-primary);
+    transform: translateX(2px);
+    text-decoration: none;
+}
+
+.view-profile-link svg {
+    width: 14px;
+    height: 14px;
+    transition: transform var(--mls-transition-fast);
+}
+
+.view-profile-link:hover svg {
+    transform: scale(1.1);
 }
 
 /* Contact Buttons */

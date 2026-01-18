@@ -581,10 +581,10 @@ $formatted_price = $price > 0 ? ($currency_symbol . ' ' . number_format($price))
                         ));
                         
                         if ($agent_post_id): 
-                            $agent_profile_url = add_query_arg('agent_id', $agent_post_id, home_url('/agent-profile/'));
+                            $agent_profile_url = get_permalink($agent_post_id);
                         ?>
                             <h4 class="agent-name">
-                                <a href="<?php echo esc_url($agent_profile_url); ?>" class="agent-link">
+                                <a href="<?php echo esc_url($agent_profile_url); ?>" class="agent-link" title="<?php esc_attr_e('View Agent Profile', 'malisafi-mls'); ?>">
                                     <?php echo esc_html($author_name); ?>
                                 </a>
                             </h4>
@@ -592,6 +592,15 @@ $formatted_price = $price > 0 ? ($currency_symbol . ' ' . number_format($price))
                             <h4 class="agent-name"><?php echo esc_html($author_name); ?></h4>
                         <?php endif; ?>
                         <p class="agent-role">Property Agent</p>
+                        <?php if ($agent_post_id): ?>
+                        <a href="<?php echo esc_url($agent_profile_url); ?>" class="view-profile-link">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                                <circle cx="12" cy="7" r="4"></circle>
+                            </svg>
+                            <?php _e('View Full Profile', 'malisafi-mls'); ?>
+                        </a>
+                        <?php endif; ?>
                     </div>
                 </div>
                 
