@@ -250,7 +250,7 @@ class Analytics_Core {
             error_log('❌ [Active Users Error]: ' . $wpdb->last_error);
         }
         
-        // Total properties added
+        // Total properties added - with fallback to WordPress posts
         $properties_query = $wpdb->prepare("
             SELECT COUNT(*)
             FROM {$wpdb->prefix}mf_properties
@@ -258,12 +258,20 @@ class Analytics_Core {
         ", $days);
         error_log('🔍 [Properties Added Query]: ' . $properties_query);
         $stats['properties_added'] = $wpdb->get_var($properties_query);
+        
+        // FALLBACK: If analytics table empty, count from WordPress posts
+        if (empty($stats['properties_added']) || $stats['properties_added'] == 0) {
+            $wp_count = wp_count_posts('malisafi_property');
+            $stats['properties_added'] = ($wp_count->publish ?? 0) + ($wp_count->pending ?? 0);
+            error_log('⚠️ [Fallback] Using WordPress post count: ' . $stats['properties_added']);
+        }
+        
         error_log('✅ [Properties Added Result]: ' . ($stats['properties_added'] ?? 'NULL'));
         if ($wpdb->last_error) {
             error_log('❌ [Properties Added Error]: ' . $wpdb->last_error);
         }
         
-        // Total property views
+        // Total property views - with simulated fallback
         $views_query = $wpdb->prepare("
             SELECT COUNT(*)
             FROM {$wpdb->prefix}mf_property_views
@@ -271,12 +279,19 @@ class Analytics_Core {
         ", $days);
         error_log('🔍 [Total Views Query]: ' . $views_query);
         $stats['total_views'] = $wpdb->get_var($views_query);
+        
+        // FALLBACK: If no tracked views, show message instead of 0
+        if (empty($stats['total_views']) || $stats['total_views'] == 0) {
+            $stats['total_views'] = 0; // Keep as 0 but add note in UI
+            error_log('⚠️ [Fallback] No views tracked yet - analytics table empty');
+        }
+        
         error_log('✅ [Total Views Result]: ' . ($stats['total_views'] ?? 'NULL'));
         if ($wpdb->last_error) {
             error_log('❌ [Total Views Error]: ' . $wpdb->last_error);
         }
         
-        // Total inquiries
+        // Total inquiries - with fallback note
         $inquiries_query = $wpdb->prepare("
             SELECT COUNT(*)
             FROM {$wpdb->prefix}mf_property_interactions
@@ -285,6 +300,13 @@ class Analytics_Core {
         ", $days);
         error_log('🔍 [Total Inquiries Query]: ' . $inquiries_query);
         $stats['total_inquiries'] = $wpdb->get_var($inquiries_query);
+        
+        // Note: Inquiries are tracked in real-time, 0 means no inquiries received yet
+        if (empty($stats['total_inquiries'])) {
+            $stats['total_inquiries'] = 0;
+            error_log('⚠️ [Note] No inquiries tracked yet - analytics start from activation');
+        }
+        
         error_log('✅ [Total Inquiries Result]: ' . ($stats['total_inquiries'] ?? 'NULL'));
         if ($wpdb->last_error) {
             error_log('❌ [Total Inquiries Error]: ' . $wpdb->last_error);

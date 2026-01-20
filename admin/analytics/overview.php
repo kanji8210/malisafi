@@ -143,6 +143,54 @@ error_log('═══════════════════════
         </div>
     </div>
 
+    <?php
+    // Show info notice if analytics are showing fallback data
+    $show_notice = false;
+    $notice_messages = [];
+    
+    if (($stats['active_users'] ?? 0) > 0) {
+        // Check if this is from fallback by checking WP_User_Query vs activity table
+        global $wpdb;
+        $tracked_users = $wpdb->get_var($wpdb->prepare("
+            SELECT COUNT(DISTINCT user_id)
+            FROM {$wpdb->prefix}mf_user_activity
+            WHERE created_at >= DATE_SUB(NOW(), INTERVAL %d DAY)
+        ", $days));
+        
+        if ($tracked_users == 0 || $tracked_users < ($stats['active_users'] ?? 0)) {
+            $show_notice = true;
+            $notice_messages[] = sprintf(
+                __('Showing %d total Malisafi users (no activity tracked yet in the selected period)', 'malisafi-mls'),
+                $stats['active_users']
+            );
+        }
+    }
+    
+    if (($stats['total_views'] ?? 0) == 0) {
+        $show_notice = true;
+        $notice_messages[] = __('Property views will start tracking when users visit property pages', 'malisafi-mls');
+    }
+    
+    if (($stats['total_inquiries'] ?? 0) == 0) {
+        $show_notice = true;
+        $notice_messages[] = __('Inquiries will appear when users submit contact forms', 'malisafi-mls');
+    }
+    
+    if ($show_notice):
+    ?>
+    <div class="notice notice-info" style="margin: 20px 0; padding: 15px; background: #e7f3ff; border-left: 4px solid #0073aa;">
+        <p><strong>ℹ️ <?php _e('Analytics Data Collection', 'malisafi-mls'); ?>:</strong></p>
+        <ul style="margin: 10px 0 5px 20px; list-style: disc;">
+            <?php foreach ($notice_messages as $msg): ?>
+                <li><?php echo esc_html($msg); ?></li>
+            <?php endforeach; ?>
+        </ul>
+        <p style="font-size: 12px; margin: 10px 0 0 0; color: #666;">
+            <?php _e('Analytics tables track real-time activity. Historical data from before plugin activation is shown where available.', 'malisafi-mls'); ?>
+        </p>
+    </div>
+    <?php endif; ?>
+
     <!-- Stats Grid -->
     <div class="analytics-stats-grid">
         <div class="stat-card">
