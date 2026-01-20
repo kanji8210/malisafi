@@ -20,8 +20,7 @@
     margin-bottom: 30px;
     box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     display: flex;
-    align-items: center;
-    gap: 30px;
+    gap: 40px;
 }
 
 .agent-photo {
@@ -29,17 +28,17 @@
 }
 
 .agent-photo img {
-    width: 150px;
-    height: 150px;
-    border-radius: 50%;
+    width: 180px;
+    height: 180px;
+    border-radius: 8px;
     object-fit: cover;
-    border: 4px solid var(--mls-accent, #737d5d);
+    border: 3px solid var(--mls-accent, #737d5d);
 }
 
 .agent-photo .placeholder-photo {
-    width: 150px;
-    height: 150px;
-    border-radius: 50%;
+    width: 180px;
+    height: 180px;
+    border-radius: 8px;
     background: var(--mls-grey-green, #c5d3b6);
     display: flex;
     align-items: center;
@@ -48,72 +47,165 @@
     color: #fff;
 }
 
+.agent-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.agent-main-info {
+    flex: 1;
+}
+
 .agent-info h1 {
-    margin: 0 0 10px 0;
+    margin: 0 0 8px 0;
     font-size: 28px;
     color: var(--mls-dark, #3a4034);
+    font-weight: 600;
 }
 
 .agent-license {
-    display: inline-block;
-    padding: 4px 12px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
     background: var(--mls-accent, #737d5d);
     color: #fff;
     border-radius: 4px;
     font-size: 13px;
-    margin-bottom: 10px;
+    margin-bottom: 12px;
 }
 
 .agent-rating {
     display: flex;
     align-items: center;
-    gap: 10px;
-    margin: 10px 0;
+    gap: 12px;
+    margin: 12px 0;
 }
 
-.rating-badge {
-    background: #ffa500;
-    color: #fff;
-    padding: 5px 15px;
-    border-radius: 20px;
-    font-weight: bold;
-    font-size: 16px;
+.agent-rating .stars {
+    display: flex;
+    gap: 2px;
 }
 
-.rating-stars {
+.agent-rating .star {
     color: #ffa500;
     font-size: 18px;
 }
 
-.rating-stars .star-filled {
+.agent-rating .star.filled {
     color: #ffa500;
 }
 
-.rating-stars .star-empty {
-    color: #ddd;
+.agent-rating .star:not(.filled) {
+    color: #e0e0e0;
 }
 
-.agent-meta {
-    display: flex;
-    gap: 20px;
+.rating-text {
     color: #666;
     font-size: 14px;
-    margin-top: 10px;
 }
 
-.agent-meta span {
+.agent-meta-details {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 16px;
+    font-size: 14px;
+    color: #666;
+}
+
+.agent-meta-details p {
+    margin: 0;
     display: flex;
     align-items: center;
-    gap: 5px;
+    gap: 8px;
+}
+
+.agent-contact {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.contact-methods h3 {
+    margin: 0;
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: uppercase;
+    color: #999;
+    letter-spacing: 0.5px;
+}
+
+.contact-links {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.contact-link {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 0;
+    color: var(--mls-dark, #3a4034);
+    text-decoration: none;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+    transition: color 0.3s;
+    font-family: inherit;
+}
+
+.contact-link:hover {
+    color: var(--mls-accent, #737d5d);
+}
+
+.contact-link .dashicons {
+    flex-shrink: 0;
+    width: 18px;
+    height: 18px;
+    font-size: 18px;
+}
+
+.rating-action {
+    margin-top: 8px;
+}
+
+.btn-rate-agent {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 24px;
+    background: #ffa500;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.btn-rate-agent:hover {
+    background: #ff8c00;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(255, 165, 0, 0.3);
+}
+
+.btn-rate-agent:active {
+    transform: translateY(0);
 }
 
 /* Contact Section */
 .agent-contact {
-    background: #fff;
-    border-radius: 8px;
-    padding: 25px;
-    margin-bottom: 30px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    background: none;
+    border-radius: 0;
+    padding: 0;
+    margin-bottom: 0;
+    box-shadow: none;
 }
 
 .agent-contact h2 {
@@ -997,3 +1089,80 @@
     
     .form-actions .button {
         width: 100%;
+    }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .agent-header {
+        flex-direction: column;
+        gap: 20px;
+        padding: 20px;
+    }
+
+    .agent-photo img,
+    .agent-photo .placeholder-photo {
+        width: 140px;
+        height: 140px;
+    }
+
+    .agent-info {
+        gap: 12px;
+    }
+
+    .agent-main-info h1 {
+        font-size: 24px;
+    }
+
+    .contact-links {
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .contact-link {
+        flex: 1 1 calc(50% - 4px);
+        min-width: 120px;
+        padding: 8px 12px;
+        font-size: 12px;
+    }
+
+    .contact-link .dashicons {
+        width: 16px;
+        height: 16px;
+        font-size: 16px;
+    }
+
+    .rating-action {
+        width: 100%;
+    }
+
+    .btn-rate-agent {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .agent-stats {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .malisafi-modal .modal-content {
+        padding: 20px;
+    }
+
+    .malisafi-modal h2 {
+        font-size: 24px;
+    }
+
+    .star-rating-input {
+        font-size: 32px;
+    }
+
+    .form-actions {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .form-actions .button {
+        width: 100%;
+    }

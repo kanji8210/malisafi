@@ -177,10 +177,16 @@
         });
         
         // ==========================
-        // Toggle Rating Form
+        // Toggle Rating Form / Show Review Modal
         // ==========================
-        $('.rating-form-toggle').on('click', function() {
-            $('.agent-rating-form').slideToggle();
+        $('#writeReviewBtn, .rating-form-toggle').on('click', function(e) {
+            e.preventDefault();
+            $('#reviewModal').fadeIn();
+        });
+        
+        // Close modal
+        $('.modal-close, .modal-overlay').on('click', function() {
+            $('#reviewModal').fadeOut();
         });
         
         // Cancel review button
@@ -188,6 +194,11 @@
             $('#reviewModal').fadeOut();
             $('.agent-rating-form')[0].reset();
             $('.star-rating-input .star').removeClass('active');
+        });
+        
+        // Prevent modal content click from closing
+        $('#reviewModal .modal-content').on('click', function(e) {
+            e.stopPropagation();
         });
         
         // Character counter for review textarea

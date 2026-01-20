@@ -116,101 +116,111 @@ $total_properties = intval($total_published) + intval($total_pending);
             </div>
 
             <div class="agent-info">
-                <h1 class="agent-name"><?php echo esc_html($agent->post_title); ?></h1>
-                
-                <?php if ($agent_license): ?>
-                    <p class="agent-license">
-                        <span class="dashicons dashicons-awards"></span>
-                        <?php printf(__('License #%s', 'malisafi-mls'), esc_html($agent_license)); ?>
-                    </p>
-                <?php endif; ?>
+                <div class="agent-main-info">
+                    <h1 class="agent-name"><?php echo esc_html($agent->post_title); ?></h1>
+                    
+                    <?php if ($agent_license): ?>
+                        <p class="agent-license">
+                            <span class="dashicons dashicons-awards"></span>
+                            <?php printf(__('License #%s', 'malisafi-mls'), esc_html($agent_license)); ?>
+                        </p>
+                    <?php endif; ?>
 
-                <?php if ($rating_count): ?>
-                    <div class="agent-rating">
-                        <div class="stars">
-                            <?php for ($i = 1; $i <= 5; $i++): ?>
-                                <span class="star <?php echo $i <= round($avg_rating) ? 'filled' : ''; ?>">★</span>
-                            <?php endfor; ?>
+                    <?php if ($rating_count): ?>
+                        <div class="agent-rating">
+                            <div class="stars">
+                                <?php for ($i = 1; $i <= 5; $i++): ?>
+                                    <span class="star <?php echo $i <= round($avg_rating) ? 'filled' : ''; ?>">★</span>
+                                <?php endfor; ?>
+                            </div>
+                            <span class="rating-text">
+                                <?php printf(__('%s (%d reviews)', 'malisafi-mls'), number_format($avg_rating, 1), $rating_count); ?>
+                            </span>
                         </div>
-                        <span class="rating-text">
-                            <?php printf(__('%s (%d reviews)', 'malisafi-mls'), number_format($avg_rating, 1), $rating_count); ?>
-                        </span>
+                    <?php endif; ?>
+
+                    <div class="agent-meta-details">
+                        <?php if ($agent_experience): ?>
+                            <p class="agent-experience">
+                                <span class="dashicons dashicons-calendar-alt"></span>
+                                <?php printf(__('%s years of experience', 'malisafi-mls'), esc_html($agent_experience)); ?>
+                            </p>
+                        <?php endif; ?>
+
+                        <?php if ($agent_languages): ?>
+                            <p class="agent-languages">
+                                <span class="dashicons dashicons-translation"></span>
+                                <?php echo esc_html($agent_languages); ?>
+                            </p>
+                        <?php endif; ?>
                     </div>
-                <?php endif; ?>
+                </div>
 
-                <?php if ($agent_experience): ?>
-                    <p class="agent-experience">
-                        <span class="dashicons dashicons-calendar-alt"></span>
-                        <?php printf(__('%s years of experience', 'malisafi-mls'), esc_html($agent_experience)); ?>
-                    </p>
-                <?php endif; ?>
+                <div class="agent-contact">
+                    <div class="contact-methods">
+                        <h3><?php _e('Contact Methods', 'malisafi-mls'); ?></h3>
+                        
+                        <div class="contact-links">
+                            <?php if ($agent_phone): ?>
+                                <a href="tel:<?php echo esc_attr($agent_phone); ?>" class="contact-link" title="<?php _e('Call agent', 'malisafi-mls'); ?>">
+                                    <span class="dashicons dashicons-phone"></span>
+                                    <span><?php echo esc_html($agent_phone); ?></span>
+                                </a>
+                            <?php endif; ?>
 
-                <?php if ($agent_languages): ?>
-                    <p class="agent-languages">
-                        <span class="dashicons dashicons-translation"></span>
-                        <?php echo esc_html($agent_languages); ?>
-                    </p>
-                <?php endif; ?>
-            </div>
+                            <?php if ($agent_whatsapp): ?>
+                                <a href="https://wa.me/<?php echo esc_attr(preg_replace('/[^0-9]/', '', $agent_whatsapp)); ?>" 
+                                   class="contact-link" target="_blank" rel="noopener" title="<?php _e('WhatsApp', 'malisafi-mls'); ?>">
+                                    <span class="dashicons dashicons-whatsapp"></span>
+                                    <span><?php _e('WhatsApp', 'malisafi-mls'); ?></span>
+                                </a>
+                            <?php endif; ?>
 
-            <div class="agent-contact">
-                <h3><?php _e('Contact Agent', 'malisafi-mls'); ?></h3>
-                
-                <?php if ($agent_phone): ?>
-                    <a href="tel:<?php echo esc_attr($agent_phone); ?>" class="contact-btn phone">
-                        <span class="dashicons dashicons-phone"></span>
-                        <?php echo esc_html($agent_phone); ?>
-                    </a>
-                <?php endif; ?>
+                            <?php if ($agent_email): ?>
+                                <a href="mailto:<?php echo esc_attr($agent_email); ?>" class="contact-link" title="<?php _e('Email agent', 'malisafi-mls'); ?>">
+                                    <span class="dashicons dashicons-email"></span>
+                                    <span><?php _e('Email', 'malisafi-mls'); ?></span>
+                                </a>
+                            <?php endif; ?>
 
-                <?php if ($agent_whatsapp): ?>
-                    <a href="https://wa.me/<?php echo esc_attr(preg_replace('/[^0-9]/', '', $agent_whatsapp)); ?>" 
-                       class="contact-btn whatsapp" target="_blank">
-                        <span class="dashicons dashicons-whatsapp"></span>
-                        <?php _e('WhatsApp', 'malisafi-mls'); ?>
-                    </a>
-                <?php endif; ?>
+                            <?php if (is_user_logged_in()): ?>
+                                <button class="contact-link" id="openContactForm" title="<?php _e('Send direct message', 'malisafi-mls'); ?>">
+                                    <span class="dashicons dashicons-email-alt"></span>
+                                    <span><?php _e('Message', 'malisafi-mls'); ?></span>
+                                </button>
+                            <?php endif; ?>
+                        </div>
+                    </div>
 
-                <?php if ($agent_email): ?>
-                    <a href="mailto:<?php echo esc_attr($agent_email); ?>" class="contact-btn email">
-                        <span class="dashicons dashicons-email"></span>
-                        <?php _e('Email', 'malisafi-mls'); ?>
-                    </a>
-                <?php endif; ?>
-
-                <?php if (is_user_logged_in()): ?>
-                    <button class="contact-btn primary" id="openContactForm">
-                        <span class="dashicons dashicons-email-alt"></span>
-                        <?php _e('Send Message', 'malisafi-mls'); ?>
-                    </button>
-                    
-                    <?php 
-                    // Check if user can rate this agent
-                    $current_user = wp_get_current_user();
-                    $can_rate = false;
-                    
-                    // User must be logged in
-                    if ($current_user->ID) {
-                        // Cannot rate yourself
-                        if ($current_user->ID != $linked_user_id) {
-                            // Agents cannot rate other agents
-                            $is_agent = in_array('malisafi_agent_basic', $current_user->roles) || 
-                                       in_array('malisafi_agent_premium', $current_user->roles);
-                            
-                            if (!$is_agent) {
-                                $can_rate = true;
+                    <div class="rating-action">
+                        <?php 
+                        // Check if user can rate this agent
+                        $current_user = wp_get_current_user();
+                        $can_rate = false;
+                        
+                        // User must be logged in
+                        if ($current_user->ID) {
+                            // Cannot rate yourself
+                            if ($current_user->ID != $linked_user_id) {
+                                // Agents cannot rate other agents
+                                $is_agent = in_array('malisafi_agent_basic', $current_user->roles) || 
+                                           in_array('malisafi_agent_premium', $current_user->roles);
+                                
+                                if (!$is_agent) {
+                                    $can_rate = true;
+                                }
                             }
                         }
-                    }
-                    ?>
-                    
-                    <?php if ($can_rate): ?>
-                        <button class="contact-btn rate-agent" id="writeReviewBtn">
-                            <span class="dashicons dashicons-star-filled"></span>
-                            <?php _e('Rate Agent', 'malisafi-mls'); ?>
-                        </button>
-                    <?php endif; ?>
-                <?php endif; ?>
+                        ?>
+                        
+                        <?php if ($can_rate): ?>
+                            <button class="btn-rate-agent" id="writeReviewBtn">
+                                <span class="dashicons dashicons-star-filled"></span>
+                                <?php _e('Rate Agent', 'malisafi-mls'); ?>
+                            </button>
+                        <?php endif; ?>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
