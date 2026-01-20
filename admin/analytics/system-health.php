@@ -98,7 +98,33 @@ $upload_max_filesize = ini_get('upload_max_filesize');
 
 // Plugin status
 $active_plugins = count(get_option('active_plugins', array()));
-$total_users = count_users();
+
+// Count only Malisafi users (not all WordPress users)
+$malisafi_roles = array(
+    'malisafi_client',
+    'malisafi_agent_basic',
+    'malisafi_agent_premium',
+    'malisafi_owner',
+    'malisafi_developer',
+    'malisafi_moderator'
+);
+$malisafi_user_query = new WP_User_Query(array(
+    'role__in' => $malisafi_roles,
+    'fields' => 'ID'
+));
+$total_users = $malisafi_user_query->get_total();
+
+// Debug for admins
+if (current_user_can('manage_options')) {
+    echo '<!-- Malisafi User Count Debug: ' . $total_users . ' users found with roles: ' . implode(', ', $malisafi_roles) . ' -->';
+    
+    // Visible debug notice for testing
+    echo '<div class="notice notice-info" style="margin: 20px 0; padding: 15px; background: #e7f3ff; border-left: 4px solid #0073aa;">';
+    echo '<p><strong>🔍 Admin Debug:</strong> Query found <strong>' . $total_users . '</strong> users with Malisafi roles.</p>';
+    echo '<p style="font-size: 12px; margin: 5px 0 0 0;">Roles searched: ' . implode(', ', $malisafi_roles) . '</p>';
+    echo '</div>';
+}
+
 $total_properties = wp_count_posts('malisafi_property');
 ?>
 
@@ -222,8 +248,8 @@ $total_properties = wp_count_posts('malisafi_property');
                         <td style="padding: 8px;"><?php echo number_format($active_plugins); ?></td>
                     </tr>
                     <tr style="border-bottom: 1px solid #e5e7eb;">
-                        <td style="padding: 8px; font-weight: 600;">Total Users</td>
-                        <td style="padding: 8px;"><?php echo number_format($total_users['total_users']); ?></td>
+                        <td style="padding: 8px; font-weight: 600;">Malisafi Users</td>
+                        <td style="padding: 8px;"><?php echo number_format($total_users); ?></td>
                     </tr>
                     <tr style="border-bottom: 1px solid #e5e7eb;">
                         <td style="padding: 8px; font-weight: 600;">Properties</td>

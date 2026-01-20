@@ -13,7 +13,18 @@ $query_args = array(
     'post_type' => 'malisafi_property',
     'post_status' => 'publish',
     'posts_per_page' => (int)$atts['count'],
-    'fields' => 'ids' // Only get IDs for better performance
+    'fields' => 'ids', // Only get IDs for better performance
+    'meta_query' => array(
+        'relation' => 'OR',
+        array(
+            'key' => '_malisafi_latitude',
+            'compare' => 'EXISTS'
+        ),
+        array(
+            'key' => '_malisafi_county',
+            'compare' => 'EXISTS'
+        )
+    )
 );
 
 // Add type filter
@@ -55,12 +66,25 @@ if ($properties_query->have_posts()) {
         $latitude = get_post_meta($property_id, '_malisafi_latitude', true);
         $longitude = get_post_meta($property_id, '_malisafi_longitude', true);
         
-        // If no GPS coordinates, try to geocode from location taxonomy
+        // If no GPS coordinates, try to geocode from county meta field first
         if (empty($latitude) || empty($longitude)) {
-            $location_terms = wp_get_post_terms($property_id, 'malisafi_property_location');
+            $location_name = '';
             
-            if (!empty($location_terms) && !is_wp_error($location_terms)) {
-                $location_name = $location_terms[0]->name;
+            // Priority 1: County meta field (Kenya-specific)
+            $county = get_post_meta($property_id, '_malisafi_county', true);
+            if (!empty($county)) {
+                $location_name = $county . ', Kenya';
+            }
+            
+            // Priority 2: Location taxonomy (fallback)
+            if (empty($location_name)) {
+                $location_terms = wp_get_post_terms($property_id, 'malisafi_property_location');
+                if (!empty($location_terms) && !is_wp_error($location_terms)) {
+                    $location_name = $location_terms[0]->name . ', Kenya';
+                }
+            }
+            
+            if (!empty($location_name)) {
                 
                 // Check if we have cached geocoding result
                 $cache_key = 'malisafi_geocode_' . sanitize_title($location_name);
@@ -73,8 +97,9 @@ if ($properties_query->have_posts()) {
                     // Use Nominatim (OpenStreetMap) for geocoding - free and no API key required
                     $geocode_url = add_query_arg(array(
                         'format' => 'json',
-                        'q' => $location_name . ', Kenya',
-                        'limit' => 1
+                        'q' => $location_name,
+                        'limit' => 1,
+                        'countrycodes' => 'ke'
                     ), 'https://nominatim.openstreetmap.org/search');
                     
                     $response = wp_remote_get($geocode_url, array(
@@ -108,6 +133,12 @@ if ($properties_query->have_posts()) {
             $price = get_post_meta($property_id, '_malisafi_price', true);
             $currency = get_post_meta($property_id, '_malisafi_currency', true) ?: 'USD';
             
+            // Get thumbnail URL with fallback
+            $thumbnail_url = get_the_post_thumbnail_url($property_id, 'thumbnail');
+            if (empty($thumbnail_url)) {
+                $thumbnail_url = plugins_url('malisafi/assets/images/placeholder-property.svg');
+            }
+            
             $property_data = array(
                 'id' => $property_id,
                 'title' => get_the_title($property_id),
@@ -116,7 +147,7 @@ if ($properties_query->have_posts()) {
                 'lng' => (float)$longitude,
                 'price' => $price,
                 'currency' => $currency,
-                'image' => get_the_post_thumbnail_url($property_id, 'thumbnail')
+                'image' => $thumbnail_url
             );
             
             // Get property type
@@ -140,8 +171,24 @@ if ($properties_query->have_posts()) {
 }
 
 // Debug info (only for admins)
-if (current_user_can('manage_options') && $total_properties > 0) {
-    echo '<!-- Map Debug: Total properties queried: ' . $total_properties . ', Properties with coordinates: ' . $properties_with_coords . ' -->';
+if (current_user_can('manage_options')) {
+    echo '<!-- Map Debug Info:
+    - Total properties queried: ' . $total_properties . '
+    - Properties with coordinates: ' . $properties_with_coords . '
+    - Properties missing location: ' . ($total_properties - $properties_with_coords) . '
+    -->';
+    
+    // Show visible debug notice if there's a discrepancy
+    if ($total_properties > 0 && $properties_with_coords === 0) {
+        echo '<div class="notice notice-warning" style="margin: 20px 0; padding: 10px;">';
+        echo '<p><strong>Admin Debug:</strong> ' . $total_properties . ' properties found but none have GPS coordinates or county information for geocoding.</p>';
+        echo '<p>Properties need either GPS coordinates (_malisafi_latitude/_malisafi_longitude) or a county (_malisafi_county) to appear on the map.</p>';
+        echo '</div>';
+    } elseif ($properties_with_coords < $total_properties) {
+        echo '<div class="notice notice-info" style="margin: 20px 0; padding: 10px;">';
+        echo '<p><strong>Admin Info:</strong> ' . $properties_with_coords . ' of ' . $total_properties . ' properties visible on map. ' . ($total_properties - $properties_with_coords) . ' missing location data.</p>';
+        echo '</div>';
+    }
 }
 
 // Enqueue Leaflet CSS and JS (open source alternative to Google Maps)

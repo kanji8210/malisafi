@@ -14,7 +14,7 @@ $property_id = get_the_ID();
 $price = get_post_meta($property_id, '_malisafi_price', true);
 $currency = get_post_meta($property_id, '_malisafi_currency', true);
 if (empty($currency)) {
-    $currency = 'USD'; // Default currency
+    $currency = 'USD';
 }
 $bedrooms = get_post_meta($property_id, '_malisafi_bedrooms', true);
 $bathrooms = get_post_meta($property_id, '_malisafi_bathrooms', true);
@@ -25,12 +25,25 @@ $featured = get_post_meta($property_id, '_malisafi_featured', true);
 $setting = get_post_meta($property_id, '_malisafi_setting', true);
 $city = get_post_meta($property_id, '_malisafi_city', true);
 $state = get_post_meta($property_id, '_malisafi_state', true);
-$location = $city ? $city . ($state ? ', ' . $state : '') : '';
+$location = !empty($city) ? $city . (!empty($state) ? ', ' . $state : '') : '';
 
-// Get featured image
-$image_url = get_the_post_thumbnail_url($property_id, 'malisafi_grid');
-if (!$image_url) {
-    $image_url = plugins_url('malisafi/assets/images/placeholder-property.svg');
+// Get featured image with srcset for crisper thumbnails
+$thumbnail_id = get_post_thumbnail_id($property_id);
+if ($thumbnail_id) {
+    $image_html = wp_get_attachment_image(
+        $thumbnail_id,
+        'malisafi_landscape',
+        false,
+        array(
+            'class' => 'property-card-image',
+            'loading' => 'lazy',
+            'decoding' => 'async',
+            'sizes' => '(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 33vw'
+        )
+    );
+} else {
+    $placeholder = plugins_url('malisafi/assets/images/placeholder-property.svg');
+    $image_html = '<img class="property-card-image" src="' . esc_url($placeholder) . '" alt="' . esc_attr(get_the_title()) . '" loading="lazy" decoding="async" />';
 }
 
 // Get property permalink
@@ -38,7 +51,7 @@ $property_url = get_permalink($property_id);
 
 // Format price with currency
 $currency_symbol = ($currency === 'KES') ? 'KSh' : '$';
-$formatted_price = $currency_symbol . ' ' . number_format(floatval($price));
+$formatted_price = $currency_symbol . ' ' . number_format(floatval($price ?: 0));
 
 // Check if property is new (posted within last 7 days)
 $post_date = get_the_date('U');
@@ -48,7 +61,7 @@ $is_new = (time() - $post_date) < (7 * 24 * 60 * 60);
 <article class="property-card-modern" data-url="<?php echo esc_url($property_url); ?>" data-property-id="<?php echo $property_id; ?>">
     
     <div class="property-image-wrapper">
-        <img src="<?php echo esc_url($image_url); ?>" alt="<?php echo esc_attr(get_the_title()); ?>">
+        <?php echo $image_html; ?>
         
         <?php if (!empty($status)) : ?>
             <span class="status-badge"><?php echo esc_html(ucfirst(str_replace('-', ' ', $status))); ?></span>
@@ -105,10 +118,11 @@ $is_new = (time() - $post_date) < (7 * 24 * 60 * 60);
         
         <h4 class="property-title">
             <?php the_title(); ?>
-            
+        </h4>
         
         <?php if ($location) : ?>
-        <div class="property-location" style="display: flex !important; gap: 5px !important; align-items: center !important;">
+        <div class="property-location">
+            <span class="dashicons dashicons-location"></span>
             <span><?php echo esc_html($location); ?></span>
         </div>
         <?php endif; ?>

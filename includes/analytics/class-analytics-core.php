@@ -228,7 +228,7 @@ class Analytics_Core {
         error_log('🔍 [Analytics Overview] Checking stats for last ' . $days . ' days');
         error_log('🔍 [Analytics Overview] Table prefix: ' . $wpdb->prefix);
         
-        // Total active users
+        // Total active users - with fallback to actual Malisafi users count
         $active_users_query = $wpdb->prepare("
             SELECT COUNT(DISTINCT user_id)
             FROM {$wpdb->prefix}mf_user_activity
@@ -236,6 +236,15 @@ class Analytics_Core {
         ", $days);
         error_log('🔍 [Active Users Query]: ' . $active_users_query);
         $stats['active_users'] = $wpdb->get_var($active_users_query);
+        
+        // FALLBACK: If no tracked activity, show all Malisafi users instead
+        if (empty($stats['active_users']) || $stats['active_users'] == 0) {
+            $malisafi_roles = array('malisafi_client', 'malisafi_agent_basic', 'malisafi_agent_premium', 'malisafi_owner', 'malisafi_developer', 'malisafi_moderator');
+            $user_query = new \WP_User_Query(array('role__in' => $malisafi_roles, 'fields' => 'ID'));
+            $stats['active_users'] = $user_query->get_total();
+            error_log('⚠️ [Fallback] Using total Malisafi users: ' . $stats['active_users']);
+        }
+        
         error_log('✅ [Active Users Result]: ' . ($stats['active_users'] ?? 'NULL'));
         if ($wpdb->last_error) {
             error_log('❌ [Active Users Error]: ' . $wpdb->last_error);
