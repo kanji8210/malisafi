@@ -518,6 +518,8 @@ transparent;
     display: grid;
     gap: 2rem;
     padding: 2rem 0;
+    max-width: 100%;
+    box-sizing: border-box;
 }
 
 .malisafi-agents-list.layout-grid {
@@ -659,10 +661,21 @@ transparent;
         justify-content: center;
     }
     
+    .malisafi-agents-list {
+        padding: 1rem 0;
+        gap: 1.5rem;
+        max-width: 100%;
+    }
+    
     .malisafi-agents-list.columns-2,
     .malisafi-agents-list.columns-3,
     .malisafi-agents-list.columns-4 {
         grid-template-columns: 1fr;
+    }
+    
+    .agent-card {
+        max-width: 100%;
+        box-sizing: border-box;
     }
     
     .properties-grid {
@@ -678,5 +691,10 @@ transparent;
     
     .agent-name {
         font-size: 1.5rem;
+    }
+    
+    .malisafi-agents-list {
+        padding: 0.5rem 0;
+        gap: 1rem;
     }
 }
