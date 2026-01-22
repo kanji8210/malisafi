@@ -125,8 +125,13 @@ body {
 .malisafi-client-dashboard,
 .malisafi-owner-dashboard,
 .malisafi-developer-dashboard {
-   max-width: 100%;
+   max-width: 100% !important;
    overflow-x: hidden;
+   margin-left: 0 !important;
+   margin-right: 0 !important;
+   position: relative;
+   left: auto !important;
+   right: auto !important;
 }
 
 h1, h2, h3, h4, h5, h6 {
