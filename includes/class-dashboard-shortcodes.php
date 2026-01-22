@@ -320,6 +320,190 @@ class Dashboard_Shortcodes {
         $is_agent = in_array('malisafi_agent_basic', $user->roles) || in_array('malisafi_agent_premium', $user->roles);
         
         if (!$is_agent) {
+            return '<div class="malisafi-access-denied"><p>' . __('You do not have permission to access the agent dashboard.', 'malisafi-mls') . '</p></div>';
+        }
+        
+        // Enqueue dashboard CSS
+        wp_enqueue_style(
+            'malisafi-agent-dashboard-clean',
+            MALISAFI_MLS_URL . 'assets/css/agent-dashboard-clean.css',
+            array('malisafi-mls-variables', 'dashicons'),
+            MALISAFI_MLS_VERSION
+        );
+        
+        wp_enqueue_script(
+            'malisafi-agent-dashboard',
+            MALISAFI_MLS_URL . 'assets/js/agent-dashboard-modern.js',
+            array('jquery'),
+            MALISAFI_MLS_VERSION,
+            true
+        );
+        
+        $current_user = wp_get_current_user();
+        
+        // Get stats
+        global $wpdb;
+        $properties_count = $wpdb->get_var($wpdb->prepare(
+            "SELECT COUNT(*) FROM {$wpdb->posts} 
+            WHERE post_author = %d AND post_type = 'malisafi_property' AND post_status = 'publish'",
+            $current_user->ID
+        ));
+        
+        $pending_count = $wpdb->get_var($wpdb->prepare(
+            "SELECT COUNT(*) FROM {$wpdb->posts} 
+            WHERE post_author = %d AND post_type = 'malisafi_property' AND post_status = 'pending'",
+            $current_user->ID
+        ));
+        
+        $views_count = get_user_meta($current_user->ID, 'total_property_views', true) ?: 0;
+        $leads_count = $wpdb->get_var($wpdb->prepare(
+            "SELECT COUNT(*) FROM {$wpdb->prefix}mf_inquiries WHERE agent_id = %d",
+            $current_user->ID
+        )) ?: 0;
+        
+        ob_start();
+        ?>
+        <div class="malisafi-agent-dashboard-clean">
+            <div class="dashboard-container">
+                <!-- Header -->
+                <header class="dashboard-header">
+                    <div class="header-content">
+                        <div class="header-left">
+                            <h1><?php printf(__('Welcome back, %s', 'malisafi-mls'), esc_html($current_user->display_name)); ?></h1>
+                            <p><?php _e('Manage your properties and leads from your dashboard', 'malisafi-mls'); ?></p>
+                        </div>
+                        <div class="header-right">
+                            <a href="<?php echo Page_Manager::get_page_url('agent_add_property'); ?>" class="btn btn-primary">
+                                <span class="dashicons dashicons-plus-alt"></span>
+                                <?php _e('Add New Property', 'malisafi-mls'); ?>
+                            </a>
+                        </div>
+                    </div>
+                </header>
+                
+                <!-- Stats Cards -->
+                <div class="dashboard-stats">
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <span class="dashicons dashicons-admin-home"></span>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-value"><?php echo number_format($properties_count); ?></div>
+                            <div class="stat-label"><?php _e('Published Properties', 'malisafi-mls'); ?></div>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-icon stat-icon-pending">
+                            <span class="dashicons dashicons-clock"></span>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-value"><?php echo number_format($pending_count); ?></div>
+                            <div class="stat-label"><?php _e('Pending Approval', 'malisafi-mls'); ?></div>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-icon stat-icon-views">
+                            <span class="dashicons dashicons-visibility"></span>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-value"><?php echo number_format($views_count); ?></div>
+                            <div class="stat-label"><?php _e('Total Views', 'malisafi-mls'); ?></div>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-icon stat-icon-leads">
+                            <span class="dashicons dashicons-email"></span>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-value"><?php echo number_format($leads_count); ?></div>
+                            <div class="stat-label"><?php _e('Inquiries', 'malisafi-mls'); ?></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Quick Actions -->
+                <div class="quick-actions">
+                    <h2><?php _e('Quick Actions', 'malisafi-mls'); ?></h2>
+                    <div class="actions-grid">
+                        <a href="<?php echo Page_Manager::get_page_url('agent_properties'); ?>" class="action-card">
+                            <span class="dashicons dashicons-admin-home"></span>
+                            <span><?php _e('My Properties', 'malisafi-mls'); ?></span>
+                        </a>
+                        <a href="<?php echo Page_Manager::get_page_url('agent_leads'); ?>" class="action-card">
+                            <span class="dashicons dashicons-email"></span>
+                            <span><?php _e('View Leads', 'malisafi-mls'); ?></span>
+                        </a>
+                        <a href="<?php echo Page_Manager::get_page_url('agent_profile'); ?>" class="action-card">
+                            <span class="dashicons dashicons-businessman"></span>
+                            <span><?php _e('My Profile', 'malisafi-mls'); ?></span>
+                        </a>
+                        <a href="<?php echo Page_Manager::get_page_url('account'); ?>" class="action-card">
+                            <span class="dashicons dashicons-admin-settings"></span>
+                            <span><?php _e('Settings', 'malisafi-mls'); ?></span>
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- Recent Properties -->
+                <div class="recent-section">
+                    <div class="section-header">
+                        <h2><?php _e('Recent Properties', 'malisafi-mls'); ?></h2>
+                        <a href="<?php echo Page_Manager::get_page_url('agent_properties'); ?>"><?php _e('View All', 'malisafi-mls'); ?></a>
+                    </div>
+                    <div class="properties-list">
+                        <?php
+                        $recent_properties = new \WP_Query([
+                            'post_type' => 'malisafi_property',
+                            'author' => $current_user->ID,
+                            'posts_per_page' => 5,
+                            'post_status' => ['publish', 'pending']
+                        ]);
+                        
+                        if ($recent_properties->have_posts()) {
+                            while ($recent_properties->have_posts()) {
+                                $recent_properties->the_post();
+                                $price = get_post_meta(get_the_ID(), '_malisafi_price', true);
+                                ?>
+                                <div class="property-item">
+                                    <div class="property-image">
+                                        <?php if (has_post_thumbnail()) : ?>
+                                            <?php the_post_thumbnail('thumbnail'); ?>
+                                        <?php else : ?>
+                                            <span class="dashicons dashicons-admin-home"></span>
+                                        <?php endif; ?>
+                                    </div>
+                                    <div class="property-info">
+                                        <h3><a href="<?php the_permalink(); ?>"><?php the_title(); ?></a></h3>
+                                        <div class="property-price">KES <?php echo number_format($price); ?></div>
+                                        <div class="property-status <?php echo get_post_status(); ?>">
+                                            <?php echo ucfirst(get_post_status()); ?>
+                                        </div>
+                                    </div>
+                                    <div class="property-actions">
+                                        <a href="<?php echo get_edit_post_link(); ?>" class="btn-icon" title="<?php _e('Edit', 'malisafi-mls'); ?>">
+                                            <span class="dashicons dashicons-edit"></span>
+                                        </a>
+                                    </div>
+                                </div>
+                                <?php
+                            }
+                            wp_reset_postdata();
+                        } else {
+                            echo '<p>' . __('No properties yet.', 'malisafi-mls') . '</p>';
+                        }
+                        ?>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <?php
+        return ob_get_clean();
+    }
+        
+        if (!$is_agent) {
             return '<div class="malisafi-access-denied">
                 <p>' . __('You do not have permission to access this page.', 'malisafi-mls') . '</p>
                 <p>' . __('This page is for agents only.', 'malisafi-mls') . '</p>
