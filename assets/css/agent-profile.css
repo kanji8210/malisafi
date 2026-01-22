@@ -514,17 +514,26 @@
    Agents List Layout
    =============================================== */
 
+/* Force full width - override theme containers */
+body.page .malisafi-agents-list,
+body.single .malisafi-agents-list,
+.entry-content .malisafi-agents-list,
+.site-content .malisafi-agents-list,
+.content-area .malisafi-agents-list,
+article .malisafi-agents-list,
 .malisafi-agents-list {
-    display: grid;
+    display: grid !important;
     gap: 2rem;
     padding: 2rem 0;
-    max-width: 100% !important;
+    max-width: none !important;
     width: 100% !important;
-    box-sizing: border-box;
+    box-sizing: border-box !important;
     margin: 0 !important;
-    position: relative;
+    position: relative !important;
     left: auto !important;
     right: auto !important;
+    float: none !important;
+    clear: both !important;
 }
 
 .malisafi-agents-list.layout-grid {
