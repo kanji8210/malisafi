@@ -158,7 +158,8 @@
    =============================================== */
 
 .agent-bio {
-    padding: 2retransparent;
+    padding: 2rem;
+    background: transparent;
     border: 1px solid var(--mls-border-light);
     border-radius: 8px;
     margin-bottom: 2rem;
@@ -181,7 +182,6 @@
 
 .agent-contact-section h2 {
     margin-top: 0;
-    color: var(--mls-text-primary
     color: var(--mls-dark);
     border-bottom: 2px solid var(--mls-accent);
     padding-bottom: 0.5rem;
@@ -195,8 +195,8 @@
 .contact-item {
     display: flex;
     align-items: center;
-    gap: 1rem;transparent;
-    border: 1px solid var(--mls-border-light
+    gap: 1rem;
+    border: 1px solid var(--mls-border-light);
     padding: 1rem;
     background: var(--mls-light-grey);
     border-radius: 4px;
@@ -231,15 +231,15 @@
 /* ===============================================
    Agent Properties Section
    =============================================== */
-transparent;
+
+.agent-properties-section {
+    padding: 2rem;
+    background: transparent;
     border: 1px solid var(--mls-border-light);
     border-radius: 8px;
     margin-bottom: 2rem;
 }
 
-.agent-properties-section h2 {
-    margin-top: 0;
-    color: var(--mls-text-primary
 .agent-properties-section h2 {
     margin-top: 0;
     color: var(--mls-dark);
@@ -543,7 +543,8 @@ transparent;
 }
 
 /* Agent Card */
-.agent-card {transparent;
+.agent-card {
+    background: var(--mls-bg-primary);
     border: 1px solid var(--mls-border-light);
     border-radius: 8px;
     overflow: hidden;
@@ -553,7 +554,6 @@ transparent;
 
 .agent-card:hover {
     transform: translateY(-4px);
-    box-shadow: 0 4px 16px rgba(26, 58, 82
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
 }
 
@@ -566,8 +566,8 @@ transparent;
 .agent-card-photo {
     width: 100%;
     height: 250px;
-    overflow: hitransparent;
-    border-bottom: 1px solid var(--mls-border-light
+    overflow: hidden;
+    border-bottom: 1px solid var(--mls-border-light);
     background: var(--mls-light-grey);
 }
 
@@ -581,16 +581,40 @@ transparent;
     padding: 1.5rem;
 }
 
-.agent-card-name {
-    margin: 0 0 0.5retext-primary);
+.agent-card-info {
+    padding: 1rem;
 }
 
-.agent-card-agency {
-    color: var(--mls-text-secondary
+.agent-card-name {
+    margin: 0 0 0.5rem;
+    color: var(--mls-text-primary);
+    font-size: 1.2rem;
+}
+
 .agent-card-agency {
     color: var(--mls-grey-green);
     margin: 0 0 1rem;
     font-size: 0.9rem;
+}
+
+.agent-card-meta {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    color: var(--mls-text-secondary);
+    font-size: 0.85rem;
+}
+
+.agent-card-meta .meta-item {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.agent-card-meta .dashicons {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
 }
 
 .agent-card-rating {
