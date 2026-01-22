@@ -80,6 +80,15 @@
             }, duration / steps);
         }
 
+        // Viewport detection helper - MUST be defined BEFORE use
+        $.fn.isInViewport = function() {
+            const elementTop = $(this).offset().top;
+            const elementBottom = elementTop + $(this).outerHeight();
+            const viewportTop = $(window).scrollTop();
+            const viewportBottom = viewportTop + $(window).height();
+            return elementBottom > viewportTop && elementTop < viewportBottom;
+        };
+
         // Trigger counter animations on load
         if ($('.stat-value').length) {
             $('.stat-value').each(function() {
@@ -88,15 +97,6 @@
                 }
             });
         }
-
-        // Viewport detection helper
-        $.fn.isInViewport = function() {
-            const elementTop = $(this).offset().top;
-            const elementBottom = elementTop + $(this).outerHeight();
-            const viewportTop = $(window).scrollTop();
-            const viewportBottom = viewportTop + $(window).height();
-            return elementBottom > viewportTop && elementTop < viewportBottom;
-        };
 
         // Lazy load stats on scroll
         $(window).on('scroll', function() {
