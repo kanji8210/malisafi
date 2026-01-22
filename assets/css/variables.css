@@ -109,6 +109,24 @@ body {
    font-size: var(--font-size-base);
    color: var(--text-base);
    line-height: 1.6;
+   overflow-x: hidden;
+   max-width: 100%;
+}
+
+/* Prevent horizontal overflow on all elements */
+* {
+   box-sizing: border-box;
+}
+
+/* Ensure containers don't overflow on mobile */
+.site-content,
+.entry-content,
+.malisafi-agents-list,
+.malisafi-client-dashboard,
+.malisafi-owner-dashboard,
+.malisafi-developer-dashboard {
+   max-width: 100%;
+   overflow-x: hidden;
 }
 
 h1, h2, h3, h4, h5, h6 {
