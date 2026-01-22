@@ -502,67 +502,12 @@ class Dashboard_Shortcodes {
         <?php
         return ob_get_clean();
     }
-        
-        if (!$is_agent) {
-            return '<div class="malisafi-access-denied">
-                <p>' . __('You do not have permission to access this page.', 'malisafi-mls') . '</p>
-                <p>' . __('This page is for agents only.', 'malisafi-mls') . '</p>
-            </div>';
-        }
-        
-        // Enqueue dashboard assets
-        wp_enqueue_style(
-            'malisafi-agent-dashboard-modern',
-            MALISAFI_MLS_URL . 'assets/css/agent-dashboard-modern.css',
-            [],
-            '1.0.0'
-        );
-        
-        wp_enqueue_script(
-            'malisafi-agent-dashboard-modern',
-            MALISAFI_MLS_URL . 'assets/js/agent-dashboard-modern.js',
-            ['jquery'],
-            '1.0.0',
-            true
-        );
-        
-        // Load modern dashboard template
-        ob_start();
-        
-        $current_user = wp_get_current_user();
-        global $wpdb;
-        
-        // Get variables needed for dashboard
-        $linked_user_id = $current_user->ID;
-        $total_properties = (int) $wpdb->get_var($wpdb->prepare(
-            "SELECT COUNT(*) FROM {$wpdb->posts} WHERE post_type = 'malisafi_property' AND post_author = %d",
-            $linked_user_id
-        ));
-        $published = (int) $wpdb->get_var($wpdb->prepare(
-            "SELECT COUNT(*) FROM {$wpdb->posts} WHERE post_type = 'malisafi_property' AND post_author = %d AND post_status = 'publish'",
-            $linked_user_id
-        ));
-        $pending = (int) $wpdb->get_var($wpdb->prepare(
-            "SELECT COUNT(*) FROM {$wpdb->posts} WHERE post_type = 'malisafi_property' AND post_author = %d AND post_status = 'pending'",
-            $linked_user_id
-        ));
-        $recent_properties = get_posts([
-            'post_type' => 'malisafi_property',
-            'author' => $linked_user_id,
-            'posts_per_page' => 5,
-            'orderby' => 'date',
-            'order' => 'DESC'
-        ]);
-        
-        include MALISAFI_MLS_PATH . 'templates/agent-dashboard-modern.php';
-        
-        return ob_get_clean();
-    }
     
     /**
-     * Agent Properties - Redirect to backend
+     * Agent Properties List
      */
     public static function agent_properties($atts) {
+        // Redirect to dashboard as we now manage properties there
         return self::agent_dashboard($atts);
     }
     
