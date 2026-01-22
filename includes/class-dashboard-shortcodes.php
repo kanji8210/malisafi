@@ -51,6 +51,10 @@ class Dashboard_Shortcodes {
         add_shortcode('malisafi_login', [__CLASS__, 'login_form']);
         add_shortcode('malisafi_register', [__CLASS__, 'register_form']);
         add_shortcode('malisafi_account', [__CLASS__, 'account_page']);
+        
+        // AJAX handlers
+        add_action('wp_ajax_malisafi_custom_login', [__CLASS__, 'ajax_custom_login']);
+        add_action('wp_ajax_nopriv_malisafi_custom_login', [__CLASS__, 'ajax_custom_login']);
     }
     
     /**
@@ -1475,6 +1479,12 @@ class Dashboard_Shortcodes {
             return '<p>' . __('You are already logged in.', 'malisafi-mls') . ' <a href="' . wp_logout_url() . '">' . __('Logout', 'malisafi-mls') . '</a></p>';
         }
         
+        // Get register page URL
+        $register_url = Page_Manager::get_page_url('register');
+        if (!$register_url) {
+            $register_url = wp_registration_url();
+        }
+        
         ob_start();
         ?>
         <div class="malisafi-login-container">
@@ -1483,22 +1493,36 @@ class Dashboard_Shortcodes {
                     <h2><?php _e('Welcome to Malisafi', 'malisafi-mls'); ?></h2>
                     <p><?php _e('Login to access your dashboard', 'malisafi-mls'); ?></p>
                 </div>
-                <?php
-                wp_login_form([
-                    'echo' => true,
-                    'redirect' => home_url(),
-                    'form_id' => 'malisafi-loginform',
-                    'label_username' => __('Username or Email', 'malisafi-mls'),
-                    'label_password' => __('Password', 'malisafi-mls'),
-                    'label_remember' => __('Remember Me', 'malisafi-mls'),
-                    'label_log_in' => __('Log In', 'malisafi-mls'),
-                    'remember' => true
-                ]);
-                ?>
+                
+                <div id="malisafi-login-messages"></div>
+                
+                <form id="malisafi-loginform" name="loginform" method="post">
+                    <p>
+                        <label for="user_login"><?php _e('Username or Email', 'malisafi-mls'); ?></label>
+                        <input type="text" name="log" id="user_login" class="input" value="" size="20" autocomplete="username" required />
+                    </p>
+                    
+                    <p>
+                        <label for="user_pass"><?php _e('Password', 'malisafi-mls'); ?></label>
+                        <input type="password" name="pwd" id="user_pass" class="input" value="" size="20" autocomplete="current-password" required />
+                    </p>
+                    
+                    <p class="login-remember">
+                        <label>
+                            <input name="rememberme" type="checkbox" id="rememberme" value="forever" />
+                            <?php _e('Remember Me', 'malisafi-mls'); ?>
+                        </label>
+                    </p>
+                    
+                    <p class="login-submit">
+                        <input type="submit" name="wp-submit" id="wp-submit" class="button button-primary" value="<?php esc_attr_e('Log In', 'malisafi-mls'); ?>" />
+                    </p>
+                </form>
+                
                 <div class="malisafi-login-links">
                     <p class="register-link">
                         <?php _e("Don't have an account?", 'malisafi-mls'); ?> 
-                        <a href="<?php echo wp_registration_url(); ?>"><?php _e('Register', 'malisafi-mls'); ?></a>
+                        <a href="<?php echo esc_url($register_url); ?>"><?php _e('Register', 'malisafi-mls'); ?></a>
                     </p>
                     <p class="lost-password-link">
                         <a href="<?php echo wp_lostpassword_url(); ?>"><?php _e('Forgot Password?', 'malisafi-mls'); ?></a>
@@ -1628,11 +1652,124 @@ class Dashboard_Shortcodes {
             color: #4a4a4a;
         }
         
+        #malisafi-login-messages {
+            margin-bottom: 20px;
+            border-radius: 8px;
+            display: none;
+        }
+        
+        #malisafi-login-messages.show {
+            display: block;
+        }
+        
+        #malisafi-login-messages.error {
+            background: #fee;
+            border: 1px solid #c33;
+            color: #c33;
+            padding: 12px 16px;
+        }
+        
+        #malisafi-login-messages.success {
+            background: #efe;
+            border: 1px solid #3c3;
+            color: #3c3;
+            padding: 12px 16px;
+        }
+        
+        #malisafi-loginform.loading {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+        
+        #malisafi-loginform.loading #wp-submit::after {
+            content: "";
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            margin-left: 10px;
+            border: 2px solid #ffffff;
+            border-top-color: transparent;
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
         @media (max-width: 768px) {
             .malisafi-login-box {
                 padding: 30px 20px;
             }
+            
+            .malisafi-login-container {
+                padding: 10px;
+            }
         }
+        </style>
+        
+        <script>
+        jQuery(document).ready(function($) {
+            $('#malisafi-loginform').on('submit', function(e) {
+                e.preventDefault();
+                
+                var $form = $(this);
+                var $messages = $('#malisafi-login-messages');
+                var $submit = $('#wp-submit');
+                
+                // Add loading state
+                $form.addClass('loading');
+                $submit.prop('disabled', true);
+                
+                // Hide previous messages
+                $messages.removeClass('show error success').hide();
+                
+                $.ajax({
+                    url: '<?php echo admin_url('admin-ajax.php'); ?>',
+                    type: 'POST',
+                    data: {
+                        action: 'malisafi_custom_login',
+                        username: $('#user_login').val(),
+                        password: $('#user_pass').val(),
+                        remember: $('#rememberme').is(':checked'),
+                        nonce: '<?php echo wp_create_nonce('malisafi_login_nonce'); ?>'
+                    },
+                    success: function(response) {
+                        $form.removeClass('loading');
+                        $submit.prop('disabled', false);
+                        
+                        if (response.success) {
+                            $messages
+                                .addClass('show success')
+                                .html('<strong><?php _e('Success!', 'malisafi-mls'); ?></strong> ' + response.data.message)
+                                .fadeIn();
+                            
+                            // Redirect to dashboard
+                            setTimeout(function() {
+                                window.location.href = response.data.redirect;
+                            }, 1000);
+                        } else {
+                            $messages
+                                .addClass('show error')
+                                .html('<strong><?php _e('Error:', 'malisafi-mls'); ?></strong> ' + response.data.message)
+                                .fadeIn();
+                            
+                            // Clear password field
+                            $('#user_pass').val('').focus();
+                        }
+                    },
+                    error: function() {
+                        $form.removeClass('loading');
+                        $submit.prop('disabled', false);
+                        $messages
+                            .addClass('show error')
+                            .html('<strong><?php _e('Error:', 'malisafi-mls'); ?></strong> <?php _e('Connection error. Please try again.', 'malisafi-mls'); ?>')
+                            .fadeIn();
+                    }
+                });
+            });
+        });
+        </script>
         </style>
         <?php
         return ob_get_clean();
@@ -1913,4 +2050,76 @@ class Dashboard_Shortcodes {
             include MALISAFI_MLS_PATH . 'templates/agent-profile-public.php';
             return ob_get_clean();
         }
+    
+    /**
+     * AJAX handler for custom login
+     */
+    public static function ajax_custom_login() {
+        // Verify nonce
+        if (!isset($_POST['nonce']) || !wp_verify_nonce($_POST['nonce'], 'malisafi_login_nonce')) {
+            wp_send_json_error([
+                'message' => __('Security check failed. Please refresh the page and try again.', 'malisafi-mls')
+            ]);
+        }
+        
+        // Get credentials
+        $username = sanitize_text_field($_POST['username']);
+        $password = $_POST['password'];
+        $remember = isset($_POST['remember']) && $_POST['remember'] === 'true';
+        
+        // Validate inputs
+        if (empty($username) || empty($password)) {
+            wp_send_json_error([
+                'message' => __('Please enter both username and password.', 'malisafi-mls')
+            ]);
+        }
+        
+        // Attempt authentication
+        $user = wp_authenticate($username, $password);
+        
+        // Check for errors
+        if (is_wp_error($user)) {
+            $error_code = $user->get_error_code();
+            
+            // Customize error messages
+            switch ($error_code) {
+                case 'invalid_username':
+                    $message = __('The username you entered does not exist. Please check and try again.', 'malisafi-mls');
+                    break;
+                case 'incorrect_password':
+                case 'invalid_email':
+                    $message = __('Incorrect password. Please try again.', 'malisafi-mls');
+                    break;
+                default:
+                    $message = __('Login failed. Please check your credentials and try again.', 'malisafi-mls');
+            }
+            
+            wp_send_json_error(['message' => $message]);
+        }
+        
+        // Log the user in
+        wp_clear_auth_cookie();
+        wp_set_current_user($user->ID);
+        wp_set_auth_cookie($user->ID, $remember);
+        
+        // Determine redirect URL based on user role
+        $redirect_url = home_url();
+        
+        if (in_array('administrator', $user->roles) || in_array('malisafi_moderator', $user->roles)) {
+            $redirect_url = admin_url();
+        } elseif (in_array('malisafi_agent_basic', $user->roles) || in_array('malisafi_agent_premium', $user->roles)) {
+            $redirect_url = Page_Manager::get_page_url('agent_dashboard') ?: home_url();
+        } elseif (in_array('malisafi_owner', $user->roles)) {
+            $redirect_url = Page_Manager::get_page_url('owner_dashboard') ?: home_url();
+        } elseif (in_array('malisafi_developer', $user->roles)) {
+            $redirect_url = Page_Manager::get_page_url('developer_dashboard') ?: home_url();
+        } elseif (in_array('malisafi_client', $user->roles)) {
+            $redirect_url = Page_Manager::get_page_url('client_dashboard') ?: home_url();
+        }
+        
+        wp_send_json_success([
+            'message' => sprintf(__('Welcome back, %s!', 'malisafi-mls'), $user->display_name),
+            'redirect' => $redirect_url
+        ]);
+    }
 }
