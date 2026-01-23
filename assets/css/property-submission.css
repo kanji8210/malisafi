@@ -3,11 +3,26 @@
  * Modern, clean, and user-friendly design
  */
 
+/* Prevent horizontal overflow on body when wizard is active */
+body.malisafi-submission-page,
+body.page-template-property-submission {
+    overflow-x: hidden !important;
+    max-width: 100vw !important;
+}
+
 /* Global box-sizing for submission wizard */
+.malisafi-submission-wizard,
 .malisafi-submission-wizard *,
 .malisafi-submission-wizard *::before,
 .malisafi-submission-wizard *::after {
     box-sizing: border-box;
+}
+
+/* Prevent any child from causing overflow */
+.malisafi-submission-wizard > *,
+.wizard-form > *,
+.wizard-step > * {
+    max-width: 100%;
 }
 
 .malisafi-submission-wizard {
@@ -15,7 +30,7 @@
     margin: 40px auto;
     padding: 20px;
     overflow-x: hidden;
-    box-sizing: border-box;
+    width: 100%;
 }
 
 /* Progress Steps */
@@ -24,6 +39,9 @@
     justify-content: space-between;
     margin-bottom: 40px;
     position: relative;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
 }
 
 .wizard-progress::before {
@@ -191,6 +209,9 @@
 /* Form Elements */
 .form-row {
     margin-bottom: 24px;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
 }
 
 .form-row-group {
@@ -263,10 +284,14 @@ select.form-control {
 .gps-input-group {
     display: flex;
     gap: 10px;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
 }
 
 .gps-input-group .form-control {
     flex: 1;
+    min-width: 0;
 }
 
 .btn-get-location {
@@ -570,6 +595,9 @@ select.form-control {
     margin-top: 40px;
     padding-top: 24px;
     border-top: 1px solid #e5e7eb;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
 }
 
 .btn {
@@ -584,6 +612,8 @@ select.form-control {
     align-items: center;
     gap: 8px;
     font-family: inherit;
+    box-sizing: border-box;
+    white-space: nowrap;
 }
 
 .btn:disabled {
