@@ -7,36 +7,19 @@
     'use strict';
 
     $(document).ready(function() {
-        // Sidebar Toggle
+        // Sidebar Toggle - Disabled (sidebar always expanded)
         const sidebar = $('#agentSidebar');
         const toggleBtn = $('#sidebarToggle');
-        const sidebarState = localStorage.getItem('agentSidebarCollapsed');
 
-        // Restore saved state
-        if (sidebarState === 'true') {
-            sidebar.addClass('collapsed');
-        }
+        // Clean up old localStorage
+        localStorage.removeItem('agentSidebarCollapsed');
 
-        // Toggle handler
+        // Remove toggle functionality
         toggleBtn.on('click', function(e) {
             e.preventDefault();
-            sidebar.toggleClass('collapsed');
-            
-            // Save state
-            const isCollapsed = sidebar.hasClass('collapsed');
-            localStorage.setItem('agentSidebarCollapsed', isCollapsed);
-            
-            // Update aria-label
-            $(this).attr('aria-label', isCollapsed ? 'Expand Sidebar' : 'Collapse Sidebar');
+            // Toggle disabled - sidebar stays expanded
         });
 
-        // Mobile: Close sidebar when clicking nav item
-        if ($(window).width() <= 768) {
-            $('.nav-item').on('click', function() {
-                sidebar.addClass('collapsed');
-                localStorage.setItem('agentSidebarCollapsed', 'true');
-            });
-        }
 
         // Smooth scroll for same-page anchors
         $('a[href^="#"]').on('click', function(e) {
