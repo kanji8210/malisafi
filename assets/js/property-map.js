@@ -15,15 +15,19 @@
         }
 
         // Check if map data is available
-        if (typeof malisafiMapData === 'undefined' || !malisafiMapData.properties || malisafiMapData.properties.length === 0) {
-            console.warn('No property data available for map');
+        if (typeof malisafiMapData === 'undefined') {
+            console.warn('Map data object not found');
             return;
         }
 
-        // Initialize map
+        // Initialize map - use default center if no properties
+        var mapCenter = (malisafiMapData.properties && malisafiMapData.properties.length > 0) 
+            ? [malisafiMapData.center.lat, malisafiMapData.center.lng]
+            : [-1.286389, 36.817223]; // Nairobi default
+            
         var map = L.map('malisafi-property-map').setView(
-            [malisafiMapData.center.lat, malisafiMapData.center.lng],
-            malisafiMapData.zoom
+            mapCenter,
+            malisafiMapData.zoom || 12
         );
 
         // Add OpenStreetMap tiles
@@ -80,7 +84,9 @@
         // Prepare markers
         var markers = [];
         
-        malisafiMapData.properties.forEach(function(property) {
+        // Only add property markers if properties exist
+        if (malisafiMapData.properties && malisafiMapData.properties.length > 0) {
+            malisafiMapData.properties.forEach(function(property) {
             // Create marker
             var marker = L.marker([property.lat, property.lng], {
                 icon: propertyIcon,
@@ -126,9 +132,10 @@
 
             markers.push(marker);
         });
+        }
 
         // Add markers to map with clustering if enabled
-        if (malisafiMapData.cluster && typeof L.markerClusterGroup !== 'undefined') {
+        if (markers.length > 0 && malisafiMapData.cluster && typeof L.markerClusterGroup !== 'undefined') {
             var markerCluster = L.markerClusterGroup({
                 spiderfyOnMaxZoom: true,
                 showCoverageOnHover: false,
@@ -192,13 +199,19 @@
         });
 
         // Near Me functionality - Geolocation
-        $('#near-me-btn').on('click', function() {
+        $('#near-me-btn').on('click', function(e) {
+            e.preventDefault();
+            console.log('Near Me button clicked');
+            
             var btn = $(this);
             
             if (!navigator.geolocation) {
                 alert('Geolocation is not supported by your browser');
+                console.error('Geolocation not supported');
                 return;
             }
+            
+            console.log('Starting geolocation...');
             
             // Show loading state
             btn.prop('disabled', true);
@@ -208,6 +221,8 @@
             navigator.geolocation.getCurrentPosition(
                 function(position) {
                     // Success callback
+                    console.log('Location obtained:', position.coords);
+                    
                     var userLat = position.coords.latitude;
                     var userLng = position.coords.longitude;
                     
@@ -226,6 +241,8 @@
                         .bindPopup('<strong>Your Location</strong>')
                         .openPopup();
                     
+                    console.log('User marker added to map');
+                    
                     // Reset button
                     btn.prop('disabled', false);
                     btn.find('.dashicons').removeClass('dashicons-update').addClass('dashicons-location');
@@ -233,6 +250,8 @@
                 },
                 function(error) {
                     // Error callback
+                    console.error('Geolocation error:', error);
+                    
                     var errorMsg = 'Unable to get your location';
                     
                     switch(error.code) {
