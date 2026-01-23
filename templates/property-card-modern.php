@@ -74,7 +74,11 @@ $is_new = (time() - $post_date) < (7 * 24 * 60 * 60);
         <?php endif; ?>
         
         <?php if (!empty($status)) : ?>
-            <span class="status-badge"><?php echo esc_html(ucfirst(str_replace('-', ' ', $status))); ?></span>
+            <?php 
+            // Format status for display
+            $status_display = ucwords(str_replace('-', ' ', $status));
+            ?>
+            <span class="status-badge"><?php echo esc_html($status_display); ?></span>
         <?php endif; ?>
         
         <?php if (!empty($setting)) : ?>
@@ -112,8 +116,19 @@ $is_new = (time() - $post_date) < (7 * 24 * 60 * 60);
     <div class="property-card-body">
         
         <div class="property-header-inline">
-            <div class="property-price">
-                <?php echo esc_html($formatted_price); ?>
+            <div class="property-price-wrapper">
+                <div class="property-price">
+                    <?php echo esc_html($formatted_price); ?>
+                </div>
+                <?php if (!empty($status)) : ?>
+                    <?php 
+                    $status_display = ucwords(str_replace('-', ' ', $status));
+                    $status_class = 'status-tag-' . sanitize_html_class($status);
+                    ?>
+                    <span class="property-status-tag <?php echo esc_attr($status_class); ?>">
+                        <?php echo esc_html($status_display); ?>
+                    </span>
+                <?php endif; ?>
             </div>
             
             <div class="property-actions-inline">

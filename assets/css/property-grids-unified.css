@@ -42,15 +42,16 @@
 .property-image-wrapper .listing-type-badge,
 .featured-image .listing-type-badge {
     position: absolute;
-    padding: 6px 14px;
+    padding: 7px 16px;
     font-size: 11px;
     font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.8px;
     color: #ffffff;
-    border-radius: 4px;
-    z-index: 2;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    border-radius: 5px;
+    z-index: 3;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.25);
+    backdrop-filter: blur(4px);
 }
 
 /* Listing Type Badge - Purple/Violet Background (Top Left) */
@@ -62,19 +63,20 @@
     left: 12px;
 }
 
-/* Status Badge - Red Background (Moved down when listing type present) */
+/* Status Badge - Gradient Background for better visibility */
 .property-image .status-badge,
 .property-image-wrapper .status-badge,
 .featured-image .status-badge {
-    background: #dc2626;
+    background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
     top: 12px;
     left: 12px;
+    font-weight: 800;
 }
 
 .property-image .listing-type-badge + .status-badge,
 .property-image-wrapper .listing-type-badge + .status-badge,
 .featured-image .listing-type-badge + .status-badge {
-    top: 44px;
+    top: 46px;
 }
 
 /* Setting Badge - Dark Blue Background (Right) */
@@ -144,9 +146,10 @@
     .property-image .listing-type-badge,
     .property-image-wrapper .listing-type-badge,
     .featured-image .listing-type-badge {
-        padding: 4px 10px;
+        padding: 5px 12px;
         font-size: 10px;
         top: 10px;
+        letter-spacing: 0.6px;
     }
     
     .property-image .status-badge,
@@ -167,7 +170,7 @@
     .property-image .listing-type-badge + .status-badge,
     .property-image-wrapper .listing-type-badge + .status-badge,
     .featured-image .listing-type-badge + .status-badge {
-        top: 36px;
+        top: 38px;
     }
 }
 

@@ -3,10 +3,19 @@
  * Modern, clean, and user-friendly design
  */
 
+/* Global box-sizing for submission wizard */
+.malisafi-submission-wizard *,
+.malisafi-submission-wizard *::before,
+.malisafi-submission-wizard *::after {
+    box-sizing: border-box;
+}
+
 .malisafi-submission-wizard {
     max-width: 900px;
     margin: 40px auto;
     padding: 20px;
+    overflow-x: hidden;
+    box-sizing: border-box;
 }
 
 /* Progress Steps */
@@ -139,10 +148,15 @@
     border-radius: 12px;
     padding: 40px;
     box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    box-sizing: border-box;
+    max-width: 100%;
+    overflow-x: hidden;
 }
 
 .wizard-step {
     display: none;
+    box-sizing: border-box;
+    max-width: 100%;
 }
 
 .wizard-step.active {
@@ -184,6 +198,8 @@
     grid-template-columns: 1fr 1fr;
     gap: 20px;
     margin-bottom: 24px;
+    box-sizing: border-box;
+    width: 100%;
 }
 
 .form-row label {
@@ -207,6 +223,8 @@
     font-size: 15px;
     transition: all 0.2s ease;
     font-family: inherit;
+    box-sizing: border-box;
+    max-width: 100%;
 }
 
 .form-control:focus {
@@ -400,6 +418,9 @@ select.form-control {
     grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
     gap: 16px;
     margin-top: 30px;
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 100%;
 }
 
 .gallery-item {
@@ -610,10 +631,12 @@ select.form-control {
     .malisafi-submission-wizard {
         padding: 10px;
         margin: 20px auto;
+        max-width: 100%;
     }
 
     .wizard-form {
-        padding: 24px;
+        padding: 20px;
+        overflow-x: hidden;
     }
 
     .wizard-progress {
@@ -633,6 +656,12 @@ select.form-control {
 
     .form-row-group {
         grid-template-columns: 1fr;
+        gap: 16px;
+    }
+
+    .image-gallery {
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+        gap: 12px;
     }
 
     .checkbox-grid {
