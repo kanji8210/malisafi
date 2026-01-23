@@ -102,24 +102,23 @@ $ratings_table = $wpdb->prefix . 'mf_agent_ratings';
                 </div>
             </div>
         </a>
-        <div class="agent-card-actions" style="margin-top:8px;text-align:center;">
+        <div class="agent-card-actions">
             <a href="<?php echo esc_url($profile_url); ?>" class="button button-small"><?php _e('View Profile', 'malisafi-mls'); ?></a>
             <button type="button" class="button button-small button-accent button-rate-agent" 
                 data-agent-id="<?php echo esc_attr($agent_id); ?>"
                 data-agent-name="<?php echo esc_attr(get_the_title()); ?>"><?php _e('Rate Agent', 'malisafi-mls'); ?></button>
-                    <button type="button" class="button button-small button-view-details" 
-                        data-agent-id="<?php echo esc_attr($agent_id); ?>"
-                        data-agent-name="<?php echo esc_attr(get_the_title()); ?>"
-                        data-agent-agency="<?php echo esc_attr($agency); ?>"
-                        data-agent-experience="<?php echo esc_attr($experience); ?>"
-                        data-agent-phone="<?php echo esc_attr($phone); ?>"
-                        data-agent-email="<?php echo esc_attr($email); ?>"
-                        data-agent-rating="<?php echo esc_attr($avg_rating); ?>"
-                        data-agent-total-ratings="<?php echo esc_attr($total_ratings); ?>"
-                        data-agent-photo="<?php echo has_post_thumbnail() ? esc_url(get_the_post_thumbnail_url($agent_id, 'medium')) : MALISAFI_MLS_URL . 'assets/images/default-agent.png'; ?>"
-                    ><?php _e('View details', 'malisafi-mls'); ?></button>
-                </div>
-            </div>
+            <button type="button" class="button button-small button-view-details" 
+                data-agent-id="<?php echo esc_attr($agent_id); ?>"
+                data-agent-name="<?php echo esc_attr(get_the_title()); ?>"
+                data-agent-agency="<?php echo esc_attr($agency); ?>"
+                data-agent-experience="<?php echo esc_attr($experience); ?>"
+                data-agent-phone="<?php echo esc_attr($phone); ?>"
+                data-agent-email="<?php echo esc_attr($email); ?>"
+                data-agent-rating="<?php echo esc_attr($avg_rating); ?>"
+                data-agent-total-ratings="<?php echo esc_attr($total_ratings); ?>"
+                data-agent-photo="<?php echo has_post_thumbnail() ? esc_url(get_the_post_thumbnail_url($agent_id, 'medium')) : MALISAFI_MLS_URL . 'assets/images/default-agent.png'; ?>"
+            ><?php _e('View details', 'malisafi-mls'); ?></button>
+        </div>
     </div>
     
 

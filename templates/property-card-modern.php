@@ -63,6 +63,16 @@ $is_new = (time() - $post_date) < (7 * 24 * 60 * 60);
     <div class="property-image-wrapper">
         <?php echo $image_html; ?>
         
+        <?php 
+        // Get listing type from taxonomy
+        $listing_types = get_the_terms($property_id, 'malisafi_property_type');
+        $listing_type = !empty($listing_types) && !is_wp_error($listing_types) ? $listing_types[0]->name : '';
+        ?>
+        
+        <?php if (!empty($listing_type)) : ?>
+            <span class="listing-type-badge"><?php echo esc_html($listing_type); ?></span>
+        <?php endif; ?>
+        
         <?php if (!empty($status)) : ?>
             <span class="status-badge"><?php echo esc_html(ucfirst(str_replace('-', ' ', $status))); ?></span>
         <?php endif; ?>

@@ -31,13 +31,16 @@
 }
 
 /* ===== UNIFIED BADGES ===== */
-/* Status and Setting Badges - Works in all contexts */
+/* Status, Setting, and Listing Type Badges - Works in all contexts */
 .property-image .status-badge,
 .property-image-wrapper .status-badge,
 .featured-image .status-badge,
 .property-image .setting-badge,
 .property-image-wrapper .setting-badge,
-.featured-image .setting-badge {
+.featured-image .setting-badge,
+.property-image .listing-type-badge,
+.property-image-wrapper .listing-type-badge,
+.featured-image .listing-type-badge {
     position: absolute;
     padding: 6px 14px;
     font-size: 11px;
@@ -50,13 +53,28 @@
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
 }
 
-/* Status Badge - Red Background (Left) */
+/* Listing Type Badge - Purple/Violet Background (Top Left) */
+.property-image .listing-type-badge,
+.property-image-wrapper .listing-type-badge,
+.featured-image .listing-type-badge {
+    background: linear-gradient(135deg, #7c3aed 0%, #6366f1 100%);
+    top: 12px;
+    left: 12px;
+}
+
+/* Status Badge - Red Background (Moved down when listing type present) */
 .property-image .status-badge,
 .property-image-wrapper .status-badge,
 .featured-image .status-badge {
     background: #dc2626;
     top: 12px;
     left: 12px;
+}
+
+.property-image .listing-type-badge + .status-badge,
+.property-image-wrapper .listing-type-badge + .status-badge,
+.featured-image .listing-type-badge + .status-badge {
+    top: 44px;
 }
 
 /* Setting Badge - Dark Blue Background (Right) */
@@ -122,7 +140,10 @@
     .featured-image .status-badge,
     .property-image .setting-badge,
     .property-image-wrapper .setting-badge,
-    .featured-image .setting-badge {
+    .featured-image .setting-badge,
+    .property-image .listing-type-badge,
+    .property-image-wrapper .listing-type-badge,
+    .featured-image .listing-type-badge {
         padding: 4px 10px;
         font-size: 10px;
         top: 10px;
@@ -130,7 +151,10 @@
     
     .property-image .status-badge,
     .property-image-wrapper .status-badge,
-    .featured-image .status-badge {
+    .featured-image .status-badge,
+    .property-image .listing-type-badge,
+    .property-image-wrapper .listing-type-badge,
+    .featured-image .listing-type-badge {
         left: 10px;
     }
     
@@ -140,10 +164,10 @@
         right: 10px;
     }
     
-    .property-image .status-badge + .setting-badge,
-    .property-image-wrapper .status-badge + .setting-badge,
-    .featured-image .status-badge + .setting-badge {
-        top: 38px;
+    .property-image .listing-type-badge + .status-badge,
+    .property-image-wrapper .listing-type-badge + .status-badge,
+    .featured-image .listing-type-badge + .status-badge {
+        top: 36px;
     }
 }
 

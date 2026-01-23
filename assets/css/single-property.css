@@ -355,8 +355,8 @@
     justify-content: space-between;
     align-items: flex-start;
     gap: var(--mls-space-xl);
-    margin-bottom: var(--mls-space-xl);
-    padding-bottom: var(--mls-space-xl);
+    margin-bottom: var(--mls-space-md);
+    padding-bottom: var(--mls-space-md);
     border-bottom: 1px solid var(--mls-gray-200);
 }
 
@@ -483,7 +483,7 @@
     align-items: center;
     flex-wrap: wrap;
     gap: var(--mls-space);
-    margin: var(--mls-space-xl) 0;
+    margin: 0 0 var(--mls-space-md) 0;
     padding: var(--mls-space);
     background: linear-gradient(135deg, rgba(30, 82, 119, 0.03), rgba(30, 82, 119, 0.08));
     border-radius: var(--mls-radius-lg);

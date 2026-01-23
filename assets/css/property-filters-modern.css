@@ -95,7 +95,7 @@
 /* ===== PROPERTY SEARCH GRID ===== */
 .property-search {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    grid-template-columns: repeat(3, 1fr);
     gap: 16px;
     margin-bottom: 16px;
 }
@@ -429,6 +429,18 @@
 }
 
 /* ===== RESPONSIVE ===== */
+
+/* Desktop Large - Force 3 columns max */
+@media (min-width: 1025px) {
+    .property-search {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 16px;
+    }
+    
+    .search-submit {
+        grid-column: span 1;
+    }
+}
 
 /* Tablet (2 columns + sidebar on side) */
 @media (max-width: 1024px) and (min-width: 769px) {

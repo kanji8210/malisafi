@@ -28,8 +28,8 @@
     position: relative;
     overflow: hidden;
     aspect-ratio: 4 / 3;
-    height: auto;
-    min-height: 0;
+    height: 240px;
+    min-height: 240px;
     background: linear-gradient(135deg, var(--color-ash-white, #f4f5f6) 0%, var(--color-light-gray, #e8ebed) 100%);
     flex-shrink: 0;
 }
@@ -39,10 +39,13 @@
     width: 100%;
     height: 100%;
     object-fit: cover;
+    object-position: center;
     display: block;
     backface-visibility: hidden;
     transform: translateZ(0);
     transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
 }
 
 .property-card-modern:hover .property-image-wrapper img {
@@ -229,24 +232,30 @@
     display: flex !important;
     flex-direction: row !important;
     align-items: center !important;
-    gap: 5px !important;
+    gap: 6px !important;
     margin: 0 0 14px 0 !important;
     font-size: 14px !important;
     color: #666 !important;
-    overflow: hidden !important;
+    line-height: 1.5 !important;
+    min-height: 24px !important;
 }
 
 .property-location .dashicons,
 .property-location .dashicons-location {
-    font-size: 20px !important;
-    width: 20px !important;
-    height: 20px !important;
-    line-height: 1 !important;
+    font-size: 18px !important;
+    width: 18px !important;
+    height: 18px !important;
+    min-width: 18px !important;
+    line-height: 18px !important;
     color: #dc2626 !important;
     flex-shrink: 0 !important;
-    display: inline-block !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
     visibility: visible !important;
     opacity: 1 !important;
+    margin: 0 !important;
+    padding: 0 !important;
 }
 
 .property-location .dashicons::before,
@@ -255,16 +264,17 @@
     font-family: dashicons !important;
     display: inline-block !important;
     color: #dc2626 !important;
-    font-size: 20px !important;
-    line-height: 1 !important;
-    width: 20px !important;
-    height: 20px !important;
+    font-size: 18px !important;
+    line-height: 18px !important;
+    width: 18px !important;
+    height: 18px !important;
     speak: never !important;
     font-weight: normal !important;
     font-variant: normal !important;
     text-transform: none !important;
     -webkit-font-smoothing: antialiased !important;
     -moz-osx-font-smoothing: grayscale !important;
+    margin: 0 !important;
 }
 
 .property-location span {
@@ -272,6 +282,7 @@
     text-overflow: ellipsis;
     white-space: nowrap;
     flex: 1;
+    line-height: 1.5;
 }
 
 /* ===== EXCERPT ===== */

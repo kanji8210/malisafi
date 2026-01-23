@@ -37,8 +37,8 @@ class Malisafi_Property_Moderation {
         // Add verification status on property save
         add_action('save_post_malisafi_property', array(__CLASS__, 'set_verification_status'), 10, 2);
         
-        // Display verification badge on frontend
-        add_filter('the_content', array(__CLASS__, 'add_verification_badge'));
+        // Display verification badge on frontend - DISABLED (badges shown in header instead)
+        // add_filter('the_content', array(__CLASS__, 'add_verification_badge'));
     }
     
     /**
