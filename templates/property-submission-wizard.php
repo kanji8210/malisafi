@@ -307,7 +307,14 @@ $property_id = isset($_GET['property_id']) ? intval($_GET['property_id']) : 0;
                         <?php _e('Get My Location', 'malisafi-mls'); ?>
                     </button>
                 </div>
-                <span class=\"field-hint\"><?php _e('Using your current location helps enable map search and shows your property on the map. You can slightly adjust the coordinates for privacy before saving.', 'malisafi-mls'); ?></span>
+                <div class="field-hint privacy-notice" style="background: #e8f4f8; padding: 10px; border-radius: 4px; margin-top: 8px; border-left: 3px solid #0073aa;">
+                    <p style="margin: 0 0 5px 0; font-weight: 600; color: #0073aa; font-size: 13px;">
+                        <span style="font-size: 16px;">🛡️</span> <?php _e('Privacy Protection', 'malisafi-mls'); ?>
+                    </p>
+                    <p style="margin: 0; font-size: 12px; line-height: 1.4;">
+                        <?php _e('Your exact GPS location will be automatically offset by 200-400 meters on public maps for security. Admins see the precise location. Please enter accurate coordinates.', 'malisafi-mls'); ?>
+                    </p>
+                </div>
             </div>
 
             <div id="property-map" class="property-map"></div>

@@ -343,8 +343,9 @@ $kenya_counties = array(
                             <button type="button" class="button" onclick="malisafiGetLocation()">
                                 📍 <?php _e('Use My Location', 'malisafi-mls'); ?>
                             </button>
-                            <p class="description">
-                                <?php _e('Using your current location helps enable map search and shows your property on the map. You can slightly adjust the coordinates for privacy before saving.', 'malisafi-mls'); ?>
+                            <p class="description" style="background: #e8f4f8; padding: 10px; margin-top: 10px; border-left: 4px solid #0073aa;">
+                                <strong style="color: #0073aa;">🛡️ <?php _e('Privacy & Security:', 'malisafi-mls'); ?></strong><br>
+                                <?php _e('For security, GPS coordinates are automatically offset by 200-400 meters on public maps. You (admin) will see the exact location, but public viewers will see an approximate location. Enter precise coordinates for accurate admin tracking.', 'malisafi-mls'); ?>
                             </p>
                         </td>
                     </tr>

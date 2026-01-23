@@ -1488,6 +1488,20 @@ class Dashboard_Shortcodes {
                         </div>
                     </div>
                     
+                    <div class="form-row">
+                        <div class="form-group full-width">
+                            <div class="gps-privacy-notice" style="padding: 12px; background: #e8f4f8; border-left: 4px solid #0073aa; margin-bottom: 15px;">
+                                <p style="margin: 0 0 8px 0; font-weight: 600; color: #0073aa;">
+                                    <span class="dashicons dashicons-shield" style="vertical-align: middle;"></span>
+                                    <?php _e('Privacy & Security Protection', 'malisafi-mls'); ?>
+                                </p>
+                                <p style="margin: 0; font-size: 13px; line-height: 1.5;">
+                                    <?php _e('For your security and privacy, the exact GPS coordinates you provide will be automatically offset by 200-400 meters when displayed publicly on the map. This protects the exact location of your property while still showing it in the correct area. <strong>Administrators will see the accurate location.</strong> Please enter the precise coordinates for best results.', 'malisafi-mls'); ?>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    
                     <div class="form-row two-col">
                         <div class="form-group">
                             <label for="property_latitude"><?php _e('Latitude', 'malisafi-mls'); ?></label>

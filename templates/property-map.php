@@ -129,6 +129,26 @@ if ($properties_query->have_posts()) {
         
         // Only add properties with valid coordinates
         if (!empty($latitude) && !empty($longitude)) {
+            // Privacy/Security: Offset coordinates for non-admin users
+            // Admins see exact location, public sees offset by 200-400m
+            if (!current_user_can('manage_options')) {
+                // Generate consistent offset based on property ID (same property = same offset)
+                $seed = intval($property_id);
+                mt_srand($seed);
+                
+                // Random offset between 200-400 meters
+                // 1 degree latitude ≈ 111km, so 300m ≈ 0.0027 degrees
+                $offset_distance = (mt_rand(200, 400) / 1000) / 111; // Convert meters to degrees
+                $offset_angle = mt_rand(0, 360); // Random direction
+                
+                // Apply offset
+                $latitude = floatval($latitude) + ($offset_distance * cos(deg2rad($offset_angle)));
+                $longitude = floatval($longitude) + ($offset_distance * sin(deg2rad($offset_angle)));
+                
+                // Reset random seed
+                mt_srand();
+            }
+            
             // Get property data
             $price = get_post_meta($property_id, '_malisafi_price', true);
             $currency = get_post_meta($property_id, '_malisafi_currency', true) ?: 'USD';
@@ -229,6 +249,14 @@ $map_height = (int)$atts['height'];
 
 <div class="malisafi-property-map-container">
     <?php if (!empty($properties)): ?>
+        <?php if (current_user_can('manage_options')): ?>
+            <div class="admin-notice" style="background: #fff3cd; border-left: 4px solid #ffc107; padding: 12px; margin-bottom: 15px;">
+                <p style="margin: 0; font-size: 13px;">
+                    <strong>🔒 Admin View:</strong> You are seeing the <strong>exact GPS coordinates</strong> for all properties. 
+                    Public users will see locations offset by 200-400 meters for privacy and security.
+                </p>
+            </div>
+        <?php endif; ?>
         <div class="map-controls">
             <div class="map-property-count">
                 <?php printf(_n('%s property found', '%s properties found', count($properties), 'malisafi-mls'), number_format_i18n(count($properties))); ?>
