@@ -195,6 +195,10 @@ if (current_user_can('manage_options')) {
 wp_enqueue_style('leaflet', 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css', array(), '1.9.4');
 wp_enqueue_script('leaflet', 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js', array(), '1.9.4', true);
 
+// Enqueue Leaflet Geocoder for address search
+wp_enqueue_style('leaflet-geocoder', 'https://unpkg.com/leaflet-control-geocoder@2.4.0/dist/Control.Geocoder.css', array('leaflet'), '2.4.0');
+wp_enqueue_script('leaflet-geocoder', 'https://unpkg.com/leaflet-control-geocoder@2.4.0/dist/Control.Geocoder.js', array('leaflet'), '2.4.0', true);
+
 // Enqueue marker clustering if enabled
 if ($atts['cluster'] === 'yes' && count($properties) > 10) {
     wp_enqueue_style('leaflet-markercluster', 'https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css', array('leaflet'), '1.5.3');
@@ -229,10 +233,16 @@ $map_height = (int)$atts['height'];
             <div class="map-property-count">
                 <?php printf(_n('%s property found', '%s properties found', count($properties), 'malisafi-mls'), number_format_i18n(count($properties))); ?>
             </div>
-            <button id="fullscreen-map-btn" class="fullscreen-btn" title="<?php _e('Fullscreen View', 'malisafi-mls'); ?>">
-                <span class="dashicons dashicons-fullscreen-alt"></span>
-                <span class="btn-text"><?php _e('Fullscreen', 'malisafi-mls'); ?></span>
-            </button>
+            <div class="map-control-buttons">
+                <button id="near-me-btn" class="map-control-btn" title="<?php _e('Search Near You', 'malisafi-mls'); ?>">
+                    <span class="dashicons dashicons-location"></span>
+                    <span class="btn-text"><?php _e('Near Me', 'malisafi-mls'); ?></span>
+                </button>
+                <button id="fullscreen-map-btn" class="fullscreen-btn" title="<?php _e('Fullscreen View', 'malisafi-mls'); ?>">
+                    <span class="dashicons dashicons-fullscreen-alt"></span>
+                    <span class="btn-text"><?php _e('Fullscreen', 'malisafi-mls'); ?></span>
+                </button>
+            </div>
         </div>
         <div id="malisafi-property-map" style="height: <?php echo esc_attr($map_height); ?>px;"></div>
     <?php else: ?>

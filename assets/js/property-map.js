@@ -32,6 +32,42 @@
             maxZoom: 19
         }).addTo(map);
 
+        // Add geocoding control for address search (Kenya-specific)
+        if (typeof L.Control.Geocoder !== 'undefined') {
+            var geocoder = L.Control.geocoder({
+                defaultMarkGeocode: false,
+                geocoder: L.Control.Geocoder.nominatim({
+                    geocodingQueryParams: {
+                        countrycodes: 'ke',  // Kenya-specific
+                        limit: 5
+                    }
+                }),
+                placeholder: 'Search address in Kenya...',
+                errorMessage: 'No results found'
+            }).on('markgeocode', function(e) {
+                var bbox = e.geocode.bbox;
+                var poly = L.polygon([
+                    bbox.getSouthEast(),
+                    bbox.getNorthEast(),
+                    bbox.getNorthWest(),
+                    bbox.getSouthWest()
+                ]);
+                map.fitBounds(poly.getBounds());
+                
+                // Add temporary marker
+                L.marker(e.geocode.center, {
+                    icon: L.divIcon({
+                        className: 'search-result-marker',
+                        html: '<div class="marker-pin search-marker"><svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg></div>',
+                        iconSize: [30, 42],
+                        iconAnchor: [15, 42]
+                    })
+                }).addTo(map)
+                    .bindPopup('<strong>' + e.geocode.name + '</strong>')
+                    .openPopup();
+            }).addTo(map);
+        }
+
         // Custom icon for property markers
         var propertyIcon = L.divIcon({
             className: 'malisafi-marker',
@@ -153,6 +189,77 @@
                 btn.find('.dashicons').removeClass('dashicons-fullscreen-exit-alt').addClass('dashicons-fullscreen-alt');
                 btn.find('.btn-text').text('Fullscreen');
             }
+        });
+
+        // Near Me functionality - Geolocation
+        $('#near-me-btn').on('click', function() {
+            var btn = $(this);
+            
+            if (!navigator.geolocation) {
+                alert('Geolocation is not supported by your browser');
+                return;
+            }
+            
+            // Show loading state
+            btn.prop('disabled', true);
+            btn.find('.dashicons').removeClass('dashicons-location').addClass('dashicons-update');
+            btn.find('.btn-text').text('Locating...');
+            
+            navigator.geolocation.getCurrentPosition(
+                function(position) {
+                    // Success callback
+                    var userLat = position.coords.latitude;
+                    var userLng = position.coords.longitude;
+                    
+                    // Center map on user location
+                    map.setView([userLat, userLng], 13);
+                    
+                    // Add user location marker
+                    var userMarker = L.marker([userLat, userLng], {
+                        icon: L.divIcon({
+                            className: 'user-location-marker',
+                            html: '<div class="marker-pin user-marker"><svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3" fill="white"/></svg></div>',
+                            iconSize: [30, 30],
+                            iconAnchor: [15, 15]
+                        })
+                    }).addTo(map)
+                        .bindPopup('<strong>Your Location</strong>')
+                        .openPopup();
+                    
+                    // Reset button
+                    btn.prop('disabled', false);
+                    btn.find('.dashicons').removeClass('dashicons-update').addClass('dashicons-location');
+                    btn.find('.btn-text').text('Near Me');
+                },
+                function(error) {
+                    // Error callback
+                    var errorMsg = 'Unable to get your location';
+                    
+                    switch(error.code) {
+                        case error.PERMISSION_DENIED:
+                            errorMsg = 'Location permission denied. Please enable location access.';
+                            break;
+                        case error.POSITION_UNAVAILABLE:
+                            errorMsg = 'Location information unavailable.';
+                            break;
+                        case error.TIMEOUT:
+                            errorMsg = 'Location request timed out.';
+                            break;
+                    }
+                    
+                    alert(errorMsg);
+                    
+                    // Reset button
+                    btn.prop('disabled', false);
+                    btn.find('.dashicons').removeClass('dashicons-update').addClass('dashicons-location');
+                    btn.find('.btn-text').text('Near Me');
+                },
+                {
+                    enableHighAccuracy: true,
+                    timeout: 10000,
+                    maximumAge: 0
+                }
+            );
         });
 
         // Listen for fullscreen change events
