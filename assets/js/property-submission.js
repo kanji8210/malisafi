@@ -492,11 +492,11 @@
                     const lat = position.coords.latitude.toFixed(6);
                     const lng = position.coords.longitude.toFixed(6);
                     $('#property_gps').val(lat + ', ' + lng);
-                    $('.btn-get-location').html('<span class="icon">📍</span> Get My Location').prop('disabled', false);
+                    $('.btn-get-location').html('<span class="icon">\u{1F4CD}</span> Get My Location').prop('disabled', false);
                 },
                 function() {
                     alert('Unable to retrieve your location');
-                    $('.btn-get-location').html('<span class="icon">📍</span> Get My Location').prop('disabled', false);
+                    $('.btn-get-location').html('<span class="icon">\u{1F4CD}</span> Get My Location').prop('disabled', false);
                 }
             );
         },

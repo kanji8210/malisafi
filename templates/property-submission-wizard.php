@@ -63,7 +63,7 @@ $property_id = isset($_GET['property_id']) ? intval($_GET['property_id']) : 0;
                        id="property_title" 
                        name="title" 
                        class="form-control" 
-                       placeholder="<?php esc_attr_e('e.g., Modern 3-Bedroom Apartment in Westlands', 'malisafi-mls'); ?>"
+                       placeholder="<?php echo esc_attr__('e.g., Modern 3-Bedroom Apartment in Westlands', 'malisafi-mls'); ?>"
                        required>
                 <span class="field-hint"><?php _e('Minimum 5 characters', 'malisafi-mls'); ?></span>
             </div>
@@ -76,7 +76,7 @@ $property_id = isset($_GET['property_id']) ? intval($_GET['property_id']) : 0;
                           name="description" 
                           class="form-control" 
                           rows="6"
-                          placeholder="<?php esc_attr_e('Describe your property...', 'malisafi-mls'); ?>"></textarea>
+                          placeholder="<?php echo esc_attr__('Describe your property...', 'malisafi-mls'); ?>"></textarea>
                 <span class="field-hint"><?php _e('Minimum 20 characters recommended', 'malisafi-mls'); ?></span>
             </div>
 
@@ -85,8 +85,8 @@ $property_id = isset($_GET['property_id']) ? intval($_GET['property_id']) : 0;
                     <?php _e('Property ID (MLS #)', 'malisafi-mls'); ?>
                 </label>
                 <div class="gps-input-group">
-                    <input type="text" id="reference_id" name="reference_id" class="form-control" placeholder="<?php esc_attr_e('Not generated yet', 'malisafi-mls'); ?>" readonly>
-                    <button type="button" class="btn btn-secondary btn-generate-ref" title="<?php esc_attr_e('Generate ID', 'malisafi-mls'); ?>">
+                    <input type="text" id="reference_id" name="reference_id" class="form-control" placeholder="<?php echo esc_attr__('Not generated yet', 'malisafi-mls'); ?>" readonly>
+                    <button type="button" class="btn btn-secondary btn-generate-ref" title="<?php echo esc_attr__('Generate ID', 'malisafi-mls'); ?>">
                         <?php _e('Generate ID', 'malisafi-mls'); ?>
                     </button>
                 </div>
@@ -224,7 +224,7 @@ $property_id = isset($_GET['property_id']) ? intval($_GET['property_id']) : 0;
             <div class="form-row-group">
                 <div class="form-row">
                     <label for="agent_name"><?php _e('Agent/Contact Name', 'malisafi-mls'); ?></label>
-                    <input type="text" id="agent_name" name="agent_name" class="form-control" placeholder="<?php esc_attr_e('e.g., John Doe', 'malisafi-mls'); ?>">
+                    <input type="text" id="agent_name" name="agent_name" class="form-control" placeholder="<?php echo esc_attr__('e.g., John Doe', 'malisafi-mls'); ?>">
                 </div>
                 <div class="form-row">
                     <label for="agent_email"><?php _e('Agent Email', 'malisafi-mls'); ?></label>
@@ -233,7 +233,7 @@ $property_id = isset($_GET['property_id']) ? intval($_GET['property_id']) : 0;
             </div>
             <div class="form-row">
                 <label for="agent_phone"><?php _e('Agent Phone', 'malisafi-mls'); ?></label>
-                <input type="text" id="agent_phone" name="agent_phone" class="form-control" placeholder="<?php esc_attr_e('+254700000000', 'malisafi-mls'); ?>">
+                <input type="text" id="agent_phone" name="agent_phone" class="form-control" placeholder="<?php echo esc_attr__('+254700000000', 'malisafi-mls'); ?>">
             </div>
         </div>
 
@@ -250,7 +250,7 @@ $property_id = isset($_GET['property_id']) ? intval($_GET['property_id']) : 0;
                        id="property_address" 
                        name="address" 
                        class="form-control" 
-                       placeholder="<?php esc_attr_e('e.g., Waiyaki Way, Building Name', 'malisafi-mls'); ?>">
+                       placeholder="<?php echo esc_attr__('e.g., Waiyaki Way, Building Name', 'malisafi-mls'); ?>">
             </div>
 
             <div class="form-row-group">
@@ -276,7 +276,7 @@ $property_id = isset($_GET['property_id']) ? intval($_GET['property_id']) : 0;
                            id="property_city" 
                            name="city" 
                            class="form-control" 
-                           placeholder="<?php esc_attr_e('e.g., Westlands', 'malisafi-mls'); ?>"
+                           placeholder="<?php echo esc_attr__('e.g., Westlands', 'malisafi-mls'); ?>"
                            required>
                 </div>
             </div>
@@ -289,7 +289,7 @@ $property_id = isset($_GET['property_id']) ? intval($_GET['property_id']) : 0;
                        id="property_area" 
                        name="area" 
                        class="form-control" 
-                       placeholder="<?php esc_attr_e('e.g., Parklands, Lavington', 'malisafi-mls'); ?>">
+                       placeholder="<?php echo esc_attr__('e.g., Parklands, Lavington', 'malisafi-mls'); ?>">
             </div>
 
             <div class="form-row">
