@@ -1071,10 +1071,7 @@ class Dashboard_Shortcodes {
         
         ob_start();
         ?>
-        <div class="malisafi-agent-dashboard-modern">
-            <!-- Main Content -->
-            <main class="agent-main-content">
-                <div class="malisafi-property-submit">
+        <div class="malisafi-property-submit">
             <?php if (!empty($message)) : ?>
                 <div class="notice notice-success"><p><?php echo esc_html($message); ?></p></div>
             <?php endif; ?>
@@ -1461,9 +1458,7 @@ class Dashboard_Shortcodes {
             to { transform: rotate(360deg); }
         }
         </style>
-                </div><!-- End .malisafi-property-submit -->
-            </main><!-- End .agent-main-content -->
-        </div><!-- End .malisafi-agent-dashboard-modern -->
+        </div><!-- End .malisafi-property-submit -->
         <?php
         return ob_get_clean();
     }
