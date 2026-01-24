@@ -39,7 +39,7 @@ if (!empty($atts['type'])) {
 // Add status filter
 if (!empty($atts['status'])) {
     $query_args['tax_query'][] = array(
-        'taxonomy' => 'property_status',
+        'taxonomy' => 'malisafi_property_status',
         'field' => 'slug',
         'terms' => $atts['status']
     );
@@ -177,7 +177,7 @@ if ($properties_query->have_posts()) {
             }
             
             // Get property status
-            $statuses = wp_get_post_terms($property_id, 'property_status');
+            $statuses = wp_get_post_terms($property_id, 'malisafi_property_status');
             if (!empty($statuses) && !is_wp_error($statuses)) {
                 $property_data['status'] = $statuses[0]->name;
             }

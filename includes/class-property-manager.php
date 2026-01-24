@@ -210,6 +210,10 @@ class Property_Manager {
         $lot_size = get_post_meta($property_id, '_malisafi_lot_size', true);
         $year_built = get_post_meta($property_id, '_malisafi_year_built', true);
         
+        // Get status from taxonomy
+        $status_terms = wp_get_post_terms($property_id, 'malisafi_property_status');
+        $status = (!empty($status_terms) && !is_wp_error($status_terms)) ? $status_terms[0]->name : '';
+        
         return array(
             'id' => $property_id,
             'title' => get_the_title($property_id),
@@ -236,6 +240,7 @@ class Property_Manager {
             'agent_email' => get_post_meta($property_id, '_malisafi_agent_email', true),
             'agent_phone' => get_post_meta($property_id, '_malisafi_agent_phone', true),
             'featured' => get_post_meta($property_id, '_malisafi_featured', true),
+            'status' => $status,
             'thumbnail' => get_the_post_thumbnail_url($property_id, 'large'),
             'gallery' => self::get_property_gallery($property_id),
         );

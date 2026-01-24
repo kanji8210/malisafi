@@ -84,7 +84,26 @@ echo '<span class="status-badge ' . esc_attr($status_class) . '">' . esc_html($s
 
 **IMPORTANT** : Le statut est stocké comme une **taxonomie** (`malisafi_property_status`), PAS comme un meta field. Utilisez toujours `wp_get_post_terms()` pour récupérer le statut.
 
-### Structure HTML requise
+### 2. **Property_Manager::get_property_data()**
+
+La méthode `get_property_data()` dans `includes/class-property-manager.php` récupère automatiquement le statut depuis la taxonomie et l'ajoute au tableau retourné :
+
+```php
+// Dans includes/class-property-manager.php
+public static function get_property_data($property_id) {
+    // Get status from taxonomy
+    $status_terms = wp_get_post_terms($property_id, 'malisafi_property_status');
+    $status = (!empty($status_terms) && !is_wp_error($status_terms)) ? $status_terms[0]->name : '';
+    
+    return array(
+        // ... autres données
+        'status' => $status,
+        // ...
+    );
+}
+```
+
+Si vous utilisez `Property_Manager::get_property_data()`, vous pouvez accéder au statut via `$property_data['status']`.
 
 Le badge doit être placé à l'intérieur d'un conteneur d'image avec `position: relative` :
 
