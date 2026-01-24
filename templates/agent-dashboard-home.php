@@ -134,8 +134,9 @@ error_log('MALISAFI DEBUG: Dashboard stats - Total: ' . $total_properties . ', P
                                 echo '<div class="placeholder-img"><span class="dashicons dashicons-admin-home"></span></div>';
                             }
                             
-                            // Add status badge - always show
-                            $property_status = get_post_meta($property->ID, '_malisafi_status', true);
+                            // Add status badge - always show, get from taxonomy
+                            $status_terms = wp_get_post_terms($property->ID, 'malisafi_property_status');
+                            $property_status = (!empty($status_terms) && !is_wp_error($status_terms)) ? $status_terms[0]->name : '';
                             if (!empty($property_status)) {
                                 $status_display = ucwords(str_replace('-', ' ', $property_status));
                                 $status_class = 'status-' . sanitize_html_class(strtolower(str_replace(' ', '-', $property_status)));

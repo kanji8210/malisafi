@@ -66,7 +66,10 @@ Le système de badges de statut affiche visuellement le statut de chaque propri�
 
 ```php
 <?php 
-$property_status = get_post_meta($property->ID, '_malisafi_status', true);
+// Get status from taxonomy (NOT from meta field)
+$status_terms = wp_get_post_terms($property_id, 'malisafi_property_status');
+$property_status = (!empty($status_terms) && !is_wp_error($status_terms)) ? $status_terms[0]->name : '';
+
 // Always show status badge - default to 'Status Not Recorded' if empty
 if (!empty($property_status)) {
     $status_display = ucwords(str_replace('-', ' ', $property_status));
@@ -78,6 +81,8 @@ if (!empty($property_status)) {
 echo '<span class="status-badge ' . esc_attr($status_class) . '">' . esc_html($status_display) . '</span>';
 ?>
 ```
+
+**IMPORTANT** : Le statut est stocké comme une **taxonomie** (`malisafi_property_status`), PAS comme un meta field. Utilisez toujours `wp_get_post_terms()` pour récupérer le statut.
 
 ### Structure HTML requise
 
@@ -140,10 +145,17 @@ Conformément au design system :
 
 ## Notes importantes
 
-1. **Toujours utiliser** `sanitize_html_class()` pour les classes dynamiques
-2. **Échapper la sortie** avec `esc_html()` et `esc_attr()`
-3. **Vérifier l'existence** du statut avant d'afficher le badge
-4. **Respecter la hiérarchie** : status badge ne doit jamais chevaucher d'autres éléments importants
+1. **CRITIQUE** : Le statut est une **taxonomie** (`malisafi_property_status`), pas un meta field
+   - Utilisez `wp_get_post_terms($property_id, 'malisafi_property_status')`
+   - NE PAS utiliser `get_post_meta($property_id, '_malisafi_status')`
+   
+2. **Toujours utiliser** `sanitize_html_class()` pour les classes dynamiques
+
+3. **Échapper la sortie** avec `esc_html()` et `esc_attr()`
+
+4. **Vérifier l'existence** du statut avant d'afficher le badge
+
+5. **Respecter la hiérarchie** : status badge ne doit jamais chevaucher d'autres éléments importants
 
 ## Compatibilité
 

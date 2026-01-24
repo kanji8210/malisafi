@@ -46,7 +46,10 @@ while (have_posts()) : the_post();
     $size_unit = get_post_meta($property_id, '_malisafi_size_unit', true) ?: 'sqm';
     $area_name = get_post_meta($property_id, '_malisafi_area', true); // neighborhood/text area
 
-    $status = get_post_meta($property_id, '_malisafi_status', true);
+    // Get status from taxonomy
+    $status_terms = wp_get_post_terms($property_id, 'malisafi_property_status');
+    $status = (!empty($status_terms) && !is_wp_error($status_terms)) ? $status_terms[0]->name : '';
+    
     $featured = get_post_meta($property_id, '_malisafi_featured', true);
     $verified = get_post_meta($property_id, '_malisafi_verified', true);
     
@@ -169,7 +172,9 @@ $formatted_price = $price > 0 ? ($currency_symbol . ' ' . number_format($price))
                             <?php endif; ?>
                             
                             <?php if ($status) : ?>
-                                <span class="badge status"><?php echo esc_html($status); ?></span>
+                                <span class="badge status" data-status="<?php echo esc_attr(strtolower($status)); ?>"><?php echo esc_html($status); ?></span>
+                            <?php else : ?>
+                                <span class="badge status" data-status="not-recorded" style="background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);">Status Not Recorded</span>
                             <?php endif; ?>
                         </div>
                     </div>
@@ -434,8 +439,24 @@ $formatted_price = $price > 0 ? ($currency_symbol . ' ' . number_format($price))
                     
                     <?php if ($status) : ?>
                         <div class="detail-item">
-                            <span class="detail-label">Status</span>
-                            <span class="detail-value"><?php echo esc_html($status); ?></span>
+                            <span class="detail-label">Listing Status</span>
+                            <span class="detail-value">
+                                <span class="status-badge <?php 
+                                    $status_class = 'status-' . sanitize_html_class(strtolower(str_replace(' ', '-', $status)));
+                                    echo esc_attr($status_class); 
+                                ?>" style="padding: 6px 14px; border-radius: 6px; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; display: inline-block;">
+                                    <?php echo esc_html($status); ?>
+                                </span>
+                            </span>
+                        </div>
+                    <?php else : ?>
+                        <div class="detail-item">
+                            <span class="detail-label">Listing Status</span>
+                            <span class="detail-value">
+                                <span class="status-badge status-not-recorded" style="padding: 6px 14px; border-radius: 6px; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; display: inline-block; background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%); color: white;">
+                                    Status Not Recorded
+                                </span>
+                            </span>
                         </div>
                     <?php endif; ?>
                     

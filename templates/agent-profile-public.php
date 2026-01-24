@@ -281,7 +281,9 @@ $total_properties = intval($total_published) + intval($total_pending);
                     $price = get_post_meta($property->ID, '_property_price', true);
                     $bedrooms = get_post_meta($property->ID, '_property_bedrooms', true);
                     $bathrooms = get_post_meta($property->ID, '_property_bathrooms', true);
-                    $property_status = get_post_meta($property->ID, '_malisafi_status', true);
+                    // Get status from taxonomy
+                    $status_terms = wp_get_post_terms($property->ID, 'malisafi_property_status');
+                    $property_status = (!empty($status_terms) && !is_wp_error($status_terms)) ? $status_terms[0]->name : '';
                 ?>
                     <div class="property-card">
                         <a href="<?php echo get_permalink($property->ID); ?>" class="property-image">

@@ -20,7 +20,11 @@ $bedrooms = get_post_meta($property_id, '_malisafi_bedrooms', true);
 $bathrooms = get_post_meta($property_id, '_malisafi_bathrooms', true);
 $size = get_post_meta($property_id, '_malisafi_size', true);
 $size_unit = get_post_meta($property_id, '_malisafi_size_unit', true) ?: 'sqm';
-$status = get_post_meta($property_id, '_malisafi_status', true);
+
+// Get status from taxonomy instead of meta
+$status_terms = wp_get_post_terms($property_id, 'malisafi_property_status');
+$status = (!empty($status_terms) && !is_wp_error($status_terms)) ? $status_terms[0]->name : '';
+
 $featured = get_post_meta($property_id, '_malisafi_featured', true);
 $setting = get_post_meta($property_id, '_malisafi_setting', true);
 $city = get_post_meta($property_id, '_malisafi_city', true);
