@@ -222,12 +222,24 @@ $property_manager = MalisafiMLS\Property_Manager::get_instance();
                                 <img src="<?php echo esc_url($image_url); ?>" alt="<?php echo esc_attr(get_the_title()); ?>">
                                 
                                 <div class="property-badges">
+                                    <?php 
+                                    // Always show status badge
+                                    if (!empty($status)) {
+                                        $status_display = ucwords(str_replace('-', ' ', $status));
+                                        $status_class = 'status-' . sanitize_html_class(strtolower(str_replace(' ', '-', $status)));
+                                    } else {
+                                        $status_display = 'Status Not Recorded';
+                                        $status_class = 'status-not-recorded';
+                                    }
+                                    ?>
+                                    <span class="status-badge <?php echo esc_attr($status_class); ?>"><?php echo esc_html($status_display); ?></span>
+                                    
                                     <?php if ($featured) : ?>
-                                        <span class="property-badge featured">Featured</span>
+                                        <span class="property-badge featured" style="background: rgba(115, 125, 93, 0.95); margin-top: 5px;">Featured</span>
                                     <?php endif; ?>
                                     
                                     <?php if (get_post_status() === 'pending') : ?>
-                                        <span class="property-badge new" style="background: rgba(255, 152, 0, 0.95);">Pending</span>
+                                        <span class="property-badge new" style="background: rgba(255, 152, 0, 0.95); margin-top: 5px;">Pending Approval</span>
                                     <?php endif; ?>
                                 </div>
                                 

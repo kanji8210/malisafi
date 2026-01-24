@@ -73,13 +73,17 @@ $is_new = (time() - $post_date) < (7 * 24 * 60 * 60);
             <span class="listing-type-badge"><?php echo esc_html($listing_type); ?></span>
         <?php endif; ?>
         
-        <?php if (!empty($status)) : ?>
-            <?php 
-            // Format status for display
+        <?php 
+        // Always show status badge - default to 'Status Not Recorded' if empty
+        if (!empty($status)) {
             $status_display = ucwords(str_replace('-', ' ', $status));
-            ?>
-            <span class="status-badge"><?php echo esc_html($status_display); ?></span>
-        <?php endif; ?>
+            $status_class = 'status-' . sanitize_html_class(strtolower(str_replace(' ', '-', $status)));
+        } else {
+            $status_display = 'Status Not Recorded';
+            $status_class = 'status-not-recorded';
+        }
+        ?>
+        <span class="status-badge <?php echo esc_attr($status_class); ?>"><?php echo esc_html($status_display); ?></span>
         
         <?php if (!empty($setting)) : ?>
             <span class="setting-badge"><?php echo esc_html(ucfirst($setting)); ?></span>

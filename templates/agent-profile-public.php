@@ -281,6 +281,7 @@ $total_properties = intval($total_published) + intval($total_pending);
                     $price = get_post_meta($property->ID, '_property_price', true);
                     $bedrooms = get_post_meta($property->ID, '_property_bedrooms', true);
                     $bathrooms = get_post_meta($property->ID, '_property_bathrooms', true);
+                    $property_status = get_post_meta($property->ID, '_malisafi_status', true);
                 ?>
                     <div class="property-card">
                         <a href="<?php echo get_permalink($property->ID); ?>" class="property-image">
@@ -291,6 +292,17 @@ $total_properties = intval($total_published) + intval($total_pending);
                                     <span class="dashicons dashicons-admin-home"></span>
                                 </div>
                             <?php endif; ?>
+                            <?php 
+                            // Always show status badge
+                            if (!empty($property_status)) {
+                                $status_display = ucwords(str_replace('-', ' ', $property_status));
+                                $status_class = 'status-' . sanitize_html_class(strtolower(str_replace(' ', '-', $property_status)));
+                            } else {
+                                $status_display = 'Status Not Recorded';
+                                $status_class = 'status-not-recorded';
+                            }
+                            ?>
+                            <span class="status-badge <?php echo esc_attr($status_class); ?>"><?php echo esc_html($status_display); ?></span>
                         </a>
                         <div class="property-info">
                             <h3><a href="<?php echo get_permalink($property->ID); ?>"><?php echo esc_html($property->post_title); ?></a></h3>

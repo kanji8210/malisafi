@@ -4,6 +4,25 @@
  * Use this file for consistent grid behavior and badge display
  */
 
+/* ===== DASHICONS SUPPORT ===== */
+/* Ensure dashicons are properly displayed everywhere */
+.dashicons,
+i.dashicons,
+span.dashicons {
+    font-family: dashicons !important;
+    display: inline-block;
+    line-height: 1;
+    font-weight: 400;
+    font-style: normal;
+    speak: never;
+    text-decoration: inherit;
+    text-transform: none;
+    text-rendering: auto;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    vertical-align: middle;
+}
+
 /* ===== UNIFIED GRID LAYOUTS ===== */
 /* All property grids - 4 columns desktop, responsive */
 .properties-container,
@@ -71,6 +90,56 @@
     top: 12px;
     left: 12px;
     font-weight: 800;
+}
+
+/* Status-specific colors */
+.property-image .status-badge.status-for-sale,
+.property-image-wrapper .status-badge.status-for-sale,
+.featured-image .status-badge.status-for-sale,
+.status-badge.status-for-sale {
+    background: linear-gradient(135deg, #16a34a 0%, #15803d 100%); /* Green */
+}
+
+.property-image .status-badge.status-for-rent,
+.property-image-wrapper .status-badge.status-for-rent,
+.featured-image .status-badge.status-for-rent,
+.status-badge.status-for-rent {
+    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); /* Blue */
+}
+
+.property-image .status-badge.status-sold,
+.property-image-wrapper .status-badge.status-sold,
+.featured-image .status-badge.status-sold,
+.status-badge.status-sold {
+    background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%); /* Red */
+}
+
+.property-image .status-badge.status-rented,
+.property-image-wrapper .status-badge.status-rented,
+.featured-image .status-badge.status-rented,
+.status-badge.status-rented {
+    background: linear-gradient(135deg, #9333ea 0%, #7e22ce 100%); /* Purple */
+}
+
+.property-image .status-badge.status-pending,
+.property-image-wrapper .status-badge.status-pending,
+.featured-image .status-badge.status-pending,
+.status-badge.status-pending {
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); /* Orange */
+}
+
+.property-image .status-badge.status-under-offer,
+.property-image-wrapper .status-badge.status-under-offer,
+.featured-image .status-badge.status-under-offer,
+.status-badge.status-under-offer {
+    background: linear-gradient(135deg, #eab308 0%, #ca8a04 100%); /* Yellow */
+}
+
+.property-image .status-badge.status-not-recorded,
+.property-image-wrapper .status-badge.status-not-recorded,
+.featured-image .status-badge.status-not-recorded,
+.status-badge.status-not-recorded {
+    background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%); /* Gray */
 }
 
 .property-image .listing-type-badge + .status-badge,

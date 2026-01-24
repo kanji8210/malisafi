@@ -288,6 +288,9 @@
     color: #dc2626;
     flex-shrink: 0;
     margin-top: 2px;
+    font-family: dashicons !important;
+    display: inline-block;
+}
 }
 
 .property-location span {
@@ -357,6 +360,8 @@
     min-height: 16px !important;
     color: var(--color-gold, #b4ab74);
     flex-shrink: 0;
+    font-family: dashicons !important;
+    display: inline-block;
 }
 
 .property-favorite-inline:hover,

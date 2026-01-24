@@ -133,6 +133,17 @@ error_log('MALISAFI DEBUG: Dashboard stats - Total: ' . $total_properties . ', P
                             } else {
                                 echo '<div class="placeholder-img"><span class="dashicons dashicons-admin-home"></span></div>';
                             }
+                            
+                            // Add status badge - always show
+                            $property_status = get_post_meta($property->ID, '_malisafi_status', true);
+                            if (!empty($property_status)) {
+                                $status_display = ucwords(str_replace('-', ' ', $property_status));
+                                $status_class = 'status-' . sanitize_html_class(strtolower(str_replace(' ', '-', $property_status)));
+                            } else {
+                                $status_display = 'Status Not Recorded';
+                                $status_class = 'status-not-recorded';
+                            }
+                            echo '<span class="status-badge ' . esc_attr($status_class) . '">' . esc_html($status_display) . '</span>';
                             ?>
                         </div>
                         <div class="property-info">

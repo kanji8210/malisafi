@@ -22,9 +22,17 @@ if (!defined('WPINC')) {
                             <a href="<?php the_permalink(); ?>">
                                 <?php the_post_thumbnail('malisafi_grid'); ?>
                             </a>
-                            <?php if (!empty($property_data['status'])) : ?>
-                                <span class="status-badge"><?php echo esc_html(ucfirst(str_replace('-', ' ', $property_data['status']))); ?></span>
-                            <?php endif; ?>
+                            <?php 
+                            // Always show status badge
+                            if (!empty($property_data['status'])) {
+                                $status_display = ucfirst(str_replace('-', ' ', $property_data['status']));
+                                $status_class = 'status-' . sanitize_html_class(strtolower(str_replace(' ', '-', $property_data['status'])));
+                            } else {
+                                $status_display = 'Status Not Recorded';
+                                $status_class = 'status-not-recorded';
+                            }
+                            ?>
+                            <span class="status-badge <?php echo esc_attr($status_class); ?>"><?php echo esc_html($status_display); ?></span>
                             <?php if (!empty($property_data['setting'])) : ?>
                                 <span class="setting-badge"><?php echo esc_html(ucfirst($property_data['setting'])); ?></span>
                             <?php endif; ?>
