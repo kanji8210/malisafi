@@ -4,6 +4,9 @@
  */
 if (!defined('ABSPATH')) exit;
 
+// Enqueue WordPress media uploader
+wp_enqueue_media();
+
 // Get agent profile post
 $agent_id = null;
 $args = array(
@@ -78,19 +81,36 @@ $agent_instagram = $agent_id ? get_post_meta($agent_id, '_agent_instagram', true
                     <?php endif; ?>
                 </div>
                 <div class="photo-controls">
-                    <button type="button" class="button" id="uploadPhotoBtn">
-                        <span class="dashicons dashicons-upload"></span>
-                        <?php _e('Upload Photo', 'malisafi-mls'); ?>
-                    </button>
-                    <input type="file" id="agentPhoto" name="agent_photo" accept="image/*" style="display:none;">
+                    <div class="upload-buttons">
+                        <button type="button" class="button button-primary" id="uploadPhotoBtn">
+                            <span class="dashicons dashicons-upload"></span>
+                            <?php _e('Choose from Library', 'malisafi-mls'); ?>
+                        </button>
+                        <button type="button" class="button button-primary" id="uploadDirectBtn">
+                            <span class="dashicons dashicons-camera"></span>
+                            <?php _e('Upload from Device', 'malisafi-mls'); ?>
+                        </button>
+                        <input type="file" id="directPhotoUpload" accept="image/jpeg,image/png,image/webp" style="display:none;">
+                    </div>
                     <input type="hidden" name="agent_photo_id" id="agentPhotoId" value="<?php echo $agent_photo; ?>">
                     <?php if ($agent_photo): ?>
-                        <button type="button" class="button" id="removePhotoBtn">
+                        <button type="button" class="button button-secondary" id="removePhotoBtn">
                             <span class="dashicons dashicons-trash"></span>
-                            <?php _e('Remove', 'malisafi-mls'); ?>
+                            <?php _e('Remove Photo', 'malisafi-mls'); ?>
                         </button>
                     <?php endif; ?>
-                    <p class="description"><?php _e('Recommended: 400x400px, max 2MB', 'malisafi-mls'); ?></p>
+                    <p class="description">
+                        <strong><?php _e('Two ways to add your photo:', 'malisafi-mls'); ?></strong><br>
+                        • <?php _e('Choose from Library: Select from your media library', 'malisafi-mls'); ?><br>
+                        • <?php _e('Upload from Device: Quick upload from your computer or phone', 'malisafi-mls'); ?>
+                    </p>
+                    <p class="description">
+                        <?php _e('Recommended: 400x400px, JPG/PNG/WebP, max 2MB', 'malisafi-mls'); ?>
+                    </p>
+                    <p class="description">
+                        <strong><?php _e('Tip:', 'malisafi-mls'); ?></strong> 
+                        <?php _e('A clear, professional headshot helps build trust with clients.', 'malisafi-mls'); ?>
+                    </p>
                 </div>
             </div>
         </div>
@@ -206,6 +226,7 @@ $agent_instagram = $agent_id ? get_post_meta($agent_id, '_agent_instagram', true
     display: flex;
     gap: 30px;
     align-items: flex-start;
+    flex-wrap: wrap;
 }
 
 .photo-preview {
@@ -214,6 +235,13 @@ $agent_instagram = $agent_id ? get_post_meta($agent_id, '_agent_instagram', true
     border-radius: 12px;
     overflow: hidden;
     border: 3px solid #e5e7eb;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+}
+
+.photo-preview:hover {
+    border-color: var(--mls-accent, #737d5d);
+    transform: scale(1.02);
 }
 
 .photo-preview img {
@@ -225,7 +253,7 @@ $agent_instagram = $agent_id ? get_post_meta($agent_id, '_agent_instagram', true
 .photo-placeholder {
     width: 100%;
     height: 100%;
-    background: #f3f4f6;
+    background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -240,6 +268,68 @@ $agent_instagram = $agent_id ? get_post_meta($agent_id, '_agent_instagram', true
 
 .photo-controls {
     flex: 1;
+    min-width: 250px;
+}
+
+.upload-buttons {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 12px;
+}
+
+.photo-controls .button {
+    margin: 0;
+    transition: all 0.2s ease;
+    flex: 1;
+    min-width: 180px;
+    justify-content: center;
+}
+
+.photo-controls .button .dashicons {
+    margin-right: 4px;
+}
+
+.photo-controls .button-primary {
+    background: var(--mls-accent, #737d5d);
+    border-color: var(--mls-accent, #737d5d);
+}
+
+.photo-controls .button-primary:hover {
+    background: var(--mls-dark, #2c2c2c);
+    border-color: var(--mls-dark, #2c2c2c);
+}
+
+.photo-controls .button-primary:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.photo-controls .button-secondary {
+    margin-top: 8px;
+    display: inline-flex;
+    align-items: center;
+}
+
+.dashicons.spin {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.photo-controls .description {
+    margin-top: 12px;
+    color: #6b7280;
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+.photo-controls .description strong {
+    color: var(--mls-accent, #737d5d);
+}
 }
 
 .photo-controls .button {
@@ -319,51 +409,134 @@ $agent_instagram = $agent_id ? get_post_meta($agent_id, '_agent_instagram', true
 
 <script>
 jQuery(document).ready(function($) {
-    // Photo upload handler
-    $('#uploadPhotoBtn').on('click', function() {
-        $('#agentPhoto').click();
+    // Option 1: WordPress Media Uploader (Library Selection)
+    var mediaUploader;
+    
+    $('#uploadPhotoBtn').on('click', function(e) {
+        e.preventDefault();
+        
+        if (mediaUploader) {
+            mediaUploader.open();
+            return;
+        }
+        
+        mediaUploader = wp.media({
+            title: '<?php _e('Choose Profile Photo', 'malisafi-mls'); ?>',
+            button: {
+                text: '<?php _e('Use this photo', 'malisafi-mls'); ?>'
+            },
+            library: {
+                type: 'image'
+            },
+            multiple: false
+        });
+        
+        mediaUploader.on('select', function() {
+            var attachment = mediaUploader.state().get('selection').first().toJSON();
+            
+            $('#photoPreview').html('<img src="' + attachment.url + '" alt="Profile Photo">');
+            $('#agentPhotoId').val(attachment.id);
+            
+            if ($('#removePhotoBtn').length === 0) {
+                var removeBtn = $('<button type="button" class="button button-secondary" id="removePhotoBtn">' +
+                    '<span class="dashicons dashicons-trash"></span> ' +
+                    '<?php _e('Remove Photo', 'malisafi-mls'); ?>' +
+                    '</button>');
+                $('.upload-buttons').after(removeBtn);
+            }
+            
+            showMessage('success', '<?php _e('Photo selected successfully!', 'malisafi-mls'); ?>');
+        });
+        
+        mediaUploader.open();
     });
 
-    $('#agentPhoto').on('change', function(e) {
-        const file = e.target.files[0];
-        if (file) {
-            // Preview
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                $('#photoPreview').html('<img src="' + e.target.result + '" alt="Profile Photo">');
-            };
-            reader.readAsDataURL(file);
+    // Option 2: Direct Upload from Device
+    $('#uploadDirectBtn').on('click', function(e) {
+        e.preventDefault();
+        $('#directPhotoUpload').click();
+    });
 
-            // Upload via AJAX
-            const formData = new FormData();
-            formData.append('action', 'upload_agent_photo');
-            formData.append('nonce', '<?php echo wp_create_nonce('upload_agent_photo'); ?>');
-            formData.append('photo', file);
+    $('#directPhotoUpload').on('change', function(e) {
+        var file = e.target.files[0];
+        if (!file) return;
 
-            $.ajax({
-                url: '<?php echo admin_url('admin-ajax.php'); ?>',
-                type: 'POST',
-                data: formData,
-                processData: false,
-                contentType: false,
-                success: function(response) {
-                    if (response.success) {
-                        $('#agentPhotoId').val(response.data.attachment_id);
-                        showMessage('success', '<?php _e('Photo uploaded successfully!', 'malisafi-mls'); ?>');
-                    } else {
-                        showMessage('error', response.data.message);
-                    }
-                }
-            });
+        // Validate file type
+        var allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+        if (allowedTypes.indexOf(file.type) === -1) {
+            showMessage('error', '<?php _e('Invalid file type. Only JPG, PNG, and WebP are allowed.', 'malisafi-mls'); ?>');
+            return;
         }
+
+        // Validate file size (2MB)
+        if (file.size > 2 * 1024 * 1024) {
+            showMessage('error', '<?php _e('File too large. Maximum size is 2MB.', 'malisafi-mls'); ?>');
+            return;
+        }
+
+        // Show preview immediately
+        var reader = new FileReader();
+        reader.onload = function(e) {
+            $('#photoPreview').html('<img src="' + e.target.result + '" alt="Profile Photo">');
+        };
+        reader.readAsDataURL(file);
+
+        // Upload to WordPress Media Library via AJAX
+        var formData = new FormData();
+        formData.append('action', 'upload_agent_photo');
+        formData.append('nonce', '<?php echo wp_create_nonce('upload_agent_photo'); ?>');
+        formData.append('photo', file);
+
+        $.ajax({
+            url: '<?php echo admin_url('admin-ajax.php'); ?>',
+            type: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            beforeSend: function() {
+                $('#uploadDirectBtn').prop('disabled', true).html(
+                    '<span class="dashicons dashicons-update spin"></span> ' +
+                    '<?php _e('Uploading...', 'malisafi-mls'); ?>'
+                );
+            },
+            success: function(response) {
+                if (response.success) {
+                    $('#agentPhotoId').val(response.data.attachment_id);
+                    $('#photoPreview').html('<img src="' + response.data.url + '" alt="Profile Photo">');
+                    
+                    if ($('#removePhotoBtn').length === 0) {
+                        var removeBtn = $('<button type="button" class="button button-secondary" id="removePhotoBtn">' +
+                            '<span class="dashicons dashicons-trash"></span> ' +
+                            '<?php _e('Remove Photo', 'malisafi-mls'); ?>' +
+                            '</button>');
+                        $('.upload-buttons').after(removeBtn);
+                    }
+                    
+                    showMessage('success', '<?php _e('Photo uploaded successfully!', 'malisafi-mls'); ?>');
+                } else {
+                    showMessage('error', response.data.message || '<?php _e('Upload failed', 'malisafi-mls'); ?>');
+                }
+            },
+            error: function() {
+                showMessage('error', '<?php _e('Upload failed. Please try again.', 'malisafi-mls'); ?>');
+            },
+            complete: function() {
+                $('#uploadDirectBtn').prop('disabled', false).html(
+                    '<span class="dashicons dashicons-camera"></span> ' +
+                    '<?php _e('Upload from Device', 'malisafi-mls'); ?>'
+                );
+                $('#directPhotoUpload').val(''); // Reset input
+            }
+        });
     });
 
     // Remove photo
-    $('#removePhotoBtn').on('click', function() {
+    $(document).on('click', '#removePhotoBtn', function() {
         $('#photoPreview').html('<div class="photo-placeholder"><span class="dashicons dashicons-businessman"></span></div>');
         $('#agentPhotoId').val('');
-        $('#agentPhoto').val('');
+        $('#directPhotoUpload').val('');
         $(this).remove();
+        showMessage('success', '<?php _e('Photo removed', 'malisafi-mls'); ?>');
     });
 
     // Form submission

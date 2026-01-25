@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agent Profile Editor - Preview</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --mls-accent: #737d5d;
+            --mls-dark: #2c2c2c;
+            --mls-text-primary: #1a1a1a;
+            --mls-border-light: #e5e7eb;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: #f9fafb;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .dashboard-profile-editor {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .dashboard-header h1 {
+            font-size: 28px;
+            color: var(--mls-dark);
+            margin-bottom: 8px;
+        }
+
+        .dashboard-header .subtitle {
+            color: #6b7280;
+            margin-bottom: 24px;
+        }
+
+        .profile-preview-link {
+            margin-bottom: 24px;
+        }
+
+        .form-section {
+            background: white;
+            border-radius: 8px;
+            padding: 24px;
+            margin-bottom: 24px;
+            border: 1px solid #e5e7eb;
+        }
+
+        .form-section h2 {
+            margin: 0 0 20px 0;
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--mls-text-primary);
+            border-bottom: 2px solid #f0f0f0;
+            padding-bottom: 12px;
+        }
+
+        .profile-photo-upload {
+            display: flex;
+            gap: 30px;
+            align-items: flex-start;
+            flex-wrap: wrap;
+        }
+
+        .photo-preview {
+            width: 200px;
+            height: 200px;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 3px solid #e5e7eb;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+
+        .photo-preview:hover {
+            border-color: var(--mls-accent);
+            transform: scale(1.02);
+        }
+
+        .photo-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .photo-placeholder {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #9ca3af;
+            font-size: 80px;
+        }
+
+        .photo-controls {
+            flex: 1;
+            min-width: 250px;
+        }
+
+        .upload-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 12px;
+        }
+
+        .button {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 10px 20px;
+            border-radius: 6px;
+            border: 1px solid #d1d5db;
+            background: white;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            justify-content: center;
+            min-width: 180px;
+            flex: 1;
+        }
+
+        .button-primary {
+            background: var(--mls-accent);
+            border-color: var(--mls-accent);
+            color: white;
+        }
+
+        .button-primary:hover {
+            background: var(--mls-dark);
+            border-color: var(--mls-dark);
+        }
+
+        .button-secondary {
+            background: #6b7280;
+            border-color: #6b7280;
+            color: white;
+            margin-top: 8px;
+        }
+
+        .button-secondary:hover {
+            background: #4b5563;
+        }
+
+        .dashicons.spin {
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .description {
+            margin-top: 12px;
+            color: #6b7280;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        .description strong {
+            color: var(--mls-accent);
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            font-weight: 500;
+            margin-bottom: 8px;
+            color: var(--mls-text-primary);
+        }
+
+        .form-group input,
+        .form-group textarea {
+            padding: 10px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border-color 0.2s;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--mls-accent);
+        }
+
+        .form-actions {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #e5e7eb;
+            text-align: right;
+        }
+
+        .dashicons {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+        }
+
+        .dashicons-businessman::before {
+            content: "👤";
+            font-size: 80px;
+        }
+
+        .dashicons-upload::before {
+            content: "⬆️";
+        }
+
+        .dashicons-trash::before {
+            content: "🗑️";
+        }
+
+        .dashicons-saved::before {
+            content: "✓";
+        }
+
+        .dashicons-visibility::before {
+            content: "👁️";
+        }
+
+        @media (max-width: 768px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .profile-photo-upload {
+                flex-direction: column;
+            }
+        }
+
+        .demo-notice {
+            background: #fef3c7;
+            border: 1px solid #fbbf24;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 24px;
+        }
+
+        .demo-notice h3 {
+            color: #92400e;
+            margin-bottom: 8px;
+        }
+
+        .demo-notice p {
+            color: #78350f;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="demo-notice">
+            <h3>🎨 Preview Statique - Agent Profile Editor</h3>
+            <p>Ceci est un aperçu HTML du formulaire d'édition de profil agent. L'interface réelle dans WordPress inclut les fonctionnalités AJAX, le media uploader et la validation.</p>
+        </div>
+
+        <div class="dashboard-profile-editor">
+            <div class="dashboard-header">
+                <h1>My Profile</h1>
+                <p class="subtitle">Manage your agent profile information</p>
+            </div>
+
+            <div class="profile-preview-link">
+                <button class="button">
+                    <span class="dashicons dashicons-visibility"></span>
+                    View Public Profile
+                </button>
+            </div>
+
+            <form class="agent-profile-form">
+                <!-- Profile Photo -->
+                <div class="form-section">
+                    <h2>Profile Photo</h2>
+                    <div class="profile-photo-upload">
+                        <div class="photo-preview">
+                            <div class="photo-placeholder">
+                                <span class="dashicons dashicons-businessman"></span>
+                            </div>
+                        </div>
+                        <div class="photo-controls">
+                            <div class="upload-buttons">
+                                <button type="button" class="button button-primary" id="uploadFromLibrary">
+                                    <span class="dashicons dashicons-upload"></span>
+                                    Choose from Library
+                                </button>
+                                <button type="button" class="button button-primary" id="uploadFromDevice">
+                                    <span class="dashicons dashicons-camera"></span>
+                                    Upload from Device
+                                </button>
+                            </div>
+                            <button type="button" class="button button-secondary" id="removePhoto">
+                                <span class="dashicons dashicons-trash"></span>
+                                Remove Photo
+                            </button>
+                            <p class="description">
+                                <strong>Two ways to add your photo:</strong><br>
+                                • Choose from Library: Select from your media library<br>
+                                • Upload from Device: Quick upload from your computer or phone
+                            </p>
+                            <p class="description">
+                                Recommended: 400x400px, JPG/PNG/WebP, max 2MB
+                            </p>
+                            <p class="description">
+                                <strong>Tip:</strong> A clear, professional headshot helps build trust with clients.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Basic Information -->
+                <div class="form-section">
+                    <h2>Basic Information</h2>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Email *</label>
+                            <input type="email" placeholder="agent@example.com" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Phone Number *</label>
+                            <input type="tel" placeholder="+254 700 123456" required>
+                        </div>
+                        <div class="form-group">
+                            <label>WhatsApp Number</label>
+                            <input type="tel" placeholder="+254 700 123456">
+                        </div>
+                        <div class="form-group">
+                            <label>License Number</label>
+                            <input type="text" placeholder="REA-12345">
+                        </div>
+                        <div class="form-group">
+                            <label>Years of Experience</label>
+                            <input type="number" placeholder="5" min="0">
+                        </div>
+                        <div class="form-group">
+                            <label>Languages</label>
+                            <input type="text" placeholder="English, Swahili, French">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Professional Information -->
+                <div class="form-section">
+                    <h2>Professional Information</h2>
+                    <div class="form-group">
+                        <label>Bio / About Me</label>
+                        <textarea rows="6" placeholder="Tell clients about yourself, your experience, and what makes you unique..."></textarea>
+                    </div>
+                    <div class="form-group" style="margin-top: 20px;">
+                        <label>Specialties</label>
+                        <input type="text" placeholder="Luxury Homes, Commercial, First-time Buyers">
+                        <p class="description">Separate multiple specialties with commas</p>
+                    </div>
+                </div>
+
+                <!-- Social Media -->
+                <div class="form-section">
+                    <h2>Social Media</h2>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Facebook</label>
+                            <input type="url" placeholder="https://facebook.com/username">
+                        </div>
+                        <div class="form-group">
+                            <label>Twitter</label>
+                            <input type="url" placeholder="https://twitter.com/username">
+                        </div>
+                        <div class="form-group">
+                            <label>LinkedIn</label>
+                            <input type="url" placeholder="https://linkedin.com/in/username">
+                        </div>
+                        <div class="form-group">
+                            <label>Instagram</label>
+                            <input type="url" placeholder="https://instagram.com/username">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Form Actions -->
+                <div class="form-actions">
+                    <button type="submit" class="button button-primary">
+                        <span class="dashicons dashicons-saved"></span>
+                        Save Profile
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Simulation d'upload depuis bibliothèque
+        document.getElementById('uploadFromLibrary').addEventListener('click', function(e) {
+            e.preventDefault();
+            alert('📚 WordPress Media Library\n\nDans WordPress, ceci ouvre la bibliothèque médias où vous pouvez :\n• Sélectionner une photo existante\n• Uploader une nouvelle photo\n• Recadrer et éditer');
+        });
+
+        // Simulation d'upload direct
+        document.getElementById('uploadFromDevice').addEventListener('click', function(e) {
+            e.preventDefault();
+            var input = document.createElement('input');
+            input.type = 'file';
+            input.accept = 'image/jpeg,image/png,image/webp';
+            input.onchange = function(event) {
+                var file = event.target.files[0];
+                if (file) {
+                    var reader = new FileReader();
+                    reader.onload = function(e) {
+                        document.querySelector('.photo-preview').innerHTML = 
+                            '<img src="' + e.target.result + '" alt="Demo Photo">';
+                    };
+                    reader.readAsDataURL(file);
+                    alert('✅ Photo uploadée !\n\nDans WordPress, ceci :\n1. Valide le fichier (type, taille)\n2. Uploade vers le serveur\n3. Crée un attachment dans la médiathèque\n4. Met à jour l\'aperçu');
+                }
+            };
+            input.click();
+        });
+
+        // Simulation de suppression
+        document.getElementById('removePhoto').addEventListener('click', function(e) {
+            e.preventDefault();
+            const preview = document.querySelector('.photo-preview');
+            preview.innerHTML = '<div class="photo-placeholder"><span class="dashicons dashicons-businessman"></span></div>';
+            alert('🗑️ Photo supprimée de votre profil\n\n(L\'image reste dans votre bibliothèque médias)');
+        });
+
+        // Simulation de sauvegarde
+        document.querySelector('form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            alert('✅ Profile saved successfully!\n\nDans WordPress, ceci enverrait les données via AJAX.');
+        });
+    </script>
+</body>
+</html>
