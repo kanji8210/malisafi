@@ -1,0 +1,150 @@
+﻿­ƒöì Malisafi MLS - Efficiency Analysis
+============================================================
+
+­ƒôä Analyzing CSS Files...
+  Ô£ô add-property-page.css: 51 selectors, 6.67 KB
+  Ô£ô add-property-page.min.css: 51 selectors, 3.93 KB
+  Ô£ô admin-agent-management.css: 27 selectors, 2.8 KB
+  Ô£ô admin-agent-management.min.css: 27 selectors, 1.9 KB
+  Ô£ô admin-fraud-reports.css: 57 selectors, 5.64 KB
+  Ô£ô admin-fraud-reports.min.css: 57 selectors, 3.85 KB
+  Ô£ô admin.css: 9 selectors, 958 B
+  Ô£ô admin.min.css: 9 selectors, 668 B
+  Ô£ô agent-dashboard-clean.css: 75 selectors, 9.04 KB
+  Ô£ô agent-dashboard-clean.min.css: 75 selectors, 6.46 KB
+  Ô£ô agent-dashboard.css: 66 selectors, 9.14 KB
+  Ô£ô agent-dashboard.min.css: 66 selectors, 6.47 KB
+  Ô£ô agent-navigation.css: 20 selectors, 2.26 KB
+  Ô£ô agent-navigation.min.css: 20 selectors, 1.46 KB
+  Ô£ô agent-profile-public.css: 181 selectors, 21.19 KB
+  Ô£ô agent-profile-public.min.css: 181 selectors, 14.19 KB
+  Ô£ô agent-profile.css: 113 selectors, 14.85 KB
+  Ô£ô agent-profile.min.css: 113 selectors, 10 KB
+  Ô£ô analytics.css: 60 selectors, 7.17 KB
+  Ô£ô analytics.min.css: 60 selectors, 5.09 KB
+  Ô£ô city-list.css: 77 selectors, 8 KB
+  Ô£ô city-list.min.css: 77 selectors, 5.08 KB
+  Ô£ô dashboards.css: 95 selectors, 13.2 KB
+  Ô£ô dashboards.min.css: 95 selectors, 9.56 KB
+  Ô£ô featured-properties.css: 43 selectors, 6.42 KB
+  Ô£ô featured-properties.min.css: 43 selectors, 4.54 KB
+  Ô£ô fraud-report.css: 47 selectors, 6.42 KB
+  Ô£ô fraud-report.min.css: 47 selectors, 4.58 KB
+  Ô£ô property-card-modern.css: 101 selectors, 16.07 KB
+  Ô£ô property-card-modern.min.css: 101 selectors, 10.99 KB
+  Ô£ô property-filters-minimalist.css: 50 selectors, 9.01 KB
+  Ô£ô property-filters-minimalist.min.css: 50 selectors, 5.82 KB
+  Ô£ô property-filters-modern.css: 95 selectors, 13.42 KB
+  Ô£ô property-filters-modern.min.css: 95 selectors, 8.73 KB
+  Ô£ô property-filters.css: 87 selectors, 14.13 KB
+  Ô£ô property-filters.min.css: 87 selectors, 10.26 KB
+  Ô£ô property-grids-unified.css: 31 selectors, 7.36 KB
+  Ô£ô property-grids-unified.min.css: 31 selectors, 5.1 KB
+  Ô£ô property-map.css: 74 selectors, 8.69 KB
+  Ô£ô property-map.min.css: 74 selectors, 5.63 KB
+  Ô£ô property-submission.css: 109 selectors, 13.2 KB
+  Ô£ô property-submission.min.css: 109 selectors, 9.02 KB
+  Ô£ô property-submit-form.css: 61 selectors, 8.52 KB
+  Ô£ô property-submit-form.min.css: 61 selectors, 6.12 KB
+  Ô£ô public.css: 57 selectors, 8.63 KB
+  Ô£ô public.min.css: 57 selectors, 5.47 KB
+  Ô£ô registration-form.css: 179 selectors, 21.26 KB
+  Ô£ô registration-form.min.css: 179 selectors, 14.34 KB
+  Ô£ô single-property.css: 212 selectors, 31.83 KB
+  Ô£ô single-property.min.css: 212 selectors, 22.43 KB
+  Ô£ô user-menu.css: 45 selectors, 5.89 KB
+  Ô£ô user-menu.min.css: 45 selectors, 4.06 KB
+  Ô£ô variables.css: 13 selectors, 4.38 KB
+  Ô£ô variables.min.css: 13 selectors, 2.38 KB
+  Total: 4070 selectors, 464.23 KB
+
+­ƒô£ Analyzing JavaScript Files...
+  Ô£ô admin-agent-management.js: 0 functions, 4.49 KB
+  Ô£ô admin-fraud-reports.js: 15 functions, 16.25 KB
+  Ô£ô admin.js: 6 functions, 6.9 KB
+  Ô£ô agent-actions.js: 0 functions, 8.69 KB
+  Ô£ô agent-dashboard-modern.js: 1 functions, 4.36 KB
+  Ô£ô agent-dashboard.js: 0 functions, 6.95 KB
+  Ô£ô agent-navigation.js: 0 functions, 0 B
+  Ô£ô analytics-charts.js: 0 functions, 8.28 KB ÔÜá´©Å  1 console.log
+  Ô£ô analytics-tracking.js: 0 functions, 8.29 KB
+  Ô£ô city-list.js: 5 functions, 6.98 KB
+  Ô£ô fraud-report.js: 3 functions, 8.02 KB
+  Ô£ô malisafi-single-property.js: 2 functions, 16 KB ÔÜá´©Å  2 console.log
+  Ô£ô property-filters-minimalist.js: 1 functions, 4.98 KB
+  Ô£ô property-filters-modern.js: 0 functions, 12.89 KB
+  Ô£ô property-filters.js: 0 functions, 25.47 KB
+  Ô£ô property-form-handler.js: 3 functions, 5.54 KB ÔÜá´©Å  3 console.log
+  Ô£ô property-map.js: 0 functions, 12.59 KB ÔÜá´©Å  5 console.log
+  Ô£ô property-submission.js: 0 functions, 24.25 KB
+  Ô£ô public.js: 7 functions, 6.55 KB
+  Ô£ô registration-form.js: 0 functions, 43.78 KB ÔÜá´©Å  11 console.log
+  Ô£ô single-property.js: 6 functions, 12.33 KB ÔÜá´©Å  1 console.log
+  Total: 49 functions, 243.58 KB
+
+­ƒôè Checking File Sizes & Optimization...
+  Ô£ô add-property-page.css: 6.67 KB ÔåÆ 3.93 KB (41% smaller)
+  Ô£ô admin-agent-management.css: 2.8 KB ÔåÆ 1.9 KB (31.9% smaller)
+  Ô£ô admin-fraud-reports.css: 5.64 KB ÔåÆ 3.85 KB (31.7% smaller)
+  Ô£ô admin.css: 958 B ÔåÆ 668 B (30.3% smaller)
+  Ô£ô agent-dashboard-clean.css: 9.04 KB ÔåÆ 6.46 KB (28.5% smaller)
+  Ô£ô agent-dashboard.css: 9.14 KB ÔåÆ 6.47 KB (29.3% smaller)
+  Ô£ô agent-navigation.css: 2.26 KB ÔåÆ 1.46 KB (35.5% smaller)
+  Ô£ô agent-profile-public.css: 21.19 KB ÔåÆ 14.19 KB (33% smaller)
+  Ô£ô agent-profile.css: 14.85 KB ÔåÆ 10 KB (32.6% smaller)
+  Ô£ô analytics.css: 7.17 KB ÔåÆ 5.09 KB (29.1% smaller)
+  Ô£ô city-list.css: 8 KB ÔåÆ 5.08 KB (36.5% smaller)
+  Ô£ô dashboards.css: 13.2 KB ÔåÆ 9.56 KB (27.6% smaller)
+  Ô£ô featured-properties.css: 6.42 KB ÔåÆ 4.54 KB (29.4% smaller)
+  Ô£ô fraud-report.css: 6.42 KB ÔåÆ 4.58 KB (28.7% smaller)
+  Ô£ô property-card-modern.css: 16.07 KB ÔåÆ 10.99 KB (31.6% smaller)
+  Ô£ô property-filters-minimalist.css: 9.01 KB ÔåÆ 5.82 KB (35.4% smaller)
+  Ô£ô property-filters-modern.css: 13.42 KB ÔåÆ 8.73 KB (35% smaller)
+  Ô£ô property-filters.css: 14.13 KB ÔåÆ 10.26 KB (27.4% smaller)
+  Ô£ô property-grids-unified.css: 7.36 KB ÔåÆ 5.1 KB (30.8% smaller)
+  Ô£ô property-map.css: 8.69 KB ÔåÆ 5.63 KB (35.2% smaller)
+  Ô£ô property-submission.css: 13.2 KB ÔåÆ 9.02 KB (31.7% smaller)
+  Ô£ô property-submit-form.css: 8.52 KB ÔåÆ 6.12 KB (28.2% smaller)
+  Ô£ô public.css: 8.63 KB ÔåÆ 5.47 KB (36.6% smaller)
+  Ô£ô registration-form.css: 21.26 KB ÔåÆ 14.34 KB (32.5% smaller)
+  Ô£ô single-property.css: 31.83 KB ÔåÆ 22.43 KB (29.5% smaller)
+  Ô£ô user-menu.css: 5.89 KB ÔåÆ 4.06 KB (31.1% smaller)
+  Ô£ô variables.css: 4.38 KB ÔåÆ 2.38 KB (45.7% smaller)
+  Ô£ô admin-agent-management.js: 4.49 KB ÔåÆ 2.06 KB (54.1% smaller)
+  Ô£ô admin-fraud-reports.js: 16.25 KB ÔåÆ 9.22 KB (43.3% smaller)
+  Ô£ô admin.js: 6.9 KB ÔåÆ 3.52 KB (49% smaller)
+  Ô£ô agent-actions.js: 8.69 KB ÔåÆ 4.22 KB (51.4% smaller)
+  Ô£ô agent-dashboard-modern.js: 4.36 KB ÔåÆ 2.16 KB (50.5% smaller)
+  Ô£ô agent-dashboard.js: 6.95 KB ÔåÆ 3.4 KB (51% smaller)
+php : PHP Fatal error:  Uncaught 
+DivisionByZeroError: Division by zero in C:\
+xampp\htdocs\wordpress\wp-content\plugins\ma
+lisafi\test-efficiency.php:287
+Au caractère Ligne:1 : 1
++ php test-efficiency.php 2>&1 | Out-File 
+-FilePath test-results.txt -E ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: 
+    (PHP Fatal error...iciency.php:287:Str  
+  ing) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommand 
+   Error
+ 
+Stack trace:
+#0 C:\xampp\htdocs\wordpress\wp-content\plug
+ins\malisafi\test-efficiency.php(51): 
+MalisafiEfficiencyTest->checkFileSizes()
+#1 C:\xampp\htdocs\wordpress\wp-content\plug
+ins\malisafi\test-efficiency.php(550): 
+MalisafiEfficiencyTest->run()
+#2 {main}
+  thrown in C:\xampp\htdocs\wordpress\wp-con
+tent\plugins\malisafi\test-efficiency.php 
+on line 287
+
+Fatal error: Uncaught DivisionByZeroError: Division by zero in C:\xampp\htdocs\wordpress\wp-content\plugins\malisafi\test-efficiency.php:287
+Stack trace:
+#0 C:\xampp\htdocs\wordpress\wp-content\plugins\malisafi\test-efficiency.php(51): MalisafiEfficiencyTest->checkFileSizes()
+#1 C:\xampp\htdocs\wordpress\wp-content\plugins\malisafi\test-efficiency.php(550): MalisafiEfficiencyTest->run()
+#2 {main}
+  thrown in C:\xampp\htdocs\wordpress\wp-content\plugins\malisafi\test-efficiency.php on line 287

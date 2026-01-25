@@ -1,0 +1,501 @@
+{
+    "timestamp": "2026-01-25 16:19:43",
+    "results": {
+        "css_files": {
+            "add-property-page.css": {
+                "size": 6825,
+                "selectors": 51,
+                "rules": 48,
+                "unused_patterns": [
+                    "12 duplicate selectors"
+                ],
+                "has_minified": false
+            },
+            "admin-agent-management.css": {
+                "size": 2864,
+                "selectors": 27,
+                "rules": 25,
+                "unused_patterns": [
+                    "3 duplicate selectors"
+                ],
+                "has_minified": false
+            },
+            "admin-fraud-reports.css": {
+                "size": 5777,
+                "selectors": 57,
+                "rules": 54,
+                "unused_patterns": [
+                    "6 duplicate selectors"
+                ],
+                "has_minified": false
+            },
+            "admin.css": {
+                "size": 958,
+                "selectors": 9,
+                "rules": 9,
+                "unused_patterns": [],
+                "has_minified": false
+            },
+            "agent-dashboard-clean.css": {
+                "size": 9252,
+                "selectors": 75,
+                "rules": 73,
+                "unused_patterns": [
+                    "15 duplicate selectors"
+                ],
+                "has_minified": false
+            },
+            "agent-dashboard.css": {
+                "size": 9363,
+                "selectors": 66,
+                "rules": 65,
+                "unused_patterns": [
+                    "9 duplicate selectors"
+                ],
+                "has_minified": false
+            },
+            "agent-navigation.css": {
+                "size": 2319,
+                "selectors": 20,
+                "rules": 19,
+                "unused_patterns": [
+                    "2 duplicate selectors"
+                ],
+                "has_minified": false
+            },
+            "agent-profile-public.css": {
+                "size": 21694,
+                "selectors": 181,
+                "rules": 175,
+                "unused_patterns": [
+                    "38 duplicate selectors"
+                ],
+                "has_minified": false
+            },
+            "agent-profile.css": {
+                "size": 15205,
+                "selectors": 113,
+                "rules": 111,
+                "unused_patterns": [
+                    "17 duplicate selectors"
+                ],
+                "has_minified": false
+            },
+            "analytics.css": {
+                "size": 7344,
+                "selectors": 60,
+                "rules": 57,
+                "unused_patterns": [
+                    "8 duplicate selectors"
+                ],
+                "has_minified": false
+            },
+            "city-list.css": {
+                "size": 8192,
+                "selectors": 77,
+                "rules": 70,
+                "unused_patterns": [
+                    "33 duplicate selectors"
+                ],
+                "has_minified": false
+            },
+            "dashboards.css": {
+                "size": 13520,
+                "selectors": 95,
+                "rules": 94,
+                "unused_patterns": [
+                    "9 duplicate selectors"
+                ],
+                "has_minified": false
+            },
+            "featured-properties.css": {
+                "size": 6579,
+                "selectors": 43,
+                "rules": 40,
+                "unused_patterns": [
+                    "10 duplicate selectors"
+                ],
+                "has_minified": false
+            },
+            "fraud-report.css": {
+                "size": 6574,
+                "selectors": 47,
+                "rules": 45,
+                "unused_patterns": [
+                    "4 duplicate selectors"
+                ],
+                "has_minified": false
+            },
+            "property-card-modern.css": {
+                "size": 16452,
+                "selectors": 101,
+                "rules": 92,
+                "unused_patterns": [
+                    "57 duplicate selectors",
+                    "54 !important declarations (consider refactoring)"
+                ],
+                "has_minified": false
+            },
+            "property-filters-minimalist.css": {
+                "size": 9230,
+                "selectors": 50,
+                "rules": 47,
+                "unused_patterns": [
+                    "18 duplicate selectors",
+                    "97 !important declarations (consider refactoring)"
+                ],
+                "has_minified": false
+            },
+            "property-filters-modern.css": {
+                "size": 13739,
+                "selectors": 95,
+                "rules": 89,
+                "unused_patterns": [
+                    "40 duplicate selectors"
+                ],
+                "has_minified": false
+            },
+            "property-filters.css": {
+                "size": 14465,
+                "selectors": 87,
+                "rules": 82,
+                "unused_patterns": [
+                    "19 duplicate selectors"
+                ],
+                "has_minified": false
+            },
+            "property-grids-unified.css": {
+                "size": 7538,
+                "selectors": 31,
+                "rules": 26,
+                "unused_patterns": [
+                    "12 duplicate selectors"
+                ],
+                "has_minified": false
+            },
+            "property-map.css": {
+                "size": 8900,
+                "selectors": 74,
+                "rules": 69,
+                "unused_patterns": [
+                    "17 duplicate selectors"
+                ],
+                "has_minified": false
+            },
+            "property-submission.css": {
+                "size": 13512,
+                "selectors": 109,
+                "rules": 105,
+                "unused_patterns": [
+                    "21 duplicate selectors"
+                ],
+                "has_minified": false
+            },
+            "property-submit-form.css": {
+                "size": 8727,
+                "selectors": 61,
+                "rules": 58,
+                "unused_patterns": [
+                    "9 duplicate selectors"
+                ],
+                "has_minified": false
+            },
+            "public.css": {
+                "size": 8834,
+                "selectors": 57,
+                "rules": 53,
+                "unused_patterns": [
+                    "27 duplicate selectors"
+                ],
+                "has_minified": false
+            },
+            "registration-form.css": {
+                "size": 21772,
+                "selectors": 179,
+                "rules": 170,
+                "unused_patterns": [
+                    "28 duplicate selectors"
+                ],
+                "has_minified": false
+            },
+            "single-property.css": {
+                "size": 32593,
+                "selectors": 212,
+                "rules": 203,
+                "unused_patterns": [
+                    "52 duplicate selectors"
+                ],
+                "has_minified": false
+            },
+            "user-menu.css": {
+                "size": 6035,
+                "selectors": 45,
+                "rules": 42,
+                "unused_patterns": [
+                    "11 duplicate selectors"
+                ],
+                "has_minified": false
+            },
+            "variables.css": {
+                "size": 4487,
+                "selectors": 13,
+                "rules": 13,
+                "unused_patterns": [],
+                "has_minified": false
+            }
+        },
+        "js_files": {
+            "admin-agent-management.js": {
+                "size": 4600,
+                "functions": 0,
+                "ready_blocks": 1,
+                "console_logs": 0,
+                "unused_patterns": [],
+                "has_minified": false
+            },
+            "admin-fraud-reports.js": {
+                "size": 16638,
+                "functions": 15,
+                "ready_blocks": 1,
+                "console_logs": 0,
+                "unused_patterns": [],
+                "has_minified": false
+            },
+            "admin.js": {
+                "size": 7070,
+                "functions": 6,
+                "ready_blocks": 1,
+                "console_logs": 0,
+                "unused_patterns": [],
+                "has_minified": false
+            },
+            "agent-actions.js": {
+                "size": 8894,
+                "functions": 0,
+                "ready_blocks": 1,
+                "console_logs": 0,
+                "unused_patterns": [],
+                "has_minified": false
+            },
+            "agent-dashboard-modern.js": {
+                "size": 4462,
+                "functions": 1,
+                "ready_blocks": 1,
+                "console_logs": 0,
+                "unused_patterns": [],
+                "has_minified": false
+            },
+            "agent-dashboard.js": {
+                "size": 7121,
+                "functions": 0,
+                "ready_blocks": 1,
+                "console_logs": 0,
+                "unused_patterns": [],
+                "has_minified": false
+            },
+            "agent-navigation.js": {
+                "size": 0,
+                "functions": 0,
+                "ready_blocks": 0,
+                "console_logs": 0,
+                "unused_patterns": [],
+                "has_minified": false
+            },
+            "analytics-charts.js": {
+                "size": 8477,
+                "functions": 0,
+                "ready_blocks": 1,
+                "console_logs": 1,
+                "unused_patterns": [],
+                "has_minified": false
+            },
+            "analytics-tracking.js": {
+                "size": 8494,
+                "functions": 0,
+                "ready_blocks": 0,
+                "console_logs": 0,
+                "unused_patterns": [],
+                "has_minified": false
+            },
+            "city-list.js": {
+                "size": 7147,
+                "functions": 5,
+                "ready_blocks": 1,
+                "console_logs": 0,
+                "unused_patterns": [],
+                "has_minified": false
+            },
+            "fraud-report.js": {
+                "size": 8216,
+                "functions": 3,
+                "ready_blocks": 1,
+                "console_logs": 0,
+                "unused_patterns": [],
+                "has_minified": false
+            },
+            "malisafi-single-property.js": {
+                "size": 16383,
+                "functions": 2,
+                "ready_blocks": 1,
+                "console_logs": 2,
+                "unused_patterns": [],
+                "has_minified": false
+            },
+            "property-filters-minimalist.js": {
+                "size": 5099,
+                "functions": 1,
+                "ready_blocks": 1,
+                "console_logs": 0,
+                "unused_patterns": [],
+                "has_minified": false
+            },
+            "property-filters-modern.js": {
+                "size": 13199,
+                "functions": 0,
+                "ready_blocks": 1,
+                "console_logs": 0,
+                "unused_patterns": [],
+                "has_minified": false
+            },
+            "property-filters.js": {
+                "size": 26078,
+                "functions": 0,
+                "ready_blocks": 1,
+                "console_logs": 0,
+                "unused_patterns": [],
+                "has_minified": false
+            },
+            "property-form-handler.js": {
+                "size": 5668,
+                "functions": 3,
+                "ready_blocks": 0,
+                "console_logs": 3,
+                "unused_patterns": [],
+                "has_minified": false
+            },
+            "property-map.js": {
+                "size": 12888,
+                "functions": 0,
+                "ready_blocks": 1,
+                "console_logs": 5,
+                "unused_patterns": [],
+                "has_minified": false
+            },
+            "property-submission.js": {
+                "size": 24831,
+                "functions": 0,
+                "ready_blocks": 1,
+                "console_logs": 0,
+                "unused_patterns": [],
+                "has_minified": false
+            },
+            "public.js": {
+                "size": 6703,
+                "functions": 7,
+                "ready_blocks": 1,
+                "console_logs": 0,
+                "unused_patterns": [],
+                "has_minified": false
+            },
+            "registration-form.js": {
+                "size": 44830,
+                "functions": 0,
+                "ready_blocks": 1,
+                "console_logs": 11,
+                "unused_patterns": [],
+                "has_minified": false
+            },
+            "single-property.js": {
+                "size": 12624,
+                "functions": 6,
+                "ready_blocks": 1,
+                "console_logs": 1,
+                "unused_patterns": [],
+                "has_minified": false
+            }
+        },
+        "unused_selectors": [],
+        "unused_functions": [],
+        "file_sizes": [],
+        "duplicates": {
+            "add-property-page.css": 1,
+            "admin-fraud-reports.css": 2,
+            "agent-dashboard-clean.css": 2,
+            "agent-profile-public.css": 11,
+            "agent-profile.css": 11,
+            "analytics.css": 1,
+            "city-list.css": 3,
+            "dashboards.css": 9,
+            "property-card-modern.css": 12,
+            "property-filters-minimalist.css": 4,
+            "property-filters-modern.css": 9,
+            "property-filters.css": 6,
+            "property-map.css": 5,
+            "property-submission.css": 3,
+            "property-submit-form.css": 2,
+            "public.css": 5,
+            "registration-form.css": 10,
+            "single-property.css": 10,
+            "user-menu.css": 1
+        },
+        "performance": {
+            "total_css": 282750,
+            "total_css_min": 0,
+            "total_js": 249422,
+            "total_js_min": 0,
+            "total_assets": 532172
+        }
+    },
+    "warnings": [
+        "Create minified version of add-property-page.css",
+        "Create minified version of admin-agent-management.css",
+        "Create minified version of admin-fraud-reports.css",
+        "Create minified version of admin.css",
+        "Create minified version of agent-dashboard-clean.css",
+        "Create minified version of agent-dashboard.css",
+        "Create minified version of agent-navigation.css",
+        "Create minified version of agent-profile-public.css",
+        "Create minified version of agent-profile.css",
+        "Create minified version of analytics.css",
+        "Create minified version of city-list.css",
+        "Create minified version of dashboards.css",
+        "Create minified version of featured-properties.css",
+        "Create minified version of fraud-report.css",
+        "Create minified version of property-card-modern.css",
+        "Create minified version of property-filters-minimalist.css",
+        "Create minified version of property-filters-modern.css",
+        "Create minified version of property-filters.css",
+        "Create minified version of property-grids-unified.css",
+        "Create minified version of property-map.css",
+        "Create minified version of property-submission.css",
+        "Create minified version of property-submit-form.css",
+        "Create minified version of public.css",
+        "Create minified version of registration-form.css",
+        "Create minified version of single-property.css",
+        "Create minified version of user-menu.css",
+        "Create minified version of variables.css",
+        "Create minified version of admin-agent-management.js",
+        "Create minified version of admin-fraud-reports.js",
+        "Create minified version of admin.js",
+        "Create minified version of agent-actions.js",
+        "Create minified version of agent-dashboard-modern.js",
+        "Create minified version of agent-dashboard.js",
+        "Create minified version of agent-navigation.js",
+        "Create minified version of analytics-charts.js",
+        "Create minified version of analytics-tracking.js",
+        "Create minified version of city-list.js",
+        "Create minified version of fraud-report.js",
+        "Create minified version of malisafi-single-property.js",
+        "Create minified version of property-filters-minimalist.js",
+        "Create minified version of property-filters-modern.js",
+        "Create minified version of property-filters.js",
+        "Create minified version of property-form-handler.js",
+        "Create minified version of property-map.js",
+        "Create minified version of property-submission.js",
+        "Create minified version of public.js",
+        "Create minified version of registration-form.js",
+        "Create minified version of single-property.js"
+    ],
+    "recommendations": [],
+    "score": 0
+}

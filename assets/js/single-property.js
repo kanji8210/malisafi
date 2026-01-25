@@ -236,7 +236,7 @@
                     title: title,
                     url: url
                 }).catch(function(error) {
-                    console.log('Error sharing:', error);
+                    // Sharing cancelled or failed
                 });
             } else {
                 // Fallback: copy to clipboard

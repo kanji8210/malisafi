@@ -16,7 +16,6 @@
 
         // Check if map data is available
         if (typeof malisafiMapData === 'undefined') {
-            console.warn('Map data object not found');
             return;
         }
 

@@ -74,7 +74,7 @@ jQuery(document).ready(function($) {
             sessionStorage.setItem('malisafi_property_form_data', JSON.stringify(formData));
             sessionStorage.setItem('malisafi_property_form_timestamp', Date.now());
         } catch (e) {
-            console.warn('Could not save form data to sessionStorage:', e);
+            // SessionStorage not available
         }
     }
     
