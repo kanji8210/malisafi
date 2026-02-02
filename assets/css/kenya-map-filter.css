@@ -11,14 +11,18 @@
   border: none;
   border-radius: 0;
   padding: 0;
-  align-items: center;
+  align-items: end;
   overflow: visible;
 }
 
 .malisafi-kenya-map-column,
 .malisafi-kenya-form-column {
-  align-self: center;
+  align-self: start;
   overflow: visible;
+}
+
+.malisafi-kenya-form-column {
+  align-self: end;
 }
 
 .malisafi-kenya-map {
@@ -135,7 +139,7 @@
 .malisafi-kenya-filter-actions {
   display: flex;
   gap: 8px;
-  align-items: center;
+  align-items: end;
 }
 
 .malisafi-kenya-filter-row--actions .malisafi-kenya-filter-actions {
