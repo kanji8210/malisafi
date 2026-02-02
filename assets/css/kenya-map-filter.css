@@ -77,7 +77,7 @@
   fill: var(--mls-map-fill, var(--mls-light-grey));
   stroke: #fff;
   stroke-width: 1;
-  opacity: 0.75;
+  opacity: 0.65;
 }
 
 .malisafi-kenya-map svg path:hover,
@@ -102,7 +102,7 @@
   padding: 12px;
   border-radius: 12px;
   border: 1px solid #fff;
-  background: rgba(255, 255, 255, 0.7);
+  background: rgba(255, 255, 255, 0.6);
 }
 
 
@@ -148,12 +148,13 @@
 }
 
 .malisafi-kenya-filter-actions button {
-  background: var(--mls-accent);
+  background: var(--mls-dark, #1f2937);
   color: var(--mls-text-on-accent, #fff);
   border: none;
   padding: 7px 12px;
   border-radius: 10px;
   cursor: pointer;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35);
 }
 
 .malisafi-kenya-filter-actions .reset-btn {
