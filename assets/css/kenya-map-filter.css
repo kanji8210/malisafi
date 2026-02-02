@@ -23,20 +23,20 @@
   border: 1px solid #fff;
   border-radius: 12px;
   background: transparent;
-  padding: 12px;
-  min-height: 300px;
+  padding: var(--mls-kenya-map-padding, 8px);
+  min-height: var(--mls-kenya-map-min-height, 160px);
   max-width: var(--mls-kenya-map-max-width, 720px);
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
   overflow: visible;
-  vertical-align: center;
 }
 
 .malisafi-kenya-map svg {
   width: 100%;
   height: auto;
-  max-height: "300PX";
+  transform: scale(var(--mls-kenya-map-scale, 0.9));
+  transform-origin: center;
   display: block;
 }
 
@@ -75,7 +75,6 @@
   border-radius: 12px;
   border: 1px solid #fff;
   background: rgba(255, 255, 255, 0.7);
-  backdrop-filter: blur(6px);
 }
 
 
@@ -147,5 +146,16 @@
 
   .malisafi-kenya-filter-row {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 600px) {
+  .malisafi-kenya-map {
+    min-height: 220px;
+    max-width: 100%;
+  }
+
+  .malisafi-kenya-map svg {
+    transform: scale(var(--mls-kenya-map-scale-mobile, 0.85));
   }
 }
