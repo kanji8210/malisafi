@@ -17,6 +17,7 @@
 .malisafi-kenya-map-column,
 .malisafi-kenya-form-column {
   align-self: center;
+  overflow: visible;
 }
 
 .malisafi-kenya-map {
@@ -151,11 +152,15 @@
 
 @media (max-width: 600px) {
   .malisafi-kenya-map {
-    min-height: 220px;
+    min-height: auto;
     max-width: 100%;
+    align-items: center;
+    padding-bottom: 16px;
+    margin: 0 auto;
   }
 
   .malisafi-kenya-map svg {
-    transform: scale(var(--mls-kenya-map-scale-mobile, 0.85));
+    transform: scale(var(--mls-kenya-map-scale-mobile, 0.8));
+    margin: 0 auto;
   }
 }
