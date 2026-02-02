@@ -61,35 +61,17 @@
 
 .malisafi-kenya-filter-form {
   display: grid;
-  gap: 16px;
-}
-
-.malisafi-kenya-filter-row {
-  display: grid;
-  gap: 16px;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-}
-
-.malisafi-kenya-filter-form label {
-  font-weight: 600;
-  color: var(--mls-text-primary);
-  margin-bottom: 6px;
-  display: inline-block;
-}
-
-.malisafi-kenya-filter-form select,
-.malisafi-kenya-filter-form input {
-  gap: 12px;
-  padding: 16px;
+  gap: 10px;
+  padding: 12px;
   border-radius: 12px;
   border: 1px solid var(--mls-border-light);
   background: rgba(255, 255, 255, 0.5);
   backdrop-filter: blur(6px);
-  padding: 10px 12px;
-  border: 1px solid var(--mls-border-light);
+}
+
 .malisafi-kenya-search-row {
   display: flex;
-  gap: 8px;
+  gap: 6px;
   align-items: center;
 }
 
@@ -102,26 +84,44 @@
   background: var(--mls-accent);
   color: var(--mls-text-on-accent, #fff);
   border: none;
-  padding: 8px 14px;
+  padding: 7px 12px;
   border-radius: 10px;
   cursor: pointer;
 }
 
+.malisafi-kenya-filter-row {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.malisafi-kenya-filter-form label {
+  font-weight: 600;
+  color: var(--mls-text-primary);
+  margin-bottom: 3px;
+  display: inline-block;
+  font-size: 0.85rem;
+}
+
+.malisafi-kenya-filter-form select,
+.malisafi-kenya-filter-form input {
+  width: 100%;
+  padding: 7px 10px;
+  border: 1px solid var(--mls-border-light);
   border-radius: 10px;
   background: var(--mls-bg, #fff);
   color: var(--mls-text-primary);
-  margin-bottom: 4px;
+}
 
-  font-size: 0.9rem;
 .malisafi-kenya-filter-form .price-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 12px;
+  gap: 10px;
 }
-  padding: 8px 10px;
+
 .malisafi-kenya-filter-actions {
   display: flex;
-  gap: 12px;
+  gap: 8px;
   align-items: center;
 }
 
@@ -129,7 +129,7 @@
   background: var(--mls-accent);
   color: var(--mls-text-on-accent, #fff);
   border: none;
-  padding: 8px 14px;
+  padding: 7px 12px;
   border-radius: 10px;
   cursor: pointer;
 }

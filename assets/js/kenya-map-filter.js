@@ -95,6 +95,38 @@
     });
   }
 
+  function highlightCounty($mapContainer, countyName) {
+    $mapContainer.find('.is-selected').removeClass('is-selected');
+    if (!countyName) {
+      return;
+    }
+
+    const target = normalize(countyName);
+    const $match = $mapContainer
+      .find('[data-county], [title], path')
+      .filter(function() {
+        const $el = $(this);
+        let name = $el.data('county');
+        if (!name) {
+          const titleAttr = $el.attr('title');
+          if (titleAttr) {
+            name = titleAttr;
+          } else {
+            const $title = $el.find('title');
+            if ($title.length) {
+              name = $title.text();
+            }
+          }
+        }
+        return normalize(name) === target;
+      })
+      .first();
+
+    if ($match.length) {
+      $match.addClass('is-selected');
+    }
+  }
+
   $(function() {
     if (typeof malisafiKenyaMapFilter === 'undefined') {
       return;
@@ -112,6 +144,7 @@
       $countySelect.on('change', function() {
         const county = $(this).val();
         populateSubcounties($subcountySelect, county, mapData, '');
+        highlightCounty($mapContainer, county);
       });
 
       $wrap.find('.reset-btn').on('click', function() {
@@ -119,6 +152,7 @@
         populateSubcounties($subcountySelect, '', mapData, '');
         $wrap.find('input[type="number"]').val('');
         $wrap.find('select[name="status"]').val('');
+        highlightCounty($mapContainer, '');
       });
 
       if ($mapContainer.find('svg').length) {
@@ -139,6 +173,7 @@
       const initialCounty = $countySelect.val();
       if (initialCounty) {
         populateSubcounties($subcountySelect, initialCounty, mapData, $subcountySelect.val());
+        highlightCounty($mapContainer, initialCounty);
       }
     });
   });
