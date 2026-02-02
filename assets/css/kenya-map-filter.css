@@ -6,28 +6,37 @@
   display: grid;
   grid-template-columns: minmax(280px, 1fr) minmax(280px, 1fr);
   gap: 24px;
-  background: var(--mls-bg, #fff);
-  border: 1px solid var(--mls-border-light);
-  border-radius: 16px;
-  padding: 20px;
+  width: 100%;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  padding: 0;
+  align-items: center;
+}
+
+.malisafi-kenya-map-column,
+.malisafi-kenya-form-column {
+  align-self: center;
 }
 
 .malisafi-kenya-map {
-  border: 1px solid var(--mls-border-light);
+  border: 1px solid #fff;
   border-radius: 12px;
-  background: var(--mls-map-bg);
+  background: transparent;
   padding: 12px;
-  min-height: 360px;
+  min-height: 300px;
+  max-width: var(--mls-kenya-map-max-width, 720px);
   display: flex;
   align-items: center;
   justify-content: center;
   overflow: visible;
+  vertical-align: center;
 }
 
 .malisafi-kenya-map svg {
   width: 100%;
   height: auto;
-  max-height: none;
+  max-height: "300PX";
   display: block;
 }
 
@@ -38,7 +47,7 @@
     stroke var(--transition-normal, 0.2s ease),
     filter var(--transition-normal, 0.2s ease);
   fill: var(--mls-map-fill, var(--mls-light-grey));
-  stroke: var(--mls-border-light);
+  stroke: #fff;
   stroke-width: 1;
   opacity: 0.75;
 }
@@ -64,30 +73,11 @@
   gap: 10px;
   padding: 12px;
   border-radius: 12px;
-  border: 1px solid var(--mls-border-light);
-  background: rgba(255, 255, 255, 0.5);
+  border: 1px solid #fff;
+  background: rgba(255, 255, 255, 0.7);
   backdrop-filter: blur(6px);
 }
 
-.malisafi-kenya-search-row {
-  display: flex;
-  gap: 6px;
-  align-items: center;
-}
-
-.malisafi-kenya-search-row input[type="search"] {
-  flex: 1;
-}
-
-.malisafi-kenya-search-row .search-btn {
-  white-space: nowrap;
-  background: var(--mls-accent);
-  color: var(--mls-text-on-accent, #fff);
-  border: none;
-  padding: 7px 12px;
-  border-radius: 10px;
-  cursor: pointer;
-}
 
 .malisafi-kenya-filter-row {
   display: grid;
@@ -107,7 +97,7 @@
 .malisafi-kenya-filter-form input {
   width: 100%;
   padding: 7px 10px;
-  border: 1px solid var(--mls-border-light);
+  border: 1px solid #fff;
   border-radius: 10px;
   background: var(--mls-bg, #fff);
   color: var(--mls-text-primary);
@@ -123,6 +113,11 @@
   display: flex;
   gap: 8px;
   align-items: center;
+}
+
+.malisafi-kenya-filter-row--actions .malisafi-kenya-filter-actions {
+  align-self: end;
+  justify-content: flex-end;
 }
 
 .malisafi-kenya-filter-actions button {
