@@ -16,7 +16,8 @@ $svg_path = MALISAFI_MLS_PATH . 'assets/svg/kenya-counties.svg';
 $has_svg = file_exists($svg_path);
 ?>
 
-<div class="malisafi-kenya-map-filter">
+<div class="malisafi-kenya-map-filter-wrap">
+    <div class="malisafi-kenya-map-filter">
     <div class="malisafi-kenya-map-column">
         <div class="malisafi-kenya-map" data-has-svg="<?php echo $has_svg ? '1' : '0'; ?>">
         <?php
@@ -77,5 +78,6 @@ $has_svg = file_exists($svg_path);
             </div>
         </div>
         </form>
+    </div>
     </div>
 </div>
