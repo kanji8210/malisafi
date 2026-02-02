@@ -12,6 +12,7 @@
   border-radius: 0;
   padding: 0;
   align-items: center;
+  overflow: visible;
 }
 
 .malisafi-kenya-map-column,
@@ -31,14 +32,36 @@
   align-items: flex-start;
   justify-content: center;
   overflow: visible;
+  position: relative;
+}
+
+.malisafi-kenya-map-tooltip {
+  position: absolute;
+  background: rgba(0, 0, 0, 0.75);
+  color: #fff;
+  padding: 8px 10px;
+  border-radius: 8px;
+  font-size: 12px;
+  line-height: 1.4;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(4px);
+  transition: opacity 0.15s ease, transform 0.15s ease;
+  z-index: 10;
+  white-space: nowrap;
+}
+
+.malisafi-kenya-map-tooltip.is-visible {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 .malisafi-kenya-map svg {
-  width: 100%;
+  width: var(--mls-kenya-map-width, 100%);
   height: auto;
-  transform: scale(var(--mls-kenya-map-scale, 0.9));
-  transform-origin: center;
   display: block;
+  max-width: 100%;
+  margin: 0 auto;
 }
 
 .malisafi-kenya-map svg path,
@@ -157,10 +180,6 @@
     align-items: center;
     padding-bottom: 16px;
     margin: 0 auto;
-  }
-
-  .malisafi-kenya-map svg {
-    transform: scale(var(--mls-kenya-map-scale-mobile, 0.8));
-    margin: 0 auto;
+    --mls-kenya-map-width: 92%;
   }
 }

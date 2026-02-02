@@ -367,9 +367,44 @@ $current_listings = (int) $wpdb->get_var($wpdb->prepare(
             }
         }
 
+        global $wpdb;
+        $counts = array();
+        $results = $wpdb->get_results(
+            "SELECT pm_county.meta_value AS county,
+                    pm_type.meta_value AS listing_type,
+                    COUNT(DISTINCT p.ID) AS total
+             FROM {$wpdb->posts} p
+             INNER JOIN {$wpdb->postmeta} pm_county
+                 ON p.ID = pm_county.post_id
+                AND pm_county.meta_key = '_malisafi_county'
+             INNER JOIN {$wpdb->postmeta} pm_type
+                 ON p.ID = pm_type.post_id
+                AND pm_type.meta_key = '_malisafi_listing_type'
+             WHERE p.post_type = 'malisafi_property'
+               AND p.post_status = 'publish'
+             GROUP BY pm_county.meta_value, pm_type.meta_value"
+        );
+
+        if (!empty($results)) {
+            foreach ($results as $row) {
+                $county = trim((string) $row->county);
+                $type = strtolower(trim((string) $row->listing_type));
+                if ($county === '' || !in_array($type, array('rent', 'sale'), true)) {
+                    continue;
+                }
+
+                if (!isset($counts[$county])) {
+                    $counts[$county] = array('rent' => 0, 'sale' => 0);
+                }
+
+                $counts[$county][$type] = (int) $row->total;
+            }
+        }
+
         wp_localize_script('malisafi-kenya-map-filter', 'malisafiKenyaMapFilter', array(
             'svgUrl' => MALISAFI_MLS_URL . 'assets/svg/kenya-counties.svg',
-            'subcounties' => $subcounties_map
+            'subcounties' => $subcounties_map,
+            'counts' => $counts
         ));
 
         ob_start();
