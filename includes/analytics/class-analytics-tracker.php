@@ -101,7 +101,7 @@ class Analytics_Tracker {
                 'ip_address' => $_SERVER['REMOTE_ADDR'] ?? '',
                 'user_agent' => $_SERVER['HTTP_USER_AGENT'] ?? '',
                 'device_type' => self::get_device_type(),
-                'referrer' => $_SERVER['HTTP_REFERER'] ?? ''
+                'referrer' => isset($_SERVER['HTTP_REFERER']) ? esc_url_raw($_SERVER['HTTP_REFERER']) : ''
             ],
             ['%d', '%s', '%s', '%s', '%s', '%s', '%s']
         );
@@ -167,6 +167,9 @@ class Analytics_Tracker {
         }
         
         $session_id = self::get_session_id();
+        $utm_source = isset($_GET['utm_source']) ? sanitize_text_field(wp_unslash($_GET['utm_source'])) : '';
+        $referrer = isset($_SERVER['HTTP_REFERER']) ? esc_url_raw($_SERVER['HTTP_REFERER']) : '';
+        $source = $utm_source !== '' ? $utm_source : ($referrer !== '' ? $referrer : 'direct');
         
         // Insert property view
         $wpdb->insert(
@@ -177,8 +180,8 @@ class Analytics_Tracker {
                 'user_id' => get_current_user_id() ?: null,
                 'session_id' => $session_id,
                 'view_type' => 'single',
-                'source' => $_GET['utm_source'] ?? ($_SERVER['HTTP_REFERER'] ?? 'direct'),
-                'referrer' => $_SERVER['HTTP_REFERER'] ?? '',
+                'source' => $source,
+                'referrer' => $referrer,
                 'device_type' => self::get_device_type(),
                 'ip_address' => $_SERVER['REMOTE_ADDR'] ?? ''
             ],

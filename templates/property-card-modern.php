@@ -28,8 +28,10 @@ $status = (!empty($status_terms) && !is_wp_error($status_terms)) ? $status_terms
 $featured = get_post_meta($property_id, '_malisafi_featured', true);
 $setting = get_post_meta($property_id, '_malisafi_setting', true);
 $city = get_post_meta($property_id, '_malisafi_city', true);
-$state = get_post_meta($property_id, '_malisafi_state', true);
-$location = !empty($city) ? $city . (!empty($state) ? ', ' . $state : '') : '';
+$subcounty = get_post_meta($property_id, '_malisafi_subcounty', true);
+$county = get_post_meta($property_id, '_malisafi_county', true);
+$location_parts = array_filter(array($city, $subcounty, $county));
+$location = !empty($location_parts) ? implode(', ', $location_parts) : '';
 
 // Get featured image with srcset for crisper thumbnails
 $thumbnail_id = get_post_thumbnail_id($property_id);

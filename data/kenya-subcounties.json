@@ -1,0 +1,401 @@
+{
+  "Mombasa": [
+    { "id": 1, "name": "Changamwe", "lat": -4.0356, "lng": 39.6066 },
+    { "id": 2, "name": "Jomvu", "lat": -4.0667, "lng": 39.6667 },
+    { "id": 3, "name": "Kisauni", "lat": -4.0167, "lng": 39.7000 },
+    { "id": 4, "name": "Likoni", "lat": -4.0833, "lng": 39.6500 },
+    { "id": 5, "name": "Mvita", "lat": -4.0500, "lng": 39.6667 },
+    { "id": 6, "name": "Nyali", "lat": -4.0500, "lng": 39.7000 }
+  ],
+  "Kwale": [
+    { "id": 7, "name": "Kinango", "lat": -4.1333, "lng": 39.3167 },
+    { "id": 8, "name": "Lunga Lunga", "lat": -4.5500, "lng": 39.1167 },
+    { "id": 9, "name": "Matuga", "lat": -4.3833, "lng": 39.4667 },
+    { "id": 10, "name": "Msambweni", "lat": -4.4667, "lng": 39.4667 }
+  ],
+  "Kilifi": [
+    { "id": 11, "name": "Ganze", "lat": -3.8167, "lng": 39.5667 },
+    { "id": 12, "name": "Kaloleni", "lat": -3.8667, "lng": 39.6333 },
+    { "id": 13, "name": "Kilifi North", "lat": -3.6333, "lng": 39.8500 },
+    { "id": 14, "name": "Kilifi South", "lat": -3.6500, "lng": 39.7167 },
+    { "id": 15, "name": "Magarini", "lat": -3.0833, "lng": 40.0833 },
+    { "id": 16, "name": "Malindi", "lat": -3.2167, "lng": 40.1167 },
+    { "id": 17, "name": "Rabai", "lat": -3.9333, "lng": 39.5833 }
+  ],
+  "Tana River": [
+    { "id": 18, "name": "Bura", "lat": -1.5333, "lng": 40.0000 },
+    { "id": 19, "name": "Galole", "lat": -1.7833, "lng": 40.1000 },
+    { "id": 20, "name": "Garsen", "lat": -2.2667, "lng": 40.1167 }
+  ],
+  "Lamu": [
+    { "id": 21, "name": "Lamu East", "lat": -2.2694, "lng": 40.9025 },
+    { "id": 22, "name": "Lamu West", "lat": -2.2694, "lng": 40.9025 }
+  ],
+  "Taita-Taveta": [
+    { "id": 23, "name": "Mwatate", "lat": -3.5000, "lng": 38.3833 },
+    { "id": 24, "name": "Taveta", "lat": -3.4000, "lng": 37.6833 },
+    { "id": 25, "name": "Voi", "lat": -3.3833, "lng": 38.5667 },
+    { "id": 26, "name": "Wundanyi", "lat": -3.4000, "lng": 38.3667 }
+  ],
+  "Garissa": [
+    { "id": 27, "name": "Balambala", "lat": -0.5667, "lng": 39.9500 },
+    { "id": 28, "name": "Daadab", "lat": 0.0500, "lng": 40.3167 },
+    { "id": 29, "name": "Fafi", "lat": 0.8167, "lng": 40.9667 },
+    { "id": 30, "name": "Garissa Township", "lat": -0.4536, "lng": 39.6461 },
+    { "id": 31, "name": "Hulugho", "lat": 1.2000, "lng": 40.8667 },
+    { "id": 32, "name": "Ijara", "lat": -1.5667, "lng": 40.9333 },
+    { "id": 33, "name": "Lagdera", "lat": 0.3000, "lng": 40.2000 }
+  ],
+  "Wajir": [
+    { "id": 34, "name": "Buna", "lat": 1.0000, "lng": 40.5167 },
+    { "id": 35, "name": "Eldas", "lat": 1.0667, "lng": 40.0167 },
+    { "id": 36, "name": "Habaswein", "lat": 1.0167, "lng": 39.3833 },
+    { "id": 37, "name": "Tarbaj", "lat": 1.5167, "lng": 40.1667 },
+    { "id": 38, "name": "Wajir East", "lat": 1.7472, "lng": 40.0689 },
+    { "id": 39, "name": "Wajir North", "lat": 2.9833, "lng": 40.1833 },
+    { "id": 40, "name": "Wajir South", "lat": 0.8500, "lng": 40.2833 },
+    { "id": 41, "name": "Wajir West", "lat": 1.7833, "lng": 39.7500 }
+  ],
+  "Mandera": [
+    { "id": 42, "name": "Banisa", "lat": 3.9333, "lng": 40.1667 },
+    { "id": 43, "name": "Kotulo", "lat": 2.5167, "lng": 40.3833 },
+    { "id": 44, "name": "Lafey", "lat": 3.3167, "lng": 40.8333 },
+    { "id": 45, "name": "Mandera East", "lat": 3.9361, "lng": 41.8739 },
+    { "id": 46, "name": "Mandera North", "lat": 3.6000, "lng": 40.7667 },
+    { "id": 47, "name": "Mandera South", "lat": 2.2500, "lng": 40.8500 },
+    { "id": 48, "name": "Mandera West", "lat": 3.5833, "lng": 40.5833 }
+  ],
+  "Marsabit": [
+    { "id": 49, "name": "Laisamis", "lat": 1.9667, "lng": 37.9833 },
+    { "id": 50, "name": "Moyale", "lat": 3.5269, "lng": 39.0581 },
+    { "id": 51, "name": "North Horr", "lat": 3.3000, "lng": 38.9000 },
+    { "id": 52, "name": "Saku", "lat": 2.2833, "lng": 37.9833 }
+  ],
+  "Isiolo": [
+    { "id": 53, "name": "Isiolo", "lat": 0.3500, "lng": 37.5833 },
+    { "id": 54, "name": "Garbatulla", "lat": 0.5000, "lng": 38.5333 },
+    { "id": 55, "name": "Merti", "lat": 1.0667, "lng": 38.1667 }
+  ],
+  "Meru": [
+    { "id": 56, "name": "Buuri", "lat": 0.0500, "lng": 37.6333 },
+    { "id": 57, "name": "Igembe Central", "lat": 0.1667, "lng": 37.9167 },
+    { "id": 58, "name": "Igembe North", "lat": 0.2500, "lng": 37.9833 },
+    { "id": 59, "name": "Igembe South", "lat": 0.0833, "lng": 37.8333 },
+    { "id": 60, "name": "Imenti Central", "lat": -0.0500, "lng": 37.6500 },
+    { "id": 61, "name": "Imenti North", "lat": 0.0167, "lng": 37.6500 },
+    { "id": 62, "name": "Imenti South", "lat": -0.3667, "lng": 37.6500 },
+    { "id": 63, "name": "Tigania Central", "lat": 0.1667, "lng": 37.8333 },
+    { "id": 64, "name": "Tigania East", "lat": 0.2500, "lng": 37.9167 },
+    { "id": 65, "name": "Tigania West", "lat": 0.0833, "lng": 37.7500 }
+  ],
+  "Tharaka-Nithi": [
+    { "id": 66, "name": "Chuka", "lat": -0.3333, "lng": 37.6500 },
+    { "id": 67, "name": "Igambang'ombe", "lat": -0.3833, "lng": 37.8667 },
+    { "id": 68, "name": "Maara", "lat": -0.1667, "lng": 37.9333 },
+    { "id": 69, "name": "Tharaka", "lat": -0.3667, "lng": 38.0667 }
+  ],
+  "Embu": [
+    { "id": 70, "name": "Manyatta", "lat": -0.5333, "lng": 37.4500 },
+    { "id": 71, "name": "Mbeere North", "lat": -0.6500, "lng": 37.5833 },
+    { "id": 72, "name": "Mbeere South", "lat": -0.7833, "lng": 37.6667 },
+    { "id": 73, "name": "Runyenjes", "lat": -0.4500, "lng": 37.5667 }
+  ],
+  "Kitui": [
+    { "id": 74, "name": "Kitui Central", "lat": -1.3667, "lng": 38.0167 },
+    { "id": 75, "name": "Kitui East", "lat": -1.3667, "lng": 38.5000 },
+    { "id": 76, "name": "Kitui Rural", "lat": -1.5000, "lng": 38.1667 },
+    { "id": 77, "name": "Kitui South", "lat": -1.9167, "lng": 38.4167 },
+    { "id": 78, "name": "Kitui West", "lat": -1.5833, "lng": 37.9167 },
+    { "id": 79, "name": "Mwingi Central", "lat": -0.9333, "lng": 38.0667 },
+    { "id": 80, "name": "Mwingi East", "lat": -0.7833, "lng": 38.4333 },
+    { "id": 81, "name": "Mwingi North", "lat": -0.6833, "lng": 38.1667 },
+    { "id": 82, "name": "Mwingi West", "lat": -1.0667, "lng": 38.0167 }
+  ],
+  "Machakos": [
+    { "id": 83, "name": "Kathiani", "lat": -1.3833, "lng": 37.2833 },
+    { "id": 84, "name": "Machakos Town", "lat": -1.5167, "lng": 37.2667 },
+    { "id": 85, "name": "Masinga", "lat": -0.9167, "lng": 37.3833 },
+    { "id": 86, "name": "Matungulu", "lat": -1.2167, "lng": 37.2000 },
+    { "id": 87, "name": "Mwala", "lat": -1.3500, "lng": 37.4500 },
+    { "id": 88, "name": "Yatta", "lat": -1.4333, "lng": 37.5000 }
+  ],
+  "Makueni": [
+    { "id": 89, "name": "Kaiti", "lat": -1.7833, "lng": 37.4167 },
+    { "id": 90, "name": "Kibwezi East", "lat": -2.4167, "lng": 37.9667 },
+    { "id": 91, "name": "Kibwezi West", "lat": -2.3333, "lng": 37.8333 },
+    { "id": 92, "name": "Kilome", "lat": -1.9167, "lng": 37.3333 },
+    { "id": 93, "name": "Makueni", "lat": -1.8000, "lng": 37.6333 },
+    { "id": 94, "name": "Mbooni", "lat": -1.9333, "lng": 37.4500 }
+  ],
+  "Nyandarua": [
+    { "id": 95, "name": "Kinangop", "lat": -0.6000, "lng": 36.6667 },
+    { "id": 96, "name": "Kipipiri", "lat": -0.3333, "lng": 36.5333 },
+    { "id": 97, "name": "Ndaragwa", "lat": -0.2833, "lng": 36.3500 },
+    { "id": 98, "name": "Ol Jorok", "lat": -0.2667, "lng": 36.2667 },
+    { "id": 99, "name": "Ol Kalou", "lat": -0.2667, "lng": 36.3833 }
+  ],
+  "Nyeri": [
+    { "id": 100, "name": "Kieni East", "lat": -0.5000, "lng": 36.9500 },
+    { "id": 101, "name": "Kieni West", "lat": -0.4167, "lng": 36.8333 },
+    { "id": 102, "name": "Mathira East", "lat": -0.3833, "lng": 37.0333 },
+    { "id": 103, "name": "Mathira West", "lat": -0.4333, "lng": 36.9167 },
+    { "id": 104, "name": "Mukurwe-ini", "lat": -0.5833, "lng": 37.0333 },
+    { "id": 105, "name": "Nyeri Town", "lat": -0.4167, "lng": 36.9500 },
+    { "id": 106, "name": "Othaya", "lat": -0.5667, "lng": 36.9500 },
+    { "id": 107, "name": "Tetu", "lat": -0.4167, "lng": 36.9833 }
+  ],
+  "Kirinyaga": [
+    { "id": 108, "name": "Kirinyaga Central", "lat": -0.5000, "lng": 37.2833 },
+    { "id": 109, "name": "Kirinyaga East", "lat": -0.5833, "lng": 37.3667 },
+    { "id": 110, "name": "Kirinyaga West", "lat": -0.5833, "lng": 37.1833 },
+    { "id": 111, "name": "Mwea East", "lat": -0.6667, "lng": 37.3500 },
+    { "id": 112, "name": "Mwea West", "lat": -0.7500, "lng": 37.2833 }
+  ],
+  "Murang'a": [
+    { "id": 113, "name": "Gatanga", "lat": -0.8000, "lng": 37.0833 },
+    { "id": 114, "name": "Kahuro", "lat": -0.8833, "lng": 37.0167 },
+    { "id": 115, "name": "Kandara", "lat": -0.9167, "lng": 36.9333 },
+    { "id": 116, "name": "Kangema", "lat": -0.6833, "lng": 36.9667 },
+    { "id": 117, "name": "Kigumo", "lat": -0.8500, "lng": 36.9333 },
+    { "id": 118, "name": "Mathioya", "lat": -0.8333, "lng": 37.0333 },
+    { "id": 119, "name": "Murang'a East", "lat": -0.7167, "lng": 37.1500 },
+    { "id": 120, "name": "Murang'a South", "lat": -0.9167, "lng": 37.1833 }
+  ],
+  "Kiambu": [
+    { "id": 121, "name": "Gatundu North", "lat": -1.0167, "lng": 36.9333 },
+    { "id": 122, "name": "Gatundu South", "lat": -1.0000, "lng": 36.8667 },
+    { "id": 123, "name": "Githunguri", "lat": -1.0667, "lng": 36.7833 },
+    { "id": 124, "name": "Juja", "lat": -1.1000, "lng": 37.0167 },
+    { "id": 125, "name": "Kabete", "lat": -1.2500, "lng": 36.7333 },
+    { "id": 126, "name": "Kiambaa", "lat": -1.1833, "lng": 36.8333 },
+    { "id": 127, "name": "Kiambu", "lat": -1.1667, "lng": 36.8333 },
+    { "id": 128, "name": "Kikuyu", "lat": -1.2500, "lng": 36.6667 },
+    { "id": 129, "name": "Lari", "lat": -0.8000, "lng": 36.5667 },
+    { "id": 130, "name": "Limuru", "lat": -1.1167, "lng": 36.6500 },
+    { "id": 131, "name": "Ruiru", "lat": -1.1500, "lng": 36.9667 },
+    { "id": 132, "name": "Thika Town", "lat": -1.0333, "lng": 37.0833 }
+  ],
+  "Turkana": [
+    { "id": 133, "name": "Kibish", "lat": 4.1667, "lng": 34.5000 },
+    { "id": 134, "name": "Loima", "lat": 3.5333, "lng": 35.6167 },
+    { "id": 135, "name": "Turkana Central", "lat": 3.1167, "lng": 35.6000 },
+    { "id": 136, "name": "Turkana East", "lat": 3.2333, "lng": 36.1667 },
+    { "id": 137, "name": "Turkana North", "lat": 3.9833, "lng": 35.8500 },
+    { "id": 138, "name": "Turkana South", "lat": 2.9833, "lng": 35.5667 },
+    { "id": 139, "name": "Turkana West", "lat": 3.3667, "lng": 35.4167 }
+  ],
+  "West Pokot": [
+    { "id": 140, "name": "Central Pokot", "lat": 1.5000, "lng": 35.1167 },
+    { "id": 141, "name": "North Pokot", "lat": 2.1667, "lng": 35.1667 },
+    { "id": 142, "name": "Pokot South", "lat": 1.4167, "lng": 35.0333 },
+    { "id": 143, "name": "West Pokot", "lat": 1.7833, "lng": 35.3833 }
+  ],
+  "Samburu": [
+    { "id": 144, "name": "Samburu East", "lat": 1.1000, "lng": 37.5333 },
+    { "id": 145, "name": "Samburu North", "lat": 1.5000, "lng": 37.0000 },
+    { "id": 146, "name": "Samburu West", "lat": 1.2500, "lng": 36.7500 }
+  ],
+  "Trans-Nzoia": [
+    { "id": 147, "name": "Cherangany", "lat": 1.0833, "lng": 35.3667 },
+    { "id": 148, "name": "Endebess", "lat": 1.0167, "lng": 34.9833 },
+    { "id": 149, "name": "Kiminini", "lat": 0.9167, "lng": 34.9167 },
+    { "id": 150, "name": "Kwanza", "lat": 1.1000, "lng": 34.9333 },
+    { "id": 151, "name": "Saboti", "lat": 0.9833, "lng": 34.9667 }
+  ],
+  "Uasin Gishu": [
+    { "id": 152, "name": "Ainabkoi", "lat": 0.3667, "lng": 35.5833 },
+    { "id": 153, "name": "Kapseret", "lat": 0.4500, "lng": 35.9667 },
+    { "id": 154, "name": "Kesses", "lat": 0.2000, "lng": 35.4667 },
+    { "id": 155, "name": "Moiben", "lat": 0.5167, "lng": 35.5167 },
+    { "id": 156, "name": "Soy", "lat": 0.5167, "lng": 35.1833 },
+    { "id": 157, "name": "Turbo", "lat": 0.6333, "lng": 35.2833 }
+  ],
+  "Elgeyo-Marakwet": [
+    { "id": 158, "name": "Keiyo North", "lat": 0.5333, "lng": 35.5333 },
+    { "id": 159, "name": "Keiyo South", "lat": 0.5000, "lng": 35.5667 },
+    { "id": 160, "name": "Marakwet East", "lat": 0.9167, "lng": 35.5667 },
+    { "id": 161, "name": "Marakwet West", "lat": 0.8333, "lng": 35.4667 }
+  ],
+  "Nandi": [
+    { "id": 162, "name": "Aldai", "lat": 0.1167, "lng": 35.1833 },
+    { "id": 163, "name": "Chesumei", "lat": 0.3333, "lng": 35.2167 },
+    { "id": 164, "name": "Emgwen", "lat": 0.2500, "lng": 35.3333 },
+    { "id": 165, "name": "Mosop", "lat": 0.1667, "lng": 35.1167 },
+    { "id": 166, "name": "Nandi Hills", "lat": 0.1000, "lng": 35.1833 },
+    { "id": 167, "name": "Tinderet", "lat": 0.0667, "lng": 35.3667 }
+  ],
+  "Baringo": [
+    { "id": 168, "name": "Baringo Central", "lat": 0.4667, "lng": 35.9667 },
+    { "id": 169, "name": "Baringo North", "lat": 0.8667, "lng": 35.9333 },
+    { "id": 170, "name": "Baringo South", "lat": 0.5833, "lng": 35.8333 },
+    { "id": 171, "name": "Eldama Ravine", "lat": 0.0500, "lng": 35.7167 },
+    { "id": 172, "name": "Mogotio", "lat": 0.0833, "lng": 35.9667 },
+    { "id": 173, "name": "Tiaty", "lat": 0.8333, "lng": 36.0833 }
+  ],
+  "Laikipia": [
+    { "id": 174, "name": "Laikipia Central", "lat": 0.0333, "lng": 36.3667 },
+    { "id": 175, "name": "Laikipia East", "lat": 0.2667, "lng": 36.9333 },
+    { "id": 176, "name": "Laikipia North", "lat": 0.6000, "lng": 36.7833 },
+    { "id": 177, "name": "Laikipia West", "lat": 0.1833, "lng": 36.4167 },
+    { "id": 178, "name": "Nyahururu", "lat": 0.0333, "lng": 36.3667 }
+  ],
+  "Nakuru": [
+    { "id": 179, "name": "Bahati", "lat": -0.3833, "lng": 36.0833 },
+    { "id": 180, "name": "Gilgil", "lat": -0.5000, "lng": 36.3333 },
+    { "id": 181, "name": "Kuresoi North", "lat": -0.1833, "lng": 35.5667 },
+    { "id": 182, "name": "Kuresoi South", "lat": -0.3667, "lng": 35.6167 },
+    { "id": 183, "name": "Molo", "lat": -0.2500, "lng": 35.7333 },
+    { "id": 184, "name": "Naivasha", "lat": -0.7167, "lng": 36.4333 },
+    { "id": 185, "name": "Nakuru Town East", "lat": -0.2833, "lng": 36.0667 },
+    { "id": 186, "name": "Nakuru Town West", "lat": -0.2833, "lng": 36.0667 },
+    { "id": 187, "name": "Njoro", "lat": -0.3333, "lng": 35.9333 },
+    { "id": 188, "name": "Rongai", "lat": -0.1667, "lng": 35.8667 },
+    { "id": 189, "name": "Subukia", "lat": -0.0167, "lng": 36.1833 }
+  ],
+  "Narok": [
+    { "id": 190, "name": "Emurua Dikirr", "lat": -1.0833, "lng": 35.0333 },
+    { "id": 191, "name": "Kilgoris", "lat": -1.0000, "lng": 34.8667 },
+    { "id": 192, "name": "Narok East", "lat": -1.0833, "lng": 35.8667 },
+    { "id": 193, "name": "Narok North", "lat": -1.0833, "lng": 35.8667 },
+    { "id": 194, "name": "Narok South", "lat": -1.5000, "lng": 35.4667 },
+    { "id": 195, "name": "Narok West", "lat": -1.0833, "lng": 35.2833 }
+  ],
+  "Kajiado": [
+    { "id": 196, "name": "Isinya", "lat": -1.6667, "lng": 36.8667 },
+    { "id": 197, "name": "Kajiado Central", "lat": -1.8500, "lng": 36.7833 },
+    { "id": 198, "name": "Kajiado East", "lat": -2.3833, "lng": 37.5333 },
+    { "id": 199, "name": "Kajiado North", "lat": -1.3833, "lng": 36.7667 },
+    { "id": 200, "name": "Kajiado West", "lat": -1.9667, "lng": 36.4333 }
+  ],
+  "Kericho": [
+    { "id": 201, "name": "Ainamoi", "lat": -0.3667, "lng": 35.2833 },
+    { "id": 202, "name": "Belgut", "lat": -0.2833, "lng": 35.4833 },
+    { "id": 203, "name": "Bureti", "lat": -0.3500, "lng": 35.3500 },
+    { "id": 204, "name": "Kipkelion East", "lat": -0.1833, "lng": 35.4667 },
+    { "id": 205, "name": "Kipkelion West", "lat": -0.2500, "lng": 35.4167 },
+    { "id": 206, "name": "Sigowet–Soin", "lat": -0.1167, "lng": 35.3000 }
+  ],
+  "Bomet": [
+    { "id": 207, "name": "Bomet Central", "lat": -0.7833, "lng": 35.3500 },
+    { "id": 208, "name": "Bomet East", "lat": -0.6333, "lng": 35.4000 },
+    { "id": 209, "name": "Chepalungu", "lat": -0.8667, "lng": 35.2000 },
+    { "id": 210, "name": "Konoin", "lat": -0.8000, "lng": 35.1667 },
+    { "id": 211, "name": "Sotik", "lat": -0.6833, "lng": 35.1167 }
+  ],
+  "Kakamega": [
+    { "id": 212, "name": "Butere", "lat": 0.2167, "lng": 34.5000 },
+    { "id": 213, "name": "Kakamega Central", "lat": 0.2833, "lng": 34.7500 },
+    { "id": 214, "name": "Kakamega East", "lat": 0.3333, "lng": 34.5833 },
+    { "id": 215, "name": "Kakamega North", "lat": 0.5000, "lng": 34.6667 },
+    { "id": 216, "name": "Kakamega South", "lat": 0.1667, "lng": 34.6167 },
+    { "id": 217, "name": "Khwisero", "lat": 0.1667, "lng": 34.7500 },
+    { "id": 218, "name": "Lugari", "lat": 0.3667, "lng": 34.8833 },
+    { "id": 219, "name": "Likuyani", "lat": 0.3833, "lng": 34.9667 },
+    { "id": 220, "name": "Malava", "lat": 0.4500, "lng": 34.8667 },
+    { "id": 221, "name": "Matungu", "lat": 0.2833, "lng": 34.6000 },
+    { "id": 222, "name": "Mumias East", "lat": 0.3333, "lng": 34.4833 },
+    { "id": 223, "name": "Mumias West", "lat": 0.2833, "lng": 34.5500 },
+    { "id": 224, "name": "Navakholo", "lat": 0.2667, "lng": 34.7667 }
+  ],
+  "Vihiga": [
+    { "id": 225, "name": "Emuhaya", "lat": 0.0500, "lng": 34.7333 },
+    { "id": 226, "name": "Hamisi", "lat": 0.2000, "lng": 34.7667 },
+    { "id": 227, "name": "Luanda", "lat": 0.0167, "lng": 34.6000 },
+    { "id": 228, "name": "Sabatia", "lat": 0.1000, "lng": 34.7833 },
+    { "id": 229, "name": "Vihiga", "lat": 0.0833, "lng": 34.7167 }
+  ],
+  "Bungoma": [
+    { "id": 230, "name": "Bumula", "lat": 0.6667, "lng": 34.4333 },
+    { "id": 231, "name": "Kabuchai", "lat": 0.7500, "lng": 34.5833 },
+    { "id": 232, "name": "Kanduyi", "lat": 0.5667, "lng": 34.5667 },
+    { "id": 233, "name": "Kimilili", "lat": 0.8000, "lng": 34.7000 },
+    { "id": 234, "name": "Mt Elgon", "lat": 1.1167, "lng": 34.5500 },
+    { "id": 235, "name": "Sirisia", "lat": 0.6333, "lng": 34.6167 },
+    { "id": 236, "name": "Tongaren", "lat": 0.7667, "lng": 34.5167 },
+    { "id": 237, "name": "Webuye East", "lat": 0.6167, "lng": 34.7667 },
+    { "id": 238, "name": "Webuye West", "lat": 0.6167, "lng": 34.7667 }
+  ],
+  "Busia": [
+    { "id": 239, "name": "Bunyala", "lat": 0.1667, "lng": 33.9667 },
+    { "id": 240, "name": "Busia", "lat": 0.4667, "lng": 34.1000 },
+    { "id": 241, "name": "Butula", "lat": 0.3667, "lng": 34.3333 },
+    { "id": 242, "name": "Nambale", "lat": 0.4667, "lng": 34.2667 },
+    { "id": 243, "name": "Samia", "lat": 0.3000, "lng": 34.0167 },
+    { "id": 244, "name": "Teso North", "lat": 0.7500, "lng": 34.3667 },
+    { "id": 245, "name": "Teso South", "lat": 0.6667, "lng": 34.2333 }
+  ],
+  "Siaya": [
+    { "id": 246, "name": "Alego Usonga", "lat": 0.0667, "lng": 34.2833 },
+    { "id": 247, "name": "Bondo", "lat": 0.1000, "lng": 34.2667 },
+    { "id": 248, "name": "Gem", "lat": 0.0833, "lng": 34.4833 },
+    { "id": 249, "name": "Rarieda", "lat": 0.0500, "lng": 34.3833 },
+    { "id": 250, "name": "Ugenya", "lat": 0.1667, "lng": 34.2833 },
+    { "id": 251, "name": "Ugunja", "lat": 0.1833, "lng": 34.3000 }
+  ],
+  "Kisumu": [
+    { "id": 252, "name": "Kisumu Central", "lat": -0.1000, "lng": 34.7500 },
+    { "id": 253, "name": "Kisumu East", "lat": -0.1000, "lng": 34.7667 },
+    { "id": 254, "name": "Kisumu West", "lat": -0.1500, "lng": 34.7333 },
+    { "id": 255, "name": "Muhoroni", "lat": -0.1500, "lng": 35.2000 },
+    { "id": 256, "name": "Nyakach", "lat": -0.2833, "lng": 34.9333 },
+    { "id": 257, "name": "Nyando", "lat": -0.3333, "lng": 34.9667 },
+    { "id": 258, "name": "Seme", "lat": -0.1000, "lng": 34.4833 }
+  ],
+  "Homa Bay": [
+    { "id": 259, "name": "Homa Bay Town", "lat": -0.5333, "lng": 34.4500 },
+    { "id": 260, "name": "Kabondo Kasipul", "lat": -0.4333, "lng": 34.5667 },
+    { "id": 261, "name": "Karachuonyo", "lat": -0.5000, "lng": 34.7333 },
+    { "id": 262, "name": "Kasipul", "lat": -0.5000, "lng": 34.6500 },
+    { "id": 263, "name": "Mbita", "lat": -0.4333, "lng": 34.2000 },
+    { "id": 264, "name": "Ndhiwa", "lat": -0.8333, "lng": 34.3500 },
+    { "id": 265, "name": "Rangwe", "lat": -0.6000, "lng": 34.6833 },
+    { "id": 266, "name": "Suba", "lat": -0.6167, "lng": 34.1833 }
+  ],
+  "Migori": [
+    { "id": 267, "name": "Awendo", "lat": -0.7333, "lng": 34.5833 },
+    { "id": 268, "name": "Kuria East", "lat": -1.0000, "lng": 34.4833 },
+    { "id": 269, "name": "Kuria West", "lat": -1.0000, "lng": 34.4833 },
+    { "id": 270, "name": "Nyatike", "lat": -1.0667, "lng": 34.4833 },
+    { "id": 271, "name": "Rongo", "lat": -0.7333, "lng": 34.6167 },
+    { "id": 272, "name": "Suna East", "lat": -1.0667, "lng": 34.4833 },
+    { "id": 273, "name": "Suna West", "lat": -1.1167, "lng": 34.3833 },
+    { "id": 274, "name": "Uriri", "lat": -0.9667, "lng": 34.4333 }
+  ],
+  "Kisii": [
+    { "id": 275, "name": "Bobasi", "lat": -0.8333, "lng": 34.7833 },
+    { "id": 276, "name": "Bomachoge Borabu", "lat": -0.7833, "lng": 34.9167 },
+    { "id": 277, "name": "Bomachoge Chache", "lat": -0.8500, "lng": 34.8333 },
+    { "id": 278, "name": "Bonchari", "lat": -0.8000, "lng": 34.7667 },
+    { "id": 279, "name": "Kitutu Chache North", "lat": -0.7833, "lng": 34.7833 },
+    { "id": 280, "name": "Kitutu Chache South", "lat": -0.8333, "lng": 34.8333 },
+    { "id": 281, "name": "Nyaribari Chache", "lat": -0.7833, "lng": 34.7833 },
+    { "id": 282, "name": "Nyaribari Masaba", "lat": -0.7833, "lng": 34.7833 },
+    { "id": 283, "name": "South Mugirango", "lat": -0.8333, "lng": 34.7833 }
+  ],
+  "Nyamira": [
+    { "id": 284, "name": "Borabu", "lat": -0.7167, "lng": 34.9833 },
+    { "id": 285, "name": "Manga", "lat": -0.7833, "lng": 34.9167 },
+    { "id": 286, "name": "Masaba North", "lat": -0.7000, "lng": 34.8667 },
+    { "id": 287, "name": "Nyamira North", "lat": -0.6500, "lng": 34.9667 },
+    { "id": 288, "name": "Nyamira South", "lat": -0.7833, "lng": 34.9833 }
+  ],
+  "Nairobi": [
+    { "id": 289, "name": "Dagoretti North", "lat": -1.2833, "lng": 36.7167 },
+    { "id": 290, "name": "Dagoretti South", "lat": -1.3000, "lng": 36.7333 },
+    { "id": 291, "name": "Embakasi Central", "lat": -1.3167, "lng": 36.9000 },
+    { "id": 292, "name": "Embakasi East", "lat": -1.2833, "lng": 36.9167 },
+    { "id": 293, "name": "Embakasi North", "lat": -1.2833, "lng": 36.8833 },
+    { "id": 294, "name": "Embakasi South", "lat": -1.3333, "lng": 36.9167 },
+    { "id": 295, "name": "Embakasi West", "lat": -1.3167, "lng": 36.8667 },
+    { "id": 296, "name": "Kamukunji", "lat": -1.2833, "lng": 36.8500 },
+    { "id": 297, "name": "Kasarani", "lat": -1.2167, "lng": 36.9000 },
+    { "id": 298, "name": "Kibra", "lat": -1.3167, "lng": 36.7833 },
+    { "id": 299, "name": "Lang'ata", "lat": -1.3667, "lng": 36.7500 },
+    { "id": 300, "name": "Makadara", "lat": -1.3000, "lng": 36.8667 },
+    { "id": 301, "name": "Mathare", "lat": -1.2667, "lng": 36.8500 },
+    { "id": 302, "name": "Roysambu", "lat": -1.2167, "lng": 36.8833 },
+    { "id": 303, "name": "Ruaraka", "lat": -1.2500, "lng": 36.8833 },
+    { "id": 304, "name": "Starehe", "lat": -1.2833, "lng": 36.8333 },
+    { "id": 305, "name": "Westlands", "lat": -1.2667, "lng": 36.8000 }
+  ]
+}

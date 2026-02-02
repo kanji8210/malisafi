@@ -23,6 +23,7 @@ class Malisafi_Shortcodes {
         add_shortcode('malisafi_registration', array(__CLASS__, 'registration_form'));
         add_shortcode('malisafi_register', array(__CLASS__, 'registration_form')); // Alias
         add_shortcode('malisafi_property_map', array(__CLASS__, 'property_map')); // Property map view
+        add_shortcode('malisafi_kenya_map_filter', array(__CLASS__, 'kenya_map_filter')); // Kenya SVG map filter
         add_shortcode('malisafi_city_list', array(__CLASS__, 'city_list')); // City list with search links
         add_shortcode('malisafi_agent', array(__CLASS__, 'agent_profile')); // Single agent profile
         add_shortcode('malisafi_agents', array(__CLASS__, 'agents_list')); // Agents listing
@@ -324,6 +325,57 @@ $current_listings = (int) $wpdb->get_var($wpdb->prepare(
         // Include the minimalist properties template
         include MALISAFI_MLS_PATH . 'templates/properties-filters-minimalist.php';
         
+        return ob_get_clean();
+    }
+
+    /**
+     * Kenya map filter shortcode
+     * Shortcode: [malisafi_kenya_map_filter]
+     *
+     * @param array $atts Shortcode attributes
+     * @return string
+     */
+    public static function kenya_map_filter($atts = array()) {
+        $atts = shortcode_atts(array(
+            'results_url' => home_url('/properties')
+        ), $atts);
+
+        wp_enqueue_style(
+            'malisafi-kenya-map-filter',
+            MALISAFI_MLS_URL . 'assets/css/kenya-map-filter.css',
+            array('malisafi-mls-variables'),
+            MALISAFI_MLS_VERSION
+        );
+
+        wp_enqueue_script(
+            'malisafi-kenya-map-filter',
+            MALISAFI_MLS_URL . 'assets/js/kenya-map-filter.js',
+            array('jquery'),
+            MALISAFI_MLS_VERSION,
+            true
+        );
+
+        $json_path = MALISAFI_MLS_PATH . 'data/kenya-subcounties.json';
+        $subcounties_map = array();
+        if (file_exists($json_path)) {
+            $raw = file_get_contents($json_path);
+            $data = json_decode($raw, true);
+            if (is_array($data)) {
+                foreach ($data as $county => $subcounties) {
+                    $subcounties_map[$county] = is_array($subcounties) ? $subcounties : array();
+                }
+            }
+        }
+
+        wp_localize_script('malisafi-kenya-map-filter', 'malisafiKenyaMapFilter', array(
+            'svgUrl' => MALISAFI_MLS_URL . 'assets/svg/kenya-counties.svg',
+            'subcounties' => $subcounties_map
+        ));
+
+        ob_start();
+
+        include MALISAFI_MLS_PATH . 'templates/property-filter-kenya-map.php';
+
         return ob_get_clean();
     }
     

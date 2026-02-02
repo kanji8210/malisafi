@@ -6,7 +6,7 @@
  */
 if (!defined('ABSPATH')) exit;
 
-$property_id = isset($_GET['property_id']) ? intval($_GET['property_id']) : 0;
+$property_id = isset($_GET['property_id']) ? absint($_GET['property_id']) : 0;
 
 if (!$property_id) {
     return '<div class="malisafi-notice error"><p>' . __('Invalid property ID', 'malisafi-mls') . '</p></div>';
@@ -28,6 +28,7 @@ if ($property->post_author != $current_user->ID && !current_user_can('administra
 $price = get_post_meta($property_id, '_malisafi_price', true);
 $currency = get_post_meta($property_id, '_malisafi_currency', true) ?: 'KES';
 $county = get_post_meta($property_id, '_malisafi_county', true);
+$subcounty = get_post_meta($property_id, '_malisafi_subcounty', true);
 $city = get_post_meta($property_id, '_malisafi_city', true);
 $bedrooms = get_post_meta($property_id, '_malisafi_bedrooms', true);
 $bathrooms = get_post_meta($property_id, '_malisafi_bathrooms', true);
@@ -124,13 +125,13 @@ $dashboard_url = home_url('/dashboard'); // Update with your dashboard URL
                     </div>
                 <?php endif; ?>
                 
-                <?php if ($city || $county): ?>
+                <?php if ($city || $subcounty || $county): ?>
                     <div class="detail-item">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
                             <circle cx="12" cy="10" r="3"></circle>
                         </svg>
-                        <?php echo esc_html(($city ? $city . ', ' : '') . $county); ?>
+                        <?php echo esc_html(implode(', ', array_filter(array($city, $subcounty, $county)))); ?>
                     </div>
                 <?php endif; ?>
             </div>

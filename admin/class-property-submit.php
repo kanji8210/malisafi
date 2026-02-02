@@ -41,11 +41,12 @@ class Malisafi_Property_Submit {
         $validator->text($_POST['property_title'] ?? '', 'title', 5, 200, true);
         $validator->price($_POST['property_price'] ?? '', 'price', true);
         $validator->in_array($_POST['property_currency'] ?? 'KES', array('KES', 'USD', 'EUR', 'GBP'), 'currency', true);
-        $validator->in_array($_POST['listing_type'] ?? '', array('sale', 'rent', 'lease'), 'listing_type', true);
+        $validator->in_array($_POST['listing_type'] ?? '', array('sale', 'rent', 'lease', 'short_term'), 'listing_type', true);
         
         // Validate location
         $validator->text($_POST['county'] ?? '', 'county', 2, 50, true);
-        $validator->text($_POST['city'] ?? '', 'city', 2, 50, true);
+        $validator->text($_POST['subcounty'] ?? '', 'subcounty', 2, 80, true);
+        $validator->text($_POST['city'] ?? '', 'city', 2, 50, false);
         
         if ($validator->fails()) {
             $error_message = $validator->first_error();
@@ -178,6 +179,7 @@ class Malisafi_Property_Submit {
             // Location
             'address' => isset($data['address']) && $data['address'] !== null ? sanitize_text_field($data['address']) : '',
             'county' => isset($data['county']) && $data['county'] !== null ? sanitize_text_field($data['county']) : '',
+            'subcounty' => isset($data['subcounty']) && $data['subcounty'] !== null ? sanitize_text_field($data['subcounty']) : '',
             'city' => isset($data['city']) && $data['city'] !== null ? sanitize_text_field($data['city']) : '',
             'area' => isset($data['area']) && $data['area'] !== null ? sanitize_text_field($data['area']) : '',
             'gps' => isset($data['property_gps']) && $data['property_gps'] !== null ? sanitize_text_field($data['property_gps']) : '',
@@ -198,6 +200,22 @@ class Malisafi_Property_Submit {
             // Media
             'video_url' => isset($data['video_url']) && $data['video_url'] !== null ? esc_url_raw($data['video_url']) : '',
             'virtual_tour' => isset($data['virtual_tour']) && $data['virtual_tour'] !== null ? esc_url_raw($data['virtual_tour']) : '',
+
+            // Sale/Lease Details
+            'floor_plan_urls' => isset($data['floor_plan_urls']) && $data['floor_plan_urls'] !== null ? sanitize_textarea_field($data['floor_plan_urls']) : '',
+            'expected_roi' => isset($data['expected_roi']) ? floatval($data['expected_roi']) : 0,
+            'rental_yield' => isset($data['rental_yield']) ? floatval($data['rental_yield']) : 0,
+            'annual_rent_income' => isset($data['annual_rent_income']) ? floatval($data['annual_rent_income']) : 0,
+            'ownership_type' => isset($data['ownership_type']) && $data['ownership_type'] !== null ? sanitize_text_field($data['ownership_type']) : '',
+            'title_deed_status' => isset($data['title_deed_status']) && $data['title_deed_status'] !== null ? sanitize_text_field($data['title_deed_status']) : '',
+            'financing_options' => isset($data['financing_options']) && is_array($data['financing_options']) ? array_filter(array_map('sanitize_text_field', $data['financing_options'])) : array(),
+            'financing_min_deposit' => isset($data['financing_min_deposit']) ? floatval($data['financing_min_deposit']) : 0,
+            'financing_tenor_months' => isset($data['financing_tenor_months']) ? intval($data['financing_tenor_months']) : 0,
+            'financing_interest_rate' => isset($data['financing_interest_rate']) ? floatval($data['financing_interest_rate']) : 0,
+            'diaspora_financing_details' => isset($data['diaspora_financing_details']) && $data['diaspora_financing_details'] !== null ? sanitize_text_field($data['diaspora_financing_details']) : '',
+            'developer_guarantee' => isset($data['developer_guarantee']) && $data['developer_guarantee'] !== null ? sanitize_textarea_field($data['developer_guarantee']) : '',
+            'sustainability' => isset($data['sustainability']) && is_array($data['sustainability']) ? array_filter(array_map('sanitize_text_field', $data['sustainability'])) : array(),
+            'green_certification' => isset($data['green_certification']) && $data['green_certification'] !== null ? sanitize_text_field($data['green_certification']) : '',
             
             // Additional
             'reference_id' => isset($data['reference_id']) && $data['reference_id'] !== null ? sanitize_text_field($data['reference_id']) : '',
@@ -224,8 +242,8 @@ class Malisafi_Property_Submit {
             $errors[] = __('County is required.', 'malisafi-mls');
         }
         
-        if (empty($data['city'])) {
-            $errors[] = __('City is required.', 'malisafi-mls');
+        if (empty($data['subcounty'])) {
+            $errors[] = __('Subcounty is required.', 'malisafi-mls');
         }
         
         if (empty($data['property_type']) || $data['property_type'] === 0) {
@@ -233,7 +251,7 @@ class Malisafi_Property_Submit {
         }
         
         if (empty($data['listing_type'])) {
-            $errors[] = __('Listing type (sale/rent/lease) is required.', 'malisafi-mls');
+            $errors[] = __('Listing type (sale/rent/lease/short term) is required.', 'malisafi-mls');
         }
         
         return $errors;
@@ -315,6 +333,7 @@ class Malisafi_Property_Submit {
             // Location
             '_malisafi_address' => isset($data['address']) ? $data['address'] : '',
             '_malisafi_county' => isset($data['county']) ? $data['county'] : '',
+            '_malisafi_subcounty' => isset($data['subcounty']) ? $data['subcounty'] : '',
             '_malisafi_city' => isset($data['city']) ? $data['city'] : '',
             '_malisafi_area' => isset($data['area']) ? $data['area'] : '',
             '_malisafi_gps' => isset($data['gps']) ? $data['gps'] : '',
@@ -332,11 +351,45 @@ class Malisafi_Property_Submit {
             // Media
             '_malisafi_video_url' => isset($data['video_url']) ? $data['video_url'] : '',
             '_malisafi_virtual_tour' => isset($data['virtual_tour']) ? $data['virtual_tour'] : '',
+
+            // Sale/Lease Details
+            '_malisafi_floor_plan_urls' => isset($data['floor_plan_urls']) ? $data['floor_plan_urls'] : '',
+            '_malisafi_expected_roi' => isset($data['expected_roi']) ? $data['expected_roi'] : 0,
+            '_malisafi_rental_yield' => isset($data['rental_yield']) ? $data['rental_yield'] : 0,
+            '_malisafi_annual_rent_income' => isset($data['annual_rent_income']) ? $data['annual_rent_income'] : 0,
+            '_malisafi_ownership_type' => isset($data['ownership_type']) ? $data['ownership_type'] : '',
+            '_malisafi_title_deed_status' => isset($data['title_deed_status']) ? $data['title_deed_status'] : '',
+            '_malisafi_financing_options' => isset($data['financing_options']) && is_array($data['financing_options']) ? $data['financing_options'] : array(),
+            '_malisafi_financing_min_deposit' => isset($data['financing_min_deposit']) ? $data['financing_min_deposit'] : 0,
+            '_malisafi_financing_tenor_months' => isset($data['financing_tenor_months']) ? $data['financing_tenor_months'] : 0,
+            '_malisafi_financing_interest_rate' => isset($data['financing_interest_rate']) ? $data['financing_interest_rate'] : 0,
+            '_malisafi_diaspora_financing_details' => isset($data['diaspora_financing_details']) ? $data['diaspora_financing_details'] : '',
+            '_malisafi_developer_guarantee' => isset($data['developer_guarantee']) ? $data['developer_guarantee'] : '',
+            '_malisafi_sustainability' => isset($data['sustainability']) && is_array($data['sustainability']) ? $data['sustainability'] : array(),
+            '_malisafi_green_certification' => isset($data['green_certification']) ? $data['green_certification'] : '',
             
             // Additional
             '_malisafi_reference_id' => isset($data['reference_id']) ? $data['reference_id'] : '',
             '_malisafi_featured' => isset($data['featured']) ? $data['featured'] : 0,
         );
+
+        $listing_type = isset($data['listing_type']) ? $data['listing_type'] : '';
+        if (!in_array($listing_type, array('sale', 'lease'), true)) {
+            $meta_fields['_malisafi_floor_plan_urls'] = '';
+            $meta_fields['_malisafi_expected_roi'] = 0;
+            $meta_fields['_malisafi_rental_yield'] = 0;
+            $meta_fields['_malisafi_annual_rent_income'] = 0;
+            $meta_fields['_malisafi_ownership_type'] = '';
+            $meta_fields['_malisafi_title_deed_status'] = '';
+            $meta_fields['_malisafi_financing_options'] = array();
+            $meta_fields['_malisafi_financing_min_deposit'] = 0;
+            $meta_fields['_malisafi_financing_tenor_months'] = 0;
+            $meta_fields['_malisafi_financing_interest_rate'] = 0;
+            $meta_fields['_malisafi_diaspora_financing_details'] = '';
+            $meta_fields['_malisafi_developer_guarantee'] = '';
+            $meta_fields['_malisafi_sustainability'] = array();
+            $meta_fields['_malisafi_green_certification'] = '';
+        }
         
         foreach ($meta_fields as $key => $value) {
             // Ensure we're not passing null values to update_post_meta

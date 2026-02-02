@@ -157,6 +157,29 @@ class Malisafi_Property_Approval_Workflow {
     }
     
     /**
+     * Intercept admin property submission to track original status
+     */
+    public static function intercept_property_submission() {
+        // Only proceed for valid, authorized submissions
+        if (!isset($_POST['malisafi_property_nonce']) || !wp_verify_nonce($_POST['malisafi_property_nonce'], 'malisafi_submit_property')) {
+            return;
+        }
+
+        $property_id = isset($_POST['property_id']) ? absint(wp_unslash($_POST['property_id'])) : 0;
+        if (!$property_id) {
+            return;
+        }
+
+        $property = get_post($property_id);
+        if (!$property || $property->post_type !== 'malisafi_property') {
+            return;
+        }
+
+        // Store original status for comparison in handle_property_status
+        set_transient('malisafi_original_status_' . $property_id . '_' . get_current_user_id(), $property->post_status, 3600);
+    }
+
+    /**
      * Show pending approval notice
      */
     public static function show_pending_approval_notice() {

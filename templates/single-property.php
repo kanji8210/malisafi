@@ -55,8 +55,9 @@ while (have_posts()) : the_post();
     
     // Location data
     $city = get_post_meta($property_id, '_malisafi_city', true);
-    $state = get_post_meta($property_id, '_malisafi_state', true);
-    $country = get_post_meta($property_id, '_malisafi_country', true);
+    $subcounty = get_post_meta($property_id, '_malisafi_subcounty', true);
+    $county = get_post_meta($property_id, '_malisafi_county', true);
+    $country = get_post_meta($property_id, '_malisafi_country', true) ?: 'Kenya';
     
     // Additional details
     $year_built = get_post_meta($property_id, '_malisafi_year_built', true);
@@ -379,7 +380,7 @@ $formatted_price = $price > 0 ? ($currency_symbol . ' ' . number_format($price))
                 <?php endif; ?>
                 
                 <!-- Location -->
-                <?php if ($city || $state) : ?>
+                <?php if ($city || $subcounty || $county) : ?>
                 <div class="spec-item-inline spec-location">
                     <span class="spec-icon-inline location-icon">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -390,7 +391,7 @@ $formatted_price = $price > 0 ? ($currency_symbol . ' ' . number_format($price))
                     <div class="spec-text">
                         <span class="spec-value">
                             <?php 
-                            $location_parts = array_filter(array($city, $state, $country));
+                            $location_parts = array_filter(array($city, $subcounty, $county, $country));
                             echo esc_html(implode(', ', $location_parts));
                             ?>
                         </span>

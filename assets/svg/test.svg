@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 900" role="img" aria-label="Kenya counties map" class="malisafi-kenya-svg">
+  <title>Kenya Counties (Placeholder)</title>
+  <desc>Replace this file with a detailed SVG map. Each county shape should include data-county="County Name". Subcounty shapes can include data-subcounty and optional data-county.</desc>
+  <rect x="40" y="40" width="720" height="820" rx="24" ry="24" fill="#f7f7f7" stroke="#c8ced6" stroke-width="2" />
+  <text x="400" y="120" text-anchor="middle" font-size="24" fill="#4b5563">Replace kenya-counties.svg with the official clickable map</text>
+  <text x="400" y="160" text-anchor="middle" font-size="14" fill="#6b7280">Each county path must have data-county="County Name"</text>
+  <g data-county="Nairobi" class="county-shape" fill="#dbeafe" stroke="#1f2937" stroke-width="1">
+    <rect x="320" y="420" width="160" height="80" rx="8" />
+    <text x="400" y="468" text-anchor="middle" font-size="14" fill="#1f2937">Nairobi</text>
+  </g>
+</svg>

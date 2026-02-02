@@ -21,6 +21,8 @@ class Property_Submission {
         add_action('wp_ajax_malisafi_delete_property_image', array(__CLASS__, 'ajax_delete_image'));
         add_action('wp_ajax_malisafi_reorder_property_images', array(__CLASS__, 'ajax_reorder_images'));
         add_action('wp_ajax_malisafi_get_property_draft', array(__CLASS__, 'ajax_get_draft'));
+        add_action('wp_ajax_malisafi_get_subcounties', array(__CLASS__, 'ajax_get_subcounties'));
+        add_action('wp_ajax_nopriv_malisafi_get_subcounties', array(__CLASS__, 'ajax_get_subcounties'));
         
         // Shortcode for property submission form
         add_shortcode('malisafi_submit_property', array(__CLASS__, 'render_submission_form'));
@@ -81,7 +83,9 @@ class Property_Submission {
      */
     public static function render_submission_form($atts) {
         // Check if we should show success page instead
-        if (isset($_GET['submission']) && $_GET['submission'] === 'success' && isset($_GET['property_id'])) {
+        $submission = isset($_GET['submission']) ? sanitize_text_field(wp_unslash($_GET['submission'])) : '';
+        $property_id = isset($_GET['property_id']) ? absint($_GET['property_id']) : 0;
+        if ($submission === 'success' && $property_id) {
             return self::render_success_page();
         }
         
@@ -266,7 +270,7 @@ class Property_Submission {
         $validator->price($data['price'] ?? '', 'price', true);
         $validator->in_array($data['currency'] ?? 'KES', array('KES', 'USD', 'EUR', 'GBP'), 'currency', true);
         $validator->in_array($data['property_type'] ?? '', array('house', 'apartment', 'land', 'commercial', 'industrial'), 'property_type', true);
-        $validator->in_array($data['listing_type'] ?? '', array('sale', 'rent', 'lease'), 'listing_type', true);
+        $validator->in_array($data['listing_type'] ?? '', array('sale', 'rent', 'lease', 'short_term'), 'listing_type', true);
         
         if ($validator->fails()) {
             return new \WP_Error('validation_failed', __('Validation failed', 'malisafi-mls'), $validator->get_errors());
@@ -303,6 +307,24 @@ class Property_Submission {
         $validator->in_array($data['size_unit'] ?? 'sqm', array('sqm', 'sqft', 'acres', 'hectares'), 'size_unit', false);
         $validator->integer($data['year_built'] ?? 0, 'year_built', 1800, date('Y') + 5, false);
         $validator->in_array($data['condition'] ?? '', array('new', 'excellent', 'good', 'fair', 'renovation'), 'condition', false);
+
+        $listing_type = get_post_meta($property_id, '_malisafi_listing_type', true);
+        $is_sale_or_lease = in_array($listing_type, array('sale', 'lease'), true);
+
+        if ($is_sale_or_lease) {
+            $validator->text($data['floor_plan_urls'] ?? '', 'floor_plan_urls', 0, 2000, false);
+            $validator->number($data['expected_roi'] ?? 0, 'expected_roi', 0, 100, false);
+            $validator->number($data['rental_yield'] ?? 0, 'rental_yield', 0, 100, false);
+            $validator->number($data['annual_rent_income'] ?? 0, 'annual_rent_income', 0, null, false);
+            $validator->in_array($data['ownership_type'] ?? '', array('freehold', 'leasehold', 'company_shares', 'sectional_title'), 'ownership_type', false);
+            $validator->in_array($data['title_deed_status'] ?? '', array('ready', 'processing', 'not_available'), 'title_deed_status', false);
+            $validator->number($data['financing_min_deposit'] ?? 0, 'financing_min_deposit', 0, 100, false);
+            $validator->integer($data['financing_tenor_months'] ?? 0, 'financing_tenor_months', 0, 600, false);
+            $validator->number($data['financing_interest_rate'] ?? 0, 'financing_interest_rate', 0, 100, false);
+            $validator->text($data['diaspora_financing_details'] ?? '', 'diaspora_financing_details', 0, 255, false);
+            $validator->text($data['developer_guarantee'] ?? '', 'developer_guarantee', 0, 1000, false);
+            $validator->text($data['green_certification'] ?? '', 'green_certification', 0, 255, false);
+        }
         
         if ($validator->fails()) {
             return new \WP_Error('validation_failed', __('Validation failed', 'malisafi-mls'), $validator->get_errors());
@@ -313,6 +335,36 @@ class Property_Submission {
         // Save meta
         foreach ($validated as $key => $value) {
             update_post_meta($property_id, '_malisafi_' . $key, $value);
+        }
+
+        // Save array-based fields (sale/lease only)
+        if ($is_sale_or_lease) {
+            $financing_options = array();
+            if (isset($data['financing_options']) && is_array($data['financing_options'])) {
+                $financing_options = array_map('sanitize_text_field', $data['financing_options']);
+            }
+            update_post_meta($property_id, '_malisafi_financing_options', $financing_options);
+
+            $sustainability = array();
+            if (isset($data['sustainability']) && is_array($data['sustainability'])) {
+                $sustainability = array_map('sanitize_text_field', $data['sustainability']);
+            }
+            update_post_meta($property_id, '_malisafi_sustainability', $sustainability);
+        } else {
+            update_post_meta($property_id, '_malisafi_floor_plan_urls', '');
+            update_post_meta($property_id, '_malisafi_expected_roi', 0);
+            update_post_meta($property_id, '_malisafi_rental_yield', 0);
+            update_post_meta($property_id, '_malisafi_annual_rent_income', 0);
+            update_post_meta($property_id, '_malisafi_ownership_type', '');
+            update_post_meta($property_id, '_malisafi_title_deed_status', '');
+            update_post_meta($property_id, '_malisafi_financing_options', array());
+            update_post_meta($property_id, '_malisafi_financing_min_deposit', 0);
+            update_post_meta($property_id, '_malisafi_financing_tenor_months', 0);
+            update_post_meta($property_id, '_malisafi_financing_interest_rate', 0);
+            update_post_meta($property_id, '_malisafi_diaspora_financing_details', '');
+            update_post_meta($property_id, '_malisafi_developer_guarantee', '');
+            update_post_meta($property_id, '_malisafi_sustainability', array());
+            update_post_meta($property_id, '_malisafi_green_certification', '');
         }
         
         return true;
@@ -325,7 +377,8 @@ class Property_Submission {
         // Validate
         $validator->text($data['address'] ?? '', 'address', 5, 200, false);
         $validator->text($data['county'] ?? '', 'county', 2, 50, true);
-        $validator->text($data['city'] ?? '', 'city', 2, 50, true);
+        $validator->text($data['subcounty'] ?? '', 'subcounty', 2, 80, true);
+        $validator->text($data['city'] ?? '', 'city', 2, 50, false);
         $validator->text($data['area'] ?? '', 'area', 2, 100, false);
         $validator->text($data['gps'] ?? '', 'gps', 0, 100, false);
         
@@ -341,8 +394,16 @@ class Property_Submission {
         }
         
         // Set location taxonomy
+        $location_terms = array();
         if (!empty($validated['county'])) {
-            wp_set_object_terms($property_id, $validated['county'], 'malisafi_property_location');
+            $location_terms[] = $validated['county'];
+        }
+        if (!empty($validated['subcounty'])) {
+            $location_terms[] = $validated['subcounty'];
+        }
+
+        if (!empty($location_terms)) {
+            wp_set_object_terms($property_id, $location_terms, 'malisafi_property_location');
         }
         
         return true;
@@ -460,6 +521,11 @@ class Property_Submission {
         $county = get_post_meta($property_id, '_malisafi_county', true);
         if (empty($county)) {
             $errors['county'] = __('County is required', 'malisafi-mls');
+        }
+
+        $subcounty = get_post_meta($property_id, '_malisafi_subcounty', true);
+        if (empty($subcounty)) {
+            $errors['subcounty'] = __('Subcounty is required', 'malisafi-mls');
         }
         
         // Require at least one image via front-end gallery upload
@@ -595,11 +661,44 @@ class Property_Submission {
             'bathrooms' => get_post_meta($property_id, '_malisafi_bathrooms', true),
             'size' => get_post_meta($property_id, '_malisafi_size', true),
             'county' => get_post_meta($property_id, '_malisafi_county', true),
+            'subcounty' => get_post_meta($property_id, '_malisafi_subcounty', true),
             'city' => get_post_meta($property_id, '_malisafi_city', true),
+            'floor_plan_urls' => get_post_meta($property_id, '_malisafi_floor_plan_urls', true),
+            'expected_roi' => get_post_meta($property_id, '_malisafi_expected_roi', true),
+            'rental_yield' => get_post_meta($property_id, '_malisafi_rental_yield', true),
+            'annual_rent_income' => get_post_meta($property_id, '_malisafi_annual_rent_income', true),
+            'ownership_type' => get_post_meta($property_id, '_malisafi_ownership_type', true),
+            'title_deed_status' => get_post_meta($property_id, '_malisafi_title_deed_status', true),
+            'financing_options' => get_post_meta($property_id, '_malisafi_financing_options', true),
+            'financing_min_deposit' => get_post_meta($property_id, '_malisafi_financing_min_deposit', true),
+            'financing_tenor_months' => get_post_meta($property_id, '_malisafi_financing_tenor_months', true),
+            'financing_interest_rate' => get_post_meta($property_id, '_malisafi_financing_interest_rate', true),
+            'diaspora_financing_details' => get_post_meta($property_id, '_malisafi_diaspora_financing_details', true),
+            'developer_guarantee' => get_post_meta($property_id, '_malisafi_developer_guarantee', true),
+            'sustainability' => get_post_meta($property_id, '_malisafi_sustainability', true),
+            'green_certification' => get_post_meta($property_id, '_malisafi_green_certification', true),
             'features' => get_post_meta($property_id, '_malisafi_features', true),
             'gallery_ids' => get_post_meta($property_id, '_malisafi_gallery_ids', true)
         );
         
         wp_send_json_success(array('data' => $data));
+    }
+
+    /**
+     * AJAX: Get subcounties for a county
+     */
+    public static function ajax_get_subcounties() {
+        check_ajax_referer('malisafi_property_submission', 'nonce');
+
+        $county = isset($_POST['county']) ? sanitize_text_field(wp_unslash($_POST['county'])) : '';
+        if ($county === '') {
+            wp_send_json_success(array('subcounties' => array()));
+        }
+
+        $subcounties = function_exists('malisafi_get_subcounties_by_county')
+            ? malisafi_get_subcounties_by_county($county)
+            : array();
+
+        wp_send_json_success(array('subcounties' => $subcounties));
     }
 }

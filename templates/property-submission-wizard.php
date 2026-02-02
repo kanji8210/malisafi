@@ -145,6 +145,7 @@ $property_id = isset($_GET['property_id']) ? intval($_GET['property_id']) : 0;
                         <option value="sale"><?php _e('For Sale', 'malisafi-mls'); ?></option>
                         <option value="rent"><?php _e('For Rent', 'malisafi-mls'); ?></option>
                         <option value="lease"><?php _e('For Lease', 'malisafi-mls'); ?></option>
+                        <option value="short_term"><?php _e('Short Term Rent (Airbnb)', 'malisafi-mls'); ?></option>
                     </select>
                 </div>
             </div>
@@ -235,6 +236,106 @@ $property_id = isset($_GET['property_id']) ? intval($_GET['property_id']) : 0;
                 <label for="agent_phone"><?php _e('Agent Phone', 'malisafi-mls'); ?></label>
                 <input type="text" id="agent_phone" name="agent_phone" class="form-control" placeholder="<?php echo esc_attr__('+254700000000', 'malisafi-mls'); ?>">
             </div>
+
+            <div class="sale-lease-details">
+                <h3><?php _e('Buyer & Investor Details (Sale/Lease)', 'malisafi-mls'); ?></h3>
+                <p class="step-description"><?php _e('Optional details for buyers and investors', 'malisafi-mls'); ?></p>
+
+                <div class="form-row">
+                    <label for="floor_plan_urls"><?php _e('Floor Plans (URLs)', 'malisafi-mls'); ?></label>
+                    <textarea id="floor_plan_urls" name="floor_plan_urls" class="form-control" rows="3" placeholder="https://..."></textarea>
+                </div>
+
+                <div class="form-row-group">
+                    <div class="form-row">
+                        <label for="expected_roi"><?php _e('Expected ROI (%)', 'malisafi-mls'); ?></label>
+                        <input type="number" id="expected_roi" name="expected_roi" class="form-control" min="0" max="100" step="0.01" placeholder="12.5">
+                    </div>
+                    <div class="form-row">
+                        <label for="rental_yield"><?php _e('Rental Yield (%)', 'malisafi-mls'); ?></label>
+                        <input type="number" id="rental_yield" name="rental_yield" class="form-control" min="0" max="100" step="0.01" placeholder="8.0">
+                    </div>
+                </div>
+
+                <div class="form-row-group">
+                    <div class="form-row">
+                        <label for="annual_rent_income"><?php _e('Expected Annual Income', 'malisafi-mls'); ?></label>
+                        <input type="number" id="annual_rent_income" name="annual_rent_income" class="form-control" min="0" step="0.01" placeholder="1200000">
+                    </div>
+                    <div class="form-row">
+                        <label for="ownership_type"><?php _e('Ownership Type', 'malisafi-mls'); ?></label>
+                        <select id="ownership_type" name="ownership_type" class="form-control">
+                            <option value=""><?php _e('Select...', 'malisafi-mls'); ?></option>
+                            <option value="freehold"><?php _e('Freehold', 'malisafi-mls'); ?></option>
+                            <option value="leasehold"><?php _e('Leasehold', 'malisafi-mls'); ?></option>
+                            <option value="company_shares"><?php _e('Company Shares', 'malisafi-mls'); ?></option>
+                            <option value="sectional_title"><?php _e('Sectional Title', 'malisafi-mls'); ?></option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row-group">
+                    <div class="form-row">
+                        <label for="title_deed_status"><?php _e('Title Deed Status', 'malisafi-mls'); ?></label>
+                        <select id="title_deed_status" name="title_deed_status" class="form-control">
+                            <option value=""><?php _e('Select...', 'malisafi-mls'); ?></option>
+                            <option value="ready"><?php _e('Ready', 'malisafi-mls'); ?></option>
+                            <option value="processing"><?php _e('Processing', 'malisafi-mls'); ?></option>
+                            <option value="not_available"><?php _e('Not Available', 'malisafi-mls'); ?></option>
+                        </select>
+                    </div>
+                    <div class="form-row">
+                        <label for="developer_guarantee"><?php _e('Developer Guarantees', 'malisafi-mls'); ?></label>
+                        <textarea id="developer_guarantee" name="developer_guarantee" class="form-control" rows="2"></textarea>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <label><?php _e('Financing Options', 'malisafi-mls'); ?></label>
+                    <div class="checkbox-grid">
+                        <label><input type="checkbox" name="financing_options" value="bank_mortgage"> <?php _e('Bank Mortgage', 'malisafi-mls'); ?></label>
+                        <label><input type="checkbox" name="financing_options" value="developer_finance"> <?php _e('Developer Financing', 'malisafi-mls'); ?></label>
+                        <label><input type="checkbox" name="financing_options" value="installments"> <?php _e('Installments', 'malisafi-mls'); ?></label>
+                        <label><input type="checkbox" name="financing_options" value="cash"> <?php _e('Cash', 'malisafi-mls'); ?></label>
+                        <label><input type="checkbox" name="financing_options" value="diaspora"> <?php _e('Diaspora Financing', 'malisafi-mls'); ?></label>
+                    </div>
+                </div>
+
+                <div class="form-row-group">
+                    <div class="form-row">
+                        <label for="financing_min_deposit"><?php _e('Min Deposit (%)', 'malisafi-mls'); ?></label>
+                        <input type="number" id="financing_min_deposit" name="financing_min_deposit" class="form-control" min="0" max="100" step="0.01" placeholder="20">
+                    </div>
+                    <div class="form-row">
+                        <label for="financing_tenor_months"><?php _e('Tenor (months)', 'malisafi-mls'); ?></label>
+                        <input type="number" id="financing_tenor_months" name="financing_tenor_months" class="form-control" min="0" max="600" step="1" placeholder="120">
+                    </div>
+                </div>
+
+                <div class="form-row-group">
+                    <div class="form-row">
+                        <label for="financing_interest_rate"><?php _e('Interest Rate (%)', 'malisafi-mls'); ?></label>
+                        <input type="number" id="financing_interest_rate" name="financing_interest_rate" class="form-control" min="0" max="100" step="0.01" placeholder="12">
+                    </div>
+                    <div class="form-row">
+                        <label for="diaspora_financing_details"><?php _e('Diaspora Financing Details', 'malisafi-mls'); ?></label>
+                        <input type="text" id="diaspora_financing_details" name="diaspora_financing_details" class="form-control" placeholder="e.g., USD financing, KYC required">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <label><?php _e('Sustainability', 'malisafi-mls'); ?></label>
+                    <div class="checkbox-grid">
+                        <label><input type="checkbox" name="sustainability" value="solar"> <?php _e('Solar', 'malisafi-mls'); ?></label>
+                        <label><input type="checkbox" name="sustainability" value="water_harvesting"> <?php _e('Water Harvesting', 'malisafi-mls'); ?></label>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <label for="green_certification"><?php _e('Green Certification', 'malisafi-mls'); ?></label>
+                    <input type="text" id="green_certification" name="green_certification" class="form-control" placeholder="EDGE, LEED, etc.">
+                </div>
+            </div>
         </div>
 
         <!-- Step 3: Location -->
@@ -310,19 +411,27 @@ $property_id = isset($_GET['property_id']) ? intval($_GET['property_id']) : 0;
                 <div class="field-hint privacy-notice" style="background: #e8f4f8; padding: 10px; border-radius: 4px; margin-top: 8px; border-left: 3px solid #0073aa;">
                     <p style="margin: 0 0 5px 0; font-weight: 600; color: #0073aa; font-size: 13px;">
                         <span style="font-size: 16px;">🛡️</span> <?php _e('Privacy Protection', 'malisafi-mls'); ?>
-                    </p>
-                    <p style="margin: 0; font-size: 12px; line-height: 1.4;">
-                        <?php _e('Your exact GPS location will be automatically offset by 200-400 meters on public maps for security. Admins see the precise location. Please enter accurate coordinates.', 'malisafi-mls'); ?>
-                    </p>
-                </div>
-            </div>
 
-            <div id="property-map" class="property-map"></div>
-        </div>
-
-        <!-- Step 4: Features & Amenities -->
-        <div class="wizard-step" id="step-4">
+                    <div class="form-row">
+                        <label for="property_subcounty" class="required">
+                            <?php _e('Subcounty', 'malisafi-mls'); ?>
+                        </label>
+                        <select id="property_subcounty" name="subcounty" class="form-control" required>
+                            <option value=""><?php _e('Select subcounty...', 'malisafi-mls'); ?></option>
+                        </select>
+                    </div>
             <h2><?php _e('Features & Amenities', 'malisafi-mls'); ?></h2>
+
+                <div class="form-row">
+                    <label for="property_city">
+                        <?php _e('Town (optional)', 'malisafi-mls'); ?>
+                    </label>
+                    <input type="text" 
+                           id="property_city" 
+                           name="city" 
+                           class="form-control" 
+                           placeholder="<?php echo esc_attr__('e.g., Nairobi, Mombasa', 'malisafi-mls'); ?>">
+                </div>
             <p class="step-description"><?php _e('Select all that apply to your property', 'malisafi-mls'); ?></p>
             
             <div class="features-section">
@@ -518,7 +627,11 @@ $property_id = isset($_GET['property_id']) ? intval($_GET['property_id']) : 0;
                             <span class="value" id="preview-county">-</span>
                         </div>
                         <div class="preview-item">
-                            <span class="label"><?php _e('City:', 'malisafi-mls'); ?></span>
+                            <span class="label"><?php _e('Subcounty:', 'malisafi-mls'); ?></span>
+                            <span class="value" id="preview-subcounty">-</span>
+                        </div>
+                        <div class="preview-item">
+                            <span class="label"><?php _e('Town:', 'malisafi-mls'); ?></span>
                             <span class="value" id="preview-city">-</span>
                         </div>
                     </div>

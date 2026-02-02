@@ -31,6 +31,72 @@ function malisafi_get_kenya_counties() {
 }
 
 /**
+ * Get subcounties by county name
+ *
+ * Uses the malisafi_property_location taxonomy with county as parent
+ *
+ * @param string $county County name
+ * @return array
+ */
+function malisafi_get_subcounties_by_county($county) {
+    $county = is_string($county) ? trim($county) : '';
+    if ($county === '') {
+        return array();
+    }
+
+    $json_path = defined('MALISAFI_MLS_PATH') ? MALISAFI_MLS_PATH . 'data/kenya-subcounties.json' : '';
+    if ($json_path && file_exists($json_path)) {
+        $raw = file_get_contents($json_path);
+        $data = json_decode($raw, true);
+        if (is_array($data)) {
+            $match = null;
+            foreach ($data as $county_name => $subcounties) {
+                if (strcasecmp($county_name, $county) === 0) {
+                    $match = $subcounties;
+                    break;
+                }
+            }
+
+            if (is_array($match)) {
+                return array_values(array_filter(array_map(function($item) {
+                    if (is_array($item) && isset($item['name'])) {
+                        return $item['name'];
+                    }
+                    if (is_string($item)) {
+                        return $item;
+                    }
+                    return null;
+                }, $match)));
+            }
+        }
+    }
+
+    // Fallback to taxonomy hierarchy if JSON not available
+    $county_term = get_term_by('name', $county, 'malisafi_property_location');
+    if (!$county_term || is_wp_error($county_term)) {
+        $county_term = get_term_by('slug', sanitize_title($county), 'malisafi_property_location');
+    }
+
+    if (!$county_term || is_wp_error($county_term)) {
+        return array();
+    }
+
+    $subcounty_terms = get_terms(array(
+        'taxonomy' => 'malisafi_property_location',
+        'hide_empty' => false,
+        'parent' => $county_term->term_id
+    ));
+
+    if (empty($subcounty_terms) || is_wp_error($subcounty_terms)) {
+        return array();
+    }
+
+    return array_map(function($term) {
+        return $term->name;
+    }, $subcounty_terms);
+}
+
+/**
  * Get area settings
  *
  * @return array
@@ -64,6 +130,7 @@ function malisafi_get_setting_label($setting) {
  */
 function malisafi_get_property_location($property_id, $format = 'full') {
     $neighbourhood = get_post_meta($property_id, '_malisafi_neighbourhood', true);
+    $subcounty = get_post_meta($property_id, '_malisafi_subcounty', true);
     $city = get_post_meta($property_id, '_malisafi_city', true);
     $county = get_post_meta($property_id, '_malisafi_county', true);
     $setting = get_post_meta($property_id, '_malisafi_setting', true);
@@ -81,6 +148,9 @@ function malisafi_get_property_location($property_id, $format = 'full') {
             if ($city) {
                 $location_parts[] = $city;
             }
+            if ($subcounty) {
+                $location_parts[] = $subcounty;
+            }
             break;
             
         case 'full':
@@ -90,6 +160,9 @@ function malisafi_get_property_location($property_id, $format = 'full') {
             }
             if ($city) {
                 $location_parts[] = $city;
+            }
+            if ($subcounty) {
+                $location_parts[] = $subcounty;
             }
             if ($county) {
                 $location_parts[] = $county;

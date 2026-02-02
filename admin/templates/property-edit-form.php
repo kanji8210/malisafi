@@ -16,9 +16,13 @@ if ($property_id) {
     // Get all meta data
     $meta_keys = array(
         'price', 'currency', 'listing_type', 'bedrooms', 'bathrooms', 'size', 'size_unit',
-        'year_built', 'condition', 'parking', 'floors', 'address', 'county', 'city', 
+        'year_built', 'condition', 'parking', 'floors', 'address', 'county', 'subcounty', 'city', 
         'area', 'gps', 'postal_code', 'features', 'amenities', 'video_url', 'virtual_tour',
-        'agent_name', 'agent_email', 'agent_phone', 'reference_id', 'featured'
+        'agent_name', 'agent_email', 'agent_phone', 'reference_id', 'featured',
+        'floor_plan_urls', 'expected_roi', 'rental_yield', 'annual_rent_income',
+        'ownership_type', 'title_deed_status', 'financing_options', 'financing_min_deposit',
+        'financing_tenor_months', 'financing_interest_rate', 'diaspora_financing_details',
+        'developer_guarantee', 'sustainability', 'green_certification'
     );
     
     foreach ($meta_keys as $key) {
@@ -27,15 +31,7 @@ if ($property_id) {
 }
 
 // Get Kenya counties
-$kenya_counties = array(
-    'Nairobi', 'Mombasa', 'Kwale', 'Kilifi', 'Tana River', 'Lamu', 'Taita-Taveta',
-    'Garissa', 'Wajir', 'Mandera', 'Marsabit', 'Isiolo', 'Meru', 'Tharaka-Nithi',
-    'Embu', 'Kitui', 'Machakos', 'Makueni', 'Nyandarua', 'Nyeri', 'Kirinyaga',
-    'Murang\'a', 'Kiambu', 'Turkana', 'West Pokot', 'Samburu', 'Trans-Nzoia',
-    'Uasin Gishu', 'Elgeyo-Marakwet', 'Nandi', 'Baringo', 'Laikipia', 'Nakuru',
-    'Narok', 'Kajiado', 'Kericho', 'Bomet', 'Kakamega', 'Vihiga', 'Bungoma',
-    'Busia', 'Siaya', 'Kisumu', 'Homa Bay', 'Migori', 'Kisii', 'Nyamira'
-);
+$kenya_counties = function_exists('malisafi_get_kenya_counties') ? malisafi_get_kenya_counties() : array();
 ?>
 
 <div class="wrap malisafi-admin-property-form">
@@ -151,8 +147,9 @@ $kenya_counties = array(
                                 <option value="sale" <?php selected($property_meta['listing_type'] ?? '', 'sale'); ?>><?php _e('For Sale', 'malisafi-mls'); ?></option>
                                 <option value="rent" <?php selected($property_meta['listing_type'] ?? '', 'rent'); ?>><?php _e('For Rent', 'malisafi-mls'); ?></option>
                                 <option value="lease" <?php selected($property_meta['listing_type'] ?? '', 'lease'); ?>><?php _e('For Lease', 'malisafi-mls'); ?></option>
+                                <option value="short_term" <?php selected($property_meta['listing_type'] ?? '', 'short_term'); ?>><?php _e('Short Term Rent (Airbnb)', 'malisafi-mls'); ?></option>
                             </select>
-                            <p class="description"><?php _e('Is this property for sale, rent, or lease?', 'malisafi-mls'); ?></p>
+                            <p class="description"><?php _e('Is this property for sale, rent, lease, or short term?', 'malisafi-mls'); ?></p>
                         </td>
                     </tr>
                     
@@ -267,6 +264,117 @@ $kenya_counties = array(
             </div>
         </div>
 
+        <!-- Buyer & Investor Details (Sale/Lease) -->
+        <div class="postbox sale-lease-details">
+            <div class="postbox-header">
+                <h2><?php _e('Buyer & Investor Details (Sale/Lease)', 'malisafi-mls'); ?></h2>
+            </div>
+            <div class="inside">
+                <table class="form-table">
+                    <tr>
+                        <th scope="row">
+                            <label for="floor_plan_urls"><?php _e('Floor Plans (URLs)', 'malisafi-mls'); ?></label>
+                        </th>
+                        <td>
+                            <textarea name="floor_plan_urls" id="floor_plan_urls" class="large-text" rows="3" placeholder="https://...">
+<?php echo esc_textarea($property_meta['floor_plan_urls'] ?? ''); ?></textarea>
+                            <p class="description"><?php _e('Paste one or more URLs (one per line).', 'malisafi-mls'); ?></p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th scope="row"><?php _e('Investment Metrics', 'malisafi-mls'); ?></th>
+                        <td>
+                            <label for="expected_roi"><?php _e('Expected ROI (%):', 'malisafi-mls'); ?></label>
+                            <input type="number" name="expected_roi" id="expected_roi" value="<?php echo esc_attr($property_meta['expected_roi'] ?? ''); ?>" min="0" max="100" step="0.01" style="width: 120px;" />
+
+                            <label for="rental_yield" style="margin-left: 20px;"><?php _e('Rental Yield (%):', 'malisafi-mls'); ?></label>
+                            <input type="number" name="rental_yield" id="rental_yield" value="<?php echo esc_attr($property_meta['rental_yield'] ?? ''); ?>" min="0" max="100" step="0.01" style="width: 120px;" />
+
+                            <label for="annual_rent_income" style="margin-left: 20px;"><?php _e('Annual Income:', 'malisafi-mls'); ?></label>
+                            <input type="number" name="annual_rent_income" id="annual_rent_income" value="<?php echo esc_attr($property_meta['annual_rent_income'] ?? ''); ?>" min="0" step="0.01" style="width: 150px;" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <th scope="row"><?php _e('Legal & Ownership', 'malisafi-mls'); ?></th>
+                        <td>
+                            <label for="ownership_type"><?php _e('Ownership Type:', 'malisafi-mls'); ?></label>
+                            <select name="ownership_type" id="ownership_type" style="width: 180px;">
+                                <option value=""><?php _e('Select...', 'malisafi-mls'); ?></option>
+                                <option value="freehold" <?php selected($property_meta['ownership_type'] ?? '', 'freehold'); ?>><?php _e('Freehold', 'malisafi-mls'); ?></option>
+                                <option value="leasehold" <?php selected($property_meta['ownership_type'] ?? '', 'leasehold'); ?>><?php _e('Leasehold', 'malisafi-mls'); ?></option>
+                                <option value="company_shares" <?php selected($property_meta['ownership_type'] ?? '', 'company_shares'); ?>><?php _e('Company Shares', 'malisafi-mls'); ?></option>
+                                <option value="sectional_title" <?php selected($property_meta['ownership_type'] ?? '', 'sectional_title'); ?>><?php _e('Sectional Title', 'malisafi-mls'); ?></option>
+                            </select>
+
+                            <label for="title_deed_status" style="margin-left: 20px;"><?php _e('Title Deed Status:', 'malisafi-mls'); ?></label>
+                            <select name="title_deed_status" id="title_deed_status" style="width: 180px;">
+                                <option value=""><?php _e('Select...', 'malisafi-mls'); ?></option>
+                                <option value="ready" <?php selected($property_meta['title_deed_status'] ?? '', 'ready'); ?>><?php _e('Ready', 'malisafi-mls'); ?></option>
+                                <option value="processing" <?php selected($property_meta['title_deed_status'] ?? '', 'processing'); ?>><?php _e('Processing', 'malisafi-mls'); ?></option>
+                                <option value="not_available" <?php selected($property_meta['title_deed_status'] ?? '', 'not_available'); ?>><?php _e('Not Available', 'malisafi-mls'); ?></option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th scope="row"><?php _e('Financing Options', 'malisafi-mls'); ?></th>
+                        <td>
+                            <?php $financing_options = is_array($property_meta['financing_options'] ?? null) ? $property_meta['financing_options'] : array(); ?>
+                            <label><input type="checkbox" name="financing_options[]" value="bank_mortgage" <?php checked(in_array('bank_mortgage', $financing_options, true)); ?> /> <?php _e('Bank Mortgage', 'malisafi-mls'); ?></label><br>
+                            <label><input type="checkbox" name="financing_options[]" value="developer_finance" <?php checked(in_array('developer_finance', $financing_options, true)); ?> /> <?php _e('Developer Financing', 'malisafi-mls'); ?></label><br>
+                            <label><input type="checkbox" name="financing_options[]" value="installments" <?php checked(in_array('installments', $financing_options, true)); ?> /> <?php _e('Installments', 'malisafi-mls'); ?></label><br>
+                            <label><input type="checkbox" name="financing_options[]" value="cash" <?php checked(in_array('cash', $financing_options, true)); ?> /> <?php _e('Cash', 'malisafi-mls'); ?></label><br>
+                            <label><input type="checkbox" name="financing_options[]" value="diaspora" <?php checked(in_array('diaspora', $financing_options, true)); ?> /> <?php _e('Diaspora Financing', 'malisafi-mls'); ?></label>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th scope="row"><?php _e('Financing Terms', 'malisafi-mls'); ?></th>
+                        <td>
+                            <label for="financing_min_deposit"><?php _e('Min Deposit (%):', 'malisafi-mls'); ?></label>
+                            <input type="number" name="financing_min_deposit" id="financing_min_deposit" value="<?php echo esc_attr($property_meta['financing_min_deposit'] ?? ''); ?>" min="0" max="100" step="0.01" style="width: 120px;" />
+
+                            <label for="financing_tenor_months" style="margin-left: 20px;"><?php _e('Tenor (months):', 'malisafi-mls'); ?></label>
+                            <input type="number" name="financing_tenor_months" id="financing_tenor_months" value="<?php echo esc_attr($property_meta['financing_tenor_months'] ?? ''); ?>" min="0" max="600" step="1" style="width: 120px;" />
+
+                            <label for="financing_interest_rate" style="margin-left: 20px;"><?php _e('Interest Rate (%):', 'malisafi-mls'); ?></label>
+                            <input type="number" name="financing_interest_rate" id="financing_interest_rate" value="<?php echo esc_attr($property_meta['financing_interest_rate'] ?? ''); ?>" min="0" max="100" step="0.01" style="width: 120px;" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <th scope="row">
+                            <label for="diaspora_financing_details"><?php _e('Diaspora Financing Details', 'malisafi-mls'); ?></label>
+                        </th>
+                        <td>
+                            <input type="text" name="diaspora_financing_details" id="diaspora_financing_details" class="regular-text" value="<?php echo esc_attr($property_meta['diaspora_financing_details'] ?? ''); ?>" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <th scope="row">
+                            <label for="developer_guarantee"><?php _e('Developer Guarantees', 'malisafi-mls'); ?></label>
+                        </th>
+                        <td>
+                            <textarea name="developer_guarantee" id="developer_guarantee" class="large-text" rows="3"><?php echo esc_textarea($property_meta['developer_guarantee'] ?? ''); ?></textarea>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th scope="row"><?php _e('Sustainability', 'malisafi-mls'); ?></th>
+                        <td>
+                            <?php $sustainability = is_array($property_meta['sustainability'] ?? null) ? $property_meta['sustainability'] : array(); ?>
+                            <label><input type="checkbox" name="sustainability[]" value="solar" <?php checked(in_array('solar', $sustainability, true)); ?> /> <?php _e('Solar', 'malisafi-mls'); ?></label><br>
+                            <label><input type="checkbox" name="sustainability[]" value="water_harvesting" <?php checked(in_array('water_harvesting', $sustainability, true)); ?> /> <?php _e('Water Harvesting', 'malisafi-mls'); ?></label>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th scope="row">
+                            <label for="green_certification"><?php _e('Green Certification', 'malisafi-mls'); ?></label>
+                        </th>
+                        <td>
+                            <input type="text" name="green_certification" id="green_certification" class="regular-text" value="<?php echo esc_attr($property_meta['green_certification'] ?? ''); ?>" />
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
         
         <!-- Location Section -->
         <div class="postbox">
@@ -304,17 +412,29 @@ $kenya_counties = array(
                             <p class="description"><?php _e('Select the county where the property is located', 'malisafi-mls'); ?></p>
                         </td>
                     </tr>
+
+                    <tr>
+                        <th scope="row">
+                            <label for="subcounty"><?php _e('Subcounty', 'malisafi-mls'); ?> <span class="required">*</span></label>
+                        </th>
+                        <td>
+                            <select name="subcounty" id="subcounty" class="regular-text" required>
+                                <option value=""><?php _e('Select Subcounty...', 'malisafi-mls'); ?></option>
+                            </select>
+                            <p class="description"><?php _e('Choose the subcounty for the selected county', 'malisafi-mls'); ?></p>
+                        </td>
+                    </tr>
                     
                     <tr>
                         <th scope="row">
-                            <label for="city"><?php _e('City/Town', 'malisafi-mls'); ?> <span class="required">*</span></label>
+                            <label for="city"><?php _e('Town (optional)', 'malisafi-mls'); ?></label>
                         </th>
                         <td>
                             <input type="text" name="city" id="city" 
                                    value="<?php echo esc_attr($property_meta['city'] ?? ''); ?>" 
-                                   class="regular-text" required 
+                                   class="regular-text" 
                                    placeholder="<?php esc_attr_e('e.g., Westlands', 'malisafi-mls'); ?>" />
-                            <p class="description"><?php _e('City or town name', 'malisafi-mls'); ?></p>
+                            <p class="description"><?php _e('Town name (optional)', 'malisafi-mls'); ?></p>
                         </td>
                     </tr>
                     
@@ -596,6 +716,45 @@ $kenya_counties = array(
 
 <script>
 jQuery(document).ready(function($){
+    function populateSubcounties(county, selected) {
+        var $subcounty = $('#subcounty');
+        $subcounty.html('<option value=""><?php echo esc_js(__('Select Subcounty...', 'malisafi-mls')); ?></option>');
+
+        if (!county) {
+            return;
+        }
+
+        $.ajax({
+            url: ajaxurl,
+            type: 'POST',
+            data: {
+                action: 'malisafi_get_subcounties',
+                nonce: '<?php echo wp_create_nonce('malisafi_property_submission'); ?>',
+                county: county
+            },
+            success: function(response){
+                if (response.success && Array.isArray(response.data.subcounties)) {
+                    response.data.subcounties.forEach(function(name){
+                        var $opt = $('<option>').val(name).text(name);
+                        if (selected && selected === name) {
+                            $opt.prop('selected', true);
+                        }
+                        $subcounty.append($opt);
+                    });
+                }
+            }
+        });
+    }
+
+    $('#county').on('change', function(){
+        populateSubcounties($(this).val(), '');
+    });
+    function toggleSaleLeaseDetails() {
+        var listingType = $('#listing_type').val();
+        var show = listingType === 'sale' || listingType === 'lease';
+        $('.sale-lease-details').toggle(show);
+    }
+
     // Generate Reference ID button
     $('#generate-reference-id').on('click', function(){
         var $btn = $(this);
@@ -632,6 +791,11 @@ jQuery(document).ready(function($){
             }
         });
     });
+
+    populateSubcounties($('#county').val(), '<?php echo esc_js($property_meta['subcounty'] ?? ''); ?>');
+
+    $('#listing_type').on('change', toggleSaleLeaseDetails);
+    toggleSaleLeaseDetails();
 });
 
 function malisafiGetLocation() {

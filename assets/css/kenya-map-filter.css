@@ -1,0 +1,156 @@
+:root {
+  --mls-map-bg: var(--mls-light-grey);
+}
+
+.malisafi-kenya-map-filter {
+  display: grid;
+  grid-template-columns: minmax(280px, 1fr) minmax(280px, 1fr);
+  gap: 24px;
+  background: var(--mls-bg, #fff);
+  border: 1px solid var(--mls-border-light);
+  border-radius: 16px;
+  padding: 20px;
+}
+
+.malisafi-kenya-map {
+  border: 1px solid var(--mls-border-light);
+  border-radius: 12px;
+  background: var(--mls-map-bg);
+  padding: 12px;
+  min-height: 360px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: visible;
+}
+
+.malisafi-kenya-map svg {
+  width: 100%;
+  height: auto;
+  max-height: none;
+  display: block;
+}
+
+.malisafi-kenya-map svg path,
+.malisafi-kenya-map .county-shape {
+  cursor: pointer;
+  transition: fill var(--transition-normal, 0.2s ease),
+    stroke var(--transition-normal, 0.2s ease),
+    filter var(--transition-normal, 0.2s ease);
+  fill: var(--mls-map-fill, var(--mls-light-grey));
+  stroke: var(--mls-border-light);
+  stroke-width: 1;
+  opacity: 0.75;
+}
+
+.malisafi-kenya-map svg path:hover,
+.malisafi-kenya-map .county-shape:hover {
+  fill: var(--color-blue);
+  stroke: var(--color-blue);
+  opacity: 1;
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.15));
+}
+
+.malisafi-kenya-map svg path.is-selected,
+.malisafi-kenya-map .county-shape.is-selected {
+  fill: color-mix(in srgb, var(--wp-green) 60%, transparent);
+  stroke: var(--wp-green);
+  opacity: 1;
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.15));
+}
+
+.malisafi-kenya-filter-form {
+  display: grid;
+  gap: 16px;
+}
+
+.malisafi-kenya-filter-row {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.malisafi-kenya-filter-form label {
+  font-weight: 600;
+  color: var(--mls-text-primary);
+  margin-bottom: 6px;
+  display: inline-block;
+}
+
+.malisafi-kenya-filter-form select,
+.malisafi-kenya-filter-form input {
+  gap: 12px;
+  padding: 16px;
+  border-radius: 12px;
+  border: 1px solid var(--mls-border-light);
+  background: rgba(255, 255, 255, 0.5);
+  backdrop-filter: blur(6px);
+  padding: 10px 12px;
+  border: 1px solid var(--mls-border-light);
+.malisafi-kenya-search-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.malisafi-kenya-search-row input[type="search"] {
+  flex: 1;
+}
+
+.malisafi-kenya-search-row .search-btn {
+  white-space: nowrap;
+  background: var(--mls-accent);
+  color: var(--mls-text-on-accent, #fff);
+  border: none;
+  padding: 8px 14px;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+  border-radius: 10px;
+  background: var(--mls-bg, #fff);
+  color: var(--mls-text-primary);
+  margin-bottom: 4px;
+
+  font-size: 0.9rem;
+.malisafi-kenya-filter-form .price-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+  padding: 8px 10px;
+.malisafi-kenya-filter-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.malisafi-kenya-filter-actions button {
+  background: var(--mls-accent);
+  color: var(--mls-text-on-accent, #fff);
+  border: none;
+  padding: 8px 14px;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.malisafi-kenya-filter-actions .reset-btn {
+  background: transparent;
+  color: var(--mls-text-primary);
+  border: 1px solid var(--mls-border-light);
+}
+
+.malisafi-kenya-helper {
+  font-size: 13px;
+  color: var(--mls-text-muted);
+}
+
+@media (max-width: 900px) {
+  .malisafi-kenya-map-filter {
+    grid-template-columns: 1fr;
+  }
+
+  .malisafi-kenya-filter-row {
+    grid-template-columns: 1fr;
+  }
+}

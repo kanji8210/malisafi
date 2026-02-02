@@ -19,6 +19,7 @@
             this.cacheElements();
             this.bindEvents();
             this.initImageUpload();
+            this.toggleSaleLeaseDetails();
             
             // Load draft if editing
             if (this.propertyId) {
@@ -57,6 +58,16 @@
             // Auto-save on input change
             this.$form.on('input change', 'input, textarea, select', function() {
                 self.scheduleAutoSave();
+            });
+
+            // Listing type toggle for sale/lease details
+            this.$form.on('change', '#listing_type', function() {
+                self.toggleSaleLeaseDetails();
+            });
+
+            // County -> Subcounty
+            this.$form.on('change', '#property_county', function() {
+                self.fetchSubcounties($(this).val(), '');
             });
 
             // GPS location
@@ -522,6 +533,7 @@
 
             // Location
             $('#preview-county').text($('#property_county').val() || '-');
+            $('#preview-subcounty').text($('#property_subcounty').val() || '-');
             $('#preview-city').text($('#property_city').val() || '-');
 
             // Images
@@ -537,6 +549,42 @@
             } else {
                 $previewImages.html('<p class="no-images">No images uploaded</p>');
             }
+        },
+
+        fetchSubcounties: function(county, selected) {
+            const $subcounty = $('#property_subcounty');
+            $subcounty.html('<option value="">Select subcounty...</option>');
+
+            if (!county) {
+                return;
+            }
+
+            $.ajax({
+                url: malisafiSubmission.ajaxurl,
+                type: 'POST',
+                data: {
+                    action: 'malisafi_get_subcounties',
+                    nonce: malisafiSubmission.nonce,
+                    county: county
+                },
+                success: function(response) {
+                    if (response.success && Array.isArray(response.data.subcounties)) {
+                        response.data.subcounties.forEach(function(name) {
+                            const $opt = $('<option>').val(name).text(name);
+                            if (selected && selected === name) {
+                                $opt.prop('selected', true);
+                            }
+                            $subcounty.append($opt);
+                        });
+                    }
+                }
+            });
+        },
+
+        toggleSaleLeaseDetails: function() {
+            const listingType = $('#listing_type').val();
+            const show = listingType === 'sale' || listingType === 'lease';
+            $('.sale-lease-details').toggle(show);
         },
 
         submitProperty: function() {
@@ -618,6 +666,12 @@
                     }
                 }
             }
+
+            if (data.county) {
+                this.fetchSubcounties(data.county, data.subcounty || '');
+            }
+
+            this.toggleSaleLeaseDetails();
 
             // Load images
             if (data.gallery_ids) {

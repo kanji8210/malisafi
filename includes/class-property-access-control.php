@@ -177,7 +177,7 @@ class Property_Access_Control {
         ));
         
         if (!empty($terms)) {
-            $selected = isset($_GET['property_type_filter']) ? $_GET['property_type_filter'] : '';
+            $selected = isset($_GET['property_type_filter']) ? sanitize_key(wp_unslash($_GET['property_type_filter'])) : '';
             echo '<select name="property_type_filter">';
             echo '<option value="">' . __('All Types', 'malisafi-mls') . '</option>';
             foreach ($terms as $term) {
@@ -202,7 +202,7 @@ class Property_Access_Control {
         ");
         
         if (!empty($counties)) {
-            $selected = isset($_GET['county_filter']) ? $_GET['county_filter'] : '';
+            $selected = isset($_GET['county_filter']) ? sanitize_text_field(wp_unslash($_GET['county_filter'])) : '';
             echo '<select name="county_filter">';
             echo '<option value="">' . __('All Counties', 'malisafi-mls') . '</option>';
             foreach ($counties as $county) {
@@ -228,22 +228,24 @@ class Property_Access_Control {
         }
         
         // Filter by property type
-        if (isset($_GET['property_type_filter']) && $_GET['property_type_filter'] != '') {
+        $property_type_filter = isset($_GET['property_type_filter']) ? sanitize_key(wp_unslash($_GET['property_type_filter'])) : '';
+        if ($property_type_filter !== '') {
             $query->query_vars['tax_query'] = array(
                 array(
                     'taxonomy' => 'malisafi_property_type',
                     'field' => 'slug',
-                    'terms' => $_GET['property_type_filter']
+                    'terms' => $property_type_filter
                 )
             );
         }
         
         // Filter by county
-        if (isset($_GET['county_filter']) && $_GET['county_filter'] != '') {
+        $county_filter = isset($_GET['county_filter']) ? sanitize_text_field(wp_unslash($_GET['county_filter'])) : '';
+        if ($county_filter !== '') {
             $query->query_vars['meta_query'] = array(
                 array(
                     'key' => '_malisafi_county',
-                    'value' => $_GET['county_filter'],
+                    'value' => $county_filter,
                     'compare' => '='
                 )
             );
