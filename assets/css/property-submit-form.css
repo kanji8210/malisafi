@@ -202,6 +202,7 @@
     background: var(--mls-bg-secondary, #f9fafb);
     cursor: pointer;
     transition: all 0.2s ease;
+    width: 100%;
 }
 
 .form-group input[type="file"]:hover {
@@ -335,6 +336,16 @@ fieldset.form-group label:hover {
         padding: 24px;
         margin-bottom: 16px;
     }
+
+    .form-section-header {
+        margin-bottom: 16px;
+        padding-bottom: 12px;
+    }
+
+    .form-row {
+        gap: 14px;
+        margin-bottom: 16px;
+    }
     
     .form-row.two-col,
     .form-row.three-col,
@@ -345,6 +356,12 @@ fieldset.form-group label:hover {
     .checkbox-group {
         grid-template-columns: 1fr;
     }
+
+    .checkbox-label {
+        align-items: flex-start;
+        gap: 10px;
+        padding: 12px 14px;
+    }
     
     .form-actions {
         flex-direction: column;
@@ -354,6 +371,16 @@ fieldset.form-group label:hover {
         width: 100%;
         justify-content: center;
     }
+
+    .form-group input[type="text"],
+    .form-group input[type="number"],
+    .form-group input[type="email"],
+    .form-group input[type="tel"],
+    .form-group select,
+    .form-group textarea {
+        font-size: 16px;
+        padding: 12px 14px;
+    }
 }
 
 @media (max-width: 480px) {
@@ -362,12 +389,25 @@ fieldset.form-group label:hover {
     }
     
     .form-section {
-        padding: 20px;
+        padding: 16px;
         border-radius: 8px;
     }
     
     .form-section-title {
         font-size: 16px;
+    }
+
+    .form-group small {
+        font-size: 11px;
+    }
+
+    .form-actions {
+        margin-top: 24px;
+        padding-top: 16px;
+    }
+
+    .form-actions .button {
+        padding: 12px 20px;
     }
 }
 
