@@ -333,18 +333,22 @@ fieldset.form-group label:hover {
 /* Responsive design */
 @media (max-width: 768px) {
     .form-section {
-        padding: 24px;
-        margin-bottom: 16px;
+        padding: 0;
+        margin-bottom: 18px;
+        background: transparent;
+        border: none;
+        box-shadow: none;
     }
 
     .form-section-header {
-        margin-bottom: 16px;
-        padding-bottom: 12px;
+        margin-bottom: 12px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid var(--mls-border-light, #e5e7eb);
     }
 
     .form-row {
-        gap: 14px;
-        margin-bottom: 16px;
+        gap: 12px;
+        margin-bottom: 14px;
     }
     
     .form-row.two-col,
@@ -381,6 +385,10 @@ fieldset.form-group label:hover {
         font-size: 16px;
         padding: 12px 14px;
     }
+
+    .malisafi-property-submit {
+        max-width: 100%;
+    }
 }
 
 @media (max-width: 480px) {
@@ -389,7 +397,7 @@ fieldset.form-group label:hover {
     }
     
     .form-section {
-        padding: 16px;
+        padding: 0;
         border-radius: 8px;
     }
     
