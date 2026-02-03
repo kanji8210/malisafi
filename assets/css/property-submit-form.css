@@ -406,6 +406,21 @@
     }
 }
 
+@media (max-width: 640px) {
+    .form-row {
+        display: block;
+    }
+
+    .form-group,
+    .form-group.full-width {
+        width: 100%;
+    }
+
+    .form-group + .form-group {
+        margin-top: 14px;
+    }
+}
+
 /* Desktop (1024px and up) */
 @media (min-width: 1024px) {
     .malisafi-property-submit {
