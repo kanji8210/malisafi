@@ -19,7 +19,7 @@
   border: none;
   border-radius: 0;
   padding: 0;
-  align-items: end;
+  align-items: center;
   overflow: visible;
 }
 
@@ -30,15 +30,14 @@
 }
 
 .malisafi-kenya-form-column {
-  align-self: end;
+  align-self: center;
 }
 
 .malisafi-kenya-map {
-  border: 1px solid #fff;
   border-radius: 12px;
   background: transparent;
   padding: var(--mls-kenya-map-padding, 8px);
-  min-height: clamp(220px, 45vh, 420px);
+
   max-height: none;
   width: 100%;
   max-width: 100%;
@@ -152,7 +151,7 @@
 .malisafi-kenya-filter-actions {
   display: flex;
   gap: 8px;
-  align-items: end;
+  align-items: center;
 }
 
 .malisafi-kenya-filter-row--actions .malisafi-kenya-filter-actions {
