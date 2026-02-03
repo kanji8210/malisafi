@@ -200,7 +200,8 @@
 }
 
 @media (max-width: 768px) {
-  .malisafi-kenya-map-filter-wrap {
+  .malisafi-kenya-map-column,
+  .malisafi-kenya-map {
     display: none;
   }
 }
