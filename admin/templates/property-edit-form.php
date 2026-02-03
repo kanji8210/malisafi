@@ -32,6 +32,10 @@ if ($property_id) {
 
 // Get Kenya counties
 $kenya_counties = function_exists('malisafi_get_kenya_counties') ? malisafi_get_kenya_counties() : array();
+
+$is_frontend = isset($is_frontend) ? (bool) $is_frontend : false;
+$frontend_cancel_url = isset($frontend_cancel_url) ? $frontend_cancel_url : '';
+$can_assign_agent = isset($can_assign_agent) ? (bool) $can_assign_agent : true;
 ?>
 
 <div class="wrap malisafi-admin-property-form">
@@ -618,6 +622,7 @@ $kenya_counties = function_exists('malisafi_get_kenya_counties') ? malisafi_get_
             </div>
         </div>
         
+        <?php if ($can_assign_agent) : ?>
         <!-- Agent Information Section -->
         <div class="postbox">
             <div class="postbox-header">
@@ -661,6 +666,7 @@ $kenya_counties = function_exists('malisafi_get_kenya_counties') ? malisafi_get_
                 </table>
             </div>
         </div>
+        <?php endif; ?>
         
         <!-- Additional Options Section -->
         <div class="postbox">
@@ -689,7 +695,7 @@ $kenya_counties = function_exists('malisafi_get_kenya_counties') ? malisafi_get_
             <button type="submit" name="submit_property" class="button button-primary button-large">
                 <?php echo $property_id ? __('Update Property', 'malisafi-mls') : __('Create Property', 'malisafi-mls'); ?>
             </button>
-            <a href="<?php echo admin_url('edit.php?post_type=malisafi_property'); ?>" class="button button-secondary button-large">
+            <a href="<?php echo esc_url($is_frontend && $frontend_cancel_url ? $frontend_cancel_url : admin_url('edit.php?post_type=malisafi_property')); ?>" class="button button-secondary button-large">
                 <?php _e('Cancel', 'malisafi-mls'); ?>
             </a>
         </p>

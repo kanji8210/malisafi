@@ -181,7 +181,7 @@ class Page_Manager {
         ),
         'developer_projects' => array(
             'title' => 'My Projects',
-            'slug' => 'developer-projects',
+            'slug' => 'projects',
             'shortcode' => '[malisafi_developer_projects]',
             'description' => 'Developer projects list',
             'parent' => 'developer_dashboard'
@@ -189,8 +189,8 @@ class Page_Manager {
         'developer_add_project' => array(
             'title' => 'Add Project',
             'slug' => 'add-project',
-            'shortcode' => '[malisafi_property_submit role="developer"]',
-            'description' => 'New project submission',
+            'shortcode' => '[malisafi_project_submit]',
+            'description' => 'Create a new development project',
             'parent' => 'developer_dashboard'
         ),
         'developer_analytics' => array(
@@ -241,7 +241,7 @@ class Page_Manager {
     public static function migrate_pages() {
         // Check if migration has already run
         $migration_version = get_option('malisafi_pages_migration_version', '0');
-        $current_migration = '1.0'; // Increment this when adding new migrations
+        $current_migration = '1.2'; // Increment this when adding new migrations
         
         if (version_compare($migration_version, $current_migration, '>=')) {
             return; // Already migrated
@@ -257,6 +257,65 @@ class Page_Manager {
                     'post_content' => '[malisafi_agent_profile_view]',
                     'post_title' => 'Agent Profile' // Update title too
                 ));
+            }
+        }
+
+        // Migration 1.1: Remove deprecated developer add-project pages
+        $deprecated_keys = array(
+            'developer_add_project',
+            'developer_projects'
+        );
+
+        foreach ($deprecated_keys as $deprecated_key) {
+            $deprecated_id = get_option('malisafi_page_' . $deprecated_key);
+            if ($deprecated_id) {
+                wp_delete_post($deprecated_id, true);
+                delete_option('malisafi_page_' . $deprecated_key);
+            }
+        }
+
+        $deprecated_paths = array(
+            'developer-dashboard/add-project',
+            'add-project',
+            'developer-dashboard/projects',
+            'projects'
+        );
+
+        foreach ($deprecated_paths as $deprecated_path) {
+            $deprecated_page = get_page_by_path($deprecated_path);
+            if ($deprecated_page && $deprecated_page->post_type === 'page') {
+                wp_delete_post($deprecated_page->ID, true);
+            }
+        }
+
+        // Migration 1.2: (Re)create developer project pages with new shortcodes
+        $project_keys = array('developer_projects', 'developer_add_project');
+        foreach ($project_keys as $project_key) {
+            if (!isset(self::$required_pages[$project_key])) {
+                continue;
+            }
+
+            $page_config = self::$required_pages[$project_key];
+            $existing_id = get_option('malisafi_page_' . $project_key);
+
+            if ($existing_id && ($page = get_post($existing_id))) {
+                if ($page->post_content !== $page_config['shortcode']) {
+                    wp_update_post(array(
+                        'ID' => $existing_id,
+                        'post_content' => $page_config['shortcode']
+                    ));
+                }
+                continue;
+            }
+
+            if ($page_config['parent'] !== 0) {
+                $parent_id = get_option('malisafi_page_' . $page_config['parent']);
+                $page_config['parent_id'] = $parent_id ? $parent_id : 0;
+            }
+
+            $new_page_id = self::create_page($project_key, $page_config);
+            if ($new_page_id) {
+                update_option('malisafi_page_' . $project_key, $new_page_id);
             }
         }
         

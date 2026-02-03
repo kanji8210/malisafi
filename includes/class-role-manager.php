@@ -89,7 +89,14 @@ class Malisafi_Roles_Manager {
             'edit_published_properties' => true,
             'publish_properties' => false, // Goes through moderation
             'delete_properties' => true,
-            
+
+            // Project management
+            'edit_projects' => true,
+            'edit_others_projects' => false,
+            'edit_published_projects' => true,
+            'publish_projects' => false, // Goes through moderation
+            'delete_projects' => true,
+
             // Dashboard access
             'access_malisafi_dashboard' => true,
             'view_property_analytics' => true,
@@ -99,6 +106,12 @@ class Malisafi_Roles_Manager {
             $role = get_role($role_name);
             if ($role) {
                 foreach ($caps as $cap => $grant) {
+                    if ($role_name === 'malisafi_client' && strpos($cap, 'project') !== false) {
+                        continue;
+                    }
+                    if ($role_name === 'malisafi_client' && strpos($cap, 'property') !== false) {
+                        continue;
+                    }
                     $role->add_cap($cap, $grant);
                 }
                 
@@ -115,6 +128,9 @@ class Malisafi_Roles_Manager {
                     $role->add_cap('moderate_properties', true);
                     $role->add_cap('manage_malisafi_settings', true);
                     $role->add_cap('manage_featured_properties', true); // Allow moderators to manage featured
+                    $role->add_cap('edit_others_projects', true);
+                    $role->add_cap('publish_projects', true);
+                    $role->add_cap('moderate_projects', true);
                 }
 
                 // Allow clients to manage required pages only

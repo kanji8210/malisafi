@@ -1,0 +1,110 @@
+.malisafi-developer-dashboard,
+.malisafi-developer-analytics,
+.malisafi-developer-projects {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: var(--spacing-xl);
+}
+
+.developer-header {
+    margin-bottom: var(--spacing-xl);
+}
+
+.dashboard-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: var(--spacing-lg);
+    margin-bottom: var(--spacing-xl);
+}
+
+.dashboard-card,
+.analytics-card {
+    background: var(--color-ash-white);
+    border: 1px solid var(--color-light-gray);
+    border-radius: var(--radius-md);
+    padding: var(--spacing-lg);
+    box-shadow: var(--shadow-sm);
+}
+
+.dashboard-card h3,
+.analytics-card h3 {
+    margin-bottom: var(--spacing-sm);
+}
+
+.dashboard-card .count,
+.analytics-card .analytics-value {
+    font-size: var(--font-size-h4);
+    color: var(--text-h2);
+    font-weight: 700;
+    margin-bottom: var(--spacing-sm);
+}
+
+.dashboard-card .subtext,
+.analytics-card .subtext,
+.muted {
+    color: var(--text-base);
+    opacity: 0.7;
+    font-size: 14px;
+}
+
+.developer-analytics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: var(--spacing-lg);
+    margin-bottom: var(--spacing-xl);
+}
+
+.developer-section {
+    background: var(--color-ash-white);
+    border: 1px solid var(--color-light-gray);
+    border-radius: var(--radius-md);
+    padding: var(--spacing-lg);
+    box-shadow: var(--shadow-sm);
+    margin-bottom: var(--spacing-xl);
+}
+
+.developer-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.developer-list li {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--spacing-md);
+    padding: var(--spacing-sm) 0;
+    border-bottom: 1px solid var(--color-light-gray);
+}
+
+.developer-list li:last-child {
+    border-bottom: none;
+}
+
+.developer-list a {
+    font-weight: 600;
+}
+
+.dashboard-links {
+    margin-top: var(--spacing-lg);
+    list-style: none;
+    padding-left: 0;
+    display: flex;
+    gap: var(--spacing-md);
+    flex-wrap: wrap;
+}
+
+.dashboard-links a {
+    background: var(--btn-secondary-bg);
+    color: var(--btn-secondary-text);
+    padding: 8px 14px;
+    border-radius: var(--radius-md);
+    display: inline-block;
+}
+
+@media (max-width: 768px) {
+    .developer-list li {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}

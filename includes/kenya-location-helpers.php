@@ -20,7 +20,7 @@ function malisafi_get_kenya_counties() {
     $counties = array(
         'Nairobi', 'Mombasa', 'Kisumu', 'Nakuru', 'Eldoret', 'Thika', 'Malindi', 'Kitale',
         'Garissa', 'Kakamega', 'Machakos', 'Meru', 'Nyeri', 'Kiambu', 'Kajiado', 'Kilifi',
-        'Trans Nzoia', 'Uasin Gishu', 'Bungoma', 'Siaya', 'Kisii', 'Kericho', 'Migori',
+        'Trans Nzoia', 'Uasin Gishu', 'Bungoma', 'Siaya', 'Kisii', 'Kericho', 'Kitui', 'Migori',
         'Baringo', 'Bomet', 'Busia', 'Elgeyo-Marakwet', 'Embu', 'Homa Bay', 'Isiolo',
         'Kirinyaga', 'Kwale', 'Laikipia', 'Lamu', 'Makueni', 'Mandera', 'Marsabit',
         'Murang\'a', 'Nandi', 'Narok', 'Nyandarua', 'Nyamira', 'Samburu', 'Taita-Taveta',

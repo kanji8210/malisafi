@@ -20,6 +20,7 @@ class Post_Types {
         
         // Add template filter for single property page
         add_filter('single_template', array($this, 'load_single_property_template'));
+        add_filter('single_template', array($this, 'load_single_project_template'));
     }
     
     /**
@@ -130,6 +131,56 @@ class Post_Types {
         
         register_post_type('malisafi_property', $args);
     }
+
+    /**
+     * Register project custom post type
+     */
+    public function register_project_post_type() {
+        $labels = array(
+            'name' => _x('Projects', 'Post Type General Name', 'malisafi-mls'),
+            'singular_name' => _x('Project', 'Post Type Singular Name', 'malisafi-mls'),
+            'menu_name' => __('Projects', 'malisafi-mls'),
+            'name_admin_bar' => __('Project', 'malisafi-mls'),
+            'archives' => __('Project Archives', 'malisafi-mls'),
+            'attributes' => __('Project Attributes', 'malisafi-mls'),
+            'parent_item_colon' => __('Parent Project:', 'malisafi-mls'),
+            'all_items' => __('All Projects', 'malisafi-mls'),
+            'add_new_item' => __('Add New Project', 'malisafi-mls'),
+            'add_new' => __('Add New', 'malisafi-mls'),
+            'new_item' => __('New Project', 'malisafi-mls'),
+            'edit_item' => __('Edit Project', 'malisafi-mls'),
+            'update_item' => __('Update Project', 'malisafi-mls'),
+            'view_item' => __('View Project', 'malisafi-mls'),
+            'view_items' => __('View Projects', 'malisafi-mls'),
+            'search_items' => __('Search Project', 'malisafi-mls'),
+        );
+
+        $args = array(
+            'label' => __('Project', 'malisafi-mls'),
+            'description' => __('Development Projects', 'malisafi-mls'),
+            'labels' => $labels,
+            'supports' => array('title', 'editor', 'thumbnail', 'excerpt', 'author'),
+            'hierarchical' => false,
+            'public' => true,
+            'show_ui' => true,
+            'show_in_menu' => true,
+            'menu_position' => 6,
+            'menu_icon' => 'dashicons-building',
+            'show_in_admin_bar' => true,
+            'show_in_nav_menus' => true,
+            'can_export' => true,
+            'has_archive' => true,
+            'exclude_from_search' => false,
+            'publicly_queryable' => true,
+            'capability_type' => array('project', 'projects'),
+            'map_meta_cap' => true,
+            'show_in_rest' => true,
+            'rewrite' => array('slug' => 'project'),
+        );
+
+        register_post_type('malisafi_project', $args);
+    }
+
     
     /**
      * Register taxonomies
@@ -214,6 +265,7 @@ class Post_Types {
             'rewrite' => array('slug' => 'feature'),
         ));
     }
+
     
     /**
      * Add property meta boxes
@@ -263,6 +315,398 @@ class Post_Types {
             'normal',
             'default'
         );
+    }
+
+    /**
+     * Add project meta boxes
+     */
+    public function add_project_meta_boxes() {
+        add_meta_box(
+            'malisafi_project_details',
+            __('Project Details', 'malisafi-mls'),
+            array($this, 'render_project_details_meta_box'),
+            'malisafi_project',
+            'normal',
+            'high'
+        );
+
+        add_meta_box(
+            'malisafi_project_location',
+            __('Location Details', 'malisafi-mls'),
+            array($this, 'render_project_location_meta_box'),
+            'malisafi_project',
+            'normal',
+            'default'
+        );
+
+        add_meta_box(
+            'malisafi_project_links',
+            __('Linked Properties (Debug Panel)', 'malisafi-mls'),
+            array($this, 'render_project_links_meta_box'),
+            'malisafi_project',
+            'side',
+            'default'
+        );
+    }
+
+    /**
+     * Render project details meta box
+     */
+    public function render_project_details_meta_box($post) {
+        wp_nonce_field('malisafi_project_details', 'malisafi_project_details_nonce');
+
+        $project_type = get_post_meta($post->ID, '_malisafi_project_type', true);
+        $project_category = get_post_meta($post->ID, '_malisafi_project_category', true);
+        $project_subcategory = get_post_meta($post->ID, '_malisafi_project_subcategory', true);
+        $timeline = get_post_meta($post->ID, '_malisafi_project_timeline', true);
+        $milestones = get_post_meta($post->ID, '_malisafi_project_milestones', true);
+        if (!is_array($milestones)) {
+            $milestones = $milestones ? (array) $milestones : array();
+        }
+        $milestones_text = self::format_milestones_for_textarea($milestones);
+        $investor_highlights = get_post_meta($post->ID, '_malisafi_project_investor_highlights', true);
+        $client_highlights = get_post_meta($post->ID, '_malisafi_project_client_highlights', true);
+        $auto_sync = get_post_meta($post->ID, '_malisafi_project_auto_sync', true);
+        $brochure_id = (int) get_post_meta($post->ID, '_malisafi_project_brochure_id', true);
+        $brochure_url = $brochure_id ? wp_get_attachment_url($brochure_id) : '';
+        ?>
+        <div class="malisafi-meta-fields">
+            <p>
+                <label for="malisafi_project_type"><?php esc_html_e('Project Type:', 'malisafi-mls'); ?></label>
+                <input type="text" id="malisafi_project_type" name="malisafi_project_type" value="<?php echo esc_attr($project_type); ?>" class="widefat">
+            </p>
+            <p>
+                <label for="malisafi_project_category"><?php esc_html_e('Category:', 'malisafi-mls'); ?></label>
+                <input type="text" id="malisafi_project_category" name="malisafi_project_category" value="<?php echo esc_attr($project_category); ?>" class="widefat">
+            </p>
+            <p>
+                <label for="malisafi_project_subcategory"><?php esc_html_e('Subcategory:', 'malisafi-mls'); ?></label>
+                <input type="text" id="malisafi_project_subcategory" name="malisafi_project_subcategory" value="<?php echo esc_attr($project_subcategory); ?>" class="widefat">
+            </p>
+            <p>
+                <label for="malisafi_project_timeline"><?php esc_html_e('Timeline & Milestones:', 'malisafi-mls'); ?></label>
+                <textarea id="malisafi_project_timeline" name="malisafi_project_timeline" rows="4" class="widefat"><?php echo esc_textarea($timeline); ?></textarea>
+            </p>
+            <p>
+                <label for="malisafi_project_milestones"><?php esc_html_e('Milestones (one per line):', 'malisafi-mls'); ?></label>
+                <textarea id="malisafi_project_milestones" name="malisafi_project_milestones" rows="4" class="widefat" placeholder="<?php esc_attr_e('YYYY-MM-DD | Title | Status | %', 'malisafi-mls'); ?>"><?php echo esc_textarea($milestones_text); ?></textarea>
+                <small><?php esc_html_e('Format: YYYY-MM-DD | Intitulé | Statut | %', 'malisafi-mls'); ?></small>
+            </p>
+            <p>
+                <label for="malisafi_project_investor_highlights"><?php esc_html_e('Investor Highlights:', 'malisafi-mls'); ?></label>
+                <textarea id="malisafi_project_investor_highlights" name="malisafi_project_investor_highlights" rows="4" class="widefat"><?php echo esc_textarea($investor_highlights); ?></textarea>
+            </p>
+            <p>
+                <label for="malisafi_project_client_highlights"><?php esc_html_e('Client Highlights:', 'malisafi-mls'); ?></label>
+                <textarea id="malisafi_project_client_highlights" name="malisafi_project_client_highlights" rows="4" class="widefat"><?php echo esc_textarea($client_highlights); ?></textarea>
+            </p>
+            <p>
+                <label for="malisafi_project_brochure"><?php esc_html_e('Brochure (PDF):', 'malisafi-mls'); ?></label>
+                <input type="file" id="malisafi_project_brochure" name="malisafi_project_brochure" accept="application/pdf" />
+                <?php if ($brochure_url) : ?>
+                    <br />
+                    <a href="<?php echo esc_url($brochure_url); ?>" target="_blank" rel="noopener noreferrer"><?php esc_html_e('View current brochure', 'malisafi-mls'); ?></a>
+                <?php endif; ?>
+            </p>
+            <p>
+                <label>
+                    <input type="checkbox" name="malisafi_project_auto_sync" value="1" <?php checked($auto_sync, '1'); ?> />
+                    <?php esc_html_e('Auto-sync linked property details', 'malisafi-mls'); ?>
+                </label>
+            </p>
+        </div>
+        <?php
+    }
+
+    /**
+     * Render project location meta box
+     */
+    public function render_project_location_meta_box($post) {
+        $county = get_post_meta($post->ID, '_malisafi_county', true);
+        $neighbourhood = get_post_meta($post->ID, '_malisafi_neighbourhood', true);
+        $setting = get_post_meta($post->ID, '_malisafi_setting', true);
+        $city = get_post_meta($post->ID, '_malisafi_city', true);
+        $latitude = get_post_meta($post->ID, '_malisafi_latitude', true);
+        $longitude = get_post_meta($post->ID, '_malisafi_longitude', true);
+        ?>
+        <div class="malisafi-meta-fields">
+            <p>
+                <label for="malisafi_project_county"><?php esc_html_e('County:', 'malisafi-mls'); ?></label>
+                <select id="malisafi_project_county" name="malisafi_project_county" class="widefat">
+                    <option value=""><?php esc_html_e('Select County', 'malisafi-mls'); ?></option>
+                    <?php if (function_exists('malisafi_get_kenya_counties')) : ?>
+                        <?php foreach (malisafi_get_kenya_counties() as $county_name) : ?>
+                            <option value="<?php echo esc_attr($county_name); ?>" <?php selected($county, $county_name); ?>><?php echo esc_html($county_name); ?></option>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                </select>
+            </p>
+            <p>
+                <label for="malisafi_project_city"><?php esc_html_e('City/Town:', 'malisafi-mls'); ?></label>
+                <input type="text" id="malisafi_project_city" name="malisafi_project_city" value="<?php echo esc_attr($city); ?>" class="widefat">
+            </p>
+            <p>
+                <label for="malisafi_project_neighbourhood"><?php esc_html_e('Neighbourhood/Estate:', 'malisafi-mls'); ?></label>
+                <input type="text" id="malisafi_project_neighbourhood" name="malisafi_project_neighbourhood" value="<?php echo esc_attr($neighbourhood); ?>" class="widefat">
+            </p>
+            <p>
+                <label for="malisafi_project_setting"><?php esc_html_e('Setting:', 'malisafi-mls'); ?></label>
+                <select id="malisafi_project_setting" name="malisafi_project_setting" class="widefat">
+                    <option value=""><?php esc_html_e('Select Setting', 'malisafi-mls'); ?></option>
+                    <option value="urban" <?php selected($setting, 'urban'); ?>><?php esc_html_e('Urban', 'malisafi-mls'); ?></option>
+                    <option value="semi-rural" <?php selected($setting, 'semi-rural'); ?>><?php esc_html_e('Semi-rural', 'malisafi-mls'); ?></option>
+                    <option value="rural" <?php selected($setting, 'rural'); ?>><?php esc_html_e('Rural', 'malisafi-mls'); ?></option>
+                    <option value="isolated" <?php selected($setting, 'isolated'); ?>><?php esc_html_e('Isolated', 'malisafi-mls'); ?></option>
+                </select>
+            </p>
+            <p>
+                <label for="malisafi_project_latitude"><?php esc_html_e('Latitude:', 'malisafi-mls'); ?></label>
+                <input type="number" step="0.000001" id="malisafi_project_latitude" name="malisafi_project_latitude" value="<?php echo esc_attr($latitude); ?>" class="widefat">
+            </p>
+            <p>
+                <label for="malisafi_project_longitude"><?php esc_html_e('Longitude:', 'malisafi-mls'); ?></label>
+                <input type="number" step="0.000001" id="malisafi_project_longitude" name="malisafi_project_longitude" value="<?php echo esc_attr($longitude); ?>" class="widefat">
+            </p>
+        </div>
+        <?php
+    }
+
+    /**
+     * Render project links meta box
+     */
+    public function render_project_links_meta_box($post) {
+        $linked_properties = get_post_meta($post->ID, '_malisafi_project_linked_properties', true);
+        if (!is_array($linked_properties)) {
+            $linked_properties = $linked_properties ? (array) $linked_properties : array();
+        }
+
+        $properties_query = new \WP_Query(array(
+            'post_type' => 'malisafi_property',
+            'posts_per_page' => -1,
+            'post_status' => array('publish', 'pending', 'draft')
+        ));
+        ?>
+        <p><?php esc_html_e('Linked properties are synced to the project profile.', 'malisafi-mls'); ?></p>
+        <label for="malisafi_project_linked_properties"><?php esc_html_e('Linked Properties', 'malisafi-mls'); ?></label>
+        <select id="malisafi_project_linked_properties" name="malisafi_project_linked_properties[]" multiple class="widefat" size="8">
+            <?php if ($properties_query->have_posts()) : ?>
+                <?php while ($properties_query->have_posts()) : $properties_query->the_post(); ?>
+                    <option value="<?php echo esc_attr(get_the_ID()); ?>" <?php selected(in_array(get_the_ID(), $linked_properties, true)); ?>>
+                        <?php echo esc_html(get_the_title()); ?>
+                    </option>
+                <?php endwhile; ?>
+            <?php endif; ?>
+        </select>
+        <?php
+        wp_reset_postdata();
+
+        if (!empty($linked_properties)) :
+            ?>
+            <div style="margin-top: 10px;">
+                <strong><?php esc_html_e('Linked Properties Debug:', 'malisafi-mls'); ?></strong>
+                <ul>
+                    <?php foreach ($linked_properties as $property_id) : ?>
+                        <?php $property_id = (int) $property_id; ?>
+                        <li>
+                            <a href="<?php echo esc_url(get_edit_post_link($property_id)); ?>">
+                                <?php echo esc_html(get_the_title($property_id)); ?>
+                            </a>
+                        </li>
+                    <?php endforeach; ?>
+                </ul>
+            </div>
+        <?php endif; ?>
+        <?php
+    }
+
+    /**
+     * Save project meta
+     */
+    public function save_project_meta($post_id, $post) {
+        if (!isset($_POST['malisafi_project_details_nonce']) || !wp_verify_nonce($_POST['malisafi_project_details_nonce'], 'malisafi_project_details')) {
+            return;
+        }
+
+        if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) {
+            return;
+        }
+
+        if ($post->post_type !== 'malisafi_project') {
+            return;
+        }
+
+        if (!current_user_can('edit_post', $post_id)) {
+            return;
+        }
+
+        $project_type = isset($_POST['malisafi_project_type']) ? sanitize_text_field($_POST['malisafi_project_type']) : '';
+        $project_category = isset($_POST['malisafi_project_category']) ? sanitize_text_field($_POST['malisafi_project_category']) : '';
+        $project_subcategory = isset($_POST['malisafi_project_subcategory']) ? sanitize_text_field($_POST['malisafi_project_subcategory']) : '';
+        $timeline = isset($_POST['malisafi_project_timeline']) ? sanitize_textarea_field($_POST['malisafi_project_timeline']) : '';
+        $milestones_raw = isset($_POST['malisafi_project_milestones']) ? sanitize_textarea_field($_POST['malisafi_project_milestones']) : '';
+        $milestones = self::parse_milestones($milestones_raw);
+        $investor_highlights = isset($_POST['malisafi_project_investor_highlights']) ? sanitize_textarea_field($_POST['malisafi_project_investor_highlights']) : '';
+        $client_highlights = isset($_POST['malisafi_project_client_highlights']) ? sanitize_textarea_field($_POST['malisafi_project_client_highlights']) : '';
+        $auto_sync = isset($_POST['malisafi_project_auto_sync']) ? '1' : '0';
+
+        update_post_meta($post_id, '_malisafi_project_type', $project_type);
+        update_post_meta($post_id, '_malisafi_project_category', $project_category);
+        update_post_meta($post_id, '_malisafi_project_subcategory', $project_subcategory);
+        update_post_meta($post_id, '_malisafi_project_timeline', $timeline);
+        update_post_meta($post_id, '_malisafi_project_milestones', $milestones);
+        update_post_meta($post_id, '_malisafi_project_investor_highlights', $investor_highlights);
+        update_post_meta($post_id, '_malisafi_project_client_highlights', $client_highlights);
+        update_post_meta($post_id, '_malisafi_project_auto_sync', $auto_sync);
+
+        $county = isset($_POST['malisafi_project_county']) ? sanitize_text_field($_POST['malisafi_project_county']) : '';
+        $neighbourhood = isset($_POST['malisafi_project_neighbourhood']) ? sanitize_text_field($_POST['malisafi_project_neighbourhood']) : '';
+        $setting = isset($_POST['malisafi_project_setting']) ? sanitize_text_field($_POST['malisafi_project_setting']) : '';
+        $city = isset($_POST['malisafi_project_city']) ? sanitize_text_field($_POST['malisafi_project_city']) : '';
+        $latitude = isset($_POST['malisafi_project_latitude']) ? sanitize_text_field($_POST['malisafi_project_latitude']) : '';
+        $longitude = isset($_POST['malisafi_project_longitude']) ? sanitize_text_field($_POST['malisafi_project_longitude']) : '';
+
+        update_post_meta($post_id, '_malisafi_country', 'Kenya');
+        update_post_meta($post_id, '_malisafi_county', $county);
+        update_post_meta($post_id, '_malisafi_neighbourhood', $neighbourhood);
+        update_post_meta($post_id, '_malisafi_setting', $setting);
+        update_post_meta($post_id, '_malisafi_city', $city);
+        update_post_meta($post_id, '_malisafi_latitude', $latitude);
+        update_post_meta($post_id, '_malisafi_longitude', $longitude);
+
+        $linked_properties = isset($_POST['malisafi_project_linked_properties']) && is_array($_POST['malisafi_project_linked_properties'])
+            ? array_map('intval', $_POST['malisafi_project_linked_properties'])
+            : array();
+
+        self::sync_project_linked_properties($post_id, $linked_properties, $auto_sync === '1');
+
+        if (!empty($_FILES['malisafi_project_brochure']['name'])) {
+            require_once ABSPATH . 'wp-admin/includes/file.php';
+            require_once ABSPATH . 'wp-admin/includes/media.php';
+            require_once ABSPATH . 'wp-admin/includes/image.php';
+
+            $attachment_id = media_handle_upload('malisafi_project_brochure', $post_id);
+            if (!is_wp_error($attachment_id)) {
+                update_post_meta($post_id, '_malisafi_project_brochure_id', $attachment_id);
+            }
+        }
+    }
+
+    /**
+     * Sync linked properties for a project
+     */
+    public static function sync_project_linked_properties($project_id, array $linked_ids, $auto_sync = true) {
+        $linked_ids = array_values(array_unique(array_filter($linked_ids)));
+
+        $previous_linked = get_post_meta($project_id, '_malisafi_project_linked_properties', true);
+        if (!is_array($previous_linked)) {
+            $previous_linked = $previous_linked ? (array) $previous_linked : array();
+        }
+
+        update_post_meta($project_id, '_malisafi_project_linked_properties', $linked_ids);
+
+        $removed = array_diff($previous_linked, $linked_ids);
+        $added = array_diff($linked_ids, $previous_linked);
+
+        foreach ($removed as $property_id) {
+            $property_id = (int) $property_id;
+            $projects = get_post_meta($property_id, '_malisafi_project_ids', true);
+            if (!is_array($projects)) {
+                $projects = $projects ? (array) $projects : array();
+            }
+            $projects = array_diff($projects, array($project_id));
+            update_post_meta($property_id, '_malisafi_project_ids', array_values($projects));
+        }
+
+        foreach ($added as $property_id) {
+            $property_id = (int) $property_id;
+            $projects = get_post_meta($property_id, '_malisafi_project_ids', true);
+            if (!is_array($projects)) {
+                $projects = $projects ? (array) $projects : array();
+            }
+            $projects[] = $project_id;
+            update_post_meta($property_id, '_malisafi_project_ids', array_values(array_unique($projects)));
+        }
+
+        if ($auto_sync) {
+            $snapshot = array();
+            $prices = array();
+            foreach ($linked_ids as $property_id) {
+                $property_id = (int) $property_id;
+                $price = get_post_meta($property_id, '_malisafi_price', true);
+                $snapshot[] = array(
+                    'id' => $property_id,
+                    'title' => get_the_title($property_id),
+                    'price' => $price,
+                    'currency' => get_post_meta($property_id, '_malisafi_currency', true),
+                    'bedrooms' => get_post_meta($property_id, '_malisafi_bedrooms', true),
+                    'bathrooms' => get_post_meta($property_id, '_malisafi_bathrooms', true),
+                    'area' => get_post_meta($property_id, '_malisafi_area', true),
+                    'thumbnail_id' => get_post_thumbnail_id($property_id),
+                    'gallery_ids' => get_post_meta($property_id, '_malisafi_gallery_ids', true),
+                );
+                if ($price !== '') {
+                    $prices[] = (float) $price;
+                }
+            }
+            update_post_meta($project_id, '_malisafi_project_properties_snapshot', $snapshot);
+            update_post_meta($project_id, '_malisafi_project_units_count', count($linked_ids));
+            if (!empty($prices)) {
+                update_post_meta($project_id, '_malisafi_project_min_price', min($prices));
+                update_post_meta($project_id, '_malisafi_project_max_price', max($prices));
+            }
+        }
+    }
+
+    /**
+     * Parse milestones from text input
+     */
+    private static function parse_milestones($raw) {
+        $lines = array_filter(array_map('trim', preg_split('/\r\n|\r|\n/', (string) $raw)));
+        $items = array();
+
+        foreach ($lines as $line) {
+            $parts = array_map('trim', explode('|', $line));
+            $date = isset($parts[0]) ? $parts[0] : '';
+            $title = isset($parts[1]) ? $parts[1] : '';
+            $status = isset($parts[2]) ? $parts[2] : '';
+            $percent = isset($parts[3]) ? $parts[3] : '';
+
+            if ($title === '' && count($parts) === 1) {
+                $title = $parts[0];
+                $date = '';
+            }
+
+            $items[] = array(
+                'date' => $date,
+                'title' => $title,
+                'status' => $status,
+                'percent' => $percent,
+                'raw' => $line
+            );
+        }
+
+        return $items;
+    }
+
+    /**
+     * Format milestones for textarea
+     */
+    private static function format_milestones_for_textarea($milestones) {
+        $lines = array();
+        foreach ($milestones as $milestone) {
+            if (is_array($milestone) && (isset($milestone['date']) || isset($milestone['title']))) {
+                $date = isset($milestone['date']) ? $milestone['date'] : '';
+                $title = isset($milestone['title']) ? $milestone['title'] : '';
+                $status = isset($milestone['status']) ? $milestone['status'] : '';
+                $percent = isset($milestone['percent']) ? $milestone['percent'] : '';
+                $line = trim($date . ' | ' . $title . ' | ' . $status . ' | ' . $percent);
+                $lines[] = trim($line, " | ");
+            } else {
+                $lines[] = (string) $milestone;
+            }
+        }
+
+        return implode("\n", array_filter($lines));
     }
     
     /**
@@ -723,7 +1167,24 @@ class Post_Types {
                 return $plugin_template;
             }
         }
-        
+
+        return $template;
+    }
+
+    /**
+     * Load custom template for single project page
+     */
+    public function load_single_project_template($template) {
+        global $post;
+
+        if ($post && 'malisafi_project' === $post->post_type) {
+            $plugin_template = MALISAFI_MLS_PATH . 'templates/single-project.php';
+
+            if (file_exists($plugin_template)) {
+                return $plugin_template;
+            }
+        }
+
         return $template;
     }
 }

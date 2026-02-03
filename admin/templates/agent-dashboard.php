@@ -168,7 +168,7 @@ if (!defined('ABSPATH')) {
                     } elseif (current_user_can('malisafi_owner')) {
                         $add_property_url = \MalisafiMLS\Page_Manager::get_page_url('owner_add_property');
                     } elseif (current_user_can('malisafi_developer')) {
-                        $add_property_url = \MalisafiMLS\Page_Manager::get_page_url('developer_add_project');
+                        $add_property_url = \MalisafiMLS\Page_Manager::get_page_url('agent_add_property');
                     }
                 }
                 if (!$add_property_url) {

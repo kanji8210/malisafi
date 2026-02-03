@@ -82,6 +82,7 @@ class Property_Submission {
      * Render submission form shortcode
      */
     public static function render_submission_form($atts) {
+        $atts = is_array($atts) ? $atts : array();
         // Check if we should show success page instead
         $submission = isset($_GET['submission']) ? sanitize_text_field(wp_unslash($_GET['submission'])) : '';
         $property_id = isset($_GET['property_id']) ? absint($_GET['property_id']) : 0;
@@ -108,10 +109,30 @@ class Property_Submission {
         if (is_wp_error($limit_check)) {
             return '<div class="malisafi-notice error"><p>' . $limit_check->get_error_message() . '</p></div>';
         }
-        
-        // Load template
+
+        // Enqueue editor assets for frontend usage of admin-style form
+        if (function_exists('wp_enqueue_editor')) {
+            wp_enqueue_editor();
+        }
+
+        $current_user = wp_get_current_user();
+        $can_assign_agent = current_user_can('manage_options') || current_user_can('edit_others_properties') || current_user_can('publish_properties');
+
+        $frontend_cancel_url = '';
+        if (class_exists('MalisafiMLS\\Page_Manager') && method_exists('MalisafiMLS\\Page_Manager', 'get_page_url')) {
+            if (in_array('malisafi_agent_basic', (array) $current_user->roles, true) || in_array('malisafi_agent_premium', (array) $current_user->roles, true)) {
+                $frontend_cancel_url = Page_Manager::get_page_url('agent_dashboard');
+            } elseif (in_array('malisafi_owner', (array) $current_user->roles, true)) {
+                $frontend_cancel_url = Page_Manager::get_page_url('owner_dashboard');
+            } elseif (in_array('malisafi_developer', (array) $current_user->roles, true)) {
+                $frontend_cancel_url = Page_Manager::get_page_url('developer_dashboard');
+            }
+        }
+
+        // Load admin form template for frontend usage
+        $is_frontend = true;
         ob_start();
-        include MALISAFI_MLS_PATH . 'templates/property-submission-wizard.php';
+        include MALISAFI_MLS_PATH . 'admin/templates/property-edit-form.php';
         return ob_get_clean();
     }
     
@@ -168,7 +189,10 @@ class Property_Submission {
         ));
         
         if ($limits) {
-            $max_properties = intval($limits->max_properties);
+            $max_properties = 0;
+            if (isset($limits->max_properties)) {
+                $max_properties = intval($limits->max_properties);
+            }
             
             if ($max_properties > 0 && $property_count >= $max_properties) {
                 return new \WP_Error(

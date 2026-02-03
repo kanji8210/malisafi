@@ -121,6 +121,7 @@ $formatted_price = $price > 0 ? ($currency_symbol . ' ' . number_format($price))
         $favorites = $favorites ? explode(',', $favorites) : array();
         $is_favorited = in_array($property_id, $favorites);
     }
+
 ?>
 
 <div class="malisafi-single-property">
@@ -278,6 +279,7 @@ $formatted_price = $price > 0 ? ($currency_symbol . ' ' . number_format($price))
                     </div>
                     
                     <h1 class="property-title"><?php the_title(); ?></h1>
+
                 </div>
                 
                 <div class="property-actions">

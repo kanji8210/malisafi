@@ -240,45 +240,11 @@ class Malisafi_Shortcodes {
      * @return string
      */
     public static function submit_property_form() {
-        if (!is_user_logged_in()) {
-            return '<p>' . __('Please log in to submit a property.', 'malisafi-mls') . '</p>';
+        if (!class_exists('MalisafiMLS\\Property_Submission')) {
+            return '<p>' . __('Property submission is currently unavailable.', 'malisafi-mls') . '</p>';
         }
-        
-        ob_start();
-        
-        // Check user limits
-        $user_id = get_current_user_id();
-        global $wpdb;
-        $limits_table = $wpdb->prefix . 'mf_user_limits';
-        $limits = $wpdb->get_row($wpdb->prepare(
-            "SELECT * FROM {$limits_table} WHERE user_id = %d",
-            $user_id
-        ));
-        
-        if ($limits) {
-            global $wpdb;
-$current_listings = (int) $wpdb->get_var($wpdb->prepare(
-    "SELECT COUNT(*) FROM {$wpdb->posts} WHERE post_type = %s AND post_status = 'publish'",
-    'malisafi_property'
-));
-            $can_submit = $limits->max_listings == -1 || $current_listings < $limits->max_listings;
-            
-            if (!$can_submit) {
-                echo '<div class="notice notice-warning">';
-                echo '<p>' . __('You have reached your listing limit. Please upgrade your plan to submit more properties.', 'malisafi-mls') . '</p>';
-                echo '<a href="' . esc_url(home_url('/pricing')) . '" class="button button-primary">' . __('Upgrade Plan', 'malisafi-mls') . '</a>';
-                echo '</div>';
-                return ob_get_clean();
-            }
-        }
-        
-        // Include property submission form
-        echo '<div class="malisafi-property-submit-form">';
-        echo '<h2>' . __('Submit a Property', 'malisafi-mls') . '</h2>';
-        echo '<p>' . __('Property submission form will be displayed here.', 'malisafi-mls') . '</p>';
-        echo '</div>';
-        
-        return ob_get_clean();
+
+        return \MalisafiMLS\Property_Submission::render_submission_form(array());
     }
     
     /**

@@ -51,6 +51,9 @@
    --wp-yellow: #f0c33c;
    --wp-orange: #d54e21;
 
+   /* Form Focus */
+   --mls-focus-ring: rgba(30, 82, 119, 0.15);
+
    /* ========================================
       TYPOGRAPHY - Font Family & Sizes
       ======================================== */

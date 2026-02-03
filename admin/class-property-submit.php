@@ -148,14 +148,18 @@ class Malisafi_Property_Submit {
         return 'pending';
     }
     
-    /**
-     * Sanitize property data - Updated for new admin form with PHP 8 compatibility
-     */
+
     private static function sanitize_property_data($data) {
         // Ensure data is an array
         if (!is_array($data)) {
             $data = array();
         }
+
+        $current_user = wp_get_current_user();
+        $can_assign_agent = self::can_assign_agent_fields($current_user);
+        $default_agent_name = $current_user->display_name;
+        $default_agent_email = $current_user->user_email;
+        $default_agent_phone = get_user_meta($current_user->ID, 'phone', true);
         
         return array(
             'title' => isset($data['property_title']) && $data['property_title'] !== null ? sanitize_text_field($data['property_title']) : '',
@@ -193,9 +197,15 @@ class Malisafi_Property_Submit {
             'property_type' => isset($data['property_type']) ? intval($data['property_type']) : 0,
             
             // Agent info
-            'agent_name' => isset($data['agent_name']) && $data['agent_name'] !== null ? sanitize_text_field($data['agent_name']) : '',
-            'agent_email' => isset($data['agent_email']) && $data['agent_email'] !== null ? sanitize_email($data['agent_email']) : '',
-            'agent_phone' => isset($data['agent_phone']) && $data['agent_phone'] !== null ? sanitize_text_field($data['agent_phone']) : '',
+            'agent_name' => $can_assign_agent
+                ? (isset($data['agent_name']) && $data['agent_name'] !== null ? sanitize_text_field($data['agent_name']) : '')
+                : $default_agent_name,
+            'agent_email' => $can_assign_agent
+                ? (isset($data['agent_email']) && $data['agent_email'] !== null ? sanitize_email($data['agent_email']) : '')
+                : $default_agent_email,
+            'agent_phone' => $can_assign_agent
+                ? (isset($data['agent_phone']) && $data['agent_phone'] !== null ? sanitize_text_field($data['agent_phone']) : '')
+                : $default_agent_phone,
             
             // Media
             'video_url' => isset($data['video_url']) && $data['video_url'] !== null ? esc_url_raw($data['video_url']) : '',
@@ -221,6 +231,19 @@ class Malisafi_Property_Submit {
             'reference_id' => isset($data['reference_id']) && $data['reference_id'] !== null ? sanitize_text_field($data['reference_id']) : '',
             'featured' => isset($data['featured']) ? 1 : 0,
         );
+    }
+
+    /**
+     * Check if user can assign/edit agent fields
+     */
+    private static function can_assign_agent_fields($user) {
+        if (!$user || !is_a($user, 'WP_User')) {
+            return false;
+        }
+
+        return user_can($user, 'manage_options')
+            || user_can($user, 'edit_others_properties')
+            || user_can($user, 'publish_properties');
     }
     
     /**

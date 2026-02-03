@@ -39,6 +39,7 @@ class Core {
         require_once MALISAFI_MLS_PATH . 'includes/class-user-creation-helper.php';
         require_once MALISAFI_MLS_PATH . 'includes/class-post-types.php';
         require_once MALISAFI_MLS_PATH . 'includes/class-property-manager.php';
+        require_once MALISAFI_MLS_PATH . 'includes/class-project-submission.php';
         require_once MALISAFI_MLS_PATH . 'includes/class-role-manager.php';
         require_once MALISAFI_MLS_PATH . 'includes/class-stripe.php';
         require_once MALISAFI_MLS_PATH . 'includes/class-featured-properties.php';
@@ -110,6 +111,7 @@ class Core {
         
         // Initialize property submission
         \Malisafi_Property_Submit::init();
+
         
         // Initialize property moderation
         \Malisafi_Property_Moderation::init();
@@ -141,6 +143,10 @@ class Core {
         // Initialize property submission system
         require_once MALISAFI_MLS_PATH . 'includes/class-property-submission.php';
         Property_Submission::init();
+
+        // Initialize project submission system
+        Project_Submission::init();
+
         
         // Initialize property access control
         require_once MALISAFI_MLS_PATH . 'includes/class-property-access-control.php';
@@ -185,6 +191,9 @@ class Core {
         $this->loader->add_action('init', $post_types, 'register_taxonomies');
         $this->loader->add_action('add_meta_boxes', $post_types, 'add_property_meta_boxes');
         $this->loader->add_action('save_post', $post_types, 'save_property_meta', 10, 2);
+        $this->loader->add_action('init', $post_types, 'register_project_post_type');
+        $this->loader->add_action('add_meta_boxes', $post_types, 'add_project_meta_boxes');
+        $this->loader->add_action('save_post', $post_types, 'save_project_meta', 10, 2);
         
         // Analytics tracker
         \MalisafiMLS\Analytics\Analytics_Tracker::init();
