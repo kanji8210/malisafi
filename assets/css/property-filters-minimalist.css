@@ -1,40 +1,44 @@
 .malisafi-minimalist-wrapper {
     background: transparent;
     border: none;
-    border-radius: 0;
+    gap: var(--spacing-md);
     box-shadow: none;
     padding: 0;
 }
 
 .malisafi-minimalist-filters {
-    display: flex;
+    gap: var(--spacing-xs);
     flex-direction: column;
     gap: var(--spacing-lg);
 }
 
 .filter-row-status .status-buttons {
-    display: flex;
-    flex-wrap: wrap;
+    gap: var(--spacing-sm);
+    align-items: flex-start;
     gap: var(--spacing-sm);
 }
 
-.status-btn {
-    border: 1px solid var(--color-light-gray);
+    flex: 0 0 auto;
+    min-width: 180px;
     background: var(--color-ash-white);
     color: var(--text-base);
     padding: 8px 14px;
     border-radius: var(--radius-md);
-    cursor: pointer;
+    flex: 0 0 auto;
+    min-width: 220px;
     font-weight: 600;
     font-size: 13px;
     transition: var(--transition-fast);
 }
-
+    width: auto;
+    min-width: 180px;
+    max-width: 320px;
 .status-btn:hover {
     transform: translateY(-1px);
     box-shadow: var(--shadow-sm);
 }
 
+    width: 100%;
 .status-btn.active {
     background: var(--btn-primary-bg);
     color: var(--btn-primary-text);
@@ -51,7 +55,7 @@
 .filter-control {
     flex: 0 1 220px;
     min-width: 180px;
-}
+    width: auto;
 
 .filter-select,
 .filter-search-input {
