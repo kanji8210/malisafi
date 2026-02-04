@@ -38,7 +38,7 @@ $frontend_cancel_url = isset($frontend_cancel_url) ? $frontend_cancel_url : '';
 $can_assign_agent = isset($can_assign_agent) ? (bool) $can_assign_agent : true;
 ?>
 
-<div class="wrap malisafi-admin-property-form">
+<div class="wrap malisafi-admin-property-form<?php echo $is_frontend ? ' is-frontend' : ''; ?>">
     <h1><?php echo $property_id ? __('Edit Property', 'malisafi-mls') : __('Add New Property', 'malisafi-mls'); ?></h1>
     
     <?php if (isset($_GET['message'])): ?>

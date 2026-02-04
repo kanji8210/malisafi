@@ -6,1396 +6,1403 @@
  *
  * @package MalisafiMLS
  * @since 1.0.0
- */
+ * @version 1.0.0
+ * category includes
+ **/
 
 namespace MalisafiMLS;
 
 if (!defined('ABSPATH')) {
-    exit;
+	exit;
 }
 
 class Dashboard_Shortcodes {
-    /**
-     * Initialize the shortcodes
-     */
-    public static function init() {
-        add_shortcode('malisafi_client_dashboard', [__CLASS__, 'client_dashboard']);
-        add_shortcode('malisafi_favorites', [__CLASS__, 'client_favorites']);
-        add_shortcode('malisafi_saved_searches', [__CLASS__, 'client_saved_searches']);
-        add_shortcode('malisafi_client_inquiries', [__CLASS__, 'client_inquiries']);
-
-        add_shortcode('malisafi_agent_dashboard', [__CLASS__, 'agent_dashboard']);
-        add_shortcode('malisafi_agent_properties', [__CLASS__, 'agent_properties']);
-        add_shortcode('malisafi_agent_add_property', [__CLASS__, 'agent_add_property']);
-        add_shortcode('malisafi_agent_leads', [__CLASS__, 'agent_leads']);
-        add_shortcode('malisafi_agent_profile_view', [__CLASS__, 'agent_profile_public']);
-
-        add_shortcode('malisafi_owner_dashboard', [__CLASS__, 'owner_dashboard']);
-        add_shortcode('malisafi_owner_properties', [__CLASS__, 'owner_properties']);
-        add_shortcode('malisafi_owner_inquiries', [__CLASS__, 'owner_inquiries']);
-
-        add_shortcode('malisafi_developer_dashboard', [__CLASS__, 'developer_dashboard']);
-        add_shortcode('malisafi_developer_projects', [__CLASS__, 'developer_projects']);
-        add_shortcode('malisafi_developer_analytics', [__CLASS__, 'developer_analytics']);
-
-        add_shortcode('malisafi_property_submit', [__CLASS__, 'property_submit_form']);
-        add_shortcode('malisafi_project_submit', [__CLASS__, 'project_submit_form']);
-        add_shortcode('malisafi_login', [__CLASS__, 'login_form']);
-        add_shortcode('malisafi_registration', [__CLASS__, 'register_form']);
-        add_shortcode('malisafi_account', [__CLASS__, 'account_page']);
-
-        add_action('wp_ajax_malisafi_custom_login', [__CLASS__, 'ajax_custom_login']);
-        add_action('wp_ajax_nopriv_malisafi_custom_login', [__CLASS__, 'ajax_custom_login']);
-    }
-
-    private static function require_login() {
-        if (is_user_logged_in()) {
-            return '';
-        }
-
-        $login_url = Page_Manager::get_page_url('login');
-        if (!$login_url) {
-            $login_url = wp_login_url();
-        }
-
-        return '<div class="malisafi-access-denied"><p>' . sprintf(
-            __('Please <a href="%s">log in</a> to access this page.', 'malisafi-mls'),
-            esc_url($login_url)
-        ) . '</p></div>';
-    }
-
-    public static function property_submit_form($atts) {
-        if (!class_exists('MalisafiMLS\\Property_Submission')) {
-            return '<div class="malisafi-access-denied"><p>' . __('Property submission is currently unavailable.', 'malisafi-mls') . '</p></div>';
-        }
-
-        return \MalisafiMLS\Property_Submission::render_submission_form($atts);
-    }
-
-    public static function project_submit_form($atts) {
-        if (!class_exists('MalisafiMLS\\Project_Submission')) {
-            return '<div class="malisafi-access-denied"><p>' . __('Project submission is currently unavailable.', 'malisafi-mls') . '</p></div>';
-        }
-
-        return \MalisafiMLS\Project_Submission::render_submission_form($atts);
-    }
-
-    public static function client_dashboard($atts) {
-        $login_check = self::require_login();
-        if ($login_check) {
-            return $login_check;
-        }
-
-        $user_id = get_current_user_id();
-        $favorites_url = Page_Manager::get_page_url('client_favorites');
-        $searches_url = Page_Manager::get_page_url('client_searches');
-        $inquiries_url = Page_Manager::get_page_url('client_inquiries');
-
-        ob_start();
-        ?>
-        <div class="malisafi-client-dashboard">
-            <h1><?php _e('My Dashboard', 'malisafi-mls'); ?></h1>
-            <div class="dashboard-cards">
-                <div class="dashboard-card">
-                    <h3><?php _e('Favorites', 'malisafi-mls'); ?></h3>
-                    <p class="count"><?php echo esc_html(self::get_favorites_count($user_id)); ?></p>
-                    <?php if ($favorites_url): ?>
-                        <a href="<?php echo esc_url($favorites_url); ?>" class="button button-secondary"><?php _e('View', 'malisafi-mls'); ?></a>
-                    <?php endif; ?>
-                </div>
-                <div class="dashboard-card">
-                    <h3><?php _e('Saved Searches', 'malisafi-mls'); ?></h3>
-                    <p class="count"><?php echo esc_html(self::get_saved_searches_count($user_id)); ?></p>
-                    <?php if ($searches_url): ?>
-                        <a href="<?php echo esc_url($searches_url); ?>" class="button button-secondary"><?php _e('View', 'malisafi-mls'); ?></a>
-                    <?php endif; ?>
-                </div>
-                <div class="dashboard-card">
-                    <h3><?php _e('Inquiries', 'malisafi-mls'); ?></h3>
-                    <p class="count"><?php echo esc_html(self::get_inquiries_count($user_id)); ?></p>
-                    <?php if ($inquiries_url): ?>
-                        <a href="<?php echo esc_url($inquiries_url); ?>" class="button button-secondary"><?php _e('View', 'malisafi-mls'); ?></a>
-                    <?php endif; ?>
-                </div>
-            </div>
-
-            <div class="dashboard-section">
-                <h2><?php _e('Recently Viewed', 'malisafi-mls'); ?></h2>
-                <?php echo self::get_recent_viewed_properties($user_id); ?>
-            </div>
-        </div>
-        <?php
-        return ob_get_clean();
-    }
-
-    public static function client_favorites($atts) {
-        $login_check = self::require_login();
-        if ($login_check) {
-            return $login_check;
-        }
-
-        $favorites = get_user_meta(get_current_user_id(), 'malisafi_favorites', true) ?: [];
-        if (empty($favorites)) {
-            return '<p>' . __('No favorites saved yet.', 'malisafi-mls') . '</p>';
-        }
-
-        $query = new \WP_Query([
-            'post_type' => 'malisafi_property',
-            'post__in' => $favorites,
-            'posts_per_page' => 20,
-            'orderby' => 'post__in'
-        ]);
-
-        ob_start();
-        ?>
-        <div class="malisafi-client-favorites">
-            <h1><?php _e('My Favorites', 'malisafi-mls'); ?></h1>
-            <?php if ($query->have_posts()) : ?>
-                <ul class="favorites-list">
-                    <?php while ($query->have_posts()) : $query->the_post(); ?>
-                        <li><a href="<?php the_permalink(); ?>"><?php the_title(); ?></a></li>
-                    <?php endwhile; ?>
-                </ul>
-            <?php else : ?>
-                <p><?php _e('No favorites found.', 'malisafi-mls'); ?></p>
-            <?php endif; ?>
-        </div>
-        <?php
-        wp_reset_postdata();
-        return ob_get_clean();
-    }
-
-    public static function client_saved_searches($atts) {
-        $login_check = self::require_login();
-        if ($login_check) {
-            return $login_check;
-        }
-
-        $searches = get_user_meta(get_current_user_id(), 'malisafi_saved_searches', true) ?: [];
-        if (empty($searches)) {
-            return '<p>' . __('No saved searches yet.', 'malisafi-mls') . '</p>';
-        }
-
-        ob_start();
-        ?>
-        <div class="malisafi-client-searches">
-            <h1><?php _e('Saved Searches', 'malisafi-mls'); ?></h1>
-            <ul class="saved-searches-list">
-                <?php foreach ($searches as $search) : ?>
-                    <li>
-                        <span><?php echo esc_html(self::format_search_criteria($search)); ?></span>
-                        <a class="button button-secondary" href="<?php echo esc_url(self::build_search_url($search)); ?>">
-                            <?php _e('Run Search', 'malisafi-mls'); ?>
-                        </a>
-                    </li>
-                <?php endforeach; ?>
-            </ul>
-        </div>
-        <?php
-        return ob_get_clean();
-    }
-
-    public static function client_inquiries($atts) {
-        $login_check = self::require_login();
-        if ($login_check) {
-            return $login_check;
-        }
-
-        global $wpdb;
-        $table_name = $wpdb->prefix . 'mf_inquiries';
-        $rows = $wpdb->get_results($wpdb->prepare(
-            "SELECT * FROM {$table_name} WHERE client_id = %d ORDER BY id DESC LIMIT 20",
-            get_current_user_id()
-        ), ARRAY_A);
-
-        ob_start();
-        ?>
-        <div class="malisafi-client-inquiries">
-            <h1><?php _e('My Inquiries', 'malisafi-mls'); ?></h1>
-            <?php if (empty($rows)) : ?>
-                <p><?php _e('No inquiries found yet.', 'malisafi-mls'); ?></p>
-            <?php else : ?>
-                <ul class="inquiries-list">
-                    <?php foreach ($rows as $row) : ?>
-                        <?php $property_id = isset($row['property_id']) ? (int) $row['property_id'] : 0; ?>
-                        <li>
-                            <?php if ($property_id) : ?>
-                                <a href="<?php echo esc_url(get_permalink($property_id)); ?>"><?php echo esc_html(get_the_title($property_id)); ?></a>
-                            <?php else : ?>
-                                <span><?php _e('Property Inquiry', 'malisafi-mls'); ?></span>
-                            <?php endif; ?>
-                            <?php if (!empty($row['created_at'])) : ?>
-                                <small><?php echo esc_html($row['created_at']); ?></small>
-                            <?php endif; ?>
-                        </li>
-                    <?php endforeach; ?>
-                </ul>
-            <?php endif; ?>
-        </div>
-        <?php
-        return ob_get_clean();
-    }
-
-    public static function agent_dashboard($atts) {
-        $login_check = self::require_login();
-        if ($login_check) {
-            return $login_check;
-        }
-
-        $current_user = wp_get_current_user();
-        $is_agent = in_array('malisafi_agent_basic', $current_user->roles) || in_array('malisafi_agent_premium', $current_user->roles);
-        if (!$is_agent && !current_user_can('administrator')) {
-            return '<div class="malisafi-access-denied"><p>' . __('Access restricted to agents only.', 'malisafi-mls') . '</p></div>';
-        }
-
-        wp_enqueue_style('agent-dashboard-modern', MALISAFI_MLS_URL . 'assets/css/agent-dashboard-modern.css', array(), MALISAFI_MLS_VERSION);
-        wp_enqueue_script('agent-dashboard-modern', MALISAFI_MLS_URL . 'assets/js/agent-dashboard-modern.js', array('jquery'), MALISAFI_MLS_VERSION, true);
-
-        ob_start();
-        include MALISAFI_MLS_PATH . 'templates/agent-dashboard-modern.php';
-        return ob_get_clean();
-    }
-
-    public static function agent_properties($atts) {
-        $login_check = self::require_login();
-        if ($login_check) {
-            return $login_check;
-        }
-
-        ob_start();
-        include MALISAFI_MLS_PATH . 'templates/agent-dashboard-properties.php';
-        return ob_get_clean();
-    }
-
-    public static function agent_add_property($atts) {
-        return self::property_submit_form($atts);
-    }
-
-    public static function agent_leads($atts) {
-        $login_check = self::require_login();
-        if ($login_check) {
-            return $login_check;
-        }
-
-        ob_start();
-        include MALISAFI_MLS_PATH . 'templates/agent-dashboard-leads.php';
-        return ob_get_clean();
-    }
-
-    public static function owner_dashboard($atts) {
-        $login_check = self::require_login();
-        if ($login_check) {
-            return $login_check;
-        }
-
-        $user_id = get_current_user_id();
-        $properties_url = Page_Manager::get_page_url('owner_properties');
-        $inquiries_url = Page_Manager::get_page_url('owner_inquiries');
-
-        ob_start();
-        ?>
-        <div class="malisafi-owner-dashboard">
-            <h1><?php _e('Owner Dashboard', 'malisafi-mls'); ?></h1>
-            <p><?php _e('Manage your properties and inquiries.', 'malisafi-mls'); ?></p>
-            <ul class="dashboard-links">
-                <?php if ($properties_url): ?>
-                    <li><a href="<?php echo esc_url($properties_url); ?>"><?php _e('My Properties', 'malisafi-mls'); ?></a></li>
-                <?php endif; ?>
-                <?php if ($inquiries_url): ?>
-                    <li><a href="<?php echo esc_url($inquiries_url); ?>"><?php _e('Inquiries', 'malisafi-mls'); ?></a></li>
-                <?php endif; ?>
-            </ul>
-            <p><?php echo sprintf(__('You have %d properties.', 'malisafi-mls'), esc_html(self::get_user_properties_count($user_id))); ?></p>
-        </div>
-        <?php
-        return ob_get_clean();
-    }
-
-    public static function owner_properties($atts) {
-        $login_check = self::require_login();
-        if ($login_check) {
-            return $login_check;
-        }
-
-        $query = new \WP_Query([
-            'post_type' => 'malisafi_property',
-            'author' => get_current_user_id(),
-            'posts_per_page' => 20,
-            'post_status' => array('publish', 'pending', 'draft')
-        ]);
-
-        ob_start();
-        ?>
-        <div class="malisafi-owner-properties">
-            <h1><?php _e('My Properties', 'malisafi-mls'); ?></h1>
-            <?php if ($query->have_posts()) : ?>
-                <ul class="owner-properties-list">
-                    <?php while ($query->have_posts()) : $query->the_post(); ?>
-                        <li><a href="<?php the_permalink(); ?>"><?php the_title(); ?></a></li>
-                    <?php endwhile; ?>
-                </ul>
-            <?php else : ?>
-                <p><?php _e('No properties found.', 'malisafi-mls'); ?></p>
-            <?php endif; ?>
-        </div>
-        <?php
-        wp_reset_postdata();
-        return ob_get_clean();
-    }
-
-    public static function owner_inquiries($atts) {
-        $login_check = self::require_login();
-        if ($login_check) {
-            return $login_check;
-        }
-
-        global $wpdb;
-        $table_name = $wpdb->prefix . 'mf_inquiries';
-        $rows = $wpdb->get_results($wpdb->prepare(
-            "SELECT i.* FROM {$table_name} i LEFT JOIN {$wpdb->posts} p ON i.property_id = p.ID WHERE p.post_author = %d ORDER BY i.id DESC LIMIT 20",
-            get_current_user_id()
-        ), ARRAY_A);
-
-        ob_start();
-        ?>
-        <div class="malisafi-owner-inquiries">
-            <h1><?php _e('Property Inquiries', 'malisafi-mls'); ?></h1>
-            <?php if (empty($rows)) : ?>
-                <p><?php _e('No inquiries found.', 'malisafi-mls'); ?></p>
-            <?php else : ?>
-                <ul class="owner-inquiries-list">
-                    <?php foreach ($rows as $row) : ?>
-                        <?php $property_id = isset($row['property_id']) ? (int) $row['property_id'] : 0; ?>
-                        <li>
-                            <?php if ($property_id) : ?>
-                                <a href="<?php echo esc_url(get_permalink($property_id)); ?>"><?php echo esc_html(get_the_title($property_id)); ?></a>
-                            <?php else : ?>
-                                <span><?php _e('Property Inquiry', 'malisafi-mls'); ?></span>
-                            <?php endif; ?>
-                            <?php if (!empty($row['created_at'])) : ?>
-                                <small><?php echo esc_html($row['created_at']); ?></small>
-                            <?php endif; ?>
-                        </li>
-                    <?php endforeach; ?>
-                </ul>
-            <?php endif; ?>
-        </div>
-        <?php
-        return ob_get_clean();
-    }
-
-    public static function developer_dashboard($atts) {
-        $login_check = self::require_login();
-        if ($login_check) {
-            return $login_check;
-        }
-
-        $user_id = get_current_user_id();
-        $projects_url = Page_Manager::get_page_url('developer_projects');
-        $add_project_url = Page_Manager::get_page_url('developer_add_project');
-        $analytics_url = Page_Manager::get_page_url('developer_analytics');
-        $stats = self::get_developer_project_stats($user_id);
-
-        wp_enqueue_style(
-            'malisafi-developer-dashboard',
-            MALISAFI_MLS_URL . 'assets/css/developer-dashboard.css',
-            array(),
-            MALISAFI_MLS_VERSION
-        );
-
-        $recent_args = array(
-            'post_type' => 'malisafi_project',
-            'posts_per_page' => 5,
-            'post_status' => array('publish', 'pending', 'draft'),
-        );
-
-        if (!current_user_can('edit_others_projects')) {
-            $recent_args['author'] = $user_id;
-        }
-
-        $recent_projects = new \WP_Query($recent_args);
-
-        ob_start();
-        ?>
-        <div class="malisafi-developer-dashboard">
-            <div class="developer-header">
-                <h1><?php _e('Developer Dashboard', 'malisafi-mls'); ?></h1>
-                <p><?php _e('Track your projects, milestones, and linked property performance.', 'malisafi-mls'); ?></p>
-            </div>
-
-            <div class="dashboard-cards">
-                <div class="dashboard-card">
-                    <h3><?php _e('Projects', 'malisafi-mls'); ?></h3>
-                    <p class="count"><?php echo esc_html($stats['total_projects']); ?></p>
-                    <?php if ($projects_url): ?>
-                        <a href="<?php echo esc_url($projects_url); ?>" class="button button-secondary"><?php _e('View Projects', 'malisafi-mls'); ?></a>
-                    <?php endif; ?>
-                </div>
-                <div class="dashboard-card">
-                    <h3><?php _e('Add Project', 'malisafi-mls'); ?></h3>
-                    <p><?php _e('Create a new development profile.', 'malisafi-mls'); ?></p>
-                    <?php if ($add_project_url): ?>
-                        <a href="<?php echo esc_url($add_project_url); ?>" class="button button-primary"><?php _e('Create Project', 'malisafi-mls'); ?></a>
-                    <?php endif; ?>
-                </div>
-                <div class="dashboard-card">
-                    <h3><?php _e('Linked Units', 'malisafi-mls'); ?></h3>
-                    <p class="count"><?php echo esc_html($stats['total_units']); ?></p>
-                    <p class="subtext"><?php _e('Total properties linked', 'malisafi-mls'); ?></p>
-                </div>
-                <div class="dashboard-card">
-                    <h3><?php _e('Price Range', 'malisafi-mls'); ?></h3>
-                    <p class="count"><?php echo esc_html($stats['min_price_formatted']); ?> - <?php echo esc_html($stats['max_price_formatted']); ?></p>
-                    <p class="subtext"><?php _e('Across linked units', 'malisafi-mls'); ?></p>
-                </div>
-            </div>
-
-            <div class="developer-analytics-grid">
-                <div class="analytics-card">
-                    <h3><?php _e('Average Unit Price', 'malisafi-mls'); ?></h3>
-                    <p class="analytics-value"><?php echo esc_html($stats['avg_price_formatted']); ?></p>
-                    <p class="subtext"><?php _e('Based on linked unit prices', 'malisafi-mls'); ?></p>
-                </div>
-                <div class="analytics-card">
-                    <h3><?php _e('Active Projects', 'malisafi-mls'); ?></h3>
-                    <p class="analytics-value"><?php echo esc_html($stats['active_projects']); ?></p>
-                    <p class="subtext"><?php _e('Published + pending', 'malisafi-mls'); ?></p>
-                </div>
-            </div>
-
-            <div class="developer-section">
-                <h2><?php _e('Recent Projects', 'malisafi-mls'); ?></h2>
-                <?php if ($recent_projects->have_posts()) : ?>
-                    <ul class="developer-list">
-                        <?php while ($recent_projects->have_posts()) : $recent_projects->the_post(); ?>
-                            <?php
-                            $linked = get_post_meta(get_the_ID(), '_malisafi_project_linked_properties', true);
-                            if (!is_array($linked)) {
-                                $linked = $linked ? (array) $linked : array();
-                            }
-                            ?>
-                            <li>
-                                <a href="<?php echo esc_url(get_permalink()); ?>"><?php the_title(); ?></a>
-                                <span class="muted"><?php echo esc_html(ucfirst(get_post_status())); ?></span>
-                                <span class="muted"><?php echo esc_html(count($linked)); ?> <?php _e('units', 'malisafi-mls'); ?></span>
-                            </li>
-                        <?php endwhile; ?>
-                    </ul>
-                <?php else : ?>
-                    <p class="muted"><?php _e('No projects created yet.', 'malisafi-mls'); ?></p>
-                <?php endif; ?>
-            </div>
-
-            <ul class="dashboard-links">
-                <?php if ($projects_url): ?>
-                    <li><a href="<?php echo esc_url($projects_url); ?>"><?php _e('My Projects', 'malisafi-mls'); ?></a></li>
-                <?php endif; ?>
-                <?php if ($analytics_url): ?>
-                    <li><a href="<?php echo esc_url($analytics_url); ?>"><?php _e('Analytics', 'malisafi-mls'); ?></a></li>
-                <?php endif; ?>
-            </ul>
-        </div>
-        <?php
-        wp_reset_postdata();
-        return ob_get_clean();
-    }
-
-    public static function developer_projects($atts) {
-        $login_check = self::require_login();
-        if ($login_check) {
-            return $login_check;
-        }
-
-        wp_enqueue_style(
-            'malisafi-developer-dashboard',
-            MALISAFI_MLS_URL . 'assets/css/developer-dashboard.css',
-            array(),
-            MALISAFI_MLS_VERSION
-        );
-
-        if (!current_user_can('edit_projects')) {
-            return '<div class="malisafi-access-denied"><p>' . __('You do not have permission to view projects.', 'malisafi-mls') . '</p></div>';
-        }
-
-        $args = array(
-            'post_type' => 'malisafi_project',
-            'posts_per_page' => 20,
-            'post_status' => array('publish', 'pending', 'draft'),
-        );
-
-        if (!current_user_can('edit_others_projects')) {
-            $args['author'] = get_current_user_id();
-        }
-
-        $query = new \WP_Query($args);
-        $add_project_url = Page_Manager::get_page_url('developer_add_project');
-
-        ob_start();
-        ?>
-        <div class="malisafi-developer-projects">
-            <h1><?php _e('My Projects', 'malisafi-mls'); ?></h1>
-            <?php if ($add_project_url): ?>
-                <a href="<?php echo esc_url($add_project_url); ?>" class="button button-primary" style="margin-bottom: 15px;">
-                    <?php _e('Add Project', 'malisafi-mls'); ?>
-                </a>
-            <?php endif; ?>
-
-            <?php if ($query->have_posts()) : ?>
-                <table class="widefat striped">
-                    <thead>
-                        <tr>
-                            <th><?php _e('Project', 'malisafi-mls'); ?></th>
-                            <th><?php _e('Status', 'malisafi-mls'); ?></th>
-                            <th><?php _e('Linked Units', 'malisafi-mls'); ?></th>
-                            <th><?php _e('Updated', 'malisafi-mls'); ?></th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php while ($query->have_posts()) : $query->the_post(); ?>
-                            <?php
-                            $linked = get_post_meta(get_the_ID(), '_malisafi_project_linked_properties', true);
-                            if (!is_array($linked)) {
-                                $linked = $linked ? (array) $linked : array();
-                            }
-                            ?>
-                            <tr>
-                                <td><a href="<?php echo esc_url(get_permalink()); ?>"><?php the_title(); ?></a></td>
-                                <td><?php echo esc_html(ucfirst(get_post_status())); ?></td>
-                                <td><?php echo esc_html(count($linked)); ?></td>
-                                <td><?php echo esc_html(get_the_modified_date()); ?></td>
-                            </tr>
-                        <?php endwhile; ?>
-                    </tbody>
-                </table>
-            <?php else : ?>
-                <p><?php _e('No projects found yet.', 'malisafi-mls'); ?></p>
-            <?php endif; ?>
-        </div>
-        <?php
-        wp_reset_postdata();
-        return ob_get_clean();
-    }
-
-    public static function developer_analytics($atts) {
-        $login_check = self::require_login();
-        if ($login_check) {
-            return $login_check;
-        }
-
-        $user_id = get_current_user_id();
-        $stats = self::get_developer_project_stats($user_id);
-
-        wp_enqueue_style(
-            'malisafi-developer-dashboard',
-            MALISAFI_MLS_URL . 'assets/css/developer-dashboard.css',
-            array(),
-            MALISAFI_MLS_VERSION
-        );
-
-        $args = array(
-            'post_type' => 'malisafi_project',
-            'posts_per_page' => 20,
-            'post_status' => array('publish', 'pending', 'draft'),
-        );
-
-        if (!current_user_can('edit_others_projects')) {
-            $args['author'] = $user_id;
-        }
-
-        $projects = new \WP_Query($args);
-
-        ob_start();
-        ?>
-        <div class="malisafi-developer-analytics">
-            <h1><?php _e('Developer Analytics', 'malisafi-mls'); ?></h1>
-            <div class="developer-analytics-grid">
-                <div class="analytics-card">
-                    <h3><?php _e('Projects', 'malisafi-mls'); ?></h3>
-                    <p class="analytics-value"><?php echo esc_html($stats['total_projects']); ?></p>
-                </div>
-                <div class="analytics-card">
-                    <h3><?php _e('Linked Units', 'malisafi-mls'); ?></h3>
-                    <p class="analytics-value"><?php echo esc_html($stats['total_units']); ?></p>
-                </div>
-                <div class="analytics-card">
-                    <h3><?php _e('Average Unit Price', 'malisafi-mls'); ?></h3>
-                    <p class="analytics-value"><?php echo esc_html($stats['avg_price_formatted']); ?></p>
-                </div>
-                <div class="analytics-card">
-                    <h3><?php _e('Price Range', 'malisafi-mls'); ?></h3>
-                    <p class="analytics-value"><?php echo esc_html($stats['min_price_formatted']); ?> - <?php echo esc_html($stats['max_price_formatted']); ?></p>
-                </div>
-            </div>
-
-            <div class="developer-section">
-                <h2><?php _e('Project Overview', 'malisafi-mls'); ?></h2>
-                <?php if ($projects->have_posts()) : ?>
-                    <table class="widefat striped">
-                        <thead>
-                            <tr>
-                                <th><?php _e('Project', 'malisafi-mls'); ?></th>
-                                <th><?php _e('Status', 'malisafi-mls'); ?></th>
-                                <th><?php _e('Linked Units', 'malisafi-mls'); ?></th>
-                                <th><?php _e('Price Range', 'malisafi-mls'); ?></th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php while ($projects->have_posts()) : $projects->the_post(); ?>
-                                <?php
-                                $linked = get_post_meta(get_the_ID(), '_malisafi_project_linked_properties', true);
-                                if (!is_array($linked)) {
-                                    $linked = $linked ? (array) $linked : array();
-                                }
-                                $min_price = get_post_meta(get_the_ID(), '_malisafi_project_min_price', true);
-                                $max_price = get_post_meta(get_the_ID(), '_malisafi_project_max_price', true);
-                                $range = '—';
-                                if ($min_price !== '' || $max_price !== '') {
-                                    $range = Property_Manager::format_price($min_price) . ' - ' . Property_Manager::format_price($max_price);
-                                }
-                                ?>
-                                <tr>
-                                    <td><a href="<?php echo esc_url(get_permalink()); ?>"><?php the_title(); ?></a></td>
-                                    <td><?php echo esc_html(ucfirst(get_post_status())); ?></td>
-                                    <td><?php echo esc_html(count($linked)); ?></td>
-                                    <td><?php echo esc_html($range); ?></td>
-                                </tr>
-                            <?php endwhile; ?>
-                        </tbody>
-                    </table>
-                <?php else : ?>
-                    <p class="muted"><?php _e('No analytics data yet.', 'malisafi-mls'); ?></p>
-                <?php endif; ?>
-            </div>
-        </div>
-        <?php
-        wp_reset_postdata();
-        return ob_get_clean();
-    }
+	/**
+	 * Initialize the shortcodes
+	 */
+	public static function init() {
+		add_shortcode('malisafi_client_dashboard', [__CLASS__, 'client_dashboard']);
+		add_shortcode('malisafi_favorites', [__CLASS__, 'client_favorites']);
+		add_shortcode('malisafi_saved_searches', [__CLASS__, 'client_saved_searches']);
+		add_shortcode('malisafi_client_inquiries', [__CLASS__, 'client_inquiries']);
+
+		add_shortcode('malisafi_agent_dashboard', [__CLASS__, 'agent_dashboard']);
+		add_shortcode('malisafi_agent_properties', [__CLASS__, 'agent_properties']);
+		add_shortcode('malisafi_agent_add_property', [__CLASS__, 'agent_add_property']);
+		add_shortcode('malisafi_agent_leads', [__CLASS__, 'agent_leads']);
+		add_shortcode('malisafi_agent_profile_view', [__CLASS__, 'agent_profile_public']);
+
+		add_shortcode('malisafi_owner_dashboard', [__CLASS__, 'owner_dashboard']);
+		add_shortcode('malisafi_owner_properties', [__CLASS__, 'owner_properties']);
+		add_shortcode('malisafi_owner_inquiries', [__CLASS__, 'owner_inquiries']);
+
+		add_shortcode('malisafi_developer_dashboard', [__CLASS__, 'developer_dashboard']);
+		add_shortcode('malisafi_developer_projects', [__CLASS__, 'developer_projects']);
+		add_shortcode('malisafi_developer_analytics', [__CLASS__, 'developer_analytics']);
+
+		add_shortcode('malisafi_property_submit', [__CLASS__, 'property_submit_form']);
+		add_shortcode('malisafi_project_submit', [__CLASS__, 'project_submit_form']);
+		add_shortcode('malisafi_login', [__CLASS__, 'login_form']);
+		add_shortcode('malisafi_registration', [__CLASS__, 'register_form']);
+		add_shortcode('malisafi_account', [__CLASS__, 'account_page']);
+
+		add_action('wp_ajax_malisafi_custom_login', [__CLASS__, 'ajax_custom_login']);
+		add_action('wp_ajax_nopriv_malisafi_custom_login', [__CLASS__, 'ajax_custom_login']);
+	}
+
+	private static function require_login() {
+		if (is_user_logged_in()) {
+			return '';
+		}
+
+		$login_url = Page_Manager::get_page_url('login');
+		if (!$login_url) {
+			$login_url = wp_login_url();
+		}
+
+		return '<div class="malisafi-access-denied"><p>' . sprintf(
+			__('Please <a href="%s">log in</a> to access this page.', 'malisafi-mls'),
+			esc_url($login_url)
+		) . '</p></div>';
+	}
+
+	public static function property_submit_form($atts) {
+		if (!class_exists('MalisafiMLS\\Property_Submission')) {
+			return '<div class="malisafi-access-denied"><p>' . __('Property submission is currently unavailable.', 'malisafi-mls') . '</p></div>';
+		}
+
+		wp_enqueue_style(
+			'malisafi-property-submission',
+			MALISAFI_MLS_URL . 'assets/css/property-submission.css',
+			array(),
+			MALISAFI_MLS_VERSION
+		);
+
+		return \MalisafiMLS\Property_Submission::render_submission_form($atts);
+	}
+
+	public static function project_submit_form($atts) {
+		if (!class_exists('MalisafiMLS\\Project_Submission')) {
+			return '<div class="malisafi-access-denied"><p>' . __('Project submission is currently unavailable.', 'malisafi-mls') . '</p></div>';
+		}
+
+		return \MalisafiMLS\Project_Submission::render_submission_form($atts);
+	}
+
+	public static function client_dashboard($atts) {
+		$login_check = self::require_login();
+		if ($login_check) {
+			return $login_check;
+		}
+
+		$user_id = get_current_user_id();
+		$favorites_url = Page_Manager::get_page_url('client_favorites');
+		$searches_url = Page_Manager::get_page_url('client_searches');
+		$inquiries_url = Page_Manager::get_page_url('client_inquiries');
+
+		ob_start();
+		?>
+		<div class="malisafi-client-dashboard">
+			<h1><?php _e('My Dashboard', 'malisafi-mls'); ?></h1>
+			<div class="dashboard-cards">
+				<div class="dashboard-card">
+					<h3><?php _e('Favorites', 'malisafi-mls'); ?></h3>
+					<p class="count"><?php echo esc_html(self::get_favorites_count($user_id)); ?></p>
+					<?php if ($favorites_url): ?>
+						<a href="<?php echo esc_url($favorites_url); ?>" class="button button-secondary"><?php _e('View', 'malisafi-mls'); ?></a>
+					<?php endif; ?>
+				</div>
+				<div class="dashboard-card">
+					<h3><?php _e('Saved Searches', 'malisafi-mls'); ?></h3>
+					<p class="count"><?php echo esc_html(self::get_saved_searches_count($user_id)); ?></p>
+					<?php if ($searches_url): ?>
+						<a href="<?php echo esc_url($searches_url); ?>" class="button button-secondary"><?php _e('View', 'malisafi-mls'); ?></a>
+					<?php endif; ?>
+				</div>
+				<div class="dashboard-card">
+					<h3><?php _e('Inquiries', 'malisafi-mls'); ?></h3>
+					<p class="count"><?php echo esc_html(self::get_inquiries_count($user_id)); ?></p>
+					<?php if ($inquiries_url): ?>
+						<a href="<?php echo esc_url($inquiries_url); ?>" class="button button-secondary"><?php _e('View', 'malisafi-mls'); ?></a>
+					<?php endif; ?>
+				</div>
+			</div>
+
+			<div class="dashboard-section">
+				<h2><?php _e('Recently Viewed', 'malisafi-mls'); ?></h2>
+				<?php echo self::get_recent_viewed_properties($user_id); ?>
+			</div>
+		</div>
+		<?php
+		return ob_get_clean();
+	}
+
+	public static function client_favorites($atts) {
+		$login_check = self::require_login();
+		if ($login_check) {
+			return $login_check;
+		}
+
+		$favorites = get_user_meta(get_current_user_id(), 'malisafi_favorites', true) ?: [];
+		if (empty($favorites)) {
+			return '<p>' . __('No favorites saved yet.', 'malisafi-mls') . '</p>';
+		}
+
+		$query = new \WP_Query([
+			'post_type' => 'malisafi_property',
+			'post__in' => $favorites,
+			'posts_per_page' => 20,
+			'orderby' => 'post__in'
+		]);
+
+		ob_start();
+		?>
+		<div class="malisafi-client-favorites">
+			<h1><?php _e('My Favorites', 'malisafi-mls'); ?></h1>
+			<?php if ($query->have_posts()) : ?>
+				<ul class="favorites-list">
+					<?php while ($query->have_posts()) : $query->the_post(); ?>
+						<li><a href="<?php the_permalink(); ?>"><?php the_title(); ?></a></li>
+					<?php endwhile; ?>
+				</ul>
+			<?php else : ?>
+				<p><?php _e('No favorites found.', 'malisafi-mls'); ?></p>
+			<?php endif; ?>
+		</div>
+		<?php
+		wp_reset_postdata();
+		return ob_get_clean();
+	}
+
+	public static function client_saved_searches($atts) {
+		$login_check = self::require_login();
+		if ($login_check) {
+			return $login_check;
+		}
+
+		$searches = get_user_meta(get_current_user_id(), 'malisafi_saved_searches', true) ?: [];
+		if (empty($searches)) {
+			return '<p>' . __('No saved searches yet.', 'malisafi-mls') . '</p>';
+		}
+
+		ob_start();
+		?>
+		<div class="malisafi-client-searches">
+			<h1><?php _e('Saved Searches', 'malisafi-mls'); ?></h1>
+			<ul class="saved-searches-list">
+				<?php foreach ($searches as $search) : ?>
+					<li>
+						<span><?php echo esc_html(self::format_search_criteria($search)); ?></span>
+						<a class="button button-secondary" href="<?php echo esc_url(self::build_search_url($search)); ?>">
+							<?php _e('Run Search', 'malisafi-mls'); ?>
+						</a>
+					</li>
+				<?php endforeach; ?>
+			</ul>
+		</div>
+		<?php
+		return ob_get_clean();
+	}
+
+	public static function client_inquiries($atts) {
+		$login_check = self::require_login();
+		if ($login_check) {
+			return $login_check;
+		}
+
+		global $wpdb;
+		$table_name = $wpdb->prefix . 'mf_inquiries';
+		$rows = $wpdb->get_results($wpdb->prepare(
+			"SELECT * FROM {$table_name} WHERE client_id = %d ORDER BY id DESC LIMIT 20",
+			get_current_user_id()
+		), ARRAY_A);
+
+		ob_start();
+		?>
+		<div class="malisafi-client-inquiries">
+			<h1><?php _e('My Inquiries', 'malisafi-mls'); ?></h1>
+			<?php if (empty($rows)) : ?>
+				<p><?php _e('No inquiries found yet.', 'malisafi-mls'); ?></p>
+			<?php else : ?>
+				<ul class="inquiries-list">
+					<?php foreach ($rows as $row) : ?>
+						<?php $property_id = isset($row['property_id']) ? (int) $row['property_id'] : 0; ?>
+						<li>
+							<?php if ($property_id) : ?>
+								<a href="<?php echo esc_url(get_permalink($property_id)); ?>"><?php echo esc_html(get_the_title($property_id)); ?></a>
+							<?php else : ?>
+								<span><?php _e('Property Inquiry', 'malisafi-mls'); ?></span>
+							<?php endif; ?>
+							<?php if (!empty($row['created_at'])) : ?>
+								<small><?php echo esc_html($row['created_at']); ?></small>
+							<?php endif; ?>
+						</li>
+					<?php endforeach; ?>
+				</ul>
+			<?php endif; ?>
+		</div>
+		<?php
+		return ob_get_clean();
+	}
+
+	public static function agent_dashboard($atts) {
+		$login_check = self::require_login();
+		if ($login_check) {
+			return $login_check;
+		}
+
+		$current_user = wp_get_current_user();
+		$is_agent = in_array('malisafi_agent_basic', $current_user->roles) || in_array('malisafi_agent_premium', $current_user->roles);
+		if (!$is_agent && !current_user_can('administrator')) {
+			return '<div class="malisafi-access-denied"><p>' . __('Access restricted to agents only.', 'malisafi-mls') . '</p></div>';
+		}
+
+		wp_enqueue_style('agent-dashboard-modern', MALISAFI_MLS_URL . 'assets/css/agent-dashboard-modern.css', array(), MALISAFI_MLS_VERSION);
+		wp_enqueue_script('agent-dashboard-modern', MALISAFI_MLS_URL . 'assets/js/agent-dashboard-modern.js', array('jquery'), MALISAFI_MLS_VERSION, true);
+
+		ob_start();
+		include MALISAFI_MLS_PATH . 'templates/agent-dashboard-modern.php';
+		return ob_get_clean();
+	}
+
+	public static function agent_properties($atts) {
+		$login_check = self::require_login();
+		if ($login_check) {
+			return $login_check;
+		}
+
+		ob_start();
+		include MALISAFI_MLS_PATH . 'templates/agent-dashboard-properties.php';
+		return ob_get_clean();
+	}
+
+	public static function agent_add_property($atts) {
+		return self::property_submit_form($atts);
+	}
+
+	public static function agent_leads($atts) {
+		$login_check = self::require_login();
+		if ($login_check) {
+			return $login_check;
+		}
+
+		ob_start();
+		include MALISAFI_MLS_PATH . 'templates/agent-dashboard-leads.php';
+		return ob_get_clean();
+	}
+
+	public static function owner_dashboard($atts) {
+		$login_check = self::require_login();
+		if ($login_check) {
+			return $login_check;
+		}
+
+		$user_id = get_current_user_id();
+		$properties_url = Page_Manager::get_page_url('owner_properties');
+		$inquiries_url = Page_Manager::get_page_url('owner_inquiries');
+
+		ob_start();
+		?>
+		<div class="malisafi-owner-dashboard">
+			<h1><?php _e('Owner Dashboard', 'malisafi-mls'); ?></h1>
+			<p><?php _e('Manage your properties and inquiries.', 'malisafi-mls'); ?></p>
+			<ul class="dashboard-links">
+				<?php if ($properties_url): ?>
+					<li><a href="<?php echo esc_url($properties_url); ?>"><?php _e('My Properties', 'malisafi-mls'); ?></a></li>
+				<?php endif; ?>
+				<?php if ($inquiries_url): ?>
+					<li><a href="<?php echo esc_url($inquiries_url); ?>"><?php _e('Inquiries', 'malisafi-mls'); ?></a></li>
+				<?php endif; ?>
+			</ul>
+			<p><?php echo sprintf(__('You have %d properties.', 'malisafi-mls'), esc_html(self::get_user_properties_count($user_id))); ?></p>
+		</div>
+		<?php
+		return ob_get_clean();
+	}
+
+	public static function owner_properties($atts) {
+		$login_check = self::require_login();
+		if ($login_check) {
+			return $login_check;
+		}
+
+		$query = new \WP_Query([
+			'post_type' => 'malisafi_property',
+			'author' => get_current_user_id(),
+			'posts_per_page' => 20,
+			'post_status' => array('publish', 'pending', 'draft')
+		]);
+
+		ob_start();
+		?>
+		<div class="malisafi-owner-properties">
+			<h1><?php _e('My Properties', 'malisafi-mls'); ?></h1>
+			<?php if ($query->have_posts()) : ?>
+				<ul class="owner-properties-list">
+					<?php while ($query->have_posts()) : $query->the_post(); ?>
+						<li><a href="<?php the_permalink(); ?>"><?php the_title(); ?></a></li>
+					<?php endwhile; ?>
+				</ul>
+			<?php else : ?>
+				<p><?php _e('No properties found.', 'malisafi-mls'); ?></p>
+			<?php endif; ?>
+		</div>
+		<?php
+		wp_reset_postdata();
+		return ob_get_clean();
+	}
+
+	public static function owner_inquiries($atts) {
+		$login_check = self::require_login();
+		if ($login_check) {
+			return $login_check;
+		}
+
+		global $wpdb;
+		$table_name = $wpdb->prefix . 'mf_inquiries';
+		$rows = $wpdb->get_results($wpdb->prepare(
+			"SELECT i.* FROM {$table_name} i LEFT JOIN {$wpdb->posts} p ON i.property_id = p.ID WHERE p.post_author = %d ORDER BY i.id DESC LIMIT 20",
+			get_current_user_id()
+		), ARRAY_A);
+
+		ob_start();
+		?>
+		<div class="malisafi-owner-inquiries">
+			<h1><?php _e('Property Inquiries', 'malisafi-mls'); ?></h1>
+			<?php if (empty($rows)) : ?>
+				<p><?php _e('No inquiries found.', 'malisafi-mls'); ?></p>
+			<?php else : ?>
+				<ul class="owner-inquiries-list">
+					<?php foreach ($rows as $row) : ?>
+						<?php $property_id = isset($row['property_id']) ? (int) $row['property_id'] : 0; ?>
+						<li>
+							<?php if ($property_id) : ?>
+								<a href="<?php echo esc_url(get_permalink($property_id)); ?>"><?php echo esc_html(get_the_title($property_id)); ?></a>
+							<?php else : ?>
+								<span><?php _e('Property Inquiry', 'malisafi-mls'); ?></span>
+							<?php endif; ?>
+							<?php if (!empty($row['created_at'])) : ?>
+								<small><?php echo esc_html($row['created_at']); ?></small>
+							<?php endif; ?>
+						</li>
+					<?php endforeach; ?>
+				</ul>
+			<?php endif; ?>
+		</div>
+		<?php
+		return ob_get_clean();
+	}
+
+	public static function developer_dashboard($atts) {
+		$login_check = self::require_login();
+		if ($login_check) {
+			return $login_check;
+		}
+
+		$user_id = get_current_user_id();
+		$projects_url = Page_Manager::get_page_url('developer_projects');
+		$add_project_url = Page_Manager::get_page_url('developer_add_project');
+		$analytics_url = Page_Manager::get_page_url('developer_analytics');
+		$stats = self::get_developer_project_stats($user_id);
+
+		wp_enqueue_style(
+			'malisafi-developer-dashboard',
+			MALISAFI_MLS_URL . 'assets/css/developer-dashboard.css',
+			array(),
+			MALISAFI_MLS_VERSION
+		);
+
+		$recent_args = array(
+			'post_type' => 'malisafi_project',
+			'posts_per_page' => 5,
+			'post_status' => array('publish', 'pending', 'draft'),
+		);
+
+		if (!current_user_can('edit_others_projects')) {
+			$recent_args['author'] = $user_id;
+		}
+
+		$recent_projects = new \WP_Query($recent_args);
+
+		ob_start();
+		?>
+		<div class="malisafi-developer-dashboard">
+			<div class="developer-header">
+				<h1><?php _e('Developer Dashboard', 'malisafi-mls'); ?></h1>
+				<p><?php _e('Track your projects, milestones, and linked property performance.', 'malisafi-mls'); ?></p>
+			</div>
+
+			<div class="dashboard-cards">
+				<div class="dashboard-card">
+					<h3><?php _e('Projects', 'malisafi-mls'); ?></h3>
+					<p class="count"><?php echo esc_html($stats['total_projects']); ?></p>
+					<?php if ($projects_url): ?>
+						<a href="<?php echo esc_url($projects_url); ?>" class="button button-secondary"><?php _e('View Projects', 'malisafi-mls'); ?></a>
+					<?php endif; ?>
+				</div>
+				<div class="dashboard-card">
+					<h3><?php _e('Add Project', 'malisafi-mls'); ?></h3>
+					<p><?php _e('Create a new development profile.', 'malisafi-mls'); ?></p>
+					<?php if ($add_project_url): ?>
+						<a href="<?php echo esc_url($add_project_url); ?>" class="button button-primary"><?php _e('Create Project', 'malisafi-mls'); ?></a>
+					<?php endif; ?>
+				</div>
+				<div class="dashboard-card">
+					<h3><?php _e('Linked Units', 'malisafi-mls'); ?></h3>
+					<p class="count"><?php echo esc_html($stats['total_units']); ?></p>
+					<p class="subtext"><?php _e('Total properties linked', 'malisafi-mls'); ?></p>
+				</div>
+				<div class="dashboard-card">
+					<h3><?php _e('Price Range', 'malisafi-mls'); ?></h3>
+					<p class="count"><?php echo esc_html($stats['min_price_formatted']); ?> - <?php echo esc_html($stats['max_price_formatted']); ?></p>
+					<p class="subtext"><?php _e('Across linked units', 'malisafi-mls'); ?></p>
+				</div>
+			</div>
+
+			<div class="developer-analytics-grid">
+				<div class="analytics-card">
+					<h3><?php _e('Average Unit Price', 'malisafi-mls'); ?></h3>
+					<p class="analytics-value"><?php echo esc_html($stats['avg_price_formatted']); ?></p>
+					<p class="subtext"><?php _e('Based on linked unit prices', 'malisafi-mls'); ?></p>
+				</div>
+				<div class="analytics-card">
+					<h3><?php _e('Active Projects', 'malisafi-mls'); ?></h3>
+					<p class="analytics-value"><?php echo esc_html($stats['active_projects']); ?></p>
+					<p class="subtext"><?php _e('Published + pending', 'malisafi-mls'); ?></p>
+				</div>
+			</div>
+
+			<div class="developer-section">
+				<h2><?php _e('Recent Projects', 'malisafi-mls'); ?></h2>
+				<?php if ($recent_projects->have_posts()) : ?>
+					<ul class="developer-list">
+						<?php while ($recent_projects->have_posts()) : $recent_projects->the_post(); ?>
+							<?php
+							$linked = get_post_meta(get_the_ID(), '_malisafi_project_linked_properties', true);
+							if (!is_array($linked)) {
+								$linked = $linked ? (array) $linked : array();
+							}
+							?>
+							<li>
+								<a href="<?php echo esc_url(get_permalink()); ?>"><?php the_title(); ?></a>
+								<span class="muted"><?php echo esc_html(ucfirst(get_post_status())); ?></span>
+								<span class="muted"><?php echo esc_html(count($linked)); ?> <?php _e('units', 'malisafi-mls'); ?></span>
+							</li>
+						<?php endwhile; ?>
+					</ul>
+				<?php else : ?>
+					<p class="muted"><?php _e('No projects created yet.', 'malisafi-mls'); ?></p>
+				<?php endif; ?>
+			</div>
+
+			<ul class="dashboard-links">
+				<?php if ($projects_url): ?>
+					<li><a href="<?php echo esc_url($projects_url); ?>"><?php _e('My Projects', 'malisafi-mls'); ?></a></li>
+				<?php endif; ?>
+				<?php if ($analytics_url): ?>
+					<li><a href="<?php echo esc_url($analytics_url); ?>"><?php _e('Analytics', 'malisafi-mls'); ?></a></li>
+				<?php endif; ?>
+			</ul>
+		</div>
+		<?php
+		wp_reset_postdata();
+		return ob_get_clean();
+	}
+
+	public static function developer_projects($atts) {
+		$login_check = self::require_login();
+		if ($login_check) {
+			return $login_check;
+		}
+
+		wp_enqueue_style(
+			'malisafi-developer-dashboard',
+			MALISAFI_MLS_URL . 'assets/css/developer-dashboard.css',
+			array(),
+			MALISAFI_MLS_VERSION
+		);
+
+		if (!current_user_can('edit_projects')) {
+			return '<div class="malisafi-access-denied"><p>' . __('You do not have permission to view projects.', 'malisafi-mls') . '</p></div>';
+		}
+
+		$args = array(
+			'post_type' => 'malisafi_project',
+			'posts_per_page' => 20,
+			'post_status' => array('publish', 'pending', 'draft'),
+		);
+
+		if (!current_user_can('edit_others_projects')) {
+			$args['author'] = get_current_user_id();
+		}
+
+		$query = new \WP_Query($args);
+		$add_project_url = Page_Manager::get_page_url('developer_add_project');
+
+		ob_start();
+		?>
+		<div class="malisafi-developer-projects">
+			<h1><?php _e('My Projects', 'malisafi-mls'); ?></h1>
+			<?php if ($add_project_url): ?>
+				<a href="<?php echo esc_url($add_project_url); ?>" class="button button-primary" style="margin-bottom: 15px;">
+					<?php _e('Add Project', 'malisafi-mls'); ?>
+				</a>
+			<?php endif; ?>
+
+			<?php if ($query->have_posts()) : ?>
+				<table class="widefat striped">
+					<thead>
+						<tr>
+							<th><?php _e('Project', 'malisafi-mls'); ?></th>
+							<th><?php _e('Status', 'malisafi-mls'); ?></th>
+							<th><?php _e('Linked Units', 'malisafi-mls'); ?></th>
+							<th><?php _e('Updated', 'malisafi-mls'); ?></th>
+						</tr>
+					</thead>
+					<tbody>
+						<?php while ($query->have_posts()) : $query->the_post(); ?>
+							<?php
+							$linked = get_post_meta(get_the_ID(), '_malisafi_project_linked_properties', true);
+							if (!is_array($linked)) {
+								$linked = $linked ? (array) $linked : array();
+							}
+							?>
+							<tr>
+								<td><a href="<?php echo esc_url(get_permalink()); ?>"><?php the_title(); ?></a></td>
+								<td><?php echo esc_html(ucfirst(get_post_status())); ?></td>
+								<td><?php echo esc_html(count($linked)); ?></td>
+								<td><?php echo esc_html(get_the_modified_date()); ?></td>
+							</tr>
+						<?php endwhile; ?>
+					</tbody>
+				</table>
+			<?php else : ?>
+				<p><?php _e('No projects found yet.', 'malisafi-mls'); ?></p>
+			<?php endif; ?>
+		</div>
+		<?php
+		wp_reset_postdata();
+		return ob_get_clean();
+	}
+
+	public static function developer_analytics($atts) {
+		$login_check = self::require_login();
+		if ($login_check) {
+			return $login_check;
+		}
+
+		$user_id = get_current_user_id();
+		$stats = self::get_developer_project_stats($user_id);
+
+		wp_enqueue_style(
+			'malisafi-developer-dashboard',
+			MALISAFI_MLS_URL . 'assets/css/developer-dashboard.css',
+			array(),
+			MALISAFI_MLS_VERSION
+		);
+
+		$args = array(
+			'post_type' => 'malisafi_project',
+			'posts_per_page' => 20,
+			'post_status' => array('publish', 'pending', 'draft'),
+		);
+
+		if (!current_user_can('edit_others_projects')) {
+			$args['author'] = $user_id;
+		}
+
+		$projects = new \WP_Query($args);
+
+		ob_start();
+		?>
+		<div class="malisafi-developer-analytics">
+			<h1><?php _e('Developer Analytics', 'malisafi-mls'); ?></h1>
+			<div class="developer-analytics-grid">
+				<div class="analytics-card">
+					<h3><?php _e('Projects', 'malisafi-mls'); ?></h3>
+					<p class="analytics-value"><?php echo esc_html($stats['total_projects']); ?></p>
+				</div>
+				<div class="analytics-card">
+					<h3><?php _e('Linked Units', 'malisafi-mls'); ?></h3>
+					<p class="analytics-value"><?php echo esc_html($stats['total_units']); ?></p>
+				</div>
+				<div class="analytics-card">
+					<h3><?php _e('Average Unit Price', 'malisafi-mls'); ?></h3>
+					<p class="analytics-value"><?php echo esc_html($stats['avg_price_formatted']); ?></p>
+				</div>
+				<div class="analytics-card">
+					<h3><?php _e('Price Range', 'malisafi-mls'); ?></h3>
+					<p class="analytics-value"><?php echo esc_html($stats['min_price_formatted']); ?> - <?php echo esc_html($stats['max_price_formatted']); ?></p>
+				</div>
+			</div>
+
+			<div class="developer-section">
+				<h2><?php _e('Project Overview', 'malisafi-mls'); ?></h2>
+				<?php if ($projects->have_posts()) : ?>
+					<table class="widefat striped">
+						<thead>
+							<tr>
+								<th><?php _e('Project', 'malisafi-mls'); ?></th>
+								<th><?php _e('Status', 'malisafi-mls'); ?></th>
+								<th><?php _e('Linked Units', 'malisafi-mls'); ?></th>
+								<th><?php _e('Price Range', 'malisafi-mls'); ?></th>
+							</tr>
+						</thead>
+						<tbody>
+							<?php while ($projects->have_posts()) : $projects->the_post(); ?>
+								<?php
+								$linked = get_post_meta(get_the_ID(), '_malisafi_project_linked_properties', true);
+								if (!is_array($linked)) {
+									$linked = $linked ? (array) $linked : array();
+								}
+								$min_price = get_post_meta(get_the_ID(), '_malisafi_project_min_price', true);
+								$max_price = get_post_meta(get_the_ID(), '_malisafi_project_max_price', true);
+								$range = '—';
+								if ($min_price !== '' || $max_price !== '') {
+									$range = Property_Manager::format_price($min_price) . ' - ' . Property_Manager::format_price($max_price);
+								}
+								?>
+								<tr>
+									<td><a href="<?php echo esc_url(get_permalink()); ?>"><?php the_title(); ?></a></td>
+									<td><?php echo esc_html(ucfirst(get_post_status())); ?></td>
+									<td><?php echo esc_html(count($linked)); ?></td>
+									<td><?php echo esc_html($range); ?></td>
+								</tr>
+							<?php endwhile; ?>
+						</tbody>
+					</table>
+				<?php else : ?>
+					<p class="muted"><?php _e('No analytics data yet.', 'malisafi-mls'); ?></p>
+				<?php endif; ?>
+			</div>
+		</div>
+		<?php
+		wp_reset_postdata();
+		return ob_get_clean();
+	}
     
-    /**
-     * Login Form
-     */
-    public static function login_form($atts) {
-        if (is_user_logged_in()) {
-            return '<p>' . __('You are already logged in.', 'malisafi-mls') . ' <a href="' . wp_logout_url() . '">' . __('Logout', 'malisafi-mls') . '</a></p>';
-        }
+	/**
+	 * Login Form
+	 */
+	public static function login_form($atts) {
+		if (is_user_logged_in()) {
+			return '<p>' . __('You are already logged in.', 'malisafi-mls') . ' <a href="' . wp_logout_url() . '">' . __('Logout', 'malisafi-mls') . '</a></p>';
+		}
         
-        // Get register page URL
-        $register_url = Page_Manager::get_page_url('register');
-        if (!$register_url) {
-            $register_url = wp_registration_url();
-        }
+		// Get register page URL
+		$register_url = Page_Manager::get_page_url('register');
+		if (!$register_url) {
+			$register_url = wp_registration_url();
+		}
         
-        ob_start();
-        ?>
-        <div class="malisafi-login-container">
-            <div class="malisafi-login-box">
-                <div class="malisafi-login-header">
-                    <h2><?php _e('Welcome to Malisafi', 'malisafi-mls'); ?></h2>
-                    <p><?php _e('Login to access your dashboard', 'malisafi-mls'); ?></p>
-                </div>
+		ob_start();
+		?>
+		<div class="malisafi-login-container">
+			<div class="malisafi-login-box">
+				<div class="malisafi-login-header">
+					<h2><?php _e('Welcome to Malisafi', 'malisafi-mls'); ?></h2>
+					<p><?php _e('Login to access your dashboard', 'malisafi-mls'); ?></p>
+				</div>
                 
-                <div id="malisafi-login-messages"></div>
+				<div id="malisafi-login-messages"></div>
                 
-                <form id="malisafi-loginform" name="loginform" method="post">
-                    <p>
-                        <label for="user_login"><?php _e('Username or Email', 'malisafi-mls'); ?></label>
-                        <input type="text" name="log" id="user_login" class="input" value="" size="20" autocomplete="username" required />
-                    </p>
+				<form id="malisafi-loginform" name="loginform" method="post">
+					<p>
+						<label for="user_login"><?php _e('Username or Email', 'malisafi-mls'); ?></label>
+						<input type="text" name="log" id="user_login" class="input" value="" size="20" autocomplete="username" required />
+					</p>
                     
-                    <p>
-                        <label for="user_pass"><?php _e('Password', 'malisafi-mls'); ?></label>
-                        <input type="password" name="pwd" id="user_pass" class="input" value="" size="20" autocomplete="current-password" required />
-                    </p>
+					<p>
+						<label for="user_pass"><?php _e('Password', 'malisafi-mls'); ?></label>
+						<input type="password" name="pwd" id="user_pass" class="input" value="" size="20" autocomplete="current-password" required />
+					</p>
                     
-                    <p class="login-remember">
-                        <label>
-                            <input name="rememberme" type="checkbox" id="rememberme" value="forever" />
-                            <?php _e('Remember Me', 'malisafi-mls'); ?>
-                        </label>
-                    </p>
+					<p class="login-remember">
+						<label>
+							<input name="rememberme" type="checkbox" id="rememberme" value="forever" />
+							<?php _e('Remember Me', 'malisafi-mls'); ?>
+						</label>
+					</p>
                     
-                    <p class="login-submit">
-                        <input type="submit" name="wp-submit" id="wp-submit" class="button button-primary" value="<?php esc_attr_e('Log In', 'malisafi-mls'); ?>" />
-                    </p>
-                </form>
+					<p class="login-submit">
+						<input type="submit" name="wp-submit" id="wp-submit" class="button button-primary" value="<?php esc_attr_e('Log In', 'malisafi-mls'); ?>" />
+					</p>
+				</form>
                 
-                <div class="malisafi-login-links">
-                    <p class="register-link">
-                        <?php _e("Don't have an account?", 'malisafi-mls'); ?> 
-                        <a href="<?php echo esc_url($register_url); ?>"><?php _e('Register', 'malisafi-mls'); ?></a>
-                    </p>
-                    <p class="lost-password-link">
-                        <a href="<?php echo wp_lostpassword_url(); ?>"><?php _e('Forgot Password?', 'malisafi-mls'); ?></a>
-                    </p>
-                </div>
-            </div>
-        </div>
+				<div class="malisafi-login-links">
+					<p class="register-link">
+						<?php _e("Don't have an account?", 'malisafi-mls'); ?> 
+						<a href="<?php echo esc_url($register_url); ?>"><?php _e('Register', 'malisafi-mls'); ?></a>
+					</p>
+					<p class="lost-password-link">
+						<a href="<?php echo wp_lostpassword_url(); ?>"><?php _e('Forgot Password?', 'malisafi-mls'); ?></a>
+					</p>
+				</div>
+			</div>
+		</div>
         
-        <style>
-        .malisafi-login-container {
-            max-width: 450px;
-            margin: 40px auto;
-            padding: 20px;
-        }
+		<style>
+		.malisafi-login-container {
+			max-width: 450px;
+			margin: 40px auto;
+			padding: 20px;
+		}
         
-        .malisafi-login-box {
-            background: #ffffff;
-            border-radius: 16px;
-            padding: 40px;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.12);
-            border: 1px solid #e0e0e0;
-        }
+		.malisafi-login-box {
+			background: #ffffff;
+			border-radius: 16px;
+			padding: 40px;
+			box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+			border: 1px solid #e0e0e0;
+		}
         
-        .malisafi-login-header {
-            text-align: center;
-            margin-bottom: 30px;
-        }
+		.malisafi-login-header {
+			text-align: center;
+			margin-bottom: 30px;
+		}
         
-        .malisafi-login-header h2 {
-            color: #1a1a1a;
-            font-size: 28px;
-            font-weight: 700;
-            margin: 0 0 10px;
-        }
+		.malisafi-login-header h2 {
+			color: #1a1a1a;
+			font-size: 28px;
+			font-weight: 700;
+			margin: 0 0 10px;
+		}
         
-        .malisafi-login-header p {
-            color: #4a4a4a;
-            font-size: 14px;
-            margin: 0;
-        }
+		.malisafi-login-header p {
+			color: #4a4a4a;
+			font-size: 14px;
+			margin: 0;
+		}
         
-        #malisafi-loginform label {
-            display: block;
-            color: #1a1a1a;
-            font-weight: 600;
-            font-size: 14px;
-            margin-bottom: 8px;
-        }
+		#malisafi-loginform label {
+			display: block;
+			color: #1a1a1a;
+			font-weight: 600;
+			font-size: 14px;
+			margin-bottom: 8px;
+		}
         
-        #malisafi-loginform input[type="text"],
-        #malisafi-loginform input[type="password"] {
-            width: 100%;
-            padding: 14px 16px;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            font-size: 16px;
-            transition: all 0.3s ease;
-            background: #f5f5f5;
-            box-sizing: border-box;
-        }
+		#malisafi-loginform input[type="text"],
+		#malisafi-loginform input[type="password"] {
+			width: 100%;
+			padding: 14px 16px;
+			border: 2px solid #e0e0e0;
+			border-radius: 8px;
+			font-size: 16px;
+			transition: all 0.3s ease;
+			background: #f5f5f5;
+			box-sizing: border-box;
+		}
         
-        #malisafi-loginform input[type="text"]:focus,
-        #malisafi-loginform input[type="password"]:focus {
-            border-color: #1a1a1a;
-            background: #ffffff;
-            outline: none;
-            box-shadow: 0 0 0 4px rgba(26, 26, 26, 0.1);
-        }
+		#malisafi-loginform input[type="text"]:focus,
+		#malisafi-loginform input[type="password"]:focus {
+			border-color: #1a1a1a;
+			background: #ffffff;
+			outline: none;
+			box-shadow: 0 0 0 4px rgba(26, 26, 26, 0.1);
+		}
         
-        #malisafi-loginform .login-remember {
-            margin: 15px 0;
-        }
+		#malisafi-loginform .login-remember {
+			margin: 15px 0;
+		}
         
-        #malisafi-loginform .login-remember label {
-            display: inline;
-            font-weight: 500;
-            color: #4a4a4a;
-        }
+		#malisafi-loginform .login-remember label {
+			display: inline;
+			font-weight: 500;
+			color: #4a4a4a;
+		}
         
-        #malisafi-loginform .login-submit {
-            margin-top: 20px;
-        }
+		#malisafi-loginform .login-submit {
+			margin-top: 20px;
+		}
         
-        #malisafi-loginform .login-submit input[type="submit"] {
-            width: 100%;
-            padding: 14px 32px;
-            background: #1a1a1a;
-            border: none;
-            border-radius: 8px;
-            color: #ffffff;
-            font-size: 16px;
-            font-weight: 600;
-            letter-spacing: 0.5px;
-            text-transform: uppercase;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 12px rgba(26, 26, 26, 0.3);
-        }
+		#malisafi-loginform .login-submit input[type="submit"] {
+			width: 100%;
+			padding: 14px 32px;
+			background: #1a1a1a;
+			border: none;
+			border-radius: 8px;
+			color: #ffffff;
+			font-size: 16px;
+			font-weight: 600;
+			letter-spacing: 0.5px;
+			text-transform: uppercase;
+			cursor: pointer;
+			transition: all 0.3s ease;
+			box-shadow: 0 4px 12px rgba(26, 26, 26, 0.3);
+		}
         
-        #malisafi-loginform .login-submit input[type="submit"]:hover {
-            background: #000000;
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(26, 26, 26, 0.4);
-        }
+		#malisafi-loginform .login-submit input[type="submit"]:hover {
+			background: #000000;
+			transform: translateY(-2px);
+			box-shadow: 0 6px 20px rgba(26, 26, 26, 0.4);
+		}
         
-        .malisafi-login-links {
-            margin-top: 25px;
-            padding-top: 25px;
-            border-top: 1px solid #e0e0e0;
-            text-align: center;
-        }
+		.malisafi-login-links {
+			margin-top: 25px;
+			padding-top: 25px;
+			border-top: 1px solid #e0e0e0;
+			text-align: center;
+		}
         
-        .malisafi-login-links p {
-            margin: 10px 0;
-            color: #4a4a4a;
-            font-size: 14px;
-        }
+		.malisafi-login-links p {
+			margin: 10px 0;
+			color: #4a4a4a;
+			font-size: 14px;
+		}
         
-        .malisafi-login-links a {
-            color: #1a1a1a;
-            font-weight: 600;
-            text-decoration: none;
-            transition: color 0.3s ease;
-        }
+		.malisafi-login-links a {
+			color: #1a1a1a;
+			font-weight: 600;
+			text-decoration: none;
+			transition: color 0.3s ease;
+		}
         
-        .malisafi-login-links a:hover {
-            color: #4a4a4a;
-        }
+		.malisafi-login-links a:hover {
+			color: #4a4a4a;
+		}
         
-        #malisafi-login-messages {
-            margin-bottom: 20px;
-            border-radius: 8px;
-            display: none;
-        }
+		#malisafi-login-messages {
+			margin-bottom: 20px;
+			border-radius: 8px;
+			display: none;
+		}
         
-        #malisafi-login-messages.show {
-            display: block;
-        }
+		#malisafi-login-messages.show {
+			display: block;
+		}
         
-        #malisafi-login-messages.error {
-            background: #fee;
-            border: 1px solid #c33;
-            color: #c33;
-            padding: 12px 16px;
-        }
+		#malisafi-login-messages.error {
+			background: #fee;
+			border: 1px solid #c33;
+			color: #c33;
+			padding: 12px 16px;
+		}
         
-        #malisafi-login-messages.success {
-            background: #efe;
-            border: 1px solid #3c3;
-            color: #3c3;
-            padding: 12px 16px;
-        }
+		#malisafi-login-messages.success {
+			background: #efe;
+			border: 1px solid #3c3;
+			color: #3c3;
+			padding: 12px 16px;
+		}
         
-        #malisafi-loginform.loading {
-            opacity: 0.6;
-            pointer-events: none;
-        }
+		#malisafi-loginform.loading {
+			opacity: 0.6;
+			pointer-events: none;
+		}
         
-        #malisafi-loginform.loading #wp-submit::after {
-            content: "";
-            display: inline-block;
-            width: 16px;
-            height: 16px;
-            margin-left: 10px;
-            border: 2px solid #ffffff;
-            border-top-color: transparent;
-            border-radius: 50%;
-            animation: spin 0.6s linear infinite;
-        }
+		#malisafi-loginform.loading #wp-submit::after {
+			content: "";
+			display: inline-block;
+			width: 16px;
+			height: 16px;
+			margin-left: 10px;
+			border: 2px solid #ffffff;
+			border-top-color: transparent;
+			border-radius: 50%;
+			animation: spin 0.6s linear infinite;
+		}
         
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
+		@keyframes spin {
+			to { transform: rotate(360deg); }
+		}
         
-        @media (max-width: 768px) {
-            .malisafi-login-box {
-                padding: 30px 20px;
-            }
+		@media (max-width: 768px) {
+			.malisafi-login-box {
+				padding: 30px 20px;
+			}
             
-            .malisafi-login-container {
-                padding: 10px;
-            }
-        }
-        </style>
+			.malisafi-login-container {
+				padding: 10px;
+			}
+		}
+		</style>
         
-        <script>
-        jQuery(document).ready(function($) {
-            $('#malisafi-loginform').on('submit', function(e) {
-                e.preventDefault();
+		<script>
+		jQuery(document).ready(function($) {
+			$('#malisafi-loginform').on('submit', function(e) {
+				e.preventDefault();
                 
-                var $form = $(this);
-                var $messages = $('#malisafi-login-messages');
-                var $submit = $('#wp-submit');
+				var $form = $(this);
+				var $messages = $('#malisafi-login-messages');
+				var $submit = $('#wp-submit');
                 
-                // Add loading state
-                $form.addClass('loading');
-                $submit.prop('disabled', true);
+				// Add loading state
+				$form.addClass('loading');
+				$submit.prop('disabled', true);
                 
-                // Hide previous messages
-                $messages.removeClass('show error success').hide();
+				// Hide previous messages
+				$messages.removeClass('show error success').hide();
                 
-                $.ajax({
-                    url: '<?php echo admin_url('admin-ajax.php'); ?>',
-                    type: 'POST',
-                    data: {
-                        action: 'malisafi_custom_login',
-                        username: $('#user_login').val(),
-                        password: $('#user_pass').val(),
-                        remember: $('#rememberme').is(':checked'),
-                        nonce: '<?php echo wp_create_nonce('malisafi_login_nonce'); ?>'
-                    },
-                    success: function(response) {
-                        $form.removeClass('loading');
-                        $submit.prop('disabled', false);
+				$.ajax({
+					url: '<?php echo admin_url('admin-ajax.php'); ?>',
+					type: 'POST',
+					data: {
+						action: 'malisafi_custom_login',
+						username: $('#user_login').val(),
+						password: $('#user_pass').val(),
+						remember: $('#rememberme').is(':checked'),
+						nonce: '<?php echo wp_create_nonce('malisafi_login_nonce'); ?>'
+					},
+					success: function(response) {
+						$form.removeClass('loading');
+						$submit.prop('disabled', false);
                         
-                        if (response.success) {
-                            $messages
-                                .addClass('show success')
-                                .html('<strong><?php _e('Success!', 'malisafi-mls'); ?></strong> ' + response.data.message)
-                                .fadeIn();
+						if (response.success) {
+							$messages
+								.addClass('show success')
+								.html('<strong><?php _e('Success!', 'malisafi-mls'); ?></strong> ' + response.data.message)
+								.fadeIn();
                             
-                            // Redirect to dashboard
-                            setTimeout(function() {
-                                window.location.href = response.data.redirect;
-                            }, 1000);
-                        } else {
-                            $messages
-                                .addClass('show error')
-                                .html('<strong><?php _e('Error:', 'malisafi-mls'); ?></strong> ' + response.data.message)
-                                .fadeIn();
+							// Redirect to dashboard
+							setTimeout(function() {
+								window.location.href = response.data.redirect;
+							}, 1000);
+						} else {
+							$messages
+								.addClass('show error')
+								.html('<strong><?php _e('Error:', 'malisafi-mls'); ?></strong> ' + response.data.message)
+								.fadeIn();
                             
-                            // Clear password field
-                            $('#user_pass').val('').focus();
-                        }
-                    },
-                    error: function() {
-                        $form.removeClass('loading');
-                        $submit.prop('disabled', false);
-                        $messages
-                            .addClass('show error')
-                            .html('<strong><?php _e('Error:', 'malisafi-mls'); ?></strong> <?php _e('Connection error. Please try again.', 'malisafi-mls'); ?>')
-                            .fadeIn();
-                    }
-                });
-            });
-        });
-        </script>
-        </style>
-        <?php
-        return ob_get_clean();
-    }
+							// Clear password field
+							$('#user_pass').val('').focus();
+						}
+					},
+					error: function() {
+						$form.removeClass('loading');
+						$submit.prop('disabled', false);
+						$messages
+							.addClass('show error')
+							.html('<strong><?php _e('Error:', 'malisafi-mls'); ?></strong> <?php _e('Connection error. Please try again.', 'malisafi-mls'); ?>')
+							.fadeIn();
+					}
+				});
+			});
+		});
+		</script>
+		<?php
+		return ob_get_clean();
+	}
     
-    /**
-     * Register Form
-     */
-    public static function register_form($atts) {
-        if (is_user_logged_in()) {
-            return '<p>' . __('You are already logged in.', 'malisafi-mls') . '</p>';
-        }
+	/**
+	 * Register Form
+	 */
+	public static function register_form($atts) {
+		if (is_user_logged_in()) {
+			return '<p>' . __('You are already logged in.', 'malisafi-mls') . '</p>';
+		}
         
-        ob_start();
-        ?>
-        <div class="malisafi-register-form">
-            <h2><?php _e('Register', 'malisafi-mls'); ?></h2>
-            <form method="post" action="" id="malisafi-register-form">
-                <?php wp_nonce_field('malisafi_register', 'malisafi_register_nonce'); ?>
+		ob_start();
+		?>
+		<div class="malisafi-register-form">
+			<h2><?php _e('Register', 'malisafi-mls'); ?></h2>
+			<form method="post" action="" id="malisafi-register-form">
+				<?php wp_nonce_field('malisafi_register', 'malisafi_register_nonce'); ?>
                 
-                <p>
-                    <label for="username"><?php _e('Username', 'malisafi-mls'); ?> *</label>
-                    <input type="text" name="username" id="username" required>
-                </p>
+				<p>
+					<label for="username"><?php _e('Username', 'malisafi-mls'); ?> *</label>
+					<input type="text" name="username" id="username" required>
+				</p>
                 
-                <p>
-                    <label for="email"><?php _e('Email', 'malisafi-mls'); ?> *</label>
-                    <input type="email" name="email" id="email" required>
-                </p>
+				<p>
+					<label for="email"><?php _e('Email', 'malisafi-mls'); ?> *</label>
+					<input type="email" name="email" id="email" required>
+				</p>
                 
-                <p>
-                    <label for="password"><?php _e('Password', 'malisafi-mls'); ?> *</label>
-                    <input type="password" name="password" id="password" required>
-                </p>
+				<p>
+					<label for="password"><?php _e('Password', 'malisafi-mls'); ?> *</label>
+					<input type="password" name="password" id="password" required>
+				</p>
                 
-                <p>
-                    <label for="password_confirm"><?php _e('Confirm Password', 'malisafi-mls'); ?> *</label>
-                    <input type="password" name="password_confirm" id="password_confirm" required>
-                </p>
+				<p>
+					<label for="password_confirm"><?php _e('Confirm Password', 'malisafi-mls'); ?> *</label>
+					<input type="password" name="password_confirm" id="password_confirm" required>
+				</p>
                 
-                <p>
-                    <button type="submit" name="malisafi_register" class="button button-primary">
-                        <?php _e('Register', 'malisafi-mls'); ?>
-                    </button>
-                </p>
-            </form>
+				<p>
+					<button type="submit" name="malisafi_register" class="button button-primary">
+						<?php _e('Register', 'malisafi-mls'); ?>
+					</button>
+				</p>
+			</form>
             
-            <p class="login-link">
-                <a href="<?php echo Page_Manager::get_page_url('login'); ?>">
-                    <?php _e('Already have an account? Login', 'malisafi-mls'); ?>
-                </a>
-            </p>
-        </div>
-        <?php
-        return ob_get_clean();
-    }
+			<p class="login-link">
+				<a href="<?php echo Page_Manager::get_page_url('login'); ?>">
+					<?php _e('Already have an account? Login', 'malisafi-mls'); ?>
+				</a>
+			</p>
+		</div>
+		<?php
+		return ob_get_clean();
+	}
     
-    /**
-     * Account Page
-     */
-    public static function account_page($atts) {
-        $login_check = self::require_login();
-        if ($login_check) return $login_check;
+	/**
+	 * Account Page
+	 */
+	public static function account_page($atts) {
+		$login_check = self::require_login();
+		if ($login_check) return $login_check;
         
-        $current_user = wp_get_current_user();
+		$current_user = wp_get_current_user();
         
-        ob_start();
-        ?>
-        <div class="malisafi-account">
-            <h1><?php _e('My Account', 'malisafi-mls'); ?></h1>
+		ob_start();
+		?>
+		<div class="malisafi-account">
+			<h1><?php _e('My Account', 'malisafi-mls'); ?></h1>
             
-            <div class="account-info">
-                <h2><?php _e('Account Information', 'malisafi-mls'); ?></h2>
-                <p><strong><?php _e('Username:', 'malisafi-mls'); ?></strong> <?php echo $current_user->user_login; ?></p>
-                <p><strong><?php _e('Email:', 'malisafi-mls'); ?></strong> <?php echo $current_user->user_email; ?></p>
-                <p><strong><?php _e('Role:', 'malisafi-mls'); ?></strong> <?php echo implode(', ', $current_user->roles); ?></p>
-            </div>
+			<div class="account-info">
+				<h2><?php _e('Account Information', 'malisafi-mls'); ?></h2>
+				<p><strong><?php _e('Username:', 'malisafi-mls'); ?></strong> <?php echo $current_user->user_login; ?></p>
+				<p><strong><?php _e('Email:', 'malisafi-mls'); ?></strong> <?php echo $current_user->user_email; ?></p>
+				<p><strong><?php _e('Role:', 'malisafi-mls'); ?></strong> <?php echo implode(', ', $current_user->roles); ?></p>
+			</div>
             
-            <div class="account-actions">
-                <h2><?php _e('Quick Links', 'malisafi-mls'); ?></h2>
-                <ul>
-                    <?php if (current_user_can('agent_basic')): ?>
-                        <li><a href="<?php echo admin_url('admin.php?page=malisafi-agent-dashboard'); ?>"><?php _e('Agent Dashboard', 'malisafi-mls'); ?></a></li>
-                    <?php elseif (current_user_can('owner')): ?>
-                        <li><a href="<?php echo Page_Manager::get_page_url('owner_dashboard'); ?>"><?php _e('Owner Dashboard', 'malisafi-mls'); ?></a></li>
-                    <?php elseif (current_user_can('developer')): ?>
-                        <li><a href="<?php echo Page_Manager::get_page_url('developer_dashboard'); ?>"><?php _e('Developer Dashboard', 'malisafi-mls'); ?></a></li>
-                    <?php else: ?>
-                        <li><a href="<?php echo Page_Manager::get_page_url('client_dashboard'); ?>"><?php _e('Client Dashboard', 'malisafi-mls'); ?></a></li>
-                    <?php endif; ?>
-                    <li><a href="<?php echo wp_logout_url(home_url()); ?>"><?php _e('Logout', 'malisafi-mls'); ?></a></li>
-                </ul>
-            </div>
-        </div>
-        <?php
-        return ob_get_clean();
-    }
+			<div class="account-actions">
+				<h2><?php _e('Quick Links', 'malisafi-mls'); ?></h2>
+				<ul>
+					<?php if (current_user_can('agent_basic')): ?>
+						<li><a href="<?php echo admin_url('admin.php?page=malisafi-agent-dashboard'); ?>"><?php _e('Agent Dashboard', 'malisafi-mls'); ?></a></li>
+					<?php elseif (current_user_can('owner')): ?>
+						<li><a href="<?php echo Page_Manager::get_page_url('owner_dashboard'); ?>"><?php _e('Owner Dashboard', 'malisafi-mls'); ?></a></li>
+					<?php elseif (current_user_can('developer')): ?>
+						<li><a href="<?php echo Page_Manager::get_page_url('developer_dashboard'); ?>"><?php _e('Developer Dashboard', 'malisafi-mls'); ?></a></li>
+					<?php else: ?>
+						<li><a href="<?php echo Page_Manager::get_page_url('client_dashboard'); ?>"><?php _e('Client Dashboard', 'malisafi-mls'); ?></a></li>
+					<?php endif; ?>
+					<li><a href="<?php echo wp_logout_url(home_url()); ?>"><?php _e('Logout', 'malisafi-mls'); ?></a></li>
+				</ul>
+			</div>
+		</div>
+		<?php
+		return ob_get_clean();
+	}
     
-    // Helper methods
+	// Helper methods
     
-    private static function get_favorites_count($user_id) {
-        $favorites = get_user_meta($user_id, 'malisafi_favorites', true) ?: [];
-        return count($favorites);
-    }
+	private static function get_favorites_count($user_id) {
+		$favorites = get_user_meta($user_id, 'malisafi_favorites', true) ?: [];
+		return count($favorites);
+	}
     
-    private static function get_saved_searches_count($user_id) {
-        $searches = get_user_meta($user_id, 'malisafi_saved_searches', true) ?: [];
-        return count($searches);
-    }
+	private static function get_saved_searches_count($user_id) {
+		$searches = get_user_meta($user_id, 'malisafi_saved_searches', true) ?: [];
+		return count($searches);
+	}
     
-    private static function get_inquiries_count($user_id) {
-        global $wpdb;
-        $table_name = $wpdb->prefix . 'mf_inquiries';
-        return $wpdb->get_var($wpdb->prepare(
-            "SELECT COUNT(*) FROM $table_name WHERE client_id = %d",
-            $user_id
-        )) ?: 0;
-    }
+	private static function get_inquiries_count($user_id) {
+		global $wpdb;
+		$table_name = $wpdb->prefix . 'mf_inquiries';
+		return $wpdb->get_var($wpdb->prepare(
+			"SELECT COUNT(*) FROM $table_name WHERE client_id = %d",
+			$user_id
+		)) ?: 0;
+	}
     
-    private static function get_user_inquiries_count($user_id) {
-        global $wpdb;
-        $table_name = $wpdb->prefix . 'mf_inquiries';
-        return $wpdb->get_var($wpdb->prepare(
-            "SELECT COUNT(*) FROM $table_name i
-            LEFT JOIN {$wpdb->posts} p ON i.property_id = p.ID
-            WHERE p.post_author = %d",
-            $user_id
-        )) ?: 0;
-    }
+	private static function get_user_inquiries_count($user_id) {
+		global $wpdb;
+		$table_name = $wpdb->prefix . 'mf_inquiries';
+		return $wpdb->get_var($wpdb->prepare(
+			"SELECT COUNT(*) FROM $table_name i
+			LEFT JOIN {$wpdb->posts} p ON i.property_id = p.ID
+			WHERE p.post_author = %d",
+			$user_id
+		)) ?: 0;
+	}
     
-    private static function get_user_properties_count($user_id) {
-        global $wpdb;
-        $statuses = array('publish','pending','draft');
-        $placeholders = implode(',', array_fill(0, count($statuses), '%s'));
-        $sql = $wpdb->prepare(
-            "SELECT COUNT(*) FROM {$wpdb->posts} WHERE post_type = %s AND post_author = %d AND post_status IN ($placeholders)",
-            array_merge(array('malisafi_property', $user_id), $statuses)
-        );
-        $count = (int) $wpdb->get_var($sql);
-        return $count;
-    }
+	private static function get_user_properties_count($user_id) {
+		global $wpdb;
+		$statuses = array('publish','pending','draft');
+		$placeholders = implode(',', array_fill(0, count($statuses), '%s'));
+		$sql = $wpdb->prepare(
+			"SELECT COUNT(*) FROM {$wpdb->posts} WHERE post_type = %s AND post_author = %d AND post_status IN ($placeholders)",
+			array_merge(array('malisafi_property', $user_id), $statuses)
+		);
+		$count = (int) $wpdb->get_var($sql);
+		return $count;
+	}
 
-    private static function get_user_projects_count($user_id) {
-        global $wpdb;
-        $statuses = array('publish','pending','draft');
-        $placeholders = implode(',', array_fill(0, count($statuses), '%s'));
-        $sql = $wpdb->prepare(
-            "SELECT COUNT(*) FROM {$wpdb->posts} WHERE post_type = %s AND post_author = %d AND post_status IN ($placeholders)",
-            array_merge(array('malisafi_project', $user_id), $statuses)
-        );
-        $count = (int) $wpdb->get_var($sql);
-        return $count;
-    }
+	private static function get_user_projects_count($user_id) {
+		global $wpdb;
+		$statuses = array('publish','pending','draft');
+		$placeholders = implode(',', array_fill(0, count($statuses), '%s'));
+		$sql = $wpdb->prepare(
+			"SELECT COUNT(*) FROM {$wpdb->posts} WHERE post_type = %s AND post_author = %d AND post_status IN ($placeholders)",
+			array_merge(array('malisafi_project', $user_id), $statuses)
+		);
+		$count = (int) $wpdb->get_var($sql);
+		return $count;
+	}
 
-    private static function get_developer_project_stats($user_id) {
-        $args = array(
-            'post_type' => 'malisafi_project',
-            'posts_per_page' => -1,
-            'post_status' => array('publish', 'pending', 'draft'),
-            'fields' => 'ids'
-        );
+	private static function get_developer_project_stats($user_id) {
+		$args = array(
+			'post_type' => 'malisafi_project',
+			'posts_per_page' => -1,
+			'post_status' => array('publish', 'pending', 'draft'),
+			'fields' => 'ids'
+		);
 
-        if (!current_user_can('edit_others_projects')) {
-            $args['author'] = $user_id;
-        }
+		if (!current_user_can('edit_others_projects')) {
+			$args['author'] = $user_id;
+		}
 
-        $project_ids = get_posts($args);
-        $total_projects = count($project_ids);
-        $active_projects = 0;
-        $total_units = 0;
-        $min_prices = array();
-        $max_prices = array();
-        $price_values = array();
+		$project_ids = get_posts($args);
+		$total_projects = count($project_ids);
+		$active_projects = 0;
+		$total_units = 0;
+		$min_prices = array();
+		$max_prices = array();
+		$price_values = array();
 
-        foreach ($project_ids as $project_id) {
-            $status = get_post_status($project_id);
-            if ($status === 'publish' || $status === 'pending') {
-                $active_projects++;
-            }
+		foreach ($project_ids as $project_id) {
+			$status = get_post_status($project_id);
+			if ($status === 'publish' || $status === 'pending') {
+				$active_projects++;
+			}
 
-            $linked = get_post_meta($project_id, '_malisafi_project_linked_properties', true);
-            if (!is_array($linked)) {
-                $linked = $linked ? (array) $linked : array();
-            }
-            $total_units += count($linked);
+			$linked = get_post_meta($project_id, '_malisafi_project_linked_properties', true);
+			if (!is_array($linked)) {
+				$linked = $linked ? (array) $linked : array();
+			}
+			$total_units += count($linked);
 
-            $min_price = get_post_meta($project_id, '_malisafi_project_min_price', true);
-            $max_price = get_post_meta($project_id, '_malisafi_project_max_price', true);
-            if ($min_price !== '') {
-                $min_prices[] = (float) $min_price;
-            }
-            if ($max_price !== '') {
-                $max_prices[] = (float) $max_price;
-            }
+			$min_price = get_post_meta($project_id, '_malisafi_project_min_price', true);
+			$max_price = get_post_meta($project_id, '_malisafi_project_max_price', true);
+			if ($min_price !== '') {
+				$min_prices[] = (float) $min_price;
+			}
+			if ($max_price !== '') {
+				$max_prices[] = (float) $max_price;
+			}
 
-            $snapshot = get_post_meta($project_id, '_malisafi_project_properties_snapshot', true);
-            if (is_array($snapshot)) {
-                foreach ($snapshot as $item) {
-                    if (isset($item['price']) && $item['price'] !== '') {
-                        $price_values[] = (float) $item['price'];
-                    }
-                }
-            }
-        }
+			$snapshot = get_post_meta($project_id, '_malisafi_project_properties_snapshot', true);
+			if (is_array($snapshot)) {
+				foreach ($snapshot as $item) {
+					if (isset($item['price']) && $item['price'] !== '') {
+						$price_values[] = (float) $item['price'];
+					}
+				}
+			}
+		}
 
-        $min_price_value = !empty($min_prices) ? min($min_prices) : null;
-        $max_price_value = !empty($max_prices) ? max($max_prices) : null;
-        $avg_price_value = !empty($price_values) ? array_sum($price_values) / count($price_values) : null;
+		$min_price_value = !empty($min_prices) ? min($min_prices) : null;
+		$max_price_value = !empty($max_prices) ? max($max_prices) : null;
+		$avg_price_value = !empty($price_values) ? array_sum($price_values) / count($price_values) : null;
 
-        return array(
-            'total_projects' => $total_projects,
-            'active_projects' => $active_projects,
-            'total_units' => $total_units,
-            'min_price' => $min_price_value,
-            'max_price' => $max_price_value,
-            'avg_price' => $avg_price_value,
-            'min_price_formatted' => $min_price_value !== null ? Property_Manager::format_price($min_price_value) : '—',
-            'max_price_formatted' => $max_price_value !== null ? Property_Manager::format_price($max_price_value) : '—',
-            'avg_price_formatted' => $avg_price_value !== null ? Property_Manager::format_price($avg_price_value) : '—'
-        );
-    }
+		return array(
+			'total_projects' => $total_projects,
+			'active_projects' => $active_projects,
+			'total_units' => $total_units,
+			'min_price' => $min_price_value,
+			'max_price' => $max_price_value,
+			'avg_price' => $avg_price_value,
+			'min_price_formatted' => $min_price_value !== null ? Property_Manager::format_price($min_price_value) : '—',
+			'max_price_formatted' => $max_price_value !== null ? Property_Manager::format_price($max_price_value) : '—',
+			'avg_price_formatted' => $avg_price_value !== null ? Property_Manager::format_price($avg_price_value) : '—'
+		);
+	}
     
-    private static function get_total_views($user_id) {
-        global $wpdb;
-        $views_table = $wpdb->prefix . 'malisafi_property_views';
+	private static function get_total_views($user_id) {
+		global $wpdb;
+		$views_table = $wpdb->prefix . 'malisafi_property_views';
         
-        $total = $wpdb->get_var($wpdb->prepare(
-            "SELECT COUNT(*) FROM $views_table v
-            LEFT JOIN {$wpdb->posts} p ON v.property_id = p.ID
-            WHERE p.post_author = %d",
-            $user_id
-        ));
+		$total = $wpdb->get_var($wpdb->prepare(
+			"SELECT COUNT(*) FROM $views_table v
+			LEFT JOIN {$wpdb->posts} p ON v.property_id = p.ID
+			WHERE p.post_author = %d",
+			$user_id
+		));
         
-        return $total ?: 0;
-    }
+		return $total ?: 0;
+	}
     
-    private static function get_recent_viewed_properties($user_id) {
-        $viewed = get_user_meta($user_id, 'malisafi_recently_viewed', true) ?: [];
+	private static function get_recent_viewed_properties($user_id) {
+		$viewed = get_user_meta($user_id, 'malisafi_recently_viewed', true) ?: [];
         
-        if (empty($viewed)) {
-            return '<p>' . __('No recent activity.', 'malisafi-mls') . '</p>';
-        }
+		if (empty($viewed)) {
+			return '<p>' . __('No recent activity.', 'malisafi-mls') . '</p>';
+		}
         
-        $args = [
-            'post_type' => 'malisafi_property',
-            'post__in' => array_slice($viewed, 0, 5),
-            'posts_per_page' => 5,
-            'orderby' => 'post__in'
-        ];
+		$args = [
+			'post_type' => 'malisafi_property',
+			'post__in' => array_slice($viewed, 0, 5),
+			'posts_per_page' => 5,
+			'orderby' => 'post__in'
+		];
         
-        $query = new \WP_Query($args);
+		$query = new \WP_Query($args);
         
-        if (!$query->have_posts()) {
-            return '<p>' . __('No recent activity.', 'malisafi-mls') . '</p>';
-        }
+		if (!$query->have_posts()) {
+			return '<p>' . __('No recent activity.', 'malisafi-mls') . '</p>';
+		}
         
-        $output = '<ul class="recent-properties">';
-        while ($query->have_posts()) {
-            $query->the_post();
-            $output .= '<li><a href="' . get_permalink() . '">' . get_the_title() . '</a></li>';
-        }
-        $output .= '</ul>';
+		$output = '<ul class="recent-properties">';
+		while ($query->have_posts()) {
+			$query->the_post();
+			$output .= '<li><a href="' . get_permalink() . '">' . get_the_title() . '</a></li>';
+		}
+		$output .= '</ul>';
         
-        wp_reset_postdata();
+		wp_reset_postdata();
         
-        return $output;
-    }
+		return $output;
+	}
     
-    private static function render_property_card($property_id) {
-        $price = get_post_meta($property_id, 'price', true);
-        $bedrooms = get_post_meta($property_id, 'bedrooms', true);
-        $bathrooms = get_post_meta($property_id, 'bathrooms', true);
+	private static function render_property_card($property_id) {
+		$price = get_post_meta($property_id, 'price', true);
+		$bedrooms = get_post_meta($property_id, 'bedrooms', true);
+		$bathrooms = get_post_meta($property_id, 'bathrooms', true);
         
-        ob_start();
-        ?>
-        <div class="property-card">
-            <?php if (has_post_thumbnail($property_id)): ?>
-                <div class="property-image">
-                    <a href="<?php echo get_permalink($property_id); ?>">
-                        <?php echo get_the_post_thumbnail($property_id, 'medium'); ?>
-                    </a>
-                </div>
-            <?php endif; ?>
+		ob_start();
+		?>
+		<div class="property-card">
+			<?php if (has_post_thumbnail($property_id)): ?>
+				<div class="property-image">
+					<a href="<?php echo get_permalink($property_id); ?>">
+						<?php echo get_the_post_thumbnail($property_id, 'medium'); ?>
+					</a>
+				</div>
+			<?php endif; ?>
             
-            <div class="property-info">
-                <h3><a href="<?php echo get_permalink($property_id); ?>"><?php echo get_the_title($property_id); ?></a></h3>
-                <p class="price"><?php echo Property_Manager::format_price($price); ?></p>
-                <div class="property-meta">
-                    <?php if ($bedrooms): ?>
-                        <span><?php echo $bedrooms; ?> <?php _e('beds', 'malisafi-mls'); ?></span>
-                    <?php endif; ?>
-                    <?php if ($bathrooms): ?>
-                        <span><?php echo $bathrooms; ?> <?php _e('baths', 'malisafi-mls'); ?></span>
-                    <?php endif; ?>
-                </div>
-            </div>
-        </div>
-        <?php
-        return ob_get_clean();
-    }
+			<div class="property-info">
+				<h3><a href="<?php echo get_permalink($property_id); ?>"><?php echo get_the_title($property_id); ?></a></h3>
+				<p class="price"><?php echo Property_Manager::format_price($price); ?></p>
+				<div class="property-meta">
+					<?php if ($bedrooms): ?>
+						<span><?php echo $bedrooms; ?> <?php _e('beds', 'malisafi-mls'); ?></span>
+					<?php endif; ?>
+					<?php if ($bathrooms): ?>
+						<span><?php echo $bathrooms; ?> <?php _e('baths', 'malisafi-mls'); ?></span>
+					<?php endif; ?>
+				</div>
+			</div>
+		</div>
+		<?php
+		return ob_get_clean();
+	}
     
-    private static function format_search_criteria($search) {
-        $criteria = [];
+	private static function format_search_criteria($search) {
+		$criteria = [];
         
-        if (!empty($search['min_price'])) {
-            $criteria[] = __('Min Price:', 'malisafi-mls') . ' ' . Property_Manager::format_price($search['min_price']);
-        }
+		if (!empty($search['min_price'])) {
+			$criteria[] = __('Min Price:', 'malisafi-mls') . ' ' . Property_Manager::format_price($search['min_price']);
+		}
         
-        if (!empty($search['max_price'])) {
-            $criteria[] = __('Max Price:', 'malisafi-mls') . ' ' . Property_Manager::format_price($search['max_price']);
-        }
+		if (!empty($search['max_price'])) {
+			$criteria[] = __('Max Price:', 'malisafi-mls') . ' ' . Property_Manager::format_price($search['max_price']);
+		}
         
-        if (!empty($search['bedrooms'])) {
-            $criteria[] = $search['bedrooms'] . ' ' . __('bedrooms', 'malisafi-mls');
-        }
+		if (!empty($search['bedrooms'])) {
+			$criteria[] = $search['bedrooms'] . ' ' . __('bedrooms', 'malisafi-mls');
+		}
         
-        return implode(' | ', $criteria);
-    }
+		return implode(' | ', $criteria);
+	}
     
-    private static function build_search_url($search) {
-        $url = Page_Manager::get_page_url('property_search');
-        $params = [];
+	private static function build_search_url($search) {
+		$url = Page_Manager::get_page_url('property_search');
+		$params = [];
         
-        if (!empty($search['min_price'])) $params['min_price'] = $search['min_price'];
-        if (!empty($search['max_price'])) $params['max_price'] = $search['max_price'];
-        if (!empty($search['bedrooms'])) $params['bedrooms'] = $search['bedrooms'];
+		if (!empty($search['min_price'])) $params['min_price'] = $search['min_price'];
+		if (!empty($search['max_price'])) $params['max_price'] = $search['max_price'];
+		if (!empty($search['bedrooms'])) $params['bedrooms'] = $search['bedrooms'];
         
-        return add_query_arg($params, $url);
-    }
+		return add_query_arg($params, $url);
+	}
     
-    /**
-     * Public Agent Profile View
-     */
-    public static function agent_profile_public($atts) {
-            $atts = shortcode_atts(array(
-                'agent_id' => isset($_GET['agent_id']) ? intval($_GET['agent_id']) : 0
-            ), $atts);
-        
-            if (empty($atts['agent_id'])) {
-                return '<div class="malisafi-error">' . __('Agent ID is required.', 'malisafi-mls') . '</div>';
-            }
+	/**
+	 * Public Agent Profile View
+	 */
+	public static function agent_profile_public($atts) {
+		$atts = shortcode_atts(array(
+			'agent_id' => isset($_GET['agent_id']) ? intval($_GET['agent_id']) : 0
+		), $atts);
     
-        
-            // Enqueue styles
-            wp_enqueue_style(
-                'agent-profile-public',
-                MALISAFI_MLS_URL . 'assets/css/agent-profile-public.css',
-                array(),
-                MALISAFI_MLS_VERSION
-            );
-        
-            ob_start();
-            include MALISAFI_MLS_PATH . 'templates/agent-profile-public.php';
-            return ob_get_clean();
-        }
+		if (empty($atts['agent_id'])) {
+			return '<div class="malisafi-error">' . __('Agent ID is required.', 'malisafi-mls') . '</div>';
+		}
+
+		// Enqueue styles
+		wp_enqueue_style(
+			'agent-profile-public',
+			MALISAFI_MLS_URL . 'assets/css/agent-profile-public.css',
+			array(),
+			MALISAFI_MLS_VERSION
+		);
     
-    /**
-     * AJAX handler for custom login
-     */
-    public static function ajax_custom_login() {
-        // Verify nonce
-        if (!isset($_POST['nonce']) || !wp_verify_nonce($_POST['nonce'], 'malisafi_login_nonce')) {
-            wp_send_json_error([
-                'message' => __('Security check failed. Please refresh the page and try again.', 'malisafi-mls')
-            ]);
-        }
+		ob_start();
+		include MALISAFI_MLS_PATH . 'templates/agent-profile-public.php';
+		return ob_get_clean();
+	}
+    
+	/**
+	 * AJAX handler for custom login
+	 */
+	public static function ajax_custom_login() {
+		// Verify nonce
+		if (!isset($_POST['nonce']) || !wp_verify_nonce($_POST['nonce'], 'malisafi_login_nonce')) {
+			wp_send_json_error([
+				'message' => __('Security check failed. Please refresh the page and try again.', 'malisafi-mls')
+			]);
+		}
         
-        // Get credentials
-        $username = sanitize_text_field($_POST['username']);
-        $password = $_POST['password'];
-        $remember = isset($_POST['remember']) && $_POST['remember'] === 'true';
+		// Get credentials
+		$username = sanitize_text_field($_POST['username']);
+		$password = $_POST['password'];
+		$remember = isset($_POST['remember']) && $_POST['remember'] === 'true';
         
-        // Validate inputs
-        if (empty($username) || empty($password)) {
-            wp_send_json_error([
-                'message' => __('Please enter both username and password.', 'malisafi-mls')
-            ]);
-        }
+		// Validate inputs
+		if (empty($username) || empty($password)) {
+			wp_send_json_error([
+				'message' => __('Please enter both username and password.', 'malisafi-mls')
+			]);
+		}
         
-        // Attempt authentication
-        $user = wp_authenticate($username, $password);
+		// Attempt authentication
+		$user = wp_authenticate($username, $password);
         
-        // Check for errors
-        if (is_wp_error($user)) {
-            $error_code = $user->get_error_code();
+		// Check for errors
+		if (is_wp_error($user)) {
+			$error_code = $user->get_error_code();
             
-            // Customize error messages
-            switch ($error_code) {
-                case 'invalid_username':
-                    $message = __('The username you entered does not exist. Please check and try again.', 'malisafi-mls');
-                    break;
-                case 'incorrect_password':
-                case 'invalid_email':
-                    $message = __('Incorrect password. Please try again.', 'malisafi-mls');
-                    break;
-                default:
-                    $message = __('Login failed. Please check your credentials and try again.', 'malisafi-mls');
-            }
+			// Customize error messages
+			switch ($error_code) {
+				case 'invalid_username':
+					$message = __('The username you entered does not exist. Please check and try again.', 'malisafi-mls');
+					break;
+				case 'incorrect_password':
+				case 'invalid_email':
+					$message = __('Incorrect password. Please try again.', 'malisafi-mls');
+					break;
+				default:
+					$message = __('Login failed. Please check your credentials and try again.', 'malisafi-mls');
+			}
             
-            wp_send_json_error(['message' => $message]);
-        }
+			wp_send_json_error(['message' => $message]);
+		}
         
-        // Log the user in
-        wp_clear_auth_cookie();
-        wp_set_current_user($user->ID);
-        wp_set_auth_cookie($user->ID, $remember);
+		// Log the user in
+		wp_clear_auth_cookie();
+		wp_set_current_user($user->ID);
+		wp_set_auth_cookie($user->ID, $remember);
         
-        // Determine redirect URL based on user role
-        $redirect_url = home_url();
+		// Determine redirect URL based on user role
+		$redirect_url = home_url();
         
-        if (in_array('administrator', $user->roles) || in_array('malisafi_moderator', $user->roles)) {
-            $redirect_url = admin_url();
-        } elseif (in_array('malisafi_agent_basic', $user->roles) || in_array('malisafi_agent_premium', $user->roles)) {
-            $redirect_url = Page_Manager::get_page_url('agent_dashboard') ?: home_url();
-        } elseif (in_array('malisafi_owner', $user->roles)) {
-            $redirect_url = Page_Manager::get_page_url('owner_dashboard') ?: home_url();
-        } elseif (in_array('malisafi_developer', $user->roles)) {
-            $redirect_url = Page_Manager::get_page_url('developer_dashboard') ?: home_url();
-        } elseif (in_array('malisafi_client', $user->roles)) {
-            $redirect_url = Page_Manager::get_page_url('client_dashboard') ?: home_url();
-        }
+		if (in_array('administrator', $user->roles) || in_array('malisafi_moderator', $user->roles)) {
+			$redirect_url = admin_url();
+		} elseif (in_array('malisafi_agent_basic', $user->roles) || in_array('malisafi_agent_premium', $user->roles)) {
+			$redirect_url = Page_Manager::get_page_url('agent_dashboard') ?: home_url();
+		} elseif (in_array('malisafi_owner', $user->roles)) {
+			$redirect_url = Page_Manager::get_page_url('owner_dashboard') ?: home_url();
+		} elseif (in_array('malisafi_developer', $user->roles)) {
+			$redirect_url = Page_Manager::get_page_url('developer_dashboard') ?: home_url();
+		} elseif (in_array('malisafi_client', $user->roles)) {
+			$redirect_url = Page_Manager::get_page_url('client_dashboard') ?: home_url();
+		}
         
-        wp_send_json_success([
-            'message' => sprintf(__('Welcome back, %s!', 'malisafi-mls'), $user->display_name),
-            'redirect' => $redirect_url
-        ]);
-    }
+		wp_send_json_success([
+			'message' => sprintf(__('Welcome back, %s!', 'malisafi-mls'), $user->display_name),
+			'redirect' => $redirect_url
+		]);
+	}
 }

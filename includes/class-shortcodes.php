@@ -558,14 +558,6 @@ class Malisafi_Shortcodes {
             'redirect' => ''
         ), $atts);
         
-        // Enqueue modern styles
-        wp_enqueue_style(
-            'malisafi-add-property',
-            MALISAFI_MLS_URL . 'assets/css/add-property-page.css',
-            array('malisafi-mls-variables'),
-            MALISAFI_MLS_VERSION
-        );
-        
         ob_start();
         
         // Include the add property page template

@@ -34,6 +34,27 @@ class Project_Submission {
             array(),
             MALISAFI_MLS_VERSION
         );
+
+        wp_enqueue_script(
+            'malisafi-project-submit-form',
+            MALISAFI_MLS_URL . 'assets/js/project-submit-form.js',
+            array(),
+            MALISAFI_MLS_VERSION,
+            true
+        );
+
+        wp_localize_script('malisafi-project-submit-form', 'malisafiProjectGps', array(
+            'i18n' => array(
+                'locating' => __('Locating your position...', 'malisafi-mls'),
+                'success' => __('Coordinates updated from your location.', 'malisafi-mls'),
+                'parsed' => __('Coordinates extracted from the link.', 'malisafi-mls'),
+                'invalid' => __('Could not detect coordinates. Paste a Google Maps link or use “lat, lng”.', 'malisafi-mls'),
+                'geoUnsupported' => __('Geolocation is not supported in this browser.', 'malisafi-mls'),
+                'permissionDenied' => __('Location permission was denied.', 'malisafi-mls'),
+                'unavailable' => __('Location is currently unavailable.', 'malisafi-mls'),
+                'timeout' => __('Location request timed out. Please try again.', 'malisafi-mls')
+            )
+        ));
     }
 
     /**
@@ -267,6 +288,19 @@ class Project_Submission {
                         <div class="form-group">
                             <label for="project_longitude"><?php _e('Longitude', 'malisafi-mls'); ?></label>
                             <input type="number" name="project_longitude" id="project_longitude" step="0.000001" placeholder="<?php esc_attr_e('e.g. 36.816666', 'malisafi-mls'); ?>" />
+                        </div>
+                    </div>
+
+                    <div class="form-row two-col">
+                        <div class="form-group">
+                            <label for="project_gps_source"><?php _e('Coordinate Helper', 'malisafi-mls'); ?></label>
+                            <input type="text" name="project_gps_source" id="project_gps_source" placeholder="<?php esc_attr_e('Paste Google Maps link or -1.2921, 36.8219', 'malisafi-mls'); ?>" />
+                            <small><?php _e('We will extract coordinates and fill the latitude/longitude fields.', 'malisafi-mls'); ?></small>
+                        </div>
+                        <div class="form-group gps-actions">
+                            <label class="gps-actions-label"><?php _e('Use My Location', 'malisafi-mls'); ?></label>
+                            <button type="button" id="project_get_location" class="button button-secondary">📍 <?php _e('Use My Location', 'malisafi-mls'); ?></button>
+                            <div id="project_gps_status" class="gps-status" role="status" aria-live="polite"></div>
                         </div>
                     </div>
                 </div>
