@@ -25,6 +25,9 @@ $size_unit = get_post_meta($property_id, '_malisafi_size_unit', true) ?: 'sqm';
 $status_terms = wp_get_post_terms($property_id, 'malisafi_property_status');
 $status = (!empty($status_terms) && !is_wp_error($status_terms)) ? $status_terms[0]->name : '';
 
+$is_verified = get_post_meta($property_id, '_malisafi_verified', true);
+$is_verified = $is_verified == 1;
+
 $featured = get_post_meta($property_id, '_malisafi_featured', true);
 $setting = get_post_meta($property_id, '_malisafi_setting', true);
 $city = get_post_meta($property_id, '_malisafi_city', true);
@@ -70,30 +73,28 @@ $is_new = (time() - $post_date) < (7 * 24 * 60 * 60);
         <?php echo $image_html; ?>
         
         <?php 
-        // Get listing type from taxonomy
-        $listing_types = get_the_terms($property_id, 'malisafi_property_type');
-        $listing_type = !empty($listing_types) && !is_wp_error($listing_types) ? $listing_types[0]->name : '';
         ?>
-        
-        <?php if (!empty($listing_type)) : ?>
-            <span class="listing-type-badge"><?php echo esc_html($listing_type); ?></span>
-        <?php endif; ?>
-        
-        <?php 
-        // Always show status badge - default to 'Status Not Recorded' if empty
-        if (!empty($status)) {
-            $status_display = ucwords(str_replace('-', ' ', $status));
-            $status_class = 'status-' . sanitize_html_class(strtolower(str_replace(' ', '-', $status)));
-        } else {
-            $status_display = 'Status Not Recorded';
-            $status_class = 'status-not-recorded';
-        }
-        ?>
-        <span class="status-badge <?php echo esc_attr($status_class); ?>"><?php echo esc_html($status_display); ?></span>
-        
-        <?php if (!empty($setting)) : ?>
-            <span class="setting-badge"><?php echo esc_html(ucfirst($setting)); ?></span>
-        <?php endif; ?>
+        <div class="property-badges">
+            <?php if ($is_verified) : ?>
+                <span class="verified" title="<?php esc_attr_e('Verified', 'malisafi-mls'); ?>" aria-label="<?php esc_attr_e('Verified', 'malisafi-mls'); ?>">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="#2ecc71" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+                        <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-8.93 3.382 5.657-5.657-1.414-1.414-4.243 4.243-2.121-2.121-1.414 1.414 3.535 3.535z"/>
+                    </svg>
+                </span>
+            <?php endif; ?>
+
+            <?php 
+            // Always show status badge - default to 'Status Not Recorded' if empty
+            if (!empty($status)) {
+                $status_display = ucwords(str_replace('-', ' ', $status));
+                $status_class = 'status-' . sanitize_html_class(strtolower(str_replace(' ', '-', $status)));
+            } else {
+                $status_display = 'Status Not Recorded';
+                $status_class = 'status-not-recorded';
+            }
+            ?>
+            <span class="status-badge <?php echo esc_attr($status_class); ?>"><?php echo esc_html($status_display); ?></span>
+        </div>
         
         <?php
         // Check if property is favorited
@@ -130,15 +131,6 @@ $is_new = (time() - $post_date) < (7 * 24 * 60 * 60);
                 <div class="property-price">
                     <?php echo esc_html($formatted_price); ?>
                 </div>
-                <?php if (!empty($status)) : ?>
-                    <?php 
-                    $status_display = ucwords(str_replace('-', ' ', $status));
-                    $status_class = 'status-tag-' . sanitize_html_class($status);
-                    ?>
-                    <span class="property-status-tag <?php echo esc_attr($status_class); ?>">
-                        <?php echo esc_html($status_display); ?>
-                    </span>
-                <?php endif; ?>
             </div>
             
             <div class="property-actions-inline">

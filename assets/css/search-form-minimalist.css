@@ -1,0 +1,81 @@
+.malisafi-search-form {
+    background: var(--color-ash-white);
+    border: 1px solid var(--color-light-gray);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-xl);
+    box-shadow: var(--shadow-sm);
+}
+
+.malisafi-search-form .property-search {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--spacing-lg);
+    align-items: end;
+}
+
+.malisafi-search-form .search-field {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+}
+
+.malisafi-search-form .search-field label {
+    font-weight: 600;
+    color: var(--text-base);
+    font-size: 14px;
+}
+
+.malisafi-search-form .search-field input,
+.malisafi-search-form .search-field select {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1px solid var(--color-light-gray);
+    border-radius: var(--radius-md);
+    background: var(--color-ash-white);
+    font-size: var(--font-size-base);
+    transition: var(--transition-fast);
+}
+
+.malisafi-search-form .search-field input:focus,
+.malisafi-search-form .search-field select:focus {
+    outline: none;
+    border-color: var(--color-blue);
+    box-shadow: 0 0 0 3px var(--mls-focus-ring);
+}
+
+.malisafi-search-form .search-submit {
+    display: flex;
+    align-items: flex-end;
+}
+
+.malisafi-search-form .search-button {
+    width: 100%;
+    padding: 12px 18px;
+    border: none;
+    border-radius: var(--radius-md);
+    background: var(--btn-primary-bg);
+    color: var(--btn-primary-text);
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition-fast);
+    box-shadow: var(--shadow-sm);
+}
+
+.malisafi-search-form .search-button:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+}
+
+.malisafi-search-form.minimalist {
+    background: var(--color-ash-white);
+}
+
+.malisafi-search-form.minimalist .property-search {
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+}
+
+@media (max-width: 900px) {
+    .malisafi-search-form .property-search {
+        grid-template-columns: 1fr;
+    }
+}

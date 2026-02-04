@@ -17,7 +17,13 @@ $statuses = get_terms(array('taxonomy' => 'malisafi_property_status', 'hide_empt
 $counties = function_exists('malisafi_get_kenya_counties') ? malisafi_get_kenya_counties() : array();
 
 // Get results page URL (you can customize this)
-$results_page_url = home_url('/properties'); // Change to your properties listing page
+$results_page_url = '';
+if (class_exists('MalisafiMLS\\Page_Manager') && method_exists('MalisafiMLS\\Page_Manager', 'get_page_url')) {
+    $results_page_url = \MalisafiMLS\Page_Manager::get_page_url('advanced_filters');
+}
+if (!$results_page_url) {
+    $results_page_url = home_url('/advanced_filters');
+}
 ?>
 
 <div class="malisafi-minimalist-wrapper" data-results-url="<?php echo esc_url($results_page_url); ?>">

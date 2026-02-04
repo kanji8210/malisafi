@@ -38,6 +38,7 @@
 
         init() {
             this.bindEvents();
+            this.loadUrlFilters();
             this.loadSavedFilters();
         }
 
@@ -538,8 +539,9 @@
             
             // Location
             if (this.filters.location) {
+                const label = $(`.filter-select[data-filter="location"] option[value="${this.filters.location}"]`).text() || this.filters.location;
                 chips.push({
-                    label: `Location: ${this.filters.location}`,
+                    label: `Location: ${label}`,
                     filter: 'location',
                     value: this.filters.location
                 });
@@ -612,6 +614,74 @@
             // }
         }
 
+        loadUrlFilters() {
+            const params = new URLSearchParams(window.location.search);
+            if (!params || params.toString() === '') {
+                return;
+            }
+
+            let hasFilters = false;
+
+            const searchValue = params.get('search') || params.get('s');
+            if (searchValue) {
+                this.filters.search = searchValue;
+                hasFilters = true;
+            }
+
+            const propertyType = params.get('property_type') || params.get('type');
+            if (propertyType) {
+                this.filters.property_type = propertyType;
+                hasFilters = true;
+            }
+
+            const status = params.get('status') || params.get('property_status');
+            if (status) {
+                this.filters.status = status;
+                hasFilters = true;
+            }
+
+            const priceMin = params.get('price_min') || params.get('min_price');
+            if (priceMin) {
+                this.filters.price_min = priceMin;
+                hasFilters = true;
+            }
+
+            const priceMax = params.get('price_max') || params.get('max_price');
+            if (priceMax) {
+                this.filters.price_max = priceMax;
+                hasFilters = true;
+            }
+
+            const bedrooms = params.get('bedrooms');
+            if (bedrooms) {
+                this.filters.bedrooms = bedrooms;
+                hasFilters = true;
+            }
+
+            const bathrooms = params.get('bathrooms');
+            if (bathrooms) {
+                this.filters.bathrooms = bathrooms;
+                hasFilters = true;
+            }
+
+            const location = params.get('location');
+            if (location) {
+                this.filters.location = location;
+                hasFilters = true;
+            }
+
+            const sort = params.get('sort');
+            if (sort) {
+                this.filters.sort = sort;
+                hasFilters = true;
+            }
+
+            if (hasFilters) {
+                this.populateFiltersForm();
+                this.applyFilters();
+            }
+        }
+
         populateFiltersForm() {
             // Populate form with saved filter values
             if (this.filters.search) {
@@ -641,6 +711,14 @@
             if (this.filters.price_max) {
                 $('.price-input-wrapper input[data-filter="price_max"]').val(this.filters.price_max);
             }
+
+            if (this.filters.location) {
+                $('.filter-select[data-filter="location"]').val(this.filters.location);
+            }
+
+            if (this.filters.sort) {
+                $('.results-sort select').val(this.filters.sort);
+            }
             
             if (this.filters.features && this.filters.features.length > 0) {
                 this.filters.features.forEach(feature => {
@@ -655,6 +733,41 @@
         if ($('.malisafi-properties-wrapper').length) {
             new PropertyFilters();
         }
+
+        const $sidebar = $('.malisafi-filters-sidebar');
+        if ($sidebar.length) {
+            const isMobile = window.matchMedia('(max-width: 900px)').matches;
+            if (isMobile) {
+                $sidebar.addClass('is-collapsed');
+            }
+        }
+
+        $(document).on('click', '.filters-toggle', function() {
+            const $btn = $(this);
+            const $panel = $btn.closest('.malisafi-filters-sidebar');
+            const isMobile = window.matchMedia('(max-width: 900px)').matches;
+            const $icon = $btn.find('.dashicons');
+
+            if (isMobile) {
+                $panel.toggleClass('is-open');
+                const isOpen = $panel.hasClass('is-open');
+                $btn.attr('aria-expanded', isOpen ? 'true' : 'false');
+                $btn.find('.filters-toggle-text').text(isOpen ? 'Hide' : 'Show');
+                if ($icon.length) {
+                    $icon.toggleClass('dashicons-arrow-down-alt2', !isOpen)
+                        .toggleClass('dashicons-arrow-up-alt2', isOpen);
+                }
+            } else {
+                $panel.toggleClass('is-collapsed');
+                const isCollapsed = $panel.hasClass('is-collapsed');
+                $btn.attr('aria-expanded', isCollapsed ? 'false' : 'true');
+                $btn.find('.filters-toggle-text').text(isCollapsed ? 'Show' : 'Hide');
+                if ($icon.length) {
+                    $icon.toggleClass('dashicons-arrow-down-alt2', isCollapsed)
+                        .toggleClass('dashicons-arrow-up-alt2', !isCollapsed);
+                }
+            }
+        });
     });
 
 })(jQuery);

@@ -169,6 +169,10 @@ class PublicArea {
      * Properties listing shortcode
      */
     public function properties_shortcode($atts) {
+        if (class_exists('Malisafi_Shortcodes') && method_exists('Malisafi_Shortcodes', 'properties_with_filters')) {
+            return Malisafi_Shortcodes::properties_with_filters($atts);
+        }
+
         $atts = shortcode_atts(array(
             'type' => '',
             'status' => '',
@@ -178,31 +182,31 @@ class PublicArea {
             'orderby' => 'date',
             'order' => 'DESC',
         ), $atts);
-        
+
         $args = array(
             'posts_per_page' => intval($atts['count']),
             'orderby' => $atts['orderby'],
             'order' => $atts['order'],
         );
-        
+
         if (!empty($atts['type'])) {
             $args['property_type'] = $atts['type'];
         }
-        
+
         if (!empty($atts['status'])) {
             $args['property_status'] = $atts['status'];
         }
-        
+
         if (!empty($atts['location'])) {
             $args['location'] = $atts['location'];
         }
-        
+
         if (!empty($atts['featured'])) {
             $args['featured'] = true;
         }
-        
+
         $properties = Property_Manager::get_properties($args);
-        
+
         ob_start();
         include MALISAFI_MLS_PATH . 'templates/properties-grid.php';
         return ob_get_clean();
@@ -213,8 +217,15 @@ class PublicArea {
      */
     public function search_shortcode($atts) {
         $atts = shortcode_atts(array(
-            'style' => 'horizontal',
+            'style' => 'minimalist',
         ), $atts);
+
+        wp_enqueue_style(
+            'malisafi-search-form-minimalist',
+            MALISAFI_MLS_URL . 'assets/css/search-form-minimalist.css',
+            array('malisafi-mls-variables'),
+            MALISAFI_MLS_VERSION
+        );
         
         ob_start();
         include MALISAFI_MLS_PATH . 'templates/search-form.php';

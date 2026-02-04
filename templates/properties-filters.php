@@ -109,10 +109,18 @@ $total_properties = $properties_query->found_posts;
                 <span class="dashicons dashicons-filter"></span>
                 Filters
             </h3>
-            <button type="button" class="filter-reset">
-                Reset All
-            </button>
+            <div class="filters-header-actions">
+                <button type="button" class="filter-reset">
+                    Reset All
+                </button>
+                <button type="button" class="filters-toggle" aria-expanded="true">
+                    <span class="dashicons dashicons-arrow-down-alt2"></span>
+                    <span class="filters-toggle-text">Hide</span>
+                </button>
+            </div>
         </div>
+
+        <div class="filters-body">
 
         <!-- Search -->
         <div class="filter-group">
@@ -260,6 +268,8 @@ $total_properties = $properties_query->found_posts;
             <button type="button" class="filter-clear">Clear All</button>
         </div>
 
+        </div>
+
     </aside>
 
     <!-- Properties Content -->
@@ -286,14 +296,6 @@ $total_properties = $properties_query->found_posts;
                     <option value="title_asc">Name: A-Z</option>
                     <option value="title_desc">Name: Z-A</option>
                 </select>
-                <div class="view-toggle">
-                    <button type="button" data-view="grid" class="active" title="Grid View">
-                        <span class="dashicons dashicons-grid-view"></span>
-                    </button>
-                    <button type="button" data-view="list" title="List View">
-                        <span class="dashicons dashicons-list-view"></span>
-                    </button>
-                </div>
             </div>
         </div>
 

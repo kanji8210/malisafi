@@ -24,6 +24,13 @@ class Page_Manager {
             'description' => 'Main properties listing page',
             'parent' => 0
         ),
+        'advanced_filters' => array(
+            'title' => 'Advanced Filters',
+            'slug' => 'advanced_filters',
+            'shortcode' => '[malisafi_properties]',
+            'description' => 'Advanced filters and search results page',
+            'parent' => 0
+        ),
         'property_search' => array(
             'title' => 'Property Search',
             'slug' => 'property-search',

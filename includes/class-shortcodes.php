@@ -20,6 +20,7 @@ class Malisafi_Shortcodes {
         add_shortcode('malisafi_properties_modern', array(__CLASS__, 'properties_with_filters'));
         add_shortcode('malisafi_properties', array(__CLASS__, 'properties_with_filters')); // Alias for modern filters
         add_shortcode('malisafi_properties_minimalist', array(__CLASS__, 'properties_minimalist_filters')); // Minimalist filters
+        add_shortcode('malisafi_properties_thumbnails', array(__CLASS__, 'properties_thumbnails')); // Thumbnails only grid
         add_shortcode('malisafi_registration', array(__CLASS__, 'registration_form'));
         add_shortcode('malisafi_register', array(__CLASS__, 'registration_form')); // Alias
         add_shortcode('malisafi_property_map', array(__CLASS__, 'property_map')); // Property map view
@@ -291,6 +292,103 @@ class Malisafi_Shortcodes {
         // Include the minimalist properties template
         include MALISAFI_MLS_PATH . 'templates/properties-filters-minimalist.php';
         
+        return ob_get_clean();
+    }
+
+    /**
+     * Thumbnails-only properties grid (no filters UI)
+     * Shortcode: [malisafi_properties_thumbnails]
+     *
+     * @param array $atts Shortcode attributes
+     * @return string
+     */
+    public static function properties_thumbnails($atts = array()) {
+        $atts = shortcode_atts(array(
+            'type'         => '',
+            'status'       => '',
+            'location'     => '',
+            'listing_type' => '',
+            'featured'     => '',
+            'count'        => 12,
+            'columns'      => 3,
+            'orderby'      => 'date',
+            'order'        => 'DESC',
+            'offset'       => 0,
+        ), $atts, 'malisafi_properties_thumbnails');
+
+        wp_enqueue_style(
+            'malisafi-property-thumbnails-grid',
+            MALISAFI_MLS_URL . 'assets/css/property-thumbnails-grid.css',
+            array('malisafi-mls-variables'),
+            MALISAFI_MLS_VERSION
+        );
+
+        $args = array(
+            'post_type'      => 'malisafi_property',
+            'post_status'    => 'publish',
+            'posts_per_page' => intval($atts['count']),
+            'orderby'        => sanitize_text_field($atts['orderby']),
+            'order'          => strtoupper(sanitize_text_field($atts['order'])) === 'ASC' ? 'ASC' : 'DESC',
+            'offset'         => intval($atts['offset']),
+        );
+
+        $tax_query = array();
+
+        if (!empty($atts['type'])) {
+            $tax_query[] = array(
+                'taxonomy' => 'malisafi_property_type',
+                'field'    => 'slug',
+                'terms'    => sanitize_text_field($atts['type']),
+            );
+        }
+
+        if (!empty($atts['status'])) {
+            $tax_query[] = array(
+                'taxonomy' => 'malisafi_property_status',
+                'field'    => 'slug',
+                'terms'    => sanitize_text_field($atts['status']),
+            );
+        }
+
+        if (!empty($atts['location'])) {
+            $tax_query[] = array(
+                'taxonomy' => 'malisafi_property_location',
+                'field'    => 'slug',
+                'terms'    => sanitize_text_field($atts['location']),
+            );
+        }
+
+        if (!empty($tax_query)) {
+            $args['tax_query'] = $tax_query;
+        }
+
+        $meta_query = array();
+
+        if (!empty($atts['featured'])) {
+            $meta_query[] = array(
+                'key'     => '_malisafi_featured',
+                'value'   => '1',
+                'compare' => '=',
+            );
+        }
+
+        if (!empty($atts['listing_type'])) {
+            $meta_query[] = array(
+                'key'     => '_malisafi_listing_type',
+                'value'   => sanitize_text_field($atts['listing_type']),
+                'compare' => '=',
+            );
+        }
+
+        if (!empty($meta_query)) {
+            $args['meta_query'] = $meta_query;
+        }
+
+        $properties = new \WP_Query($args);
+        $shortcode_atts = $atts;
+
+        ob_start();
+        include MALISAFI_MLS_PATH . 'templates/properties-thumbnails.php';
         return ob_get_clean();
     }
 
