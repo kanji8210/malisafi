@@ -32,49 +32,51 @@ $has_svg = file_exists($svg_path);
 
     <div class="malisafi-kenya-form-column">
         <form class="malisafi-kenya-filter-form" method="get" action="<?php echo esc_url($results_url); ?>">
-        <div class="malisafi-kenya-filter-row">
-            <div>
-                <label for="mf-county"><?php _e('County', 'malisafi-mls'); ?></label>
-                <select id="mf-county" name="county">
-                    <option value=""><?php _e('Select County...', 'malisafi-mls'); ?></option>
-                    <?php foreach ($counties as $county) : ?>
-                        <option value="<?php echo esc_attr($county); ?>"><?php echo esc_html($county); ?></option>
-                    <?php endforeach; ?>
-                </select>
+        <div class="malisafi-kenya-filter-inner">
+            <div class="malisafi-kenya-filter-row">
+                <div>
+                    <label for="mf-county"><?php _e('County', 'malisafi-mls'); ?></label>
+                    <select id="mf-county" name="county">
+                        <option value=""><?php _e('Select County...', 'malisafi-mls'); ?></option>
+                        <?php foreach ($counties as $county) : ?>
+                            <option value="<?php echo esc_attr($county); ?>"><?php echo esc_html($county); ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+
+                <div>
+                    <label for="mf-subcounty"><?php _e('Sub-county', 'malisafi-mls'); ?></label>
+                    <select id="mf-subcounty" name="subcounty">
+                        <option value=""><?php _e('Select Sub-county...', 'malisafi-mls'); ?></option>
+                    </select>
+                    <div class="malisafi-kenya-helper"><?php _e('Select a county to load sub-counties.', 'malisafi-mls'); ?></div>
+                </div>
             </div>
 
-            <div>
-                <label for="mf-subcounty"><?php _e('Sub-county', 'malisafi-mls'); ?></label>
-                <select id="mf-subcounty" name="subcounty">
-                    <option value=""><?php _e('Select Sub-county...', 'malisafi-mls'); ?></option>
-                </select>
-                <div class="malisafi-kenya-helper"><?php _e('Select a county to load sub-counties.', 'malisafi-mls'); ?></div>
-            </div>
-        </div>
-
-        <div class="price-grid">
-            <div>
-                <label for="mf-price-min"><?php _e('Min Price', 'malisafi-mls'); ?></label>
-                <input type="number" id="mf-price-min" name="price_min" min="0" step="0.01" placeholder="0" />
-            </div>
-            <div>
-                <label for="mf-price-max"><?php _e('Max Price', 'malisafi-mls'); ?></label>
-                <input type="number" id="mf-price-max" name="price_max" min="0" step="0.01" placeholder="10000000" />
-            </div>
-        </div>
-
-        <div class="malisafi-kenya-filter-row malisafi-kenya-filter-row--actions">
-            <div>
-                <label for="mf-status"><?php _e('Property Status', 'malisafi-mls'); ?></label>
-                <select id="mf-status" name="status">
-                    <option value=""><?php _e('Select Status...', 'malisafi-mls'); ?></option>
-                    <option value="rent"><?php _e('Rent', 'malisafi-mls'); ?></option>
-                    <option value="sale"><?php _e('Sale', 'malisafi-mls'); ?></option>
-                </select>
+            <div class="price-grid">
+                <div>
+                    <label for="mf-price-min"><?php _e('Min Price', 'malisafi-mls'); ?></label>
+                    <input type="number" id="mf-price-min" name="price_min" min="0" step="0.01" placeholder="0" />
+                </div>
+                <div>
+                    <label for="mf-price-max"><?php _e('Max Price', 'malisafi-mls'); ?></label>
+                    <input type="number" id="mf-price-max" name="price_max" min="0" step="0.01" placeholder="10000000" />
+                </div>
             </div>
 
-            <div class="malisafi-kenya-filter-actions">
-                <button type="submit"><?php _e('Search', 'malisafi-mls'); ?></button>
+            <div class="malisafi-kenya-filter-row malisafi-kenya-filter-row--actions">
+                <div>
+                    <label for="mf-status"><?php _e('Property Status', 'malisafi-mls'); ?></label>
+                    <select id="mf-status" name="status">
+                        <option value=""><?php _e('Select Status...', 'malisafi-mls'); ?></option>
+                        <option value="rent"><?php _e('Rent', 'malisafi-mls'); ?></option>
+                        <option value="sale"><?php _e('Sale', 'malisafi-mls'); ?></option>
+                    </select>
+                </div>
+
+                <div class="malisafi-kenya-filter-actions">
+                    <button type="submit"><?php _e('Search', 'malisafi-mls'); ?></button>
+                </div>
             </div>
         </div>
         </form>
