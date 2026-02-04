@@ -31,8 +31,6 @@
 
 .malisafi-kenya-form-column {
   align-self: center;
-  display: flex;
-  justify-content: center;
 }
 
 .malisafi-kenya-map {
@@ -109,23 +107,14 @@
 }
 
 .malisafi-kenya-filter-form {
-  display: flex;
-  justify-content: center;
-  width: 100%;
+  display: grid;
+  gap: 8px;
   padding: 10px;
   border-radius: 10px;
   border: 1px solid var(--color-light-gray);
   background: rgba(255, 255, 255, 0.8);
-  max-height: none;
-  overflow: visible;
-}
-
-.malisafi-kenya-filter-inner {
-  width: 100%;
-  max-width: 420px;
-  display: grid;
-  gap: 8px;
-  justify-items: stretch;
+  max-height: auto;
+  overflow: auto;
 }
 
 
@@ -133,7 +122,6 @@
   display: grid;
   gap: 8px;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  width: 100%;
 }
 
 .malisafi-kenya-filter-form label {
@@ -158,7 +146,6 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 8px;
-  width: 100%;
 }
 
 .malisafi-kenya-filter-actions {
@@ -169,7 +156,7 @@
 
 .malisafi-kenya-filter-row--actions .malisafi-kenya-filter-actions {
   align-self: end;
-  justify-content: center;
+  justify-content: flex-end;
 }
 
 .malisafi-kenya-filter-actions button {
