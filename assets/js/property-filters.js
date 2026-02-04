@@ -25,6 +25,8 @@
                 area_min: '',
                 area_max: '',
                 location: '',
+                county: '',
+                subcounty: '',
                 features: [],
                 sort: 'date_desc'
             };
@@ -58,6 +60,11 @@
                 const $select = $(e.target);
                 const filterName = $select.data('filter');
                 this.filters[filterName] = $select.val();
+                if (filterName === 'county') {
+                    this.updateSubcountyOptions($select.val());
+                    this.filters.subcounty = '';
+                    $('.filter-select[data-filter="subcounty"]').val('');
+                }
                 this.applyFilters();
             });
 
@@ -429,6 +436,8 @@
                 area_min: '',
                 area_max: '',
                 location: '',
+                county: '',
+                subcounty: '',
                 features: [],
                 sort: 'date_desc'
             };
@@ -441,6 +450,7 @@
             $('.filter-checkbox input[type="checkbox"]').prop('checked', false);
             $('.range-slider').val(0);
             $('.range-value span').text('0');
+            this.updateSubcountyOptions('');
             
             // Clear active filters
             this.activeFiltersContainer.addClass('hidden').empty();
@@ -460,6 +470,11 @@
                 $(`.filter-select[data-filter="${filterName}"]`).val('');
                 $(`.filter-search input, .price-input-wrapper input, .area-input-wrapper input`)
                     .filter(`[data-filter="${filterName}"]`).val('');
+                if (filterName === 'county') {
+                    this.filters.subcounty = '';
+                    $('.filter-select[data-filter="subcounty"]').val('');
+                    this.updateSubcountyOptions('');
+                }
             }
             
             this.applyFilters();
@@ -544,6 +559,26 @@
                     label: `Location: ${label}`,
                     filter: 'location',
                     value: this.filters.location
+                });
+            }
+
+            // County
+            if (this.filters.county) {
+                const label = $(`.filter-select[data-filter="county"] option[value="${this.filters.county}"]`).text() || this.filters.county;
+                chips.push({
+                    label: `County: ${label}`,
+                    filter: 'county',
+                    value: this.filters.county
+                });
+            }
+
+            // Subcounty
+            if (this.filters.subcounty) {
+                const label = $(`.filter-select[data-filter="subcounty"] option[value="${this.filters.subcounty}"]`).text() || this.filters.subcounty;
+                chips.push({
+                    label: `Subcounty: ${label}`,
+                    filter: 'subcounty',
+                    value: this.filters.subcounty
                 });
             }
             
@@ -670,6 +705,18 @@
                 hasFilters = true;
             }
 
+            const county = params.get('county');
+            if (county) {
+                this.filters.county = county;
+                hasFilters = true;
+            }
+
+            const subcounty = params.get('subcounty');
+            if (subcounty) {
+                this.filters.subcounty = subcounty;
+                hasFilters = true;
+            }
+
             const sort = params.get('sort');
             if (sort) {
                 this.filters.sort = sort;
@@ -716,6 +763,15 @@
                 $('.filter-select[data-filter="location"]').val(this.filters.location);
             }
 
+            if (this.filters.county) {
+                $('.filter-select[data-filter="county"]').val(this.filters.county);
+                this.updateSubcountyOptions(this.filters.county, this.filters.subcounty);
+            }
+
+            if (this.filters.subcounty) {
+                $('.filter-select[data-filter="subcounty"]').val(this.filters.subcounty);
+            }
+
             if (this.filters.sort) {
                 $('.results-sort select').val(this.filters.sort);
             }
@@ -724,6 +780,45 @@
                 this.filters.features.forEach(feature => {
                     $(`.filter-checkbox input[value="${feature}"]`).prop('checked', true);
                 });
+            }
+        }
+
+        updateSubcountyOptions(county, selectedSubcounty = '') {
+            const $subcounty = $('.filter-select[data-filter="subcounty"]');
+            if (!$subcounty.length) return;
+
+            const map = window.malisafiSubcountiesMap || {};
+            const options = [];
+
+            if (county && map) {
+                const entries = Object.entries(map);
+                const match = entries.find(([name]) => name.toLowerCase() === county.toLowerCase());
+                if (match && Array.isArray(match[1])) {
+                    match[1].forEach(item => {
+                        if (typeof item === 'string') {
+                            options.push(item);
+                        } else if (item && typeof item === 'object' && item.name) {
+                            options.push(item.name);
+                        }
+                    });
+                }
+            }
+
+            $subcounty.empty();
+            $subcounty.append('<option value="">All Subcounties</option>');
+
+            if (options.length) {
+                options.forEach(name => {
+                    const escaped = $('<div>').text(name).html();
+                    $subcounty.append(`<option value="${escaped}">${escaped}</option>`);
+                });
+                $subcounty.prop('disabled', false);
+            } else {
+                $subcounty.prop('disabled', true);
+            }
+
+            if (selectedSubcounty) {
+                $subcounty.val(selectedSubcounty);
             }
         }
     }

@@ -605,7 +605,16 @@ $formatted_price = $price > 0 ? ($currency_symbol . ' ' . number_format($price))
                         ));
                         
                         if ($agent_post_id): 
-                            $agent_profile_url = get_permalink($agent_post_id);
+                            $agent_profile_url = '';
+                            if (class_exists('MalisafiMLS\\Page_Manager') && method_exists('MalisafiMLS\\Page_Manager', 'get_page_url')) {
+                                $agent_profile_url = \MalisafiMLS\Page_Manager::get_page_url('agent_profile');
+                                if ($agent_profile_url) {
+                                    $agent_profile_url = add_query_arg('agent_id', $agent_post_id, $agent_profile_url);
+                                }
+                            }
+                            if (!$agent_profile_url) {
+                                $agent_profile_url = get_permalink($agent_post_id);
+                            }
                         ?>
                             <h4 class="agent-name">
                                 <a href="<?php echo esc_url($agent_profile_url); ?>" class="agent-link" title="<?php esc_attr_e('View Agent Profile', 'malisafi-mls'); ?>">

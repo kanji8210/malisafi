@@ -11,9 +11,8 @@
 }
 
 .malisafi-kenya-map-filter {
-  display: grid;
-  grid-template-columns: minmax(280px, 1fr) minmax(280px, 1fr);
-  gap: 24px;
+  display: flex;
+  gap: 16px;
   width: 100%;
   background: transparent;
   border: none;
@@ -25,6 +24,7 @@
 
 .malisafi-kenya-map-column,
 .malisafi-kenya-form-column {
+  flex: 1 1 0;
   align-self: start;
   overflow: visible;
 }
@@ -36,7 +36,7 @@
 .malisafi-kenya-map {
   border-radius: 12px;
   background: transparent;
-  padding: var(--mls-kenya-map-padding, 8px);
+  padding: var(--mls-kenya-map-padding, 6px);
 
   max-height: none;
   width: 100%;
@@ -108,11 +108,11 @@
 
 .malisafi-kenya-filter-form {
   display: grid;
-  gap: 10px;
-  padding: 12px;
-  border-radius: 12px;
-  border: 1px solid #fff;
-  background: rgba(255, 255, 255, 0.6);
+  gap: 8px;
+  padding: 10px;
+  border-radius: 10px;
+  border: 1px solid var(--color-light-gray);
+  background: rgba(255, 255, 255, 0.8);
   max-height: auto;
   overflow: auto;
 }
@@ -120,7 +120,7 @@
 
 .malisafi-kenya-filter-row {
   display: grid;
-  gap: 10px;
+  gap: 8px;
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
@@ -129,23 +129,23 @@
   color: var(--mls-text-primary);
   margin-bottom: 3px;
   display: inline-block;
-  font-size: 0.85rem;
+  font-size: 0.8rem;
 }
 
 .malisafi-kenya-filter-form select,
 .malisafi-kenya-filter-form input {
   width: 100%;
-  padding: 7px 10px;
-  border: 1px solid #fff;
-  border-radius: 10px;
-  background: var(--mls-bg, #fff);
+  padding: 6px 8px;
+  border: 1px solid var(--color-light-gray);
+  border-radius: 8px;
+  background: var(--color-ash-white);
   color: var(--mls-text-primary);
 }
 
 .malisafi-kenya-filter-form .price-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 10px;
+  gap: 8px;
 }
 
 .malisafi-kenya-filter-actions {
@@ -163,8 +163,8 @@
   background: var(--mls-dark, #1f2937);
   color: var(--mls-text-on-accent, #fff);
   border: none;
-  padding: 7px 12px;
-  border-radius: 10px;
+  padding: 6px 10px;
+  border-radius: 8px;
   cursor: pointer;
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35);
 }
@@ -182,7 +182,7 @@
 
 @media (max-width: 900px) {
   .malisafi-kenya-map-filter {
-    grid-template-columns: 1fr;
+    flex-direction: column;
   }
 
   .malisafi-kenya-filter-row {

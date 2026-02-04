@@ -367,8 +367,8 @@ class Malisafi_Shortcodes {
         if (!empty($atts['featured'])) {
             $meta_query[] = array(
                 'key'     => '_malisafi_featured',
-                'value'   => '1',
-                'compare' => '=',
+                'value'   => array('1', 1, 'yes', 'true', 'on'),
+                'compare' => 'IN',
             );
         }
 
@@ -406,7 +406,7 @@ class Malisafi_Shortcodes {
 
         wp_enqueue_style(
             'malisafi-kenya-map-filter',
-            MALISAFI_MLS_URL . 'assets/css/kenya-map-filter.css',
+            MALISAFI_MLS_URL . 'assets/css/kenya-map-filtere.css',
             array('malisafi-mls-variables'),
             MALISAFI_MLS_VERSION
         );

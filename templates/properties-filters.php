@@ -23,7 +23,8 @@ $shortcode_atts = isset($atts) ? $atts : array(
 // Get filter options
 $property_types = get_terms(array('taxonomy' => 'malisafi_property_type', 'hide_empty' => true));
 $locations = get_terms(array('taxonomy' => 'malisafi_property_location', 'hide_empty' => true));
-$statuses = array('For Sale', 'For Rent', 'Sold', 'Rented');
+$status_terms = get_terms(array('taxonomy' => 'malisafi_property_status', 'hide_empty' => true));
+$counties = function_exists('malisafi_get_kenya_counties') ? malisafi_get_kenya_counties() : array();
 $bedrooms_options = array(1, 2, 3, 4, 5, '6+');
 $bathrooms_options = array(1, 2, 3, 4, '5+');
 $features = array(
@@ -100,6 +101,20 @@ $total_properties = $properties_query->found_posts;
 ?>
 
 <div class="malisafi-properties-wrapper">
+    <?php
+    $subcounties_map = array();
+    $subcounties_path = MALISAFI_MLS_PATH . 'data/kenya-subcounties.json';
+    if (file_exists($subcounties_path)) {
+        $raw = file_get_contents($subcounties_path);
+        $decoded = json_decode($raw, true);
+        if (is_array($decoded)) {
+            $subcounties_map = $decoded;
+        }
+    }
+    ?>
+    <script>
+        window.malisafiSubcountiesMap = <?php echo wp_json_encode($subcounties_map); ?>;
+    </script>
     
     <!-- Filters Sidebar -->
     <aside class="malisafi-filters-sidebar">
@@ -160,11 +175,13 @@ $total_properties = $properties_query->found_posts;
             </label>
             <select class="filter-select" data-filter="status">
                 <option value="">All Statuses</option>
-                <?php foreach ($statuses as $status) : ?>
-                    <option value="<?php echo esc_attr(sanitize_title($status)); ?>">
-                        <?php echo esc_html($status); ?>
-                    </option>
-                <?php endforeach; ?>
+                <?php if ($status_terms && !is_wp_error($status_terms)) : ?>
+                    <?php foreach ($status_terms as $status_term) : ?>
+                        <option value="<?php echo esc_attr($status_term->slug); ?>">
+                            <?php echo esc_html($status_term->name); ?> (<?php echo $status_term->count; ?>)
+                        </option>
+                    <?php endforeach; ?>
+                <?php endif; ?>
             </select>
         </div>
 
@@ -243,6 +260,27 @@ $total_properties = $properties_query->found_posts;
             </select>
         </div>
         <?php endif; ?>
+
+        <!-- County / Subcounty -->
+        <div class="filter-group">
+            <label class="filter-group-label">
+                <span class="dashicons dashicons-admin-site"></span>
+                County & Subcounty
+            </label>
+            <select class="filter-select" data-filter="county" style="margin-bottom: 10px;">
+                <option value="">All Counties</option>
+                <?php if (!empty($counties)) : ?>
+                    <?php foreach ($counties as $county) : ?>
+                        <option value="<?php echo esc_attr($county); ?>">
+                            <?php echo esc_html($county); ?>
+                        </option>
+                    <?php endforeach; ?>
+                <?php endif; ?>
+            </select>
+            <select class="filter-select" data-filter="subcounty" disabled>
+                <option value="">All Subcounties</option>
+            </select>
+        </div>
 
         <!-- Features -->
         <div class="filter-group">

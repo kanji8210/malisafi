@@ -194,6 +194,16 @@ class Property_Filters_Ajax {
             );
             $has_tax_filters = true;
         }
+
+        // Status (taxonomy)
+        if (!empty($filters['status'])) {
+            $tax_query[] = array(
+                'taxonomy' => 'malisafi_property_status',
+                'field' => 'slug',
+                'terms' => sanitize_text_field($filters['status']),
+            );
+            $has_tax_filters = true;
+        }
         
         // Location
         if (!empty($filters['location'])) {
@@ -213,11 +223,21 @@ class Property_Filters_Ajax {
         $meta_query = array('relation' => 'AND');
         $has_meta_filters = false;
         
-        // Status
-        if (!empty($filters['status'])) {
+        // County
+        if (!empty($filters['county'])) {
             $meta_query[] = array(
-                'key' => '_malisafi_status',
-                'value' => sanitize_text_field($filters['status']),
+                'key' => '_malisafi_county',
+                'value' => sanitize_text_field($filters['county']),
+                'compare' => '=',
+            );
+            $has_meta_filters = true;
+        }
+
+        // Subcounty
+        if (!empty($filters['subcounty'])) {
+            $meta_query[] = array(
+                'key' => '_malisafi_subcounty',
+                'value' => sanitize_text_field($filters['subcounty']),
                 'compare' => '=',
             );
             $has_meta_filters = true;
