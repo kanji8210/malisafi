@@ -677,6 +677,49 @@ select.form-control {
         width: 100%;
         justify-content: center;
     }
+
+    .malisafi-admin-property-form .form-table,
+    .malisafi-admin-property-form .form-table tbody,
+    .malisafi-admin-property-form .form-table tr,
+    .malisafi-admin-property-form .form-table th,
+    .malisafi-admin-property-form .form-table td {
+        display: block;
+        width: 100%;
+    }
+
+    .malisafi-admin-property-form .form-table tr {
+        margin-bottom: 16px;
+        padding-bottom: 16px;
+        border-bottom: 1px solid var(--mls-border-light, #e5e7eb);
+    }
+
+    .malisafi-admin-property-form .form-table tr:last-child {
+        margin-bottom: 0;
+        padding-bottom: 0;
+        border-bottom: 0;
+    }
+
+    .malisafi-admin-property-form .form-table th {
+        padding: 0 0 6px 0;
+    }
+
+    .malisafi-admin-property-form .form-table td {
+        padding: 0;
+    }
+
+    .malisafi-admin-property-form .form-table .description {
+        margin-top: 6px;
+    }
+
+    .malisafi-admin-property-form .form-table input[type="text"],
+    .malisafi-admin-property-form .form-table input[type="number"],
+    .malisafi-admin-property-form .form-table input[type="email"],
+    .malisafi-admin-property-form .form-table input[type="tel"],
+    .malisafi-admin-property-form .form-table select,
+    .malisafi-admin-property-form .form-table textarea {
+        width: 100%;
+        max-width: 100%;
+    }
 }
 
 /* Loading State */
