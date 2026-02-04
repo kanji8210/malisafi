@@ -170,7 +170,7 @@ class PublicArea {
      */
     public function properties_shortcode($atts) {
         if (class_exists('Malisafi_Shortcodes') && method_exists('Malisafi_Shortcodes', 'properties_with_filters')) {
-            return Malisafi_Shortcodes::properties_with_filters($atts);
+            return \Malisafi_Shortcodes::properties_with_filters($atts);
         }
 
         $atts = shortcode_atts(array(
