@@ -93,7 +93,7 @@
 .malisafi-kenya-map svg path:hover,
 .malisafi-kenya-map .county-shape:hover {
   fill: var(--color-blue);
-  stroke: var(--color-blue);
+  stroke: #fff;
   opacity: 1;
   filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.15));
 }
@@ -101,7 +101,7 @@
 .malisafi-kenya-map svg path.is-selected,
 .malisafi-kenya-map .county-shape.is-selected {
   fill: color-mix(in srgb, var(--wp-green) 60%, transparent);
-  stroke: var(--wp-green);
+  stroke: #fff;
   opacity: 1;
   filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.15));
 }
