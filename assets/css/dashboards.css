@@ -435,6 +435,47 @@
     padding: 20px;
 }
 
+.malisafi-owner-properties .owner-properties-list {
+    display: grid;
+    gap: 16px;
+}
+
+.malisafi-owner-properties .property-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    padding: 16px;
+    border: 1px solid var(--mls-border-light);
+    border-radius: var(--mls-radius-lg);
+    background: var(--mls-bg-primary);
+    box-shadow: var(--mls-shadow-sm);
+}
+
+.malisafi-owner-properties .property-info h3 {
+    margin: 0 0 6px;
+    font-size: 16px;
+    color: var(--mls-text-primary);
+}
+
+.malisafi-owner-properties .property-meta {
+    display: flex;
+    gap: 12px;
+    color: var(--mls-text-secondary);
+    font-size: 13px;
+}
+
+.malisafi-owner-properties .property-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.malisafi-owner-properties .property-actions .button {
+    padding: 6px 12px;
+    border-radius: var(--mls-radius-md);
+}
+
 .page-header {
     display: flex;
     justify-content: space-between;
