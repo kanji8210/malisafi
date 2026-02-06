@@ -223,6 +223,34 @@ class Page_Manager {
             'description' => 'User registration page',
             'parent' => 0
         ),
+        'register_client' => array(
+            'title' => 'Register - Client',
+            'slug' => 'register-client',
+            'shortcode' => '[malisafi_register_client]',
+            'description' => 'Client registration page',
+            'parent' => 0
+        ),
+        'register_agent' => array(
+            'title' => 'Register - Agent',
+            'slug' => 'register-agent',
+            'shortcode' => '[malisafi_register_agent]',
+            'description' => 'Agent registration page',
+            'parent' => 0
+        ),
+        'register_owner' => array(
+            'title' => 'Register - Owner',
+            'slug' => 'register-owner',
+            'shortcode' => '[malisafi_register_owner]',
+            'description' => 'Owner registration page',
+            'parent' => 0
+        ),
+        'register_developer' => array(
+            'title' => 'Register - Developer',
+            'slug' => 'register-developer',
+            'shortcode' => '[malisafi_register_developer]',
+            'description' => 'Developer registration page',
+            'parent' => 0
+        ),
         'account' => array(
             'title' => 'My Account',
             'slug' => 'my-account',

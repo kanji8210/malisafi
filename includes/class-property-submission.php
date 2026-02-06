@@ -38,7 +38,9 @@ class Property_Submission {
      * Enqueue assets
      */
     public static function enqueue_assets() {
-        if (is_page() && has_shortcode(get_post()->post_content, 'malisafi_submit_property')) {
+        if (is_page() && (has_shortcode(get_post()->post_content, 'malisafi_submit_property') ||
+                          has_shortcode(get_post()->post_content, 'malisafi_property_submit') ||
+                          has_shortcode(get_post()->post_content, 'malisafi_agent_add_property'))) {
             wp_enqueue_media();
             wp_enqueue_script('jquery-ui-sortable');
             
@@ -129,10 +131,9 @@ class Property_Submission {
             }
         }
 
-        // Load admin form template for frontend usage
-        $is_frontend = true;
+        // Load wizard template for frontend usage
         ob_start();
-        include MALISAFI_MLS_PATH . 'admin/templates/property-edit-form.php';
+        include MALISAFI_MLS_PATH . 'templates/property-submission-wizard.php';
         return ob_get_clean();
     }
     
@@ -190,8 +191,8 @@ class Property_Submission {
         
         if ($limits) {
             $max_properties = 0;
-            if (isset($limits->max_properties)) {
-                $max_properties = intval($limits->max_properties);
+            if (isset($limits->max_listings)) {
+                $max_properties = intval($limits->max_listings);
             }
             
             if ($max_properties > 0 && $property_count >= $max_properties) {

@@ -96,6 +96,7 @@ class Dashboard_Shortcodes {
 		}
 
 		$user_id = get_current_user_id();
+		$logout_url = wp_logout_url(home_url());
 		$favorites_url = Page_Manager::get_page_url('client_favorites');
 		$searches_url = Page_Manager::get_page_url('client_searches');
 		$inquiries_url = Page_Manager::get_page_url('client_inquiries');
@@ -103,7 +104,12 @@ class Dashboard_Shortcodes {
 		ob_start();
 		?>
 		<div class="malisafi-client-dashboard">
-			<h1><?php _e('My Dashboard', 'malisafi-mls'); ?></h1>
+			<div class="dashboard-header">
+				<h1><?php _e('My Dashboard', 'malisafi-mls'); ?></h1>
+				<a class="button button-secondary" href="<?php echo esc_url($logout_url); ?>">
+					<?php _e('Logout', 'malisafi-mls'); ?>
+				</a>
+			</div>
 			<div class="dashboard-cards">
 				<div class="dashboard-card">
 					<h3><?php _e('Favorites', 'malisafi-mls'); ?></h3>
@@ -298,13 +304,19 @@ class Dashboard_Shortcodes {
 		}
 
 		$user_id = get_current_user_id();
+		$logout_url = wp_logout_url(home_url());
 		$properties_url = Page_Manager::get_page_url('owner_properties');
 		$inquiries_url = Page_Manager::get_page_url('owner_inquiries');
 
 		ob_start();
 		?>
 		<div class="malisafi-owner-dashboard">
-			<h1><?php _e('Owner Dashboard', 'malisafi-mls'); ?></h1>
+			<div class="dashboard-header">
+				<h1><?php _e('Owner Dashboard', 'malisafi-mls'); ?></h1>
+				<a class="button button-secondary" href="<?php echo esc_url($logout_url); ?>">
+					<?php _e('Logout', 'malisafi-mls'); ?>
+				</a>
+			</div>
 			<p><?php _e('Manage your properties and inquiries.', 'malisafi-mls'); ?></p>
 			<ul class="dashboard-links">
 				<?php if ($properties_url): ?>
@@ -333,16 +345,42 @@ class Dashboard_Shortcodes {
 			'post_status' => array('publish', 'pending', 'draft')
 		]);
 
+		$edit_base = Page_Manager::get_page_url('owner_add_property');
+
 		ob_start();
 		?>
 		<div class="malisafi-owner-properties">
 			<h1><?php _e('My Properties', 'malisafi-mls'); ?></h1>
 			<?php if ($query->have_posts()) : ?>
-				<ul class="owner-properties-list">
+				<div class="owner-properties-list">
 					<?php while ($query->have_posts()) : $query->the_post(); ?>
-						<li><a href="<?php the_permalink(); ?>"><?php the_title(); ?></a></li>
+						<?php
+						$edit_url = $edit_base ? add_query_arg('property_id', get_the_ID(), $edit_base) : '';
+						$status = get_post_status();
+						?>
+						<div class="property-item">
+							<div class="property-info">
+								<h3><a href="<?php the_permalink(); ?>"><?php the_title(); ?></a></h3>
+								<div class="property-meta">
+									<span class="status status-<?php echo esc_attr($status); ?>">
+										<?php echo esc_html(ucfirst($status)); ?>
+									</span>
+									<span class="date"><?php echo esc_html(get_the_date()); ?></span>
+								</div>
+							</div>
+							<div class="property-actions">
+								<?php if ($edit_url) : ?>
+									<a class="button button-secondary" href="<?php echo esc_url($edit_url); ?>">
+										<?php _e('Edit', 'malisafi-mls'); ?>
+									</a>
+								<?php endif; ?>
+								<a class="button" href="<?php echo esc_url(get_permalink()); ?>">
+									<?php _e('View', 'malisafi-mls'); ?>
+								</a>
+							</div>
+						</div>
 					<?php endwhile; ?>
-				</ul>
+				</div>
 			<?php else : ?>
 				<p><?php _e('No properties found.', 'malisafi-mls'); ?></p>
 			<?php endif; ?>
@@ -400,6 +438,7 @@ class Dashboard_Shortcodes {
 		}
 
 		$user_id = get_current_user_id();
+		$logout_url = wp_logout_url(home_url());
 		$projects_url = Page_Manager::get_page_url('developer_projects');
 		$add_project_url = Page_Manager::get_page_url('developer_add_project');
 		$analytics_url = Page_Manager::get_page_url('developer_analytics');
@@ -428,7 +467,12 @@ class Dashboard_Shortcodes {
 		?>
 		<div class="malisafi-developer-dashboard">
 			<div class="developer-header">
-				<h1><?php _e('Developer Dashboard', 'malisafi-mls'); ?></h1>
+				<div class="dashboard-header">
+					<h1><?php _e('Developer Dashboard', 'malisafi-mls'); ?></h1>
+					<a class="button button-secondary" href="<?php echo esc_url($logout_url); ?>">
+						<?php _e('Logout', 'malisafi-mls'); ?>
+					</a>
+				</div>
 				<p><?php _e('Track your projects, milestones, and linked property performance.', 'malisafi-mls'); ?></p>
 			</div>
 

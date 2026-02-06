@@ -19,8 +19,16 @@ defined('ABSPATH') || exit;
             <?php wp_nonce_field('malisafi_registration', 'malisafi_registration_nonce'); ?>
             
             <?php
-            // Get preselected account type from URL parameter
-            $preselected_type = isset($_GET['type']) ? sanitize_text_field($_GET['type']) : '';
+            // Get preselected account type from shortcode attribute or URL parameter
+            $preselected_type = isset($preselected_type) ? sanitize_text_field($preselected_type) : '';
+            if (empty($preselected_type) && isset($_GET['type'])) {
+                $preselected_type = sanitize_text_field($_GET['type']);
+            }
+
+            $allowed_types = array('client', 'agent', 'owner', 'developer');
+            if (!in_array($preselected_type, $allowed_types, true)) {
+                $preselected_type = '';
+            }
             ?>
             
             <!-- Step Progress Indicator with Bar -->
@@ -52,8 +60,8 @@ defined('ABSPATH') || exit;
                 <p class="step-description"><?php _e('Choose the option that best describes you', 'malisafi-mls'); ?></p>
                 
                 <div class="account-type-cards">
-                    <label class="account-card" data-type="client">
-                        <input type="radio" name="account_type" value="client" required>
+                    <label class="account-card<?php echo $preselected_type === 'client' ? ' selected' : ''; ?>" data-type="client">
+                        <input type="radio" name="account_type" value="client" required <?php checked($preselected_type, 'client'); ?>>
                         <div class="card-content">
                             <div class="card-icon">🏠</div>
                             <h4><?php _e('Looking for Property', 'malisafi-mls'); ?></h4>
@@ -62,8 +70,8 @@ defined('ABSPATH') || exit;
                         <div class="card-checkmark">✓</div>
                     </label>
                     
-                    <label class="account-card" data-type="agent">
-                        <input type="radio" name="account_type" value="agent" required>
+                    <label class="account-card<?php echo $preselected_type === 'agent' ? ' selected' : ''; ?>" data-type="agent">
+                        <input type="radio" name="account_type" value="agent" required <?php checked($preselected_type, 'agent'); ?>>
                         <div class="card-content">
                             <div class="card-icon">💼</div>
                             <h4><?php _e('Real Estate Agent', 'malisafi-mls'); ?></h4>
@@ -72,8 +80,8 @@ defined('ABSPATH') || exit;
                         <div class="card-checkmark">✓</div>
                     </label>
                     
-                    <label class="account-card" data-type="owner">
-                        <input type="radio" name="account_type" value="owner" required>
+                    <label class="account-card<?php echo $preselected_type === 'owner' ? ' selected' : ''; ?>" data-type="owner">
+                        <input type="radio" name="account_type" value="owner" required <?php checked($preselected_type, 'owner'); ?>>
                         <div class="card-content">
                             <div class="card-icon">🔑</div>
                             <h4><?php _e('Property Owner', 'malisafi-mls'); ?></h4>
@@ -82,8 +90,8 @@ defined('ABSPATH') || exit;
                         <div class="card-checkmark">✓</div>
                     </label>
                     
-                    <label class="account-card" data-type="developer">
-                        <input type="radio" name="account_type" value="developer" required>
+                    <label class="account-card<?php echo $preselected_type === 'developer' ? ' selected' : ''; ?>" data-type="developer">
+                        <input type="radio" name="account_type" value="developer" required <?php checked($preselected_type, 'developer'); ?>>
                         <div class="card-content">
                             <div class="card-icon">🏗️</div>
                             <h4><?php _e('Developer', 'malisafi-mls'); ?></h4>

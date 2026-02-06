@@ -96,7 +96,10 @@
             var propertyId = $button.data('property-id');
             
             if (!malisafiProperty.user_logged_in) {
-                alert('Please log in to add properties to your favorites.');
+                showNotification('Register to add this property to your favorites.', 'info');
+                if (window.confirm('Register now?')) {
+                    window.location.href = malisafiProperty.register_client_url || '';
+                }
                 return;
             }
             

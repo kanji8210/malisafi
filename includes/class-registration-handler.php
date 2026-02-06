@@ -28,7 +28,11 @@ class Malisafi_Registration_Handler {
     public static function enqueue_scripts() {
         // Only load on registration page
         if (is_page() && (has_shortcode(get_post()->post_content, 'malisafi_registration') || 
-                          has_shortcode(get_post()->post_content, 'malisafi_register'))) {
+                  has_shortcode(get_post()->post_content, 'malisafi_register') ||
+                  has_shortcode(get_post()->post_content, 'malisafi_register_client') ||
+                  has_shortcode(get_post()->post_content, 'malisafi_register_agent') ||
+                  has_shortcode(get_post()->post_content, 'malisafi_register_owner') ||
+                  has_shortcode(get_post()->post_content, 'malisafi_register_developer'))) {
             
             wp_enqueue_style(
                 'malisafi-registration-form',

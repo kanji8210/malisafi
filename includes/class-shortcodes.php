@@ -23,6 +23,10 @@ class Malisafi_Shortcodes {
         add_shortcode('malisafi_properties_thumbnails', array(__CLASS__, 'properties_thumbnails')); // Thumbnails only grid
         add_shortcode('malisafi_registration', array(__CLASS__, 'registration_form'));
         add_shortcode('malisafi_register', array(__CLASS__, 'registration_form')); // Alias
+        add_shortcode('malisafi_register_client', array(__CLASS__, 'registration_form_client'));
+        add_shortcode('malisafi_register_agent', array(__CLASS__, 'registration_form_agent'));
+        add_shortcode('malisafi_register_owner', array(__CLASS__, 'registration_form_owner'));
+        add_shortcode('malisafi_register_developer', array(__CLASS__, 'registration_form_developer'));
         add_shortcode('malisafi_property_map', array(__CLASS__, 'property_map')); // Property map view
         add_shortcode('malisafi_kenya_map_filter', array(__CLASS__, 'kenya_map_filter')); // Kenya SVG map filter
         add_shortcode('malisafi_city_list', array(__CLASS__, 'city_list')); // City list with search links
@@ -30,6 +34,7 @@ class Malisafi_Shortcodes {
         add_shortcode('malisafi_agents', array(__CLASS__, 'agents_list')); // Agents listing
         add_shortcode('malisafi_add_property', array(__CLASS__, 'add_property_page')); // Add property with permission checks
         add_shortcode('malisafi_user_menu', array(__CLASS__, 'user_menu')); // User menu with logout
+        add_shortcode('malisafi_user_status', array(__CLASS__, 'user_status')); // Header status with role + logout
     }
     
     /**
@@ -484,7 +489,7 @@ class Malisafi_Shortcodes {
      *
      * @return string
      */
-    public static function registration_form() {
+    public static function registration_form($atts = array()) {
         // If user is already logged in, redirect to dashboard
         if (is_user_logged_in()) {
             return '<div class="malisafi-notice">
@@ -492,6 +497,12 @@ class Malisafi_Shortcodes {
                 <a href="' . home_url('/dashboard') . '">' . __('Go to Dashboard', 'malisafi-mls') . '</a></p>
             </div>';
         }
+
+        $atts = shortcode_atts(array(
+            'type' => ''
+        ), $atts);
+
+        $preselected_type = sanitize_text_field($atts['type']);
         
         ob_start();
         
@@ -499,6 +510,38 @@ class Malisafi_Shortcodes {
         include MALISAFI_MLS_PATH . 'templates/registration-form.php';
         
         return ob_get_clean();
+    }
+
+    /**
+     * Registration form - Client
+     * Shortcode: [malisafi_register_client]
+     */
+    public static function registration_form_client() {
+        return self::registration_form(array('type' => 'client'));
+    }
+
+    /**
+     * Registration form - Agent
+     * Shortcode: [malisafi_register_agent]
+     */
+    public static function registration_form_agent() {
+        return self::registration_form(array('type' => 'agent'));
+    }
+
+    /**
+     * Registration form - Owner
+     * Shortcode: [malisafi_register_owner]
+     */
+    public static function registration_form_owner() {
+        return self::registration_form(array('type' => 'owner'));
+    }
+
+    /**
+     * Registration form - Developer
+     * Shortcode: [malisafi_register_developer]
+     */
+    public static function registration_form_developer() {
+        return self::registration_form(array('type' => 'developer'));
     }
     
     /**
@@ -783,6 +826,85 @@ class Malisafi_Shortcodes {
             <?php
         }
         
+        return ob_get_clean();
+    }
+
+    /**
+     * User status header shortcode
+     * Shortcode: [malisafi_user_status]
+     *
+     * Shows "Logged in as" with role and logout option
+     */
+    public static function user_status($atts) {
+        $atts = shortcode_atts(array(
+            'show_avatar' => 'no',
+            'login_text' => __('Login', 'malisafi-mls'),
+            'logout_text' => __('Logout', 'malisafi-mls'),
+            'show_role' => 'yes'
+        ), $atts);
+
+        wp_enqueue_style(
+            'malisafi-user-status',
+            MALISAFI_MLS_URL . 'assets/css/user-status.css',
+            array('malisafi-mls-variables'),
+            MALISAFI_MLS_VERSION
+        );
+
+        ob_start();
+
+        if (is_user_logged_in()) {
+            $current_user = wp_get_current_user();
+            $display_name = !empty($current_user->display_name) ? $current_user->display_name : $current_user->user_login;
+            $logout_url = wp_logout_url(home_url());
+
+            $role_labels = array(
+                'malisafi_client' => __('Client', 'malisafi-mls'),
+                'malisafi_agent_basic' => __('Agent', 'malisafi-mls'),
+                'malisafi_agent_premium' => __('Agent Premium', 'malisafi-mls'),
+                'malisafi_owner' => __('Owner', 'malisafi-mls'),
+                'malisafi_developer' => __('Developer', 'malisafi-mls'),
+                'malisafi_moderator' => __('Moderator', 'malisafi-mls'),
+                'administrator' => __('Administrator', 'malisafi-mls')
+            );
+
+            $role_label = '';
+            if (!empty($current_user->roles)) {
+                $primary_role = $current_user->roles[0];
+                $role_label = $role_labels[$primary_role] ?? ucfirst(str_replace('_', ' ', $primary_role));
+            }
+            ?>
+            <div class="malisafi-user-status">
+                <?php if ($atts['show_avatar'] === 'yes') : ?>
+                    <div class="user-avatar">
+                        <?php echo get_avatar($current_user->ID, 28); ?>
+                    </div>
+                <?php endif; ?>
+                <span class="user-text">
+                    <?php _e('Logged in as', 'malisafi-mls'); ?>
+                    <strong><?php echo esc_html($display_name); ?></strong>
+                    <?php if ($atts['show_role'] === 'yes' && !empty($role_label)) : ?>
+                        <span class="user-role">(<?php echo esc_html($role_label); ?>)</span>
+                    <?php endif; ?>
+                </span>
+                <a class="user-logout" href="<?php echo esc_url($logout_url); ?>">
+                    <?php echo esc_html($atts['logout_text']); ?>
+                </a>
+            </div>
+            <?php
+        } else {
+            $login_url = \MalisafiMLS\Page_Manager::get_page_url('login');
+            if (!$login_url) {
+                $login_url = wp_login_url();
+            }
+            ?>
+            <div class="malisafi-user-status logged-out">
+                <a class="user-login" href="<?php echo esc_url($login_url); ?>">
+                    <?php echo esc_html($atts['login_text']); ?>
+                </a>
+            </div>
+            <?php
+        }
+
         return ob_get_clean();
     }
 }

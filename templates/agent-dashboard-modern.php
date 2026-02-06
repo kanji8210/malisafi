@@ -49,15 +49,25 @@ $recent_properties = get_posts([
 
 // Current page
 $current_page = isset($_GET['section']) ? sanitize_text_field($_GET['section']) : 'dashboard';
+
+$logout_url = wp_logout_url(home_url());
 ?>
 
 <div class="malisafi-agent-dashboard-modern">
+    <div class="dashboard-header">
+        <a class="button button-secondary" href="<?php echo esc_url($logout_url); ?>">
+            <?php _e('Logout', 'malisafi-mls'); ?>
+        </a>
+    </div>
     <!-- Main Content -->
     <main class="agent-main-content">
         <?php
         switch ($current_page) {
             case 'dashboard':
                 include __DIR__ . '/agent-dashboard-home.php';
+                break;
+            case 'properties':
+                include __DIR__ . '/agent-dashboard-properties.php';
                 break;
             case 'leads':
                 include __DIR__ . '/agent-dashboard-leads.php';

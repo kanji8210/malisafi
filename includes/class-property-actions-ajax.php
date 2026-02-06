@@ -55,11 +55,25 @@ class Property_Actions_Ajax {
                 '1.0.0',
                 true
             );
+
+            $login_url = Page_Manager::get_page_url('login');
+            if (!$login_url) {
+                $login_url = wp_login_url(get_permalink());
+            } else {
+                $login_url = add_query_arg('redirect_to', rawurlencode(get_permalink()), $login_url);
+            }
+
+            $register_client_url = Page_Manager::get_page_url('register_client');
+            if (!$register_client_url) {
+                $register_client_url = home_url('/register-client/');
+            }
             
             wp_localize_script('malisafi-single-property', 'malisafiProperty', array(
                 'ajax_url' => admin_url('admin-ajax.php'),
                 'nonce' => wp_create_nonce('malisafi_property_nonce'),
-                'user_logged_in' => is_user_logged_in()
+                'user_logged_in' => is_user_logged_in(),
+                'login_url' => $login_url,
+                'register_client_url' => $register_client_url
             ));
         }
     }
@@ -115,7 +129,22 @@ class Property_Actions_Ajax {
      * Handle favorite for non-logged in users
      */
     public function toggle_favorite_guest() {
-        wp_send_json_error(array('message' => 'Please log in to add properties to your favorites.'));
+        $login_url = Page_Manager::get_page_url('login');
+        if (!$login_url) {
+            $login_url = wp_login_url();
+        }
+
+        $register_client_url = Page_Manager::get_page_url('register_client');
+        if (!$register_client_url) {
+            $register_client_url = home_url('/register-client/');
+        }
+
+        wp_send_json_error(array(
+            'message' => 'Please log in as a client to add properties to your favorites.',
+            'login_url' => $login_url,
+            'register_client_url' => $register_client_url,
+            'login_required' => true
+        ));
     }
     
     /**
