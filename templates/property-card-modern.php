@@ -70,7 +70,8 @@ $is_new = (time() - $post_date) < (7 * 24 * 60 * 60);
 <article class="property-card-modern" data-url="<?php echo esc_url($property_url); ?>" data-property-id="<?php echo $property_id; ?>">
     
     <div class="property-image-wrapper">
-        <?php echo $image_html; ?>
+        <a href="<?php echo esc_url($property_url); ?>" class="property-image-link" aria-label="<?php echo esc_attr(get_the_title()); ?>">
+            <?php echo $image_html; ?>
         
         <?php 
         ?>
@@ -95,6 +96,7 @@ $is_new = (time() - $post_date) < (7 * 24 * 60 * 60);
             ?>
             <span class="status-badge <?php echo esc_attr($status_class); ?>"><?php echo esc_html($status_display); ?></span>
         </div>
+        </a>
         
         <?php
         // Check if property is favorited

@@ -13,36 +13,44 @@
 }
 
 .filter-row-status .status-buttons {
+    display: flex;
+    flex-wrap: wrap;
     gap: var(--spacing-sm);
     align-items: flex-start;
     gap: var(--spacing-sm);
 }
 
+.status-btn {
     flex: 0 0 auto;
     min-width: 180px;
-    background: var(--color-ash-white);
+    background: rgba(255, 255, 255, 0.65);
     color: var(--text-base);
-    padding: 8px 14px;
+    padding: 10px 16px;
     border-radius: var(--radius-md);
-    flex: 0 0 auto;
-    min-width: 220px;
     font-weight: 600;
     font-size: 13px;
     transition: var(--transition-fast);
-}
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    cursor: pointer;
     width: auto;
-    min-width: 180px;
     max-width: 320px;
+    box-shadow: var(--shadow-sm);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+}
 .status-btn:hover {
     transform: translateY(-1px);
     box-shadow: var(--shadow-sm);
 }
-
-    width: 100%;
+.status-btn:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px var(--mls-focus-ring), var(--shadow-sm);
+}
 .status-btn.active {
     background: var(--btn-primary-bg);
     color: var(--btn-primary-text);
     border-color: var(--btn-primary-bg);
+    box-shadow: var(--shadow-md);
 }
 
 .filter-row-controls .filter-controls {
@@ -56,17 +64,21 @@
     flex: 0 1 220px;
     min-width: 180px;
     width: auto;
+}
 
 .filter-select,
 .filter-search-input {
     width: 100%;
     padding: 12px 14px;
-    border: 1px solid var(--color-light-gray);
+    border: 1px solid rgba(0, 0, 0, 0.08);
     border-radius: var(--radius-md);
-    background: var(--color-ash-white);
+    background: rgba(255, 255, 255, 0.65);
     font-size: 14px;
     color: var(--text-base);
     transition: var(--transition-fast);
+    box-shadow: var(--shadow-sm);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
 }
 
 .filter-select:focus,

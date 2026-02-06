@@ -126,26 +126,28 @@ error_log('MALISAFI DEBUG: Dashboard stats - Total: ' . $total_properties . ', P
                 <?php foreach ($recent_properties as $property): ?>
                     <div class="property-item">
                         <div class="property-thumbnail">
-                            <?php 
-                            $images = get_post_meta($property->ID, '_property_images', true);
-                            if (!empty($images) && is_array($images)) {
-                                echo wp_get_attachment_image($images[0], 'thumbnail');
-                            } else {
-                                echo '<div class="placeholder-img"><span class="dashicons dashicons-admin-home"></span></div>';
-                            }
-                            
-                            // Add status badge - always show, get from taxonomy
-                            $status_terms = wp_get_post_terms($property->ID, 'malisafi_property_status');
-                            $property_status = (!empty($status_terms) && !is_wp_error($status_terms)) ? $status_terms[0]->name : '';
-                            if (!empty($property_status)) {
-                                $status_display = ucwords(str_replace('-', ' ', $property_status));
-                                $status_class = 'status-' . sanitize_html_class(strtolower(str_replace(' ', '-', $property_status)));
-                            } else {
-                                $status_display = 'Status Not Recorded';
-                                $status_class = 'status-not-recorded';
-                            }
-                            echo '<span class="status-badge ' . esc_attr($status_class) . '">' . esc_html($status_display) . '</span>';
-                            ?>
+                            <a href="<?php echo esc_url(get_permalink($property->ID)); ?>" aria-label="<?php echo esc_attr($property->post_title); ?>">
+                                <?php 
+                                $images = get_post_meta($property->ID, '_property_images', true);
+                                if (!empty($images) && is_array($images)) {
+                                    echo wp_get_attachment_image($images[0], 'thumbnail');
+                                } else {
+                                    echo '<div class="placeholder-img"><span class="dashicons dashicons-admin-home"></span></div>';
+                                }
+                                
+                                // Add status badge - always show, get from taxonomy
+                                $status_terms = wp_get_post_terms($property->ID, 'malisafi_property_status');
+                                $property_status = (!empty($status_terms) && !is_wp_error($status_terms)) ? $status_terms[0]->name : '';
+                                if (!empty($property_status)) {
+                                    $status_display = ucwords(str_replace('-', ' ', $property_status));
+                                    $status_class = 'status-' . sanitize_html_class(strtolower(str_replace(' ', '-', $property_status)));
+                                } else {
+                                    $status_display = 'Status Not Recorded';
+                                    $status_class = 'status-not-recorded';
+                                }
+                                echo '<span class="status-badge ' . esc_attr($status_class) . '">' . esc_html($status_display) . '</span>';
+                                ?>
+                            </a>
                         </div>
                         <div class="property-info">
                             <h3><?php echo esc_html($property->post_title); ?></h3>
