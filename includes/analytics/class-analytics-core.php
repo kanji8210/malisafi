@@ -163,17 +163,18 @@ class Analytics_Core {
                 MAX(p.post_date) as last_property_added
             FROM {$wpdb->users} u
             LEFT JOIN {$wpdb->posts} p ON u.ID = p.post_author AND p.post_type = 'malisafi_property'
+            LEFT JOIN {$wpdb->prefix}mf_properties mp ON p.ID = mp.post_id
             LEFT JOIN (
-                SELECT property_id, COUNT(*) as view_count
+                SELECT post_id, COUNT(*) as view_count
                 FROM {$wpdb->prefix}mf_property_views
-                GROUP BY property_id
-            ) pv ON p.ID = pv.property_id
+                GROUP BY post_id
+            ) pv ON p.ID = pv.post_id
             LEFT JOIN (
                 SELECT property_id, COUNT(*) as inquiry_count
                 FROM {$wpdb->prefix}mf_property_interactions
                 WHERE interaction_type = 'inquiry'
                 GROUP BY property_id
-            ) pi ON p.ID = pi.property_id
+            ) pi ON mp.property_id = pi.property_id
             LEFT JOIN {$wpdb->prefix}mf_user_activity ua ON u.ID = ua.user_id AND ua.activity_type IN ('login', 'property_add_complete', 'property_edit')
             GROUP BY u.ID
             HAVING properties > 0 OR activities > 0

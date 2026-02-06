@@ -163,7 +163,50 @@ class Analytics_Tracker {
         ", $post->ID));
         
         if (!$property_meta) {
-            return;
+            $listing_type = get_post_meta($post->ID, '_malisafi_listing_type', true);
+            $transaction_type = in_array($listing_type, ['sale', 'rent', 'lease'], true) ? $listing_type : 'sale';
+
+            $property_type = 'residential';
+            $type_terms = wp_get_post_terms($post->ID, 'malisafi_property_type');
+            if (!is_wp_error($type_terms) && !empty($type_terms)) {
+                $slug = $type_terms[0]->slug ?? '';
+                if (stripos($slug, 'commercial') !== false) {
+                    $property_type = 'commercial';
+                } elseif (stripos($slug, 'development') !== false) {
+                    $property_type = 'development';
+                } elseif (stripos($slug, 'mixed') !== false) {
+                    $property_type = 'mixed-use';
+                }
+            }
+
+            $status_map = [
+                'publish' => 'published',
+                'pending' => 'pending_review',
+                'draft' => 'draft'
+            ];
+            $status = $status_map[$post->post_status] ?? 'draft';
+
+            $wpdb->insert(
+                $wpdb->prefix . 'mf_properties',
+                [
+                    'post_id' => $post->ID,
+                    'author_id' => (int) $post->post_author,
+                    'property_type' => $property_type,
+                    'transaction_type' => $transaction_type,
+                    'price' => get_post_meta($post->ID, '_malisafi_price', true),
+                    'price_currency' => get_post_meta($post->ID, '_malisafi_currency', true) ?: 'KES',
+                    'status' => $status
+                ]
+            );
+
+            $property_meta = $wpdb->get_row($wpdb->prepare("
+                SELECT * FROM {$wpdb->prefix}mf_properties 
+                WHERE post_id = %d
+            ", $post->ID));
+
+            if (!$property_meta) {
+                return;
+            }
         }
         
         $session_id = self::get_session_id();
@@ -284,12 +327,19 @@ class Analytics_Tracker {
         global $wpdb;
         
         $step_map = [
+            'form_loaded' => 'form_loaded',
+            'submit_attempt' => 'submit_attempt',
             'Basic Information' => 'basic_info',
+            'Basic Info' => 'basic_info',
             'Pricing' => 'pricing',
             'Property Details' => 'details',
+            'Details' => 'details',
             'Location' => 'location',
             'Amenities & Features' => 'amenities',
-            'Property Images' => 'images'
+            'Features' => 'amenities',
+            'Property Images' => 'images',
+            'Images' => 'images',
+            'Review' => 'submit_attempt'
         ];
         
         $section = sanitize_text_field($_POST['section'] ?? '');
@@ -388,7 +438,16 @@ class Analytics_Tracker {
      */
     public static function enqueue_tracking_scripts() {
         // Only on property pages and submission forms
-        if (!is_singular('malisafi_property') && !is_page(['agent-add-property', 'owner-add-property', 'developer-add-property'])) {
+        $is_submission_page = false;
+        if (is_page()) {
+            $content = get_post()->post_content ?? '';
+            $is_submission_page = has_shortcode($content, 'malisafi_submit_property')
+                || has_shortcode($content, 'malisafi_property_submit')
+                || has_shortcode($content, 'malisafi_agent_add_property')
+                || is_page(['add-property', 'list-property', 'add-project']);
+        }
+
+        if (!is_singular('malisafi_property') && !$is_submission_page) {
             return;
         }
         

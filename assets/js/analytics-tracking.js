@@ -159,8 +159,8 @@
         }, 30000);
     }
 
-    // Track form submission funnel
-    $('.malisafi-property-submit-form').each(function() {
+    // Track form submission funnel (wizard)
+    $('.wizard-form, .malisafi-property-submit-form').each(function() {
         const $form = $(this);
         let formStartTime = Date.now();
 
@@ -173,10 +173,13 @@
             has_value: 1
         });
 
-        // Track section interactions
-        $('.form-section').on('blur', ':input', function() {
+        // Track section interactions (wizard steps or legacy sections)
+        $form.on('blur', ':input', function() {
+            const $step = $(this).closest('.wizard-step');
             const $section = $(this).closest('.form-section');
-            const sectionTitle = $section.find('.form-section-title, h3, h2').first().text().trim();
+            const sectionTitle = $step.length
+                ? $step.find('h2, h3').first().text().trim()
+                : $section.find('.form-section-title, h3, h2').first().text().trim();
             const fieldName = $(this).attr('name') || $(this).attr('id');
             const hasValue = $(this).val() ? 1 : 0;
 
