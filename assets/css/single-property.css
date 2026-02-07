@@ -1110,7 +1110,12 @@
 }
 
 .malisafi-modal.open {
-    display: flex;
+    display: flex !important;
+}
+
+/* Force hide modals without open class */
+.malisafi-modal:not(.open) {
+    display: none !important;
 }
 
 .modal-content {

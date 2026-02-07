@@ -833,7 +833,8 @@
         if ($sidebar.length) {
             const isMobile = window.matchMedia('(max-width: 900px)').matches;
             if (isMobile) {
-                $sidebar.addClass('is-collapsed');
+                // On mobile, filters are always visible at the top, no toggle needed
+                $sidebar.find('.filters-toggle').hide();
             }
         }
 
@@ -844,23 +845,17 @@
             const $icon = $btn.find('.dashicons');
 
             if (isMobile) {
-                $panel.toggleClass('is-open');
-                const isOpen = $panel.hasClass('is-open');
-                $btn.attr('aria-expanded', isOpen ? 'true' : 'false');
-                $btn.find('.filters-toggle-text').text(isOpen ? 'Hide' : 'Show');
-                if ($icon.length) {
-                    $icon.toggleClass('dashicons-arrow-down-alt2', !isOpen)
-                        .toggleClass('dashicons-arrow-up-alt2', isOpen);
-                }
-            } else {
-                $panel.toggleClass('is-collapsed');
-                const isCollapsed = $panel.hasClass('is-collapsed');
-                $btn.attr('aria-expanded', isCollapsed ? 'false' : 'true');
-                $btn.find('.filters-toggle-text').text(isCollapsed ? 'Show' : 'Hide');
-                if ($icon.length) {
-                    $icon.toggleClass('dashicons-arrow-down-alt2', isCollapsed)
-                        .toggleClass('dashicons-arrow-up-alt2', !isCollapsed);
-                }
+                // On mobile, filters are always visible, no toggle action needed
+                return;
+            }
+
+            $panel.toggleClass('is-collapsed');
+            const isCollapsed = $panel.hasClass('is-collapsed');
+            $btn.attr('aria-expanded', isCollapsed ? 'false' : 'true');
+            $btn.find('.filters-toggle-text').text(isCollapsed ? 'Show' : 'Hide');
+            if ($icon.length) {
+                $icon.toggleClass('dashicons-arrow-down-alt2', isCollapsed)
+                    .toggleClass('dashicons-arrow-up-alt2', !isCollapsed);
             }
         });
     });

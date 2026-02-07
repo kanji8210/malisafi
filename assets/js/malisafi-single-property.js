@@ -8,7 +8,9 @@
 
     // DOM Ready
     $(document).ready(function() {
-        console.log ("js single prperty loaded");
+        // Ensure no modals are open by default
+        $('.malisafi-modal').removeClass('open').hide();
+        $('body').removeClass('modal-open');
         
         // ===== GALLERY NAVIGATION =====
         var currentImageIndex = 0;
@@ -109,7 +111,7 @@
                 success: function(response) {
                     if (response.success) {
                         // Success - button state already updated
-                        console.log('Favorite updated');
+                        // Favorite updated successfully
                     } else {
                         // Revert if failed
                         $button.toggleClass('favorited');
@@ -163,19 +165,53 @@
         // ===== REPORT MODAL =====
         var $reportModal = $('#report-modal');
         var $reportForm = $('#report-form');
-        
+
         // Open report modal
-        $('.report-button').on('click', function() {
+        $('.report-button').on('click', function(e) {
+            e.preventDefault();
+            
+            // Check if user is logged in
+            if (!malisafi_ajax.user_logged_in) {
+                alert('You must be logged in to report a property. Please log in first.');
+                window.location.href = malisafi_ajax.login_url;
+                return;
+            }
+            
             var propertyId = $(this).data('property-id');
             $reportForm.find('input[name="property_id"]').val(propertyId);
             $reportModal.addClass('open');
             $('body').addClass('modal-open');
         });
         
-        // Close modal
-        $('.modal-close, .button-secondary.modal-close').on('click', function() {
-            $(this).closest('.malisafi-modal').removeClass('open');
+        // Close modal - Multiple ways to ensure it works
+        $('.modal-close, .button-secondary.modal-close').on('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            var $modal = $(this).closest('.malisafi-modal');
+            
+            // Force close with multiple methods
+            $modal.removeClass('open').hide();
             $('body').removeClass('modal-open');
+            
+            // Double-check after a short delay
+            setTimeout(function() {
+                if ($modal.hasClass('open') || $modal.is(':visible')) {
+                    $modal.removeClass('open').hide();
+                    $('body').removeClass('modal-open');
+                }
+            }, 100);
+            
+            return false;
+        });
+
+        // Also bind to the modal header close button specifically
+        $('.malisafi-modal .modal-header .modal-close').on('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            var $modal = $(this).closest('.malisafi-modal');
+            $modal.removeClass('open').hide();
+            $('body').removeClass('modal-open');
+            return false;
         });
         
         // Submit report form
@@ -187,7 +223,7 @@
             $.ajax({
                 url: malisafi_ajax.ajax_url,
                 type: 'POST',
-                data: formData + '&action=malisafi_report_property&nonce=' + malisafi_ajax.nonce,
+                data: formData + '&action=malisafi_report_property&nonce=' + malisafi_ajax.report_nonce,
                 beforeSend: function() {
                     $reportForm.find('.button-primary').prop('disabled', true).text('Submitting...');
                 },
@@ -206,6 +242,58 @@
                 },
                 complete: function() {
                     $reportForm.find('.button-primary').prop('disabled', false).text('Submit Report');
+                }
+            });
+        });
+        
+        // ===== INQUIRY MODAL =====
+        var $inquiryModal = $('#inquiry-modal');
+        var $inquiryForm = $('#inquiry-form');
+
+        // Open inquiry modal - ONLY when button is clicked
+        $('.inquiry-button').on('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            var propertyId = $(this).data('property-id');
+
+            // Ensure no other modals are open
+            $('.malisafi-modal').removeClass('open').hide();
+            $('body').removeClass('modal-open');
+
+            $inquiryForm.find('input[name="property_id"]').val(propertyId);
+            $inquiryModal.addClass('open');
+            $('body').addClass('modal-open');
+            return false;
+        });
+        
+        // Submit inquiry form
+        $inquiryForm.on('submit', function(e) {
+            e.preventDefault();
+            
+            var formData = $(this).serialize();
+            
+            $.ajax({
+                url: malisafi_ajax.ajax_url,
+                type: 'POST',
+                data: formData + '&action=malisafi_send_inquiry&nonce=' + malisafi_ajax.nonce,
+                beforeSend: function() {
+                    $inquiryForm.find('.button-primary').prop('disabled', true).text('Sending...');
+                },
+                success: function(response) {
+                    if (response.success) {
+                        alert('Thank you! Your inquiry has been sent successfully.');
+                        $inquiryModal.removeClass('open');
+                        $('body').removeClass('modal-open');
+                        $inquiryForm[0].reset();
+                    } else {
+                        alert(response.data || 'Failed to send inquiry. Please try again.');
+                    }
+                },
+                error: function() {
+                    alert('Network error. Please try again.');
+                },
+                complete: function() {
+                    $inquiryForm.find('.button-primary').prop('disabled', false).text('Send Inquiry');
                 }
             });
         });
@@ -321,18 +409,29 @@
         // ===== MODAL CLICK OUTSIDE =====
         $(document).on('click', function(e) {
             if ($(e.target).hasClass('malisafi-modal')) {
-                $(e.target).removeClass('open');
+                $(e.target).removeClass('open').hide();
                 $('body').removeClass('modal-open');
             }
         });
-        
+
+        // Prevent modal content clicks from closing modal
+        $(document).on('click', '.modal-content', function(e) {
+            e.stopPropagation();
+        });
+
         // ===== ESC KEY TO CLOSE MODAL =====
         $(document).on('keydown', function(e) {
             if (e.key === 'Escape') {
-                $('.malisafi-modal.open').removeClass('open');
+                $('.malisafi-modal.open').removeClass('open').hide();
                 $('body').removeClass('modal-open');
             }
         });
+
+        // Add a global function to force close modals (for emergency use)
+        window.forceCloseModals = function() {
+            $('.malisafi-modal').removeClass('open').hide();
+            $('body').removeClass('modal-open');
+        };
         
         // Initialize gallery
         initGallery();

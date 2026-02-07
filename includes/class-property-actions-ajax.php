@@ -26,8 +26,8 @@ class Property_Actions_Ajax {
         add_action('wp_ajax_malisafi_toggle_favorite', array($this, 'toggle_favorite'));
         add_action('wp_ajax_nopriv_malisafi_toggle_favorite', array($this, 'toggle_favorite_guest'));
         
-        add_action('wp_ajax_malisafi_report_property', array($this, 'report_property'));
-        add_action('wp_ajax_nopriv_malisafi_report_property', array($this, 'report_property'));
+        add_action('wp_ajax_malisafi_send_inquiry', array($this, 'send_inquiry'));
+        add_action('wp_ajax_nopriv_malisafi_send_inquiry', array($this, 'send_inquiry'));
         
         add_action('wp_ajax_malisafi_contact_agent', array($this, 'contact_agent'));
         add_action('wp_ajax_nopriv_malisafi_contact_agent', array($this, 'contact_agent'));
@@ -50,7 +50,7 @@ class Property_Actions_Ajax {
             
             wp_enqueue_script(
                 'malisafi-single-property',
-                MALISAFI_MLS_URL . 'assets/js/single-property.js',
+                MALISAFI_MLS_URL . 'assets/js/malisafi-single-property.js',
                 array('jquery'),
                 '1.0.0',
                 true
@@ -68,9 +68,10 @@ class Property_Actions_Ajax {
                 $register_client_url = home_url('/register-client/');
             }
             
-            wp_localize_script('malisafi-single-property', 'malisafiProperty', array(
+            wp_localize_script('malisafi-single-property', 'malisafi_ajax', array(
                 'ajax_url' => admin_url('admin-ajax.php'),
-                'nonce' => wp_create_nonce('malisafi_property_nonce'),
+                'nonce' => wp_create_nonce('malisafi_ajax_nonce'),
+                'report_nonce' => wp_create_nonce('malisafi_report_property'),
                 'user_logged_in' => is_user_logged_in(),
                 'login_url' => $login_url,
                 'register_client_url' => $register_client_url
@@ -148,30 +149,40 @@ class Property_Actions_Ajax {
     }
     
     /**
-     * Handle property report
+     * Handle property inquiry
      */
-    public function report_property() {
+    public function send_inquiry() {
+        // Debug logging
+        error_log('Malisafi: send_inquiry called');
+        error_log('POST data: ' . print_r($_POST, true));
+        
         // Verify nonce
-        if (!isset($_POST['nonce']) || !wp_verify_nonce($_POST['nonce'], 'malisafi_property_nonce')) {
+        if (!isset($_POST['nonce']) || !wp_verify_nonce($_POST['nonce'], 'malisafi_ajax_nonce')) {
+            error_log('Malisafi: Invalid nonce');
             wp_send_json_error(array('message' => 'Invalid security token.'));
         }
         
         $property_id = isset($_POST['property_id']) ? intval($_POST['property_id']) : 0;
-        $reason = isset($_POST['report_reason']) ? sanitize_text_field($_POST['report_reason']) : '';
-        $details = isset($_POST['report_details']) ? sanitize_textarea_field($_POST['report_details']) : '';
-        $reporter_email = isset($_POST['reporter_email']) ? sanitize_email($_POST['reporter_email']) : '';
+        $name = isset($_POST['inquiry_name']) ? sanitize_text_field($_POST['inquiry_name']) : '';
+        $email = isset($_POST['inquiry_email']) ? sanitize_email($_POST['inquiry_email']) : '';
+        $phone = isset($_POST['inquiry_phone']) ? sanitize_text_field($_POST['inquiry_phone']) : '';
+        $message = isset($_POST['inquiry_message']) ? sanitize_textarea_field($_POST['inquiry_message']) : '';
         
         // Validation
         if (!$property_id || get_post_type($property_id) !== 'malisafi_property') {
             wp_send_json_error(array('message' => 'Invalid property.'));
         }
         
-        if (empty($reason)) {
-            wp_send_json_error(array('message' => 'Please select a reason for reporting.'));
+        if (empty($name)) {
+            wp_send_json_error(array('message' => 'Please provide your name.'));
         }
         
-        if (empty($reporter_email) || !is_email($reporter_email)) {
+        if (empty($email) || !is_email($email)) {
             wp_send_json_error(array('message' => 'Please provide a valid email address.'));
+        }
+        
+        if (empty($message)) {
+            wp_send_json_error(array('message' => 'Please provide a message.'));
         }
         
         // Get property and agent info
@@ -180,37 +191,53 @@ class Property_Actions_Ajax {
         $property_url = get_permalink($property_id);
         $agent_id = $property->post_author;
         $agent_email = get_the_author_meta('user_email', $agent_id);
+        $agent_name = get_the_author_meta('display_name', $agent_id);
         
-        // Store report in database (as post meta for admin review)
-        $report_data = array(
-            'reason' => $reason,
-            'details' => $details,
-            'reporter_email' => $reporter_email,
+        // Store inquiry in database
+        $inquiry_data = array(
+            'name' => $name,
+            'email' => $email,
+            'phone' => $phone,
+            'message' => $message,
+            'property_id' => $property_id,
+            'agent_id' => $agent_id,
             'date' => current_time('mysql'),
             'ip' => $_SERVER['REMOTE_ADDR']
         );
         
-        // Get existing reports
-        $reports = get_post_meta($property_id, '_malisafi_reports', true);
-        $reports = $reports ? maybe_unserialize($reports) : array();
-        $reports[] = $report_data;
+        // Get existing inquiries
+        $inquiries = get_post_meta($property_id, '_malisafi_inquiries', true);
+        $inquiries = $inquiries ? maybe_unserialize($inquiries) : array();
+        $inquiries[] = $inquiry_data;
         
-        update_post_meta($property_id, '_malisafi_reports', $reports);
+        update_post_meta($property_id, '_malisafi_inquiries', $inquiries);
         
-        // Send email notification to admin
-        $admin_email = get_option('admin_email');
-        $subject = 'Property Report: ' . $property_title;
-        $message = "A property has been reported on your site.\n\n";
-        $message .= "Property: {$property_title}\n";
-        $message .= "URL: {$property_url}\n";
-        $message .= "Reason: {$reason}\n";
-        $message .= "Details: {$details}\n";
-        $message .= "Reporter Email: {$reporter_email}\n";
-        $message .= "Date: " . current_time('mysql') . "\n";
+        // Send email to agent
+        $subject = 'New Property Inquiry: ' . $property_title;
+        $email_message = "Hello {$agent_name},\n\n";
+        $email_message .= "You have received a new inquiry about your property.\n\n";
+        $email_message .= "Property: {$property_title}\n";
+        $email_message .= "URL: {$property_url}\n\n";
+        $email_message .= "Inquirer Details:\n";
+        $email_message .= "Name: {$name}\n";
+        $email_message .= "Email: {$email}\n";
+        if (!empty($phone)) {
+            $email_message .= "Phone: {$phone}\n";
+        }
+        $email_message .= "\nMessage:\n{$message}\n\n";
+        $email_message .= "Please respond to this inquiry as soon as possible.\n\n";
+        $email_message .= "Best regards,\n";
+        $email_message .= get_bloginfo('name') . " Team";
         
-        wp_mail($admin_email, $subject, $message);
+        $headers = array(
+            'Content-Type: text/plain; charset=UTF-8',
+            'From: ' . get_bloginfo('name') . ' <' . get_option('admin_email') . '>',
+            'Reply-To: ' . $email
+        );
         
-        wp_send_json_success(array('message' => 'Report submitted successfully.'));
+        wp_mail($agent_email, $subject, $email_message, $headers);
+        
+        wp_send_json_success(array('message' => 'Inquiry sent successfully.'));
     }
     
     /**

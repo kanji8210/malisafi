@@ -246,7 +246,7 @@ $total_properties = $properties_query->found_posts;
 
         <!-- Location -->
         <?php if ($locations && !is_wp_error($locations)) : ?>
-        <div class="filter-group">
+        <div class="filter-group filter-group--location-general">
             <label class="filter-group-label">
                 <span class="dashicons dashicons-location"></span>
                 Location

@@ -5,33 +5,6 @@ if (!defined('ABSPATH')) {
 
 get_header();
 
-// DIRECT ENQUEUE FOR TESTING ONLY
-$plugin_url = plugin_dir_url(dirname(__FILE__, 2)); // Go up 2 levels from templates/
-
-// JavaScript
-$js_url = $plugin_url . 'assets/js/malisafi-single-property.js';
-if (file_exists(plugin_dir_path(dirname(__FILE__, 2)) . 'assets/js/malisafi-single-property.js')) {
-    ?>
-    <script src="<?php echo esc_url($js_url); ?>?ver=<?php echo time(); ?>" defer></script>
-    <script>
-    // Initialize malisafi_ajax for the script
-    var malisafi_ajax = {
-        ajax_url: '<?php echo admin_url('admin-ajax.php'); ?>',
-        nonce: '<?php echo wp_create_nonce('malisafi_ajax_nonce'); ?>'
-    };
-    console.log('Malisafi script loaded directly');
-    </script>
-    <?php
-}
-
-// CSS
-$css_url = $plugin_url . 'assets/css/single-property.css';
-if (file_exists(plugin_dir_path(dirname(__FILE__, 2)) . 'assets/css/single-property.css')) {
-    ?>
-    <link rel="stylesheet" href="<?php echo esc_url($css_url); ?>?ver=<?php echo time(); ?>">
-    <?php
-}
-
 while (have_posts()) : the_post();
     $property_id = get_the_ID();
     
@@ -302,6 +275,14 @@ $formatted_price = $price > 0 ? ($currency_symbol . ' ' . number_format($price))
                             <path d="M15.41 6.51L8.59 10.49"/>
                         </svg>
                         <span class="action-text">Share</span>
+                    </button>
+                    
+                    <button class="action-button inquiry-button" data-property-id="<?php echo $property_id; ?>" aria-label="Send inquiry">
+                        <svg class="action-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <path d="M21.2 8.4c.5.38.8.97.8 1.6v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V10a2 2 0 0 1 .8-1.6l8-6a2 2 0 0 1 2.4 0l8 6Z"/>
+                            <path d="m22 10-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 10"/>
+                        </svg>
+                        <span class="action-text">Inquiry</span>
                     </button>
                     
                     <button class="action-button report-button" data-property-id="<?php echo $property_id; ?>" aria-label="Report property">
@@ -799,7 +780,7 @@ $formatted_price = $price > 0 ? ($currency_symbol . ' ' . number_format($price))
                 
                 <div class="form-group">
                     <label>Reason for reporting</label>
-                    <select name="report_reason" required>
+                    <select name="reason" required>
                         <option value="">Select a reason...</option>
                         <option value="incorrect_info">Incorrect Information</option>
                         <option value="duplicate">Duplicate Listing</option>
@@ -812,21 +793,52 @@ $formatted_price = $price > 0 ? ($currency_symbol . ' ' . number_format($price))
                 
                 <div class="form-group">
                     <label>Additional details (optional)</label>
-                    <textarea name="report_details" rows="4" placeholder="Provide more information..."></textarea>
+                    <textarea name="details" rows="4" placeholder="Provide more information..."></textarea>
                 </div>
-                
-                <?php if (is_user_logged_in()) : ?>
-                    <input type="hidden" name="reporter_email" value="<?php echo esc_attr(wp_get_current_user()->user_email); ?>">
-                <?php else : ?>
-                    <div class="form-group">
-                        <label>Your email</label>
-                        <input type="email" name="reporter_email" placeholder="your@email.com" required>
-                    </div>
-                <?php endif; ?>
                 
                 <div class="form-actions">
                     <button type="button" class="button-secondary modal-close">Cancel</button>
                     <button type="submit" class="button-primary">Submit Report</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Inquiry Modal -->
+<div id="inquiry-modal" class="malisafi-modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Send Inquiry</h3>
+            <button class="modal-close">&times;</button>
+        </div>
+        <div class="modal-body">
+            <form id="inquiry-form">
+                <input type="hidden" name="property_id" value="<?php echo $property_id; ?>">
+                
+                <div class="form-group">
+                    <label>Your Name</label>
+                    <input type="text" name="inquiry_name" placeholder="Enter your name" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Your Email</label>
+                    <input type="email" name="inquiry_email" placeholder="your@email.com" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Phone Number</label>
+                    <input type="tel" name="inquiry_phone" placeholder="Your phone number">
+                </div>
+                
+                <div class="form-group">
+                    <label>Message</label>
+                    <textarea name="inquiry_message" rows="4" placeholder="I'm interested in this property. Please contact me with more details." required></textarea>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="button" class="button-secondary modal-close">Cancel</button>
+                    <button type="submit" class="button-primary">Send Inquiry</button>
                 </div>
             </form>
         </div>
