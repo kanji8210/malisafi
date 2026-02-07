@@ -55,6 +55,10 @@ $page_categories = array(
         'title' => __('Owner Dashboard', 'malisafi-mls'),
         'pages' => array('owner_dashboard', 'owner_properties', 'owner_add_property', 'owner_inquiries')
     ),
+    'agency' => array(
+        'title' => __('Agency Dashboard', 'malisafi-mls'),
+        'pages' => array('agency_dashboard', 'agency_agents', 'agency_inquiries')
+    ),
     'developer' => array(
         'title' => __('Developer Dashboard', 'malisafi-mls'),
         'pages' => array('developer_dashboard', 'developer_projects', 'developer_add_project', 'developer_analytics')

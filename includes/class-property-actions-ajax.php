@@ -249,6 +249,18 @@ class Property_Actions_Ajax {
         $agent_email = get_the_author_meta('user_email', $agent_id);
         $agent_name = get_the_author_meta('display_name', $agent_id);
         
+        // Check if agent belongs to an agency
+        $agency = \MalisafiMLS\Agency_Manager::get_agent_agency($agent_id);
+        $agency_id = null;
+        $agency_email = null;
+        $agency_name = null;
+        
+        if ($agency) {
+            $agency_id = $agency->id;
+            $agency_email = $agency->agency_email ?: $agency->owner_email;
+            $agency_name = $agency->agency_name;
+        }
+        
         // Send email to agent
         $subject = 'New Property Inquiry: ' . $property_title;
         $email_message = "Hello {$agent_name},\n\n";
@@ -266,28 +278,104 @@ class Property_Actions_Ajax {
             'Reply-To: ' . $name . ' <' . $email . '>'
         );
         
-        $sent = wp_mail($agent_email, $subject, $email_message, $headers);
+        $sent_to_agent = wp_mail($agent_email, $subject, $email_message, $headers);
         
-        if ($sent) {
-            // Store inquiry in database for tracking
+        // Send email to agency if agent belongs to one
+        $sent_to_agency = false;
+        if ($agency && $agency_email) {
+            $agency_subject = 'New Property Inquiry for Your Agent: ' . $property_title;
+            $agency_message = "Hello {$agency_name} Team,\n\n";
+            $agency_message .= "Your agent {$agent_name} has received a new inquiry about their property: {$property_title}\n\n";
+            $agency_message .= "From: {$name}\n";
+            $agency_message .= "Email: {$email}\n";
+            if ($phone) {
+                $agency_message .= "Phone: {$phone}\n";
+            }
+            $agency_message .= "\nMessage:\n{$message}\n\n";
+            $agency_message .= "Property URL: {$property_url}\n";
+            $agency_message .= "Agent: {$agent_name} ({$agent_email})\n";
+            
+            $sent_to_agency = wp_mail($agency_email, $agency_subject, $agency_message, $headers);
+        }
+        
+        $email_sent = $sent_to_agent || $sent_to_agency;
+        
+        $email_sent = $sent_to_agent || $sent_to_agency;
+        
+        if ($email_sent) {
+            global $wpdb;
+            $table_name = $wpdb->prefix . 'mf_inquiries';
+
+            // Store inquiry in database table
             $inquiry_data = array(
                 'property_id' => $property_id,
+                'client_id' => get_current_user_id() ?: null, // NULL for guest users
                 'agent_id' => $agent_id,
-                'name' => $name,
-                'email' => $email,
-                'phone' => $phone,
+                'agency_id' => $agency_id, // Store agency ID if agent belongs to one
+                'inquiry_type' => 'general',
                 'message' => $message,
-                'date' => current_time('mysql'),
-                'ip' => $_SERVER['REMOTE_ADDR']
+                'status' => 'new',
+                'client_phone' => $phone,
+                'client_email' => $email,
+                'created_at' => current_time('mysql'),
+                'updated_at' => current_time('mysql')
             );
-            
-            // Save as user meta for the agent
-            $inquiries = get_user_meta($agent_id, '_malisafi_inquiries', true);
-            $inquiries = $inquiries ? maybe_unserialize($inquiries) : array();
-            $inquiries[] = $inquiry_data;
-            update_user_meta($agent_id, '_malisafi_inquiries', $inquiries);
-            
-            wp_send_json_success(array('message' => 'Your message has been sent successfully.'));
+
+            $inserted = $wpdb->insert($table_name, $inquiry_data);
+
+            if ($inserted) {
+                $inquiry_id = $wpdb->insert_id;
+                
+                // Trigger agency notification hook
+                do_action('malisafi_inquiry_created', $inquiry_id, array(
+                    'property_id' => $property_id,
+                    'agent_id' => $agent_id,
+                    'agency_id' => $agency_id,
+                    'client_name' => $name,
+                    'client_email' => $email,
+                    'client_phone' => $phone,
+                    'message' => $message,
+                    'property_title' => $property_title,
+                    'property_url' => $property_url
+                ));
+                
+                // Also save as user meta for backward compatibility and agent dashboard
+                $meta_data = array(
+                    'property_id' => $property_id,
+                    'agent_id' => $agent_id,
+                    'agency_id' => $agency_id,
+                    'name' => $name,
+                    'email' => $email,
+                    'phone' => $phone,
+                    'message' => $message,
+                    'date' => current_time('mysql'),
+                    'ip' => $_SERVER['REMOTE_ADDR'],
+                    'inquiry_id' => $inquiry_id,
+                    'is_guest' => !get_current_user_id()
+                );
+
+                // Store in agent's meta
+                $agent_inquiries = get_user_meta($agent_id, '_malisafi_inquiries', true);
+                $agent_inquiries = $agent_inquiries ? maybe_unserialize($agent_inquiries) : array();
+                $agent_inquiries[] = $meta_data;
+                update_user_meta($agent_id, '_malisafi_inquiries', $agent_inquiries);
+                
+                // Store in agency's meta if agent belongs to an agency
+                if ($agency && isset($agency->user_id)) {
+                    $agency_meta_data = $meta_data;
+                    $agency_meta_data['agent_name'] = $agent_name;
+                    $agency_meta_data['agent_email'] = $agent_email;
+                    
+                    $agency_inquiries = get_user_meta($agency->user_id, '_malisafi_agency_inquiries', true);
+                    $agency_inquiries = $agency_inquiries ? maybe_unserialize($agency_inquiries) : array();
+                    $agency_inquiries[] = $agency_meta_data;
+                    update_user_meta($agency->user_id, '_malisafi_agency_inquiries', $agency_inquiries);
+                }
+
+                wp_send_json_success(array('message' => 'Your message has been sent successfully.'));
+            } else {
+                wp_send_json_error(array('message' => 'Message sent but failed to save inquiry record.'));
+            }
         } else {
             wp_send_json_error(array('message' => 'Failed to send message. Please try again.'));
         }

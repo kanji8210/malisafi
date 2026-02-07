@@ -416,6 +416,434 @@
     border: 1px solid var(--mls-border-light);
 }
 
+/* Client Inquiries List */
+.malisafi-client-inquiries {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.malisafi-client-inquiries .inquiries-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.malisafi-client-inquiries .inquiry-item {
+    background: var(--mls-bg-primary);
+    border: 1px solid var(--mls-border-light);
+    border-radius: var(--mls-radius-lg);
+    padding: 20px;
+    box-shadow: var(--mls-shadow-sm);
+    transition: box-shadow 0.2s ease;
+}
+
+.malisafi-client-inquiries .inquiry-item:hover {
+    box-shadow: var(--mls-shadow-md);
+}
+
+.malisafi-client-inquiries .inquiry-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 12px;
+}
+
+.malisafi-client-inquiries .property-link {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--mls-accent);
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+.malisafi-client-inquiries .property-link:hover {
+    color: var(--mls-accent-hover, #5a6b45);
+}
+
+.malisafi-client-inquiries .inquiry-status {
+    font-size: 12px;
+    font-weight: 500;
+    padding: 4px 12px;
+    border-radius: 12px;
+    text-transform: uppercase;
+}
+
+.malisafi-client-inquiries .inquiry-status.status-new {
+    background: rgba(255, 193, 7, 0.1);
+    color: #856404;
+    border: 1px solid rgba(255, 193, 7, 0.3);
+}
+
+.malisafi-client-inquiries .inquiry-status.status-read {
+    background: rgba(0, 123, 255, 0.1);
+    color: #0056b3;
+    border: 1px solid rgba(0, 123, 255, 0.3);
+}
+
+.malisafi-client-inquiries .inquiry-status.status-replied {
+    background: rgba(40, 167, 69, 0.1);
+    color: #155724;
+    border: 1px solid rgba(40, 167, 69, 0.3);
+}
+
+.malisafi-client-inquiries .inquiry-status.status-closed {
+    background: rgba(108, 117, 125, 0.1);
+    color: #6c757d;
+    border: 1px solid rgba(108, 117, 125, 0.3);
+}
+
+.malisafi-client-inquiries .inquiry-meta {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 12px;
+    font-size: 14px;
+    color: var(--mls-text-muted);
+}
+
+.malisafi-client-inquiries .inquiry-date,
+.malisafi-client-inquiries .inquiry-type {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.malisafi-client-inquiries .inquiry-message {
+    font-style: italic;
+    color: var(--mls-text-secondary);
+    line-height: 1.5;
+}
+
+/* Owner Inquiries List */
+.malisafi-owner-inquiries {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.malisafi-owner-inquiries .owner-inquiries-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.malisafi-owner-inquiries .inquiry-item {
+    background: var(--mls-bg-primary);
+    border: 1px solid var(--mls-border-light);
+    border-radius: var(--mls-radius-lg);
+    padding: 20px;
+    box-shadow: var(--mls-shadow-sm);
+    transition: box-shadow 0.2s ease;
+}
+
+.malisafi-owner-inquiries .inquiry-item:hover {
+    box-shadow: var(--mls-shadow-md);
+}
+
+.malisafi-owner-inquiries .inquiry-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 12px;
+}
+
+.malisafi-owner-inquiries .property-link {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--mls-accent);
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+.malisafi-owner-inquiries .property-link:hover {
+    color: var(--mls-accent-hover, #5a6b45);
+}
+
+.malisafi-owner-inquiries .inquiry-status {
+    font-size: 12px;
+    font-weight: 500;
+    padding: 4px 12px;
+    border-radius: 12px;
+    text-transform: uppercase;
+}
+
+.malisafi-owner-inquiries .inquiry-status.status-new {
+    background: rgba(255, 193, 7, 0.1);
+    color: #856404;
+    border: 1px solid rgba(255, 193, 7, 0.3);
+}
+
+.malisafi-owner-inquiries .inquiry-status.status-read {
+    background: rgba(0, 123, 255, 0.1);
+    color: #0056b3;
+    border: 1px solid rgba(0, 123, 255, 0.3);
+}
+
+.malisafi-owner-inquiries .inquiry-status.status-replied {
+    background: rgba(40, 167, 69, 0.1);
+    color: #155724;
+    border: 1px solid rgba(40, 167, 69, 0.3);
+}
+
+.malisafi-owner-inquiries .inquiry-status.status-closed {
+    background: rgba(108, 117, 125, 0.1);
+    color: #6c757d;
+    border: 1px solid rgba(108, 117, 125, 0.3);
+}
+
+.malisafi-owner-inquiries .inquiry-meta {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 12px;
+    font-size: 14px;
+    color: var(--mls-text-muted);
+}
+
+.malisafi-owner-inquiries .inquiry-date,
+.malisafi-owner-inquiries .inquiry-type {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.malisafi-owner-inquiries .inquiry-message {
+    font-style: italic;
+    color: var(--mls-text-secondary);
+    line-height: 1.5;
+    margin-bottom: 12px;
+}
+
+.malisafi-owner-inquiries .inquiry-contact {
+    font-size: 14px;
+    color: var(--mls-text-muted);
+}
+
+/* Agency Dashboard */
+.malisafi-agency-dashboard {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.malisafi-agency-dashboard .dashboard-overview {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    margin: 20px 0;
+}
+
+.malisafi-agency-dashboard .overview-card {
+    background: var(--mls-bg-primary);
+    border: 1px solid var(--mls-border-light);
+    border-radius: var(--mls-radius-lg);
+    padding: 20px;
+    text-align: center;
+    box-shadow: var(--mls-shadow-sm);
+}
+
+.malisafi-agency-dashboard .overview-card h3 {
+    margin: 0 0 10px 0;
+    color: var(--mls-text-secondary);
+    font-size: 14px;
+    text-transform: uppercase;
+    font-weight: 600;
+}
+
+.malisafi-agency-dashboard .overview-card .metric {
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--mls-accent);
+    margin: 0;
+}
+
+.malisafi-agency-dashboard .dashboard-links {
+    list-style: none;
+    padding: 0;
+    margin: 20px 0;
+}
+
+.malisafi-agency-dashboard .dashboard-links li {
+    margin-bottom: 10px;
+}
+
+.malisafi-agency-dashboard .dashboard-links a {
+    display: inline-block;
+    padding: 12px 20px;
+    background: var(--mls-accent);
+    color: white;
+    text-decoration: none;
+    border-radius: var(--mls-radius-md);
+    transition: background-color 0.2s ease;
+}
+
+.malisafi-agency-dashboard .dashboard-links a:hover {
+    background: var(--mls-accent-hover, #5a6b45);
+}
+
+/* Agency Inquiries */
+.malisafi-agency-inquiries {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.malisafi-agency-inquiries .agency-inquiries-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.malisafi-agency-inquiries .inquiry-item {
+    background: var(--mls-bg-primary);
+    border: 1px solid var(--mls-border-light);
+    border-radius: var(--mls-radius-lg);
+    padding: 20px;
+    box-shadow: var(--mls-shadow-sm);
+    transition: box-shadow 0.2s ease;
+}
+
+.malisafi-agency-inquiries .inquiry-item:hover {
+    box-shadow: var(--mls-shadow-md);
+}
+
+.malisafi-agency-inquiries .inquiry-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 12px;
+}
+
+.malisafi-agency-inquiries .property-link {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--mls-accent);
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+.malisafi-agency-inquiries .property-link:hover {
+    color: var(--mls-accent-hover, #5a6b45);
+}
+
+.malisafi-agency-inquiries .inquiry-status {
+    font-size: 12px;
+    font-weight: 500;
+    padding: 4px 12px;
+    border-radius: 12px;
+    text-transform: uppercase;
+}
+
+.malisafi-agency-inquiries .inquiry-status.status-new {
+    background: rgba(255, 193, 7, 0.1);
+    color: #856404;
+    border: 1px solid rgba(255, 193, 7, 0.3);
+}
+
+.malisafi-agency-inquiries .inquiry-status.status-read {
+    background: rgba(0, 123, 255, 0.1);
+    color: #0056b3;
+    border: 1px solid rgba(0, 123, 255, 0.3);
+}
+
+.malisafi-agency-inquiries .inquiry-status.status-replied {
+    background: rgba(40, 167, 69, 0.1);
+    color: #155724;
+    border: 1px solid rgba(40, 167, 69, 0.3);
+}
+
+.malisafi-agency-inquiries .inquiry-status.status-closed {
+    background: rgba(108, 117, 125, 0.1);
+    color: #6c757d;
+    border: 1px solid rgba(108, 117, 125, 0.3);
+}
+
+.malisafi-agency-inquiries .inquiry-agent {
+    font-size: 14px;
+    color: var(--mls-text-secondary);
+    margin-bottom: 8px;
+}
+
+.malisafi-agency-inquiries .inquiry-meta {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 12px;
+    font-size: 14px;
+    color: var(--mls-text-muted);
+}
+
+.malisafi-agency-inquiries .inquiry-date,
+.malisafi-agency-inquiries .inquiry-type {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.malisafi-agency-inquiries .inquiry-message {
+    font-style: italic;
+    color: var(--mls-text-secondary);
+    line-height: 1.5;
+    margin-bottom: 12px;
+}
+
+.malisafi-agency-inquiries .inquiry-contact {
+    font-size: 14px;
+    color: var(--mls-text-muted);
+}
+
+/* Agency Agents */
+.malisafi-agency-agents {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.malisafi-agency-agents .agents-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.malisafi-agency-agents .agent-card {
+    background: var(--mls-bg-primary);
+    border: 1px solid var(--mls-border-light);
+    border-radius: var(--mls-radius-lg);
+    padding: 20px;
+    box-shadow: var(--mls-shadow-sm);
+}
+
+.malisafi-agency-agents .agent-card h3 {
+    margin: 0 0 8px 0;
+    color: var(--mls-accent);
+}
+
+.malisafi-agency-agents .agent-card p {
+    margin: 0 0 12px 0;
+    color: var(--mls-text-secondary);
+}
+
+.malisafi-agency-agents .agent-stats {
+    display: flex;
+    gap: 16px;
+    font-size: 14px;
+    color: var(--mls-text-muted);
+}
+
+.malisafi-agency-agents .agent-stats span {
+    background: var(--mls-bg-secondary);
+    padding: 4px 8px;
+    border-radius: 4px;
+}
+
 /* Agent Dashboard Redirect */
 .malisafi-agent-dashboard-redirect {
     max-width: 600px;

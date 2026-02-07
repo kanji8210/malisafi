@@ -178,6 +178,29 @@ class Page_Manager {
             'parent' => 'owner_dashboard'
         ),
         
+        // Agency Dashboard Pages
+        'agency_dashboard' => array(
+            'title' => 'Agency Dashboard',
+            'slug' => 'agency-dashboard',
+            'shortcode' => '[malisafi_agency_dashboard]',
+            'description' => 'Agency dashboard homepage',
+            'parent' => 0
+        ),
+        'agency_agents' => array(
+            'title' => 'My Agents',
+            'slug' => 'agency-agents',
+            'shortcode' => '[malisafi_agency_agents]',
+            'description' => 'Agency agents management',
+            'parent' => 'agency_dashboard'
+        ),
+        'agency_inquiries' => array(
+            'title' => 'Agent Inquiries',
+            'slug' => 'agency-inquiries',
+            'shortcode' => '[malisafi_agency_inquiries]',
+            'description' => 'Inquiries received by agency agents',
+            'parent' => 'agency_dashboard'
+        ),
+        
         // Developer Dashboard Pages
         'developer_dashboard' => array(
             'title' => 'Developer Dashboard',

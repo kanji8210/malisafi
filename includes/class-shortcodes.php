@@ -740,7 +740,9 @@ class Malisafi_Shortcodes {
             
             // Get dashboard URL based on user role
             $user_roles = $current_user->roles;
-            if (in_array('malisafi_agent_basic', $user_roles) || in_array('malisafi_agent_premium', $user_roles)) {
+            if (in_array('malisafi_agency', $user_roles)) {
+                $dashboard_url = home_url('/agency-dashboard/');
+            } elseif (in_array('malisafi_agent_basic', $user_roles) || in_array('malisafi_agent_premium', $user_roles)) {
                 $dashboard_url = home_url('/agent-dashboard/');
             } elseif (in_array('administrator', $user_roles) || in_array('malisafi_moderator', $user_roles)) {
                 $dashboard_url = admin_url();
@@ -773,7 +775,20 @@ class Malisafi_Shortcodes {
                             </li>
                         <?php endif; ?>
                         
-                        <?php if (in_array('malisafi_agent_basic', $user_roles) || in_array('malisafi_agent_premium', $user_roles)) : ?>
+                        <?php if (in_array('malisafi_agency', $user_roles)) : ?>
+                            <li>
+                                <a href="<?php echo home_url('/agency-dashboard/?tab=agents'); ?>">
+                                    <span class="dashicons dashicons-groups"></span>
+                                    <?php _e('My Agents', 'malisafi-mls'); ?>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="<?php echo home_url('/agency-dashboard/?tab=inquiries'); ?>">
+                                    <span class="dashicons dashicons-email"></span>
+                                    <?php _e('Agency Inquiries', 'malisafi-mls'); ?>
+                                </a>
+                            </li>
+                        <?php elseif (in_array('malisafi_agent_basic', $user_roles) || in_array('malisafi_agent_premium', $user_roles)) : ?>
                             <li>
                                 <a href="<?php echo home_url('/add-property/'); ?>">
                                     <span class="dashicons dashicons-plus-alt"></span>

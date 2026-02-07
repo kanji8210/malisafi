@@ -220,8 +220,9 @@ class Malisafi_Registration_Handler {
             'youtube' => $youtube
         );
         
-        // Create user using helper (with auto-login)
-        $user_id = User_Creation_Helper::create_user($user_data, $meta_data, true);
+        // Create user using helper (with auto-login only if email verification is disabled)
+        $auto_login = !get_option('malisafi_email_verification_enabled');
+        $user_id = User_Creation_Helper::create_user($user_data, $meta_data, $auto_login);
         
         if (is_wp_error($user_id)) {
             wp_send_json_error(array(
@@ -229,26 +230,40 @@ class Malisafi_Registration_Handler {
             ));
         }
         
+        // Store registration date for admin notifications
+        update_user_meta($user_id, '_malisafi_registration_date', current_time('mysql'));
+        
         // Log user registration
-        do_action('malisafi_user_registered', $user_id, $user_role, $account_type);
+        do_action('malisafi_user_registered', $user_id, $user_role, $account_type, $user_data);
         
-        // Send welcome email
-        self::send_welcome_email($user_id, $email, $first_name, $account_type);
-        
-        // Determine redirect URL based on account type
-        $redirect_url = home_url('/my-favorites'); // Default to favorites for clients
-        
-        if ($account_type === 'agent' || $account_type === 'owner' || $account_type === 'developer') {
-            $redirect_url = home_url('/agent-dashboard');
-        } elseif ($account_type === 'client') {
-            $redirect_url = home_url('/my-favorites');
+        if (get_option('malisafi_email_verification_enabled')) {
+            // Email verification is enabled - don't auto-login, send verification email
+            wp_send_json_success(array(
+                'message' => __('Registration successful! Please check your email to verify your account.', 'malisafi-mls'),
+                'redirect' => home_url('/login/?verification_sent=1'),
+                'email_verification_required' => true
+            ));
+        } else {
+            // No email verification - send welcome email and redirect
+            self::send_welcome_email($user_id, $email, $first_name, $account_type);
+            
+            // Determine redirect URL based on account type
+            $redirect_url = home_url('/my-favorites'); // Default to favorites for clients
+            
+            if ($account_type === 'agency') {
+                $redirect_url = home_url('/agency-dashboard');
+            } elseif ($account_type === 'agent' || $account_type === 'owner' || $account_type === 'developer') {
+                $redirect_url = home_url('/agent-dashboard');
+            } elseif ($account_type === 'client') {
+                $redirect_url = home_url('/my-favorites');
+            }
+            
+            wp_send_json_success(array(
+                'message' => __('Registration successful! Redirecting...', 'malisafi-mls'),
+                'redirect' => $redirect_url,
+                'user_id' => $user_id
+            ));
         }
-        
-        wp_send_json_success(array(
-            'message' => __('Registration successful! Redirecting...', 'malisafi-mls'),
-            'redirect' => $redirect_url,
-            'user_id' => $user_id
-        ));
     }
     
 

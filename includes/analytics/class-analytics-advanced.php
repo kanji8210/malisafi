@@ -533,4 +533,175 @@ class Analytics_Advanced {
             'factors' => $factors
         ];
     }
+
+    /**
+     * Create a manual alert
+     */
+    public static function create_alert($data) {
+        global $wpdb;
+        
+        $table = $wpdb->prefix . 'mf_alerts';
+        
+        $result = $wpdb->insert(
+            $table,
+            [
+                'alert_type' => $data['alert_type'],
+                'title' => sanitize_text_field($data['title']),
+                'message' => sanitize_textarea_field($data['message']),
+                'severity' => $data['severity'] ?? 'medium',
+                'user_id' => $data['user_id'] ?? null,
+                'property_id' => $data['property_id'] ?? null,
+                'agent_id' => $data['agent_id'] ?? null,
+                'expires_at' => $data['expires_at'] ?? null,
+                'created_by' => get_current_user_id()
+            ],
+            ['%s', '%s', '%s', '%s', '%d', '%d', '%d', '%s', '%d']
+        );
+        
+        if ($result === false) {
+            return false;
+        }
+        
+        return $wpdb->insert_id;
+    }
+
+    /**
+     * Get alerts by various filters
+     */
+    public static function get_alerts($filters = []) {
+        global $wpdb;
+        
+        $table = $wpdb->prefix . 'mf_alerts';
+        $where = ['1=1'];
+        $values = [];
+        
+        if (!empty($filters['alert_type'])) {
+            $where[] = 'alert_type = %s';
+            $values[] = $filters['alert_type'];
+        }
+        
+        if (!empty($filters['severity'])) {
+            $where[] = 'severity = %s';
+            $values[] = $filters['severity'];
+        }
+        
+        if (!empty($filters['user_id'])) {
+            $where[] = 'user_id = %d';
+            $values[] = $filters['user_id'];
+        }
+        
+        if (!empty($filters['agent_id'])) {
+            $where[] = 'agent_id = %d';
+            $values[] = $filters['agent_id'];
+        }
+        
+        if (!empty($filters['property_id'])) {
+            $where[] = 'property_id = %d';
+            $values[] = $filters['property_id'];
+        }
+        
+        if (isset($filters['is_active'])) {
+            $where[] = 'is_active = %d';
+            $values[] = $filters['is_active'];
+        }
+        
+        $where_clause = implode(' AND ', $where);
+        
+        $sql = "SELECT * FROM {$table} WHERE {$where_clause} ORDER BY created_at DESC";
+        
+        if (!empty($values)) {
+            $sql = $wpdb->prepare($sql, $values);
+        }
+        
+        return $wpdb->get_results($sql);
+    }
+
+    /**
+     * Update alert status
+     */
+    public static function update_alert($alert_id, $data) {
+        global $wpdb;
+        
+        $table = $wpdb->prefix . 'mf_alerts';
+        
+        $update_data = [];
+        $format = [];
+        
+        if (isset($data['is_active'])) {
+            $update_data['is_active'] = $data['is_active'];
+            $format[] = '%d';
+        }
+        
+        if (isset($data['title'])) {
+            $update_data['title'] = sanitize_text_field($data['title']);
+            $format[] = '%s';
+        }
+        
+        if (isset($data['message'])) {
+            $update_data['message'] = sanitize_textarea_field($data['message']);
+            $format[] = '%s';
+        }
+        
+        if (isset($data['severity'])) {
+            $update_data['severity'] = $data['severity'];
+            $format[] = '%s';
+        }
+        
+        if (isset($data['expires_at'])) {
+            $update_data['expires_at'] = $data['expires_at'];
+            $format[] = '%s';
+        }
+        
+        if (empty($update_data)) {
+            return false;
+        }
+        
+        $result = $wpdb->update(
+            $table,
+            $update_data,
+            ['id' => $alert_id],
+            $format,
+            ['%d']
+        );
+        
+        return $result !== false;
+    }
+
+    /**
+     * Delete an alert
+     */
+    public static function delete_alert($alert_id) {
+        global $wpdb;
+        
+        $table = $wpdb->prefix . 'mf_alerts';
+        
+        return $wpdb->delete($table, ['id' => $alert_id], ['%d']);
+    }
+
+    /**
+     * Get active alerts for display
+     */
+    public static function get_active_alerts($limit = 10) {
+        global $wpdb;
+        
+        $table = $wpdb->prefix . 'mf_alerts';
+        
+        $sql = $wpdb->prepare(
+            "SELECT * FROM {$table} 
+             WHERE is_active = 1 
+             AND (expires_at IS NULL OR expires_at > NOW())
+             ORDER BY 
+                 CASE severity 
+                     WHEN 'critical' THEN 1 
+                     WHEN 'high' THEN 2 
+                     WHEN 'medium' THEN 3 
+                     WHEN 'low' THEN 4 
+                 END, 
+                 created_at DESC
+             LIMIT %d",
+            $limit
+        );
+        
+        return $wpdb->get_results($sql);
+    }
 }

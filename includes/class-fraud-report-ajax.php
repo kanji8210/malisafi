@@ -41,6 +41,12 @@ class Fraud_Report_Ajax {
         add_action('wp_ajax_malisafi_get_agent_name', array($this, 'get_agent_name'));
         add_action('wp_ajax_malisafi_get_property_title', array($this, 'get_property_title'));
         add_action('wp_ajax_malisafi_link_report_to_suspicion', array($this, 'link_report_to_suspicion'));
+
+        // Alert management
+        add_action('wp_ajax_malisafi_create_alert', array($this, 'create_alert'));
+        add_action('wp_ajax_malisafi_get_alerts', array($this, 'get_alerts'));
+        add_action('wp_ajax_malisafi_update_alert', array($this, 'update_alert'));
+        add_action('wp_ajax_malisafi_delete_alert', array($this, 'delete_alert'));
     }
 
     private function verify_frontend_nonce() {

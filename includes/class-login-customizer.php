@@ -148,7 +148,9 @@ class Login_Customizer {
         
         // Otherwise, redirect to appropriate FRONTEND dashboard
         $redirect_url = '';
-        if (in_array('malisafi_agent_basic', $user->roles) || in_array('malisafi_agent_premium', $user->roles)) {
+        if (in_array('malisafi_agency', $user->roles)) {
+            $redirect_url = self::get_page_url('agency_dashboard');
+        } elseif (in_array('malisafi_agent_basic', $user->roles) || in_array('malisafi_agent_premium', $user->roles)) {
             $redirect_url = self::get_page_url('agent_dashboard');
         } elseif (in_array('malisafi_owner', $user->roles)) {
             $redirect_url = self::get_page_url('owner_dashboard');
@@ -491,7 +493,9 @@ class Login_Customizer {
         // Determine dashboard URL based on user role - ALL go to FRONTEND
         $dashboard_url = '';
         
-        if (in_array('malisafi_agent_basic', $user->roles) || in_array('malisafi_agent_premium', $user->roles)) {
+        if (in_array('malisafi_agency', $user->roles)) {
+            $dashboard_url = self::get_page_url('agency_dashboard');
+        } elseif (in_array('malisafi_agent_basic', $user->roles) || in_array('malisafi_agent_premium', $user->roles)) {
             $dashboard_url = self::get_page_url('agent_dashboard');
         } elseif (in_array('malisafi_owner', $user->roles)) {
             $dashboard_url = self::get_page_url('owner_dashboard');
@@ -520,7 +524,10 @@ class Login_Customizer {
         $dashboard_title = '';
         
         // Determine dashboard URL and title based on user role
-        if (in_array('malisafi_agent_basic', $current_user->roles) || in_array('malisafi_agent_premium', $current_user->roles)) {
+        if (in_array('malisafi_agency', $current_user->roles)) {
+            $dashboard_url = Page_Manager::get_page_url('agency_dashboard');
+            $dashboard_title = __('Agency Dashboard', 'malisafi-mls');
+        } elseif (in_array('malisafi_agent_basic', $current_user->roles) || in_array('malisafi_agent_premium', $current_user->roles)) {
             // Agents use backend dashboard
             $dashboard_url = admin_url('admin.php?page=malisafi-agent-dashboard');
             $dashboard_title = __('Agent Dashboard', 'malisafi-mls');

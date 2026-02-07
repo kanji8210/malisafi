@@ -100,6 +100,11 @@ class Analytics_Migration {
         self::create_submission_funnel_table($charset_collate);
         self::create_fraud_detection_table($charset_collate);
         self::create_fraud_reports_table($charset_collate);
+        self::create_alerts_table($charset_collate);
+        self::create_agency_table($charset_collate);
+        self::create_agency_agents_table($charset_collate);
+        self::create_agency_membership_plans_table($charset_collate);
+        self::create_agency_subscriptions_table($charset_collate);
         self::create_revenue_tracking_table($charset_collate);
         self::create_system_health_table($charset_collate);
         
@@ -120,6 +125,11 @@ class Analytics_Migration {
             'mf_submission_funnel',
             'mf_fraud_detection',
             'mf_fraud_reports',
+            'mf_alerts',
+            'mf_agencies',
+            'mf_agency_agents',
+            'mf_agency_membership_plans',
+            'mf_agency_subscriptions',
             'mf_revenue_tracking',
             'mf_system_health'
         ];
@@ -429,6 +439,169 @@ class Analytics_Migration {
             KEY idx_property (property_id),
             KEY idx_status (status),
             KEY idx_date (created_at)
+        ) $charset_collate;";
+        
+        dbDelta($sql);
+    }
+
+    /**
+     * Create alerts table (admin-created alerts)
+     */
+    private static function create_alerts_table($charset_collate) {
+        global $wpdb;
+        $table_name = $wpdb->prefix . 'mf_alerts';
+        
+        $sql = "CREATE TABLE IF NOT EXISTS $table_name (
+            id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+            alert_type ENUM(
+                'fraud_warning', 'system_alert', 'urgent_notice',
+                'account_suspension', 'property_removal', 'general_alert'
+            ) NOT NULL,
+            title VARCHAR(255) NOT NULL,
+            message TEXT NOT NULL,
+            severity ENUM('low', 'medium', 'high', 'critical') DEFAULT 'medium',
+            user_id BIGINT UNSIGNED,
+            property_id BIGINT UNSIGNED,
+            agent_id BIGINT UNSIGNED,
+            is_active BOOLEAN DEFAULT TRUE,
+            expires_at TIMESTAMP NULL,
+            created_by BIGINT UNSIGNED NOT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            
+            KEY idx_type (alert_type),
+            KEY idx_user (user_id),
+            KEY idx_property (property_id),
+            KEY idx_agent (agent_id),
+            KEY idx_severity (severity),
+            KEY idx_active (is_active),
+            KEY idx_expires (expires_at)
+        ) $charset_collate;";
+        
+        dbDelta($sql);
+    }
+
+    /**
+     * Create agency table
+     */
+    private static function create_agency_table($charset_collate) {
+        global $wpdb;
+        $table_name = $wpdb->prefix . 'mf_agencies';
+        
+        $sql = "CREATE TABLE IF NOT EXISTS $table_name (
+            id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+            user_id BIGINT UNSIGNED NOT NULL, -- Agency owner/admin
+            agency_name VARCHAR(255) NOT NULL,
+            agency_description TEXT,
+            agency_logo VARCHAR(255),
+            agency_website VARCHAR(255),
+            agency_email VARCHAR(255),
+            agency_phone VARCHAR(50),
+            agency_address TEXT,
+            license_number VARCHAR(100),
+            established_year YEAR,
+            social_facebook VARCHAR(255),
+            social_twitter VARCHAR(255),
+            social_linkedin VARCHAR(255),
+            social_instagram VARCHAR(255),
+            is_verified BOOLEAN DEFAULT FALSE,
+            is_active BOOLEAN DEFAULT TRUE,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            
+            KEY idx_user (user_id),
+            KEY idx_name (agency_name),
+            KEY idx_verified (is_verified),
+            KEY idx_active (is_active)
+        ) $charset_collate;";
+        
+        dbDelta($sql);
+    }
+
+    /**
+     * Create agency agents table (linking agents to agencies)
+     */
+    private static function create_agency_agents_table($charset_collate) {
+        global $wpdb;
+        $table_name = $wpdb->prefix . 'mf_agency_agents';
+        
+        $sql = "CREATE TABLE IF NOT EXISTS $table_name (
+            id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+            agency_id BIGINT UNSIGNED NOT NULL,
+            agent_id BIGINT UNSIGNED NOT NULL,
+            role_in_agency ENUM('owner', 'manager', 'senior_agent', 'agent', 'assistant') DEFAULT 'agent',
+            commission_split DECIMAL(5,2) DEFAULT 0.00,
+            is_active BOOLEAN DEFAULT TRUE,
+            joined_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            left_at TIMESTAMP NULL,
+            
+            KEY idx_agency (agency_id),
+            KEY idx_agent (agent_id),
+            KEY idx_role (role_in_agency),
+            KEY idx_active (is_active),
+            UNIQUE KEY unique_agency_agent (agency_id, agent_id)
+        ) $charset_collate;";
+        
+        dbDelta($sql);
+    }
+
+    /**
+     * Create agency membership plans table
+     */
+    private static function create_agency_membership_plans_table($charset_collate) {
+        global $wpdb;
+        $table_name = $wpdb->prefix . 'mf_agency_membership_plans';
+        
+        $sql = "CREATE TABLE IF NOT EXISTS $table_name (
+            id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+            plan_name VARCHAR(255) NOT NULL,
+            plan_description TEXT,
+            stripe_price_id VARCHAR(100),
+            price DECIMAL(10,2) NOT NULL,
+            currency VARCHAR(3) DEFAULT 'KES',
+            billing_interval ENUM('month', 'year') DEFAULT 'month',
+            max_agents INT UNSIGNED DEFAULT 5,
+            max_properties INT UNSIGNED DEFAULT 50,
+            features TEXT, -- JSON encoded features list
+            is_active BOOLEAN DEFAULT TRUE,
+            is_popular BOOLEAN DEFAULT FALSE,
+            sort_order INT DEFAULT 0,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            
+            KEY idx_active (is_active),
+            KEY idx_popular (is_popular),
+            KEY idx_sort (sort_order)
+        ) $charset_collate;";
+        
+        dbDelta($sql);
+    }
+
+    /**
+     * Create agency subscriptions table
+     */
+    private static function create_agency_subscriptions_table($charset_collate) {
+        global $wpdb;
+        $table_name = $wpdb->prefix . 'mf_agency_subscriptions';
+        
+        $sql = "CREATE TABLE IF NOT EXISTS $table_name (
+            id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+            agency_id BIGINT UNSIGNED NOT NULL,
+            plan_id BIGINT UNSIGNED NOT NULL,
+            stripe_subscription_id VARCHAR(100),
+            status ENUM('active', 'canceled', 'past_due', 'incomplete', 'trialing') DEFAULT 'active',
+            current_period_start TIMESTAMP NULL,
+            current_period_end TIMESTAMP NULL,
+            cancel_at_period_end BOOLEAN DEFAULT FALSE,
+            max_agents INT UNSIGNED DEFAULT 5,
+            max_properties INT UNSIGNED DEFAULT 50,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            
+            KEY idx_agency (agency_id),
+            KEY idx_plan (plan_id),
+            KEY idx_status (status),
+            KEY idx_period_end (current_period_end)
         ) $charset_collate;";
         
         dbDelta($sql);

@@ -76,6 +76,12 @@ class Core {
         require_once MALISAFI_MLS_PATH . 'includes/class-fraud-report-ajax.php';
         require_once MALISAFI_MLS_PATH . 'includes/class-fraud-report-shortcode.php';
         require_once MALISAFI_MLS_PATH . 'admin/class-admin-fraud-reports.php';
+
+        // Agency management system
+        require_once MALISAFI_MLS_PATH . 'includes/class-agency-manager.php';
+        require_once MALISAFI_MLS_PATH . 'includes/class-agency-membership-manager.php';
+        require_once MALISAFI_MLS_PATH . 'admin/class-agency-management-admin.php';
+        require_once MALISAFI_MLS_PATH . 'admin/class-agency-membership-admin.php';
         
         // Agent settings AJAX handler
         require_once MALISAFI_MLS_PATH . 'includes/ajax/class-agent-settings-ajax.php';
@@ -136,6 +142,10 @@ class Core {
         
         // Initialize agent actions AJAX (ratings, reports)
         Agent_Actions_Ajax::get_instance();
+        
+        // Initialize email settings and notifications
+        require_once MALISAFI_MLS_PATH . 'includes/class-email-settings.php';
+        \MalisafiMLS\Email_Settings::init();
         
         // Initialize cache manager
         Cache_Manager::init();

@@ -2,7 +2,7 @@
 
 ## Rôles Personnalisés
 
-Le plugin Malisafi MLS crée 6 rôles personnalisés pour gérer l'accès et les permissions des utilisateurs.
+Le plugin Malisafi MLS crée 7 rôles personnalisés pour gérer l'accès et les permissions des utilisateurs.
 
 ### 1. Client (malisafi_client)
 **Description**: Utilisateur de base qui peut rechercher et consulter des propriétés.
@@ -63,7 +63,42 @@ Le plugin Malisafi MLS crée 6 rôles personnalisés pour gérer l'accès et les
 
 ---
 
-### 4. Property Owner (malisafi_owner)
+### 4. Real Estate Agency (malisafi_agency)
+**Description**: Agence immobilière qui gère plusieurs agents et propriétés sous une marque commune.
+
+**Capabilities de base**:
+- `read` - Lire le contenu
+- `upload_files` - Télécharger des médias
+- `edit_posts` - Éditer les publications
+- `edit_users` - Gérer les utilisateurs de l'agence
+
+**Capabilities propriétés**:
+- `edit_properties` - Éditer les propriétés de l'agence
+- `edit_published_properties` - Éditer les propriétés publiées
+- `delete_properties` - Supprimer les propriétés
+- `access_malisafi_dashboard` - Accès au tableau de bord
+- `view_property_analytics` - Voir les statistiques
+
+**Capabilities d'agence**:
+- ✅ `manage_agency_agents` - Gérer les agents de l'agence
+- ✅ `bulk_manage_properties` - Gestion en masse des propriétés
+- ✅ `agency_analytics` - Statistiques au niveau de l'agence
+- ✅ `feature_properties` - Mettre en vedette des propriétés
+- ✅ `boost_listings` - Booster la visibilité des annonces
+- ✅ `advanced_analytics` - Accès aux statistiques avancées
+- ✅ `create_agency_profile` - Créer un profil d'agence
+- ✅ `manage_agency_listings` - Gérer les annonces de l'agence
+
+**Fonctionnalités spéciales**:
+- Gestion d'équipe d'agents
+- Profil d'agence personnalisé
+- Statistiques consolidées
+- Gestion de marque commune
+- Attribution des propriétés aux agents
+
+---
+
+### 5. Property Owner (malisafi_owner)
 **Description**: Propriétaire de bien immobilier qui souhaite lister ses propriétés.
 
 **Capabilities de base**:
@@ -85,7 +120,7 @@ Le plugin Malisafi MLS crée 6 rôles personnalisés pour gérer l'accès et les
 
 ---
 
-### 5. Developer (malisafi_developer)
+### 6. Developer (malisafi_developer)
 **Description**: Promoteur immobilier avec capacité de gérer plusieurs propriétés et projets.
 
 **Capabilities de base**:
@@ -107,7 +142,7 @@ Le plugin Malisafi MLS crée 6 rôles personnalisés pour gérer l'accès et les
 
 ---
 
-### 6. Moderator (malisafi_moderator)
+### 7. Moderator (malisafi_moderator)
 **Description**: Modérateur avec accès étendu pour gérer et approuver les propriétés.
 
 **Capabilities de base**:
@@ -138,7 +173,7 @@ Le plugin Malisafi MLS crée 6 rôles personnalisés pour gérer l'accès et les
 
 ---
 
-### 7. Administrator (Rôle WordPress existant)
+### 8. Administrator (Rôle WordPress existant)
 **Description**: Administrateur WordPress avec capacités Malisafi étendues.
 
 **Capabilities héritées de WordPress**:

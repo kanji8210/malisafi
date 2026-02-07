@@ -9,6 +9,7 @@ class Malisafi_Roles_Manager {
     public static function create_roles() {
         self::create_client_role();
         self::create_agent_roles();
+        self::create_agency_role();
         self::create_owner_roles();
         self::create_developer_role();
         self::create_moderator_role();
@@ -36,6 +37,15 @@ class Malisafi_Roles_Manager {
             'read' => true,
             'upload_files' => true,
             'edit_posts' => true,
+        ));
+    }
+    
+    private static function create_agency_role() {
+        add_role('malisafi_agency', __('Real Estate Agency', 'malisafi'), array(
+            'read' => true,
+            'upload_files' => true,
+            'edit_posts' => true,
+            'edit_users' => true, // Can manage agency agents
         ));
     }
     
@@ -75,6 +85,7 @@ class Malisafi_Roles_Manager {
         $roles = array(
             'administrator',
             'malisafi_moderator',
+            'malisafi_agency',
             'malisafi_agent_basic', 
             'malisafi_agent_premium',
             'malisafi_owner',
@@ -120,6 +131,17 @@ class Malisafi_Roles_Manager {
                     $role->add_cap('feature_properties', true);
                     $role->add_cap('boost_listings', true);
                     $role->add_cap('advanced_analytics', true);
+                }
+
+                if ($role_name === 'malisafi_agency') {
+                    $role->add_cap('manage_agency_agents', true);
+                    $role->add_cap('bulk_manage_properties', true);
+                    $role->add_cap('agency_analytics', true);
+                    $role->add_cap('feature_properties', true);
+                    $role->add_cap('boost_listings', true);
+                    $role->add_cap('advanced_analytics', true);
+                    $role->add_cap('create_agency_profile', true);
+                    $role->add_cap('manage_agency_listings', true);
                 }
 
                 if ($role_name === 'malisafi_moderator' || $role_name === 'administrator') {

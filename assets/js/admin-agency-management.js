@@ -1,0 +1,371 @@
+/**
+ * Agency Management Admin JavaScript
+ *
+ * Handles AJAX interactions for agency management
+ */
+
+(function($) {
+    'use strict';
+
+    var MalisafiAgencyManagement = {
+
+        init: function() {
+            this.bindEvents();
+        },
+
+        bindEvents: function() {
+            // Agency management
+            $('.edit-agency-btn').on('click', this.editAgency.bind(this));
+            $('.delete-agency-btn').on('click', this.deleteAgency.bind(this));
+            $('#save-agency-btn').on('click', this.saveAgency.bind(this));
+            $('#cancel-agency-btn, .modal-close').on('click', this.closeModal.bind(this));
+
+            // Agents management
+            $('.manage-agents-btn').on('click', this.manageAgents.bind(this));
+            $('#add-agent-btn').on('click', this.addAgent.bind(this));
+            $(document).on('click', '.remove-agent-btn', this.removeAgent.bind(this));
+            $('#close-agents-modal-btn').on('click', this.closeModal.bind(this));
+
+            // Agent search
+            $('#agent_search').on('input', this.searchAgents.bind(this));
+            $(document).on('click', '.agent-search-result', this.selectAgent.bind(this));
+
+            // Logo upload
+            $('#upload-logo-btn').on('click', this.uploadLogo.bind(this));
+        },
+
+        editAgency: function(e) {
+            e.preventDefault();
+            var agencyId = $(e.target).data('agency-id');
+
+            // Load agency data via AJAX
+            $.ajax({
+                url: malisafiAgencyManagement.ajaxUrl,
+                type: 'POST',
+                data: {
+                    action: 'malisafi_get_agency_data',
+                    agency_id: agencyId,
+                    nonce: malisafiAgencyManagement.nonce
+                },
+                success: function(response) {
+                    if (response.success) {
+                        MalisafiAgencyManagement.populateAgencyForm(response.data);
+                        $('#modal-title').text(malisafiAgencyManagement.i18n.editAgency || 'Edit Agency');
+                        $('#agency-modal').show();
+                    } else {
+                        alert(response.data || malisafiAgencyManagement.i18n.error);
+                    }
+                },
+                error: function() {
+                    alert(malisafiAgencyManagement.i18n.error);
+                }
+            });
+        },
+
+        populateAgencyForm: function(agency) {
+            $('#agency_id').val(agency.id);
+            $('#agency_name').val(agency.agency_name);
+            $('#agency_description').val(agency.agency_description);
+            $('#agency_logo').val(agency.agency_logo);
+            $('#agency_website').val(agency.agency_website);
+            $('#agency_email').val(agency.agency_email);
+            $('#agency_phone').val(agency.agency_phone);
+            $('#agency_address').val(agency.agency_address);
+            $('#is_active').prop('checked', agency.is_active == 1);
+
+            // Update logo preview
+            if (agency.agency_logo) {
+                $('#logo-preview').html('<img src="' + agency.agency_logo + '" style="max-width: 100px; max-height: 100px;">');
+                $('#upload-logo-btn').text(malisafiAgencyManagement.i18n.changeLogo || 'Change Logo');
+            } else {
+                $('#logo-preview').html('');
+                $('#upload-logo-btn').text(malisafiAgencyManagement.i18n.selectLogo || 'Select Logo');
+            }
+        },
+
+        saveAgency: function() {
+            var formData = new FormData(document.getElementById('agency-form'));
+            formData.append('action', 'malisafi_save_agency');
+            formData.append('nonce', malisafiAgencyManagement.nonce);
+
+            // Convert checkbox to boolean
+            if ($('#is_active').is(':checked')) {
+                formData.append('is_active', '1');
+            }
+
+            $('#save-agency-btn').prop('disabled', true).text('Saving...');
+
+            $.ajax({
+                url: malisafiAgencyManagement.ajaxUrl,
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function(response) {
+                    if (response.success) {
+                        alert(malisafiAgencyManagement.i18n.saveSuccess);
+                        MalisafiAgencyManagement.closeModal();
+                        location.reload();
+                    } else {
+                        alert(response.data || malisafiAgencyManagement.i18n.error);
+                    }
+                },
+                error: function() {
+                    alert(malisafiAgencyManagement.i18n.error);
+                },
+                complete: function() {
+                    $('#save-agency-btn').prop('disabled', false).text('Save Agency');
+                }
+            });
+        },
+
+        deleteAgency: function(e) {
+            e.preventDefault();
+            var agencyId = $(e.target).data('agency-id');
+
+            if (!confirm(malisafiAgencyManagement.i18n.confirmDelete)) {
+                return;
+            }
+
+            $.ajax({
+                url: malisafiAgencyManagement.ajaxUrl,
+                type: 'POST',
+                data: {
+                    action: 'malisafi_delete_agency',
+                    agency_id: agencyId,
+                    nonce: malisafiAgencyManagement.nonce
+                },
+                success: function(response) {
+                    if (response.success) {
+                        alert(malisafiAgencyManagement.i18n.deleteSuccess);
+                        location.reload();
+                    } else {
+                        alert(response.data || malisafiAgencyManagement.i18n.error);
+                    }
+                },
+                error: function() {
+                    alert(malisafiAgencyManagement.i18n.error);
+                }
+            });
+        },
+
+        manageAgents: function(e) {
+            e.preventDefault();
+            var agencyId = $(e.target).data('agency-id');
+            var agencyName = $(e.target).data('agency-name');
+
+            $('#agents-modal-title').text('Manage Agents - ' + agencyName);
+            $('#agents-modal').data('agency-id', agencyId);
+            this.loadCurrentAgents(agencyId);
+            $('#agents-modal').show();
+        },
+
+        loadCurrentAgents: function(agencyId) {
+            $.ajax({
+                url: malisafiAgencyManagement.ajaxUrl,
+                type: 'POST',
+                data: {
+                    action: 'malisafi_get_agency_agents',
+                    agency_id: agencyId,
+                    nonce: malisafiAgencyManagement.nonce
+                },
+                success: function(response) {
+                    if (response.success) {
+                        MalisafiAgencyManagement.displayCurrentAgents(response.data);
+                    } else {
+                        $('#current-agents-list').html('<p>' + (response.data || malisafiAgencyManagement.i18n.error) + '</p>');
+                    }
+                },
+                error: function() {
+                    $('#current-agents-list').html('<p>' + malisafiAgencyManagement.i18n.error + '</p>');
+                }
+            });
+        },
+
+        displayCurrentAgents: function(agents) {
+            var html = '';
+
+            if (agents.length === 0) {
+                html = '<p>No agents assigned to this agency.</p>';
+            } else {
+                agents.forEach(function(agent) {
+                    html += '<div class="agent-item" data-agent-id="' + agent.user_id + '">' +
+                        '<div class="agent-info">' +
+                            '<img src="' + (agent.avatar || '') + '" alt="" onerror="this.style.display=\'none\'">' +
+                            '<div class="agent-details">' +
+                                '<h5>' + agent.display_name + '</h5>' +
+                                '<small>' + agent.user_email + ' | ' + agent.role + '</small>' +
+                            '</div>' +
+                        '</div>' +
+                        '<a href="#" class="remove-agent-btn" data-agency-id="' + agent.agency_id + '" data-agent-id="' + agent.user_id + '">Remove</a>' +
+                    '</div>';
+                });
+            }
+
+            $('#current-agents-list').html(html);
+        },
+
+        searchAgents: function(e) {
+            var searchTerm = $(e.target).val().trim();
+            var agencyId = $('#agents-modal').data('agency-id');
+
+            if (searchTerm.length < 2) {
+                $('#agent_search').autocomplete('close');
+                return;
+            }
+
+            $.ajax({
+                url: malisafiAgencyManagement.ajaxUrl,
+                type: 'POST',
+                data: {
+                    action: 'malisafi_get_available_agents',
+                    search: searchTerm,
+                    agency_id: agencyId,
+                    nonce: malisafiAgencyManagement.nonce
+                },
+                success: function(response) {
+                    if (response.success) {
+                        MalisafiAgencyManagement.showAgentSearchResults(response.data);
+                    }
+                }
+            });
+        },
+
+        showAgentSearchResults: function(agents) {
+            var results = agents.map(function(agent) {
+                return {
+                    label: agent.display_name + ' (' + agent.user_email + ')',
+                    value: agent.display_name,
+                    id: agent.ID,
+                    email: agent.user_email
+                };
+            });
+
+            $('#agent_search').autocomplete({
+                source: results,
+                select: function(event, ui) {
+                    $('#selected_agent_id').val(ui.item.id);
+                    $('#add-agent-btn').prop('disabled', false);
+                }
+            }).autocomplete('search', $('#agent_search').val());
+        },
+
+        selectAgent: function(e) {
+            e.preventDefault();
+            var agentId = $(e.target).data('agent-id');
+            $('#selected_agent_id').val(agentId);
+            $('#add-agent-btn').prop('disabled', false);
+        },
+
+        addAgent: function() {
+            var agencyId = $('#agents-modal').data('agency-id');
+            var agentId = $('#selected_agent_id').val();
+            var role = $('#agent_role').val();
+            var commissionSplit = $('#commission_split').val();
+
+            if (!agentId) {
+                alert('Please select an agent first.');
+                return;
+            }
+
+            $('#add-agent-btn').prop('disabled', true).text('Adding...');
+
+            $.ajax({
+                url: malisafiAgencyManagement.ajaxUrl,
+                type: 'POST',
+                data: {
+                    action: 'malisafi_add_agent_to_agency',
+                    agency_id: agencyId,
+                    agent_user_id: agentId,
+                    role: role,
+                    commission_split: commissionSplit,
+                    nonce: malisafiAgencyManagement.nonce
+                },
+                success: function(response) {
+                    if (response.success) {
+                        alert(malisafiAgencyManagement.i18n.agentAdded);
+                        $('#agent_search').val('');
+                        $('#selected_agent_id').val('');
+                        $('#commission_split').val('0.00');
+                        $('#add-agent-btn').prop('disabled', true);
+                        MalisafiAgencyManagement.loadCurrentAgents(agencyId);
+                    } else {
+                        alert(response.data || malisafiAgencyManagement.i18n.error);
+                    }
+                },
+                error: function() {
+                    alert(malisafiAgencyManagement.i18n.error);
+                },
+                complete: function() {
+                    $('#add-agent-btn').prop('disabled', false).text('Add Agent');
+                }
+            });
+        },
+
+        removeAgent: function(e) {
+            e.preventDefault();
+            var agencyId = $(e.target).data('agency-id');
+            var agentId = $(e.target).data('agent-id');
+
+            if (!confirm(malisafiAgencyManagement.i18n.confirmRemoveAgent)) {
+                return;
+            }
+
+            $.ajax({
+                url: malisafiAgencyManagement.ajaxUrl,
+                type: 'POST',
+                data: {
+                    action: 'malisafi_remove_agent_from_agency',
+                    agency_id: agencyId,
+                    agent_user_id: agentId,
+                    nonce: malisafiAgencyManagement.nonce
+                },
+                success: function(response) {
+                    if (response.success) {
+                        alert(malisafiAgencyManagement.i18n.agentRemoved);
+                        MalisafiAgencyManagement.loadCurrentAgents(agencyId);
+                    } else {
+                        alert(response.data || malisafiAgencyManagement.i18n.error);
+                    }
+                },
+                error: function() {
+                    alert(malisafiAgencyManagement.i18n.error);
+                }
+            });
+        },
+
+        uploadLogo: function(e) {
+            e.preventDefault();
+
+            var frame = wp.media({
+                title: malisafiAgencyManagement.i18n.selectLogo || 'Select Agency Logo',
+                button: { text: malisafiAgencyManagement.i18n.selectLogo || 'Use this logo' },
+                multiple: false
+            });
+
+            frame.on('select', function() {
+                var attachment = frame.state().get('selection').first().toJSON();
+                $('#agency_logo').val(attachment.url);
+                $('#logo-preview').html('<img src="' + attachment.url + '" style="max-width: 100px; max-height: 100px;">');
+                $('#upload-logo-btn').text(malisafiAgencyManagement.i18n.changeLogo || 'Change Logo');
+            });
+
+            frame.open();
+        },
+
+        closeModal: function() {
+            $('.malisafi-modal').hide();
+            // Reset forms
+            $('#agency-form')[0].reset();
+            $('#agent_search').val('');
+            $('#selected_agent_id').val('');
+            $('#add-agent-btn').prop('disabled', true);
+        }
+    };
+
+    // Initialize when document is ready
+    $(document).ready(function() {
+        MalisafiAgencyManagement.init();
+    });
+
+})(jQuery);

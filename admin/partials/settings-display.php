@@ -23,6 +23,9 @@ if (!defined('WPINC')) {
         <a href="<?php echo esc_url(admin_url('admin.php?page=malisafi-settings&tab=features')); ?>" class="nav-tab <?php echo isset($_GET['tab']) && $_GET['tab'] === 'features' ? 'nav-tab-active' : ''; ?>">
             <?php _e('Features', 'malisafi-mls'); ?>
         </a>
+        <a href="<?php echo esc_url(admin_url('admin.php?page=malisafi-email-settings')); ?>" class="nav-tab">
+            <?php _e('Email Settings', 'malisafi-mls'); ?>
+        </a>
     </h2>
     
     <?php

@@ -36,6 +36,10 @@ class Dashboard_Shortcodes {
 		add_shortcode('malisafi_owner_properties', [__CLASS__, 'owner_properties']);
 		add_shortcode('malisafi_owner_inquiries', [__CLASS__, 'owner_inquiries']);
 
+		add_shortcode('malisafi_agency_dashboard', [__CLASS__, 'agency_dashboard']);
+		add_shortcode('malisafi_agency_inquiries', [__CLASS__, 'agency_inquiries']);
+		add_shortcode('malisafi_agency_agents', [__CLASS__, 'agency_agents']);
+
 		add_shortcode('malisafi_developer_dashboard', [__CLASS__, 'developer_dashboard']);
 		add_shortcode('malisafi_developer_projects', [__CLASS__, 'developer_projects']);
 		add_shortcode('malisafi_developer_analytics', [__CLASS__, 'developer_analytics']);
@@ -315,10 +319,13 @@ class Dashboard_Shortcodes {
 			return $login_check;
 		}
 
+		// Enqueue dashboard styles
+		wp_enqueue_style('malisafi-dashboards', MALISAFI_MLS_URL . 'assets/css/dashboards.css', array(), MALISAFI_MLS_VERSION);
+
 		global $wpdb;
 		$table_name = $wpdb->prefix . 'mf_inquiries';
 		$rows = $wpdb->get_results($wpdb->prepare(
-			"SELECT * FROM {$table_name} WHERE client_id = %d ORDER BY id DESC LIMIT 20",
+			"SELECT * FROM {$table_name} WHERE client_id = %d ORDER BY inquiry_id DESC LIMIT 20",
 			get_current_user_id()
 		), ARRAY_A);
 
@@ -332,14 +339,31 @@ class Dashboard_Shortcodes {
 				<ul class="inquiries-list">
 					<?php foreach ($rows as $row) : ?>
 						<?php $property_id = isset($row['property_id']) ? (int) $row['property_id'] : 0; ?>
-						<li>
-							<?php if ($property_id) : ?>
-								<a href="<?php echo esc_url(get_permalink($property_id)); ?>"><?php echo esc_html(get_the_title($property_id)); ?></a>
-							<?php else : ?>
-								<span><?php _e('Property Inquiry', 'malisafi-mls'); ?></span>
-							<?php endif; ?>
-							<?php if (!empty($row['created_at'])) : ?>
-								<small><?php echo esc_html($row['created_at']); ?></small>
+						<li class="inquiry-item">
+							<div class="inquiry-header">
+								<?php if ($property_id) : ?>
+									<a href="<?php echo esc_url(get_permalink($property_id)); ?>" class="property-link">
+										<?php echo esc_html(get_the_title($property_id)); ?>
+									</a>
+								<?php else : ?>
+									<span><?php _e('Property Inquiry', 'malisafi-mls'); ?></span>
+								<?php endif; ?>
+								<span class="inquiry-status status-<?php echo esc_attr($row['status']); ?>">
+									<?php echo esc_html(ucfirst($row['status'])); ?>
+								</span>
+							</div>
+							<div class="inquiry-meta">
+								<?php if (!empty($row['created_at'])) : ?>
+									<small class="inquiry-date"><?php echo esc_html(date('M j, Y g:i A', strtotime($row['created_at']))); ?></small>
+								<?php endif; ?>
+								<?php if (!empty($row['inquiry_type'])) : ?>
+									<small class="inquiry-type"><?php echo esc_html(ucfirst(str_replace('_', ' ', $row['inquiry_type']))); ?></small>
+								<?php endif; ?>
+							</div>
+							<?php if (!empty($row['message'])) : ?>
+								<div class="inquiry-message">
+									<?php echo esc_html(wp_trim_words($row['message'], 20)); ?>
+								</div>
 							<?php endif; ?>
 						</li>
 					<?php endforeach; ?>
@@ -495,10 +519,13 @@ class Dashboard_Shortcodes {
 			return $login_check;
 		}
 
+		// Enqueue dashboard styles
+		wp_enqueue_style('malisafi-dashboards', MALISAFI_MLS_URL . 'assets/css/dashboards.css', array(), MALISAFI_MLS_VERSION);
+
 		global $wpdb;
 		$table_name = $wpdb->prefix . 'mf_inquiries';
 		$rows = $wpdb->get_results($wpdb->prepare(
-			"SELECT i.* FROM {$table_name} i LEFT JOIN {$wpdb->posts} p ON i.property_id = p.ID WHERE p.post_author = %d ORDER BY i.id DESC LIMIT 20",
+			"SELECT i.* FROM {$table_name} i LEFT JOIN {$wpdb->posts} p ON i.property_id = p.ID WHERE p.post_author = %d ORDER BY i.inquiry_id DESC LIMIT 20",
 			get_current_user_id()
 		), ARRAY_A);
 
@@ -512,18 +539,250 @@ class Dashboard_Shortcodes {
 				<ul class="owner-inquiries-list">
 					<?php foreach ($rows as $row) : ?>
 						<?php $property_id = isset($row['property_id']) ? (int) $row['property_id'] : 0; ?>
-						<li>
-							<?php if ($property_id) : ?>
-								<a href="<?php echo esc_url(get_permalink($property_id)); ?>"><?php echo esc_html(get_the_title($property_id)); ?></a>
-							<?php else : ?>
-								<span><?php _e('Property Inquiry', 'malisafi-mls'); ?></span>
+						<li class="inquiry-item">
+							<div class="inquiry-header">
+								<?php if ($property_id) : ?>
+									<a href="<?php echo esc_url(get_permalink($property_id)); ?>" class="property-link">
+										<?php echo esc_html(get_the_title($property_id)); ?>
+									</a>
+								<?php else : ?>
+									<span><?php _e('Property Inquiry', 'malisafi-mls'); ?></span>
+								<?php endif; ?>
+								<span class="inquiry-status status-<?php echo esc_attr($row['status']); ?>">
+									<?php echo esc_html(ucfirst($row['status'])); ?>
+								</span>
+							</div>
+							<div class="inquiry-meta">
+								<?php if (!empty($row['created_at'])) : ?>
+									<small class="inquiry-date"><?php echo esc_html(date('M j, Y g:i A', strtotime($row['created_at']))); ?></small>
+								<?php endif; ?>
+								<?php if (!empty($row['inquiry_type'])) : ?>
+									<small class="inquiry-type"><?php echo esc_html(ucfirst(str_replace('_', ' ', $row['inquiry_type']))); ?></small>
+								<?php endif; ?>
+							</div>
+							<?php if (!empty($row['message'])) : ?>
+								<div class="inquiry-message">
+									<?php echo esc_html(wp_trim_words($row['message'], 20)); ?>
+								</div>
 							<?php endif; ?>
-							<?php if (!empty($row['created_at'])) : ?>
-								<small><?php echo esc_html($row['created_at']); ?></small>
+							<?php if (!empty($row['client_email'])) : ?>
+								<div class="inquiry-contact">
+									<small><?php _e('From:', 'malisafi-mls'); ?> <?php echo esc_html($row['client_email']); ?>
+									<?php if (!empty($row['client_phone'])) : ?>
+										| <?php echo esc_html($row['client_phone']); ?>
+									<?php endif; ?>
+									</small>
+								</div>
 							<?php endif; ?>
 						</li>
 					<?php endforeach; ?>
 				</ul>
+			<?php endif; ?>
+		</div>
+		<?php
+		return ob_get_clean();
+	}
+
+	public static function agency_dashboard($atts) {
+		$login_check = self::require_login();
+		if ($login_check) {
+			return $login_check;
+		}
+
+		$current_user = wp_get_current_user();
+		$is_agency = in_array('malisafi_agency', $current_user->roles);
+		if (!$is_agency && !current_user_can('administrator')) {
+			return '<div class="malisafi-access-denied"><p>' . __('Access restricted to agencies only.', 'malisafi-mls') . '</p></div>';
+		}
+
+		$user_id = get_current_user_id();
+		$logout_url = wp_logout_url(home_url());
+		$inquiries_url = Page_Manager::get_page_url('agency_inquiries');
+		$agents_url = Page_Manager::get_page_url('agency_agents');
+
+		// Get agency info
+		$agency = \MalisafiMLS\Agency_Manager::get_agency_profile($user_id);
+		$agency_name = $agency ? $agency->agency_name : __('Your Agency', 'malisafi-mls');
+
+		// Get stats
+		$agent_count = count(\MalisafiMLS\Agency_Manager::get_agency_agents($user_id));
+		$inquiry_count = self::get_agency_inquiries_count($user_id);
+
+		ob_start();
+		?>
+		<div class="malisafi-agency-dashboard">
+			<div class="dashboard-header">
+				<h1><?php echo esc_html($agency_name); ?> Dashboard</h1>
+				<a class="button button-secondary" href="<?php echo esc_url($logout_url); ?>">
+					<?php _e('Logout', 'malisafi-mls'); ?>
+				</a>
+			</div>
+
+			<div class="dashboard-overview">
+				<div class="overview-card">
+					<h3><?php _e('Agents', 'malisafi-mls'); ?></h3>
+					<div class="metric"><?php echo esc_html($agent_count); ?></div>
+				</div>
+				<div class="overview-card">
+					<h3><?php _e('Inquiries', 'malisafi-mls'); ?></h3>
+					<div class="metric"><?php echo esc_html($inquiry_count); ?></div>
+				</div>
+			</div>
+
+			<p><?php _e('Manage your agency, agents, and property inquiries.', 'malisafi-mls'); ?></p>
+
+			<ul class="dashboard-links">
+				<?php if ($agents_url): ?>
+					<li><a href="<?php echo esc_url($agents_url); ?>"><?php _e('My Agents', 'malisafi-mls'); ?></a></li>
+				<?php endif; ?>
+				<?php if ($inquiries_url): ?>
+					<li><a href="<?php echo esc_url($inquiries_url); ?>"><?php _e('Agent Inquiries', 'malisafi-mls'); ?></a></li>
+				<?php endif; ?>
+			</ul>
+		</div>
+		<?php
+		return ob_get_clean();
+	}
+
+	public static function agency_inquiries($atts) {
+		$login_check = self::require_login();
+		if ($login_check) {
+			return $login_check;
+		}
+
+		$current_user = wp_get_current_user();
+		$is_agency = in_array('malisafi_agency', $current_user->roles);
+		if (!$is_agency && !current_user_can('administrator')) {
+			return '<div class="malisafi-access-denied"><p>' . __('Access restricted to agencies only.', 'malisafi-mls') . '</p></div>';
+		}
+
+		// Enqueue dashboard styles
+		wp_enqueue_style('malisafi-dashboards', MALISAFI_MLS_URL . 'assets/css/dashboards.css', array(), MALISAFI_MLS_VERSION);
+
+		global $wpdb;
+		$table_name = $wpdb->prefix . 'mf_inquiries';
+		$user_id = get_current_user_id();
+
+		// Get inquiries for all agents in this agency
+		$rows = $wpdb->get_results($wpdb->prepare(
+			"SELECT i.*, u.display_name as agent_name, u.user_email as agent_email
+			 FROM {$table_name} i
+			 LEFT JOIN {$wpdb->users} u ON i.agent_id = u.ID
+			 WHERE i.agency_id = (
+				 SELECT id FROM {$wpdb->prefix}mf_agencies WHERE user_id = %d LIMIT 1
+			 )
+			 ORDER BY i.inquiry_id DESC LIMIT 50",
+			$user_id
+		), ARRAY_A);
+
+		ob_start();
+		?>
+		<div class="malisafi-agency-inquiries">
+			<h1><?php _e('Agent Inquiries', 'malisafi-mls'); ?></h1>
+			<p><?php _e('Inquiries received by your agents.', 'malisafi-mls'); ?></p>
+
+			<?php if (empty($rows)) : ?>
+				<p><?php _e('No inquiries found.', 'malisafi-mls'); ?></p>
+			<?php else : ?>
+				<ul class="agency-inquiries-list">
+					<?php foreach ($rows as $row) : ?>
+						<?php $property_id = isset($row['property_id']) ? (int) $row['property_id'] : 0; ?>
+						<li class="inquiry-item">
+							<div class="inquiry-header">
+								<?php if ($property_id) : ?>
+									<a href="<?php echo esc_url(get_permalink($property_id)); ?>" class="property-link">
+										<?php echo esc_html(get_the_title($property_id)); ?>
+									</a>
+								<?php else : ?>
+									<span><?php _e('Property Inquiry', 'malisafi-mls'); ?></span>
+								<?php endif; ?>
+								<span class="inquiry-status status-<?php echo esc_attr($row['status']); ?>">
+									<?php echo esc_html(ucfirst($row['status'])); ?>
+								</span>
+							</div>
+
+							<div class="inquiry-agent">
+								<small><?php _e('Agent:', 'malisafi-mls'); ?> <?php echo esc_html($row['agent_name'] ?? 'Unknown'); ?>
+								(<?php echo esc_html($row['agent_email'] ?? 'N/A'); ?>)</small>
+							</div>
+
+							<div class="inquiry-meta">
+								<?php if (!empty($row['created_at'])) : ?>
+									<small class="inquiry-date"><?php echo esc_html(date('M j, Y g:i A', strtotime($row['created_at']))); ?></small>
+								<?php endif; ?>
+								<?php if (!empty($row['inquiry_type'])) : ?>
+									<small class="inquiry-type"><?php echo esc_html(ucfirst(str_replace('_', ' ', $row['inquiry_type']))); ?></small>
+								<?php endif; ?>
+							</div>
+
+							<?php if (!empty($row['message'])) : ?>
+								<div class="inquiry-message">
+									<?php echo esc_html(wp_trim_words($row['message'], 20)); ?>
+								</div>
+							<?php endif; ?>
+
+							<?php if (!empty($row['client_email'])) : ?>
+								<div class="inquiry-contact">
+									<small><?php _e('From:', 'malisafi-mls'); ?> <?php echo esc_html($row['client_email']); ?>
+									<?php if (!empty($row['client_phone'])) : ?>
+										| <?php echo esc_html($row['client_phone']); ?>
+									<?php endif; ?>
+									</small>
+								</div>
+							<?php endif; ?>
+						</li>
+					<?php endforeach; ?>
+				</ul>
+			<?php endif; ?>
+		</div>
+		<?php
+		return ob_get_clean();
+	}
+
+	public static function agency_agents($atts) {
+		$login_check = self::require_login();
+		if ($login_check) {
+			return $login_check;
+		}
+
+		$current_user = wp_get_current_user();
+		$is_agency = in_array('malisafi_agency', $current_user->roles);
+		if (!$is_agency && !current_user_can('administrator')) {
+			return '<div class="malisafi-access-denied"><p>' . __('Access restricted to agencies only.', 'malisafi-mls') . '</p></div>';
+		}
+
+		$user_id = get_current_user_id();
+		$agents = \MalisafiMLS\Agency_Manager::get_agency_agents($user_id);
+
+		ob_start();
+		?>
+		<div class="malisafi-agency-agents">
+			<h1><?php _e('My Agents', 'malisafi-mls'); ?></h1>
+
+			<?php if (empty($agents)) : ?>
+				<p><?php _e('No agents found.', 'malisafi-mls'); ?></p>
+			<?php else : ?>
+				<div class="agents-grid">
+					<?php foreach ($agents as $agent) : ?>
+						<div class="agent-card">
+							<h3><?php echo esc_html($agent->display_name); ?></h3>
+							<p><?php echo esc_html($agent->user_email); ?></p>
+							<div class="agent-stats">
+								<?php
+								$agent_properties = count(get_posts(array(
+									'post_type' => 'malisafi_property',
+									'author' => $agent->ID,
+									'posts_per_page' => -1
+								)));
+								$agent_inquiries = get_user_meta($agent->ID, '_malisafi_inquiries', true);
+								$agent_inquiries = $agent_inquiries ? count(maybe_unserialize($agent_inquiries)) : 0;
+								?>
+								<span><?php echo esc_html($agent_properties); ?> properties</span>
+								<span><?php echo esc_html($agent_inquiries); ?> inquiries</span>
+							</div>
+						</div>
+					<?php endforeach; ?>
+				</div>
 			<?php endif; ?>
 		</div>
 		<?php
@@ -838,6 +1097,10 @@ class Dashboard_Shortcodes {
 			$register_url = wp_registration_url();
 		}
         
+		// Check for email verification messages
+		$verification_sent = isset($_GET['verification_sent']) && $_GET['verification_sent'] === '1';
+		$email_verified = isset($_GET['email_verified']) && $_GET['email_verified'] === '1';
+        
 		ob_start();
 		?>
 		<div class="malisafi-login-container">
@@ -846,6 +1109,16 @@ class Dashboard_Shortcodes {
 					<h2><?php _e('Welcome to Malisafi', 'malisafi-mls'); ?></h2>
 					<p><?php _e('Login to access your dashboard', 'malisafi-mls'); ?></p>
 				</div>
+                
+				<?php if ($verification_sent): ?>
+					<div class="malisafi-notice malisafi-notice-info">
+						<p><?php _e('Registration successful! Please check your email and click the verification link to activate your account.', 'malisafi-mls'); ?></p>
+					</div>
+				<?php elseif ($email_verified): ?>
+					<div class="malisafi-notice malisafi-notice-success">
+						<p><?php _e('Email verified successfully! You can now log in to your account.', 'malisafi-mls'); ?></p>
+					</div>
+				<?php endif; ?>
                 
 				<div id="malisafi-login-messages"></div>
                 
@@ -1203,11 +1476,13 @@ class Dashboard_Shortcodes {
 			<div class="account-actions">
 				<h2><?php _e('Quick Links', 'malisafi-mls'); ?></h2>
 				<ul>
-					<?php if (current_user_can('agent_basic')): ?>
-						<li><a href="<?php echo admin_url('admin.php?page=malisafi-agent-dashboard'); ?>"><?php _e('Agent Dashboard', 'malisafi-mls'); ?></a></li>
-					<?php elseif (current_user_can('owner')): ?>
+					<?php if (current_user_can('malisafi_agency')): ?>
+						<li><a href="<?php echo Page_Manager::get_page_url('agency_dashboard'); ?>"><?php _e('Agency Dashboard', 'malisafi-mls'); ?></a></li>
+					<?php elseif (current_user_can('malisafi_agent_basic') || current_user_can('malisafi_agent_premium')): ?>
+						<li><a href="<?php echo Page_Manager::get_page_url('agent_dashboard'); ?>"><?php _e('Agent Dashboard', 'malisafi-mls'); ?></a></li>
+					<?php elseif (current_user_can('malisafi_owner')): ?>
 						<li><a href="<?php echo Page_Manager::get_page_url('owner_dashboard'); ?>"><?php _e('Owner Dashboard', 'malisafi-mls'); ?></a></li>
-					<?php elseif (current_user_can('developer')): ?>
+					<?php elseif (current_user_can('malisafi_developer')): ?>
 						<li><a href="<?php echo Page_Manager::get_page_url('developer_dashboard'); ?>"><?php _e('Developer Dashboard', 'malisafi-mls'); ?></a></li>
 					<?php else: ?>
 						<li><a href="<?php echo Page_Manager::get_page_url('client_dashboard'); ?>"><?php _e('Client Dashboard', 'malisafi-mls'); ?></a></li>
@@ -1274,6 +1549,20 @@ class Dashboard_Shortcodes {
 		);
 		$count = (int) $wpdb->get_var($sql);
 		return $count;
+	}
+
+	private static function get_agency_inquiries_count($agency_user_id) {
+		global $wpdb;
+		$table_name = $wpdb->prefix . 'mf_inquiries';
+
+		$count = $wpdb->get_var($wpdb->prepare(
+			"SELECT COUNT(*) FROM {$table_name} WHERE agency_id = (
+				SELECT id FROM {$wpdb->prefix}mf_agencies WHERE user_id = %d LIMIT 1
+			)",
+			$agency_user_id
+		));
+
+		return (int) $count;
 	}
 
 	private static function get_developer_project_stats($user_id) {
@@ -1521,6 +1810,13 @@ class Dashboard_Shortcodes {
 			}
             
 			wp_send_json_error(['message' => $message]);
+		}
+        
+		// Check email verification if enabled
+		if (get_option('malisafi_email_verification_enabled') && !\MalisafiMLS\Email_Settings::is_email_verified($user->ID)) {
+			wp_send_json_error([
+				'message' => __('Please verify your email address before logging in. Check your email for the verification link.', 'malisafi-mls')
+			]);
 		}
         
 		// Log the user in
