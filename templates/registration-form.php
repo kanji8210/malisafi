@@ -12,7 +12,7 @@ defined('ABSPATH') || exit;
     <div class="registration-container">
         <div class="registration-header">
             <h2><?php _e('Create Your Malisafi Account', 'malisafi-mls'); ?></h2>
-            <p class="subtitle"><?php _e('What do you need an account for?', 'malisafi-mls'); ?></p>
+            <p class="subtitle"><?php _e('Tell us how you plan to use Malisafi.', 'malisafi-mls'); ?></p>
         </div>
 
         <form id="malisafi-registration-form" class="multi-step-form" method="post">
@@ -36,19 +36,19 @@ defined('ABSPATH') || exit;
                 <div class="progress-bar-container">
                     <div class="progress-bar" style="width: 33.33%;"></div>
                 </div>
-                <div class="step-counter"><?php _e('Step 1 of 3', 'malisafi-mls'); ?></div>
+                <div class="step-counter"><?php _e('Step 1 of 3 - Account type', 'malisafi-mls'); ?></div>
             </div>
             
             <div class="step-progress">
-                <div class="step-item active" data-step="1">
+                <div class="step-item active" data-step="1" data-step-label="<?php esc_attr_e('Account type', 'malisafi-mls'); ?>">
                     <div class="step-number">1</div>
                     <div class="step-label"><?php _e('Account Type', 'malisafi-mls'); ?></div>
                 </div>
-                <div class="step-item" data-step="2">
+                <div class="step-item" data-step="2" data-step-label="<?php esc_attr_e('Your details', 'malisafi-mls'); ?>">
                     <div class="step-number">2</div>
                     <div class="step-label"><?php _e('Your Info', 'malisafi-mls'); ?></div>
                 </div>
-                <div class="step-item" data-step="3">
+                <div class="step-item" data-step="3" data-step-label="<?php esc_attr_e('Login setup', 'malisafi-mls'); ?>">
                     <div class="step-number">3</div>
                     <div class="step-label"><?php _e('Login Details', 'malisafi-mls'); ?></div>
                 </div>
@@ -56,16 +56,17 @@ defined('ABSPATH') || exit;
             
             <!-- Step 1: Account Type Selection -->
             <div class="form-step" data-step="1">
-                <h3><?php _e('What brings you to Malisafi?', 'malisafi-mls'); ?></h3>
-                <p class="step-description"><?php _e('Choose the option that best describes you', 'malisafi-mls'); ?></p>
+                <h3><?php _e('What brings you to Malisafi today?', 'malisafi-mls'); ?></h3>
+                <p class="step-description"><?php _e('Choose one option so we can tailor your experience.', 'malisafi-mls'); ?></p>
+                <p class="step-helper"><?php _e('You can change your account type later in your profile.', 'malisafi-mls'); ?></p>
                 
                 <div class="account-type-cards">
                     <label class="account-card<?php echo $preselected_type === 'client' ? ' selected' : ''; ?>" data-type="client">
                         <input type="radio" name="account_type" value="client" required <?php checked($preselected_type, 'client'); ?>>
                         <div class="card-content">
                             <div class="card-icon">🏠</div>
-                            <h4><?php _e('Looking for Property', 'malisafi-mls'); ?></h4>
-                            <p><?php _e('I want to buy, rent, or browse properties', 'malisafi-mls'); ?></p>
+                            <h4><?php _e('I am looking for property', 'malisafi-mls'); ?></h4>
+                            <p><?php _e('Browse listings to buy or rent', 'malisafi-mls'); ?></p>
                         </div>
                         <div class="card-checkmark">✓</div>
                     </label>
@@ -74,8 +75,8 @@ defined('ABSPATH') || exit;
                         <input type="radio" name="account_type" value="agent" required <?php checked($preselected_type, 'agent'); ?>>
                         <div class="card-content">
                             <div class="card-icon">💼</div>
-                            <h4><?php _e('Real Estate Agent', 'malisafi-mls'); ?></h4>
-                            <p><?php _e('Licensed agent or agency professional', 'malisafi-mls'); ?></p>
+                            <h4><?php _e('I am a real estate agent', 'malisafi-mls'); ?></h4>
+                            <p><?php _e('Manage listings and connect with clients', 'malisafi-mls'); ?></p>
                         </div>
                         <div class="card-checkmark">✓</div>
                     </label>
@@ -84,8 +85,8 @@ defined('ABSPATH') || exit;
                         <input type="radio" name="account_type" value="owner" required <?php checked($preselected_type, 'owner'); ?>>
                         <div class="card-content">
                             <div class="card-icon">🔑</div>
-                            <h4><?php _e('Property Owner', 'malisafi-mls'); ?></h4>
-                            <p><?php _e('I want to list my property for sale or rent', 'malisafi-mls'); ?></p>
+                            <h4><?php _e('I am a property owner', 'malisafi-mls'); ?></h4>
+                            <p><?php _e('List property for sale or rent', 'malisafi-mls'); ?></p>
                         </div>
                         <div class="card-checkmark">✓</div>
                     </label>
@@ -94,8 +95,8 @@ defined('ABSPATH') || exit;
                         <input type="radio" name="account_type" value="developer" required <?php checked($preselected_type, 'developer'); ?>>
                         <div class="card-content">
                             <div class="card-icon">🏗️</div>
-                            <h4><?php _e('Developer', 'malisafi-mls'); ?></h4>
-                            <p><?php _e('Property developer or construction company', 'malisafi-mls'); ?></p>
+                            <h4><?php _e('I am a developer', 'malisafi-mls'); ?></h4>
+                            <p><?php _e('Showcase projects and new builds', 'malisafi-mls'); ?></p>
                         </div>
                         <div class="card-checkmark">✓</div>
                     </label>
@@ -106,8 +107,8 @@ defined('ABSPATH') || exit;
 
             <!-- Step 2: Personal Information -->
             <div class="form-step" data-step="2" style="display: none;">
-                <h3><?php _e('Tell us about yourself', 'malisafi-mls'); ?></h3>
-                <p class="step-description"><?php _e('Basic information to get started', 'malisafi-mls'); ?></p>
+                <h3><?php _e('Let us get your details', 'malisafi-mls'); ?></h3>
+                <p class="step-description"><?php _e('Just the basics to set things up.', 'malisafi-mls'); ?></p>
                 
                 <div class="form-row">
                     <div class="form-group half-width">
@@ -259,8 +260,8 @@ defined('ABSPATH') || exit;
 
             <!-- Step 3: Account Credentials -->
             <div class="form-step" data-step="3" style="display: none;">
-                <h3><?php _e('Create Your Account', 'malisafi-mls'); ?></h3>
-                <p class="step-description"><?php _e('Almost there! Set up your login details', 'malisafi-mls'); ?></p>
+                <h3><?php _e('Set up your login', 'malisafi-mls'); ?></h3>
+                <p class="step-description"><?php _e('Use an email you check often.', 'malisafi-mls'); ?></p>
                 
                 <div class="form-group">
                     <label for="email">
@@ -335,8 +336,10 @@ defined('ABSPATH') || exit;
                 <button type="button" class="btn btn-secondary btn-prev" style="display: none;">
                     ← <?php _e('Back', 'malisafi-mls'); ?>
                 </button>
-                <button type="button" class="btn btn-primary btn-next">
-                    <?php _e('Continue', 'malisafi-mls'); ?> →
+                <button type="button" class="btn btn-primary btn-next"
+                        data-label-step1="<?php esc_attr_e('Next: your details', 'malisafi-mls'); ?>"
+                        data-label-step2="<?php esc_attr_e('Next: login setup', 'malisafi-mls'); ?>">
+                    <?php _e('Next: your details', 'malisafi-mls'); ?> →
                 </button>
                 <button type="submit" class="btn btn-primary btn-submit" style="display: none;">
                     <?php _e('Create My Account', 'malisafi-mls'); ?> ✨

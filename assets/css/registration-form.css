@@ -173,6 +173,12 @@
     color: rgba(26, 58, 82, 0.7);
 }
 
+.step-helper {
+    margin: -15px 0 25px 0;
+    font-size: 14px;
+    color: var(--text-links);
+}
+
 .step-navigation {
     display: flex;
     gap: 15px;

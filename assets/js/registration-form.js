@@ -17,6 +17,7 @@
                 this.initializeAccountTypeCards();
                 this.updateStepProgress();
                 this.updateNavigationButtons();
+                this.updateProgressBar();
                 // Initial validation only for current step
                 this.validateForm();
             },
@@ -60,36 +61,13 @@
                 });
             },
             
-            updateNavigationButtons: function() {
-                const $prevBtn = $('.btn-prev');
-                const $nextBtn = $('.btn-next');
-                const $submitBtn = $('.btn-submit');
-                
-                // Show/hide buttons based on current step
-                if (this.currentStep === 1) {
-                    $prevBtn.hide();
-                    $nextBtn.show().prop('disabled', true); // Disabled until account type selected
-                    $submitBtn.hide();
-                } else if (this.currentStep === 2) {
-                    $prevBtn.show();
-                    $nextBtn.show();
-                    $submitBtn.hide();
-                } else if (this.currentStep === 3) {
-                    $prevBtn.show();
-                    $nextBtn.hide();
-                    $submitBtn.show();
-                }
-                
-                // Trigger validation to update button states (but not on initial load)
-                if (this.currentStep > 1 || $('input[name="account_type"]:checked').length > 0) {
-                    this.validateForm();
-                }
-            },
-            
             updateProgressBar: function() {
                 const progressPercent = (this.currentStep / 3) * 100;
+                const $currentStep = $(`.step-item[data-step="${this.currentStep}"]`);
+                const stepLabel = $currentStep.data('step-label');
+                const counterText = stepLabel ? `Step ${this.currentStep} of 3 - ${stepLabel}` : `Step ${this.currentStep} of 3`;
                 $('.progress-bar').css('width', progressPercent + '%');
-                $('.step-counter').text(`Step ${this.currentStep} of 3`);
+                $('.step-counter').text(counterText);
             },
             
             updateStepProgress: function() {
@@ -129,6 +107,27 @@
                 } else {
                     $nextBtn.show();
                     $submitBtn.hide();
+                }
+
+                this.updateNextButtonLabel();
+            },
+
+            updateNextButtonLabel: function() {
+                const $nextBtn = $('.btn-next');
+                if ($nextBtn.length === 0 || this.currentStep >= 3) {
+                    return;
+                }
+
+                const labelStep1 = $nextBtn.data('label-step1');
+                const labelStep2 = $nextBtn.data('label-step2');
+                let label = labelStep1;
+
+                if (this.currentStep === 2) {
+                    label = labelStep2 || labelStep1;
+                }
+
+                if (label) {
+                    $nextBtn.html(`${label} →`);
                 }
             },
             
