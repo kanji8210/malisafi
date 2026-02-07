@@ -207,11 +207,58 @@ class Core {
         
         $this->loader->add_action('wp_enqueue_scripts', $plugin_public, 'enqueue_styles');
         $this->loader->add_action('wp_enqueue_scripts', $plugin_public, 'enqueue_scripts');
+
+        // Keep trashed properties for one week
+        $this->loader->add_action('wp_trash_post', $this, 'schedule_property_trash_cleanup');
+        $this->loader->add_action('untrash_post', $this, 'unschedule_property_trash_cleanup');
+        $this->loader->add_action('malisafi_delete_trashed_property', $this, 'delete_trashed_property');
         
         // Register shortcodes
         $this->loader->add_shortcode('malisafi_properties', $plugin_public, 'properties_shortcode');
         $this->loader->add_shortcode('malisafi_property_search', $plugin_public, 'search_shortcode');
         $this->loader->add_shortcode('malisafi_featured_properties', $plugin_public, 'featured_properties_shortcode');
+    }
+
+    /**
+     * Schedule deletion for trashed properties after 7 days.
+     */
+    public function schedule_property_trash_cleanup($post_id) {
+        $post = get_post($post_id);
+        if (!$post || $post->post_type !== 'malisafi_property') {
+            return;
+        }
+
+        $timestamp = time() + (7 * DAY_IN_SECONDS);
+        if (!wp_next_scheduled('malisafi_delete_trashed_property', array($post_id))) {
+            wp_schedule_single_event($timestamp, 'malisafi_delete_trashed_property', array($post_id));
+        }
+    }
+
+    /**
+     * Clear scheduled deletion when a property is restored.
+     */
+    public function unschedule_property_trash_cleanup($post_id) {
+        $post = get_post($post_id);
+        if (!$post || $post->post_type !== 'malisafi_property') {
+            return;
+        }
+
+        $timestamp = wp_next_scheduled('malisafi_delete_trashed_property', array($post_id));
+        if ($timestamp) {
+            wp_unschedule_event($timestamp, 'malisafi_delete_trashed_property', array($post_id));
+        }
+    }
+
+    /**
+     * Permanently delete trashed properties after retention window.
+     */
+    public function delete_trashed_property($post_id) {
+        $post = get_post($post_id);
+        if (!$post || $post->post_type !== 'malisafi_property' || $post->post_status !== 'trash') {
+            return;
+        }
+
+        wp_delete_post($post_id, true);
     }
     
     /**

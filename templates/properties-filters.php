@@ -122,7 +122,7 @@ $total_properties = $properties_query->found_posts;
         <div class="filters-header">
             <h3>
                 <span class="dashicons dashicons-filter"></span>
-                Filters
+                <span class="filters-title">Filters</span>
             </h3>
             <div class="filters-header-actions">
                 <button type="button" class="filter-reset">
@@ -138,7 +138,7 @@ $total_properties = $properties_query->found_posts;
         <div class="filters-body">
 
         <!-- Search -->
-        <div class="filter-group">
+        <div class="filter-group filter-group--search">
             <label class="filter-group-label">
                 <span class="dashicons dashicons-search"></span>
                 Search
@@ -150,7 +150,7 @@ $total_properties = $properties_query->found_posts;
         </div>
 
         <!-- Property Type -->
-        <div class="filter-group">
+        <div class="filter-group filter-group--property-type">
             <label class="filter-group-label">
                 <span class="dashicons dashicons-admin-home"></span>
                 Property Type
@@ -168,7 +168,7 @@ $total_properties = $properties_query->found_posts;
         </div>
 
         <!-- Status -->
-        <div class="filter-group">
+        <div class="filter-group filter-group--status">
             <label class="filter-group-label">
                 <span class="dashicons dashicons-tag"></span>
                 Status
@@ -186,7 +186,7 @@ $total_properties = $properties_query->found_posts;
         </div>
 
         <!-- Bedrooms & Bathrooms -->
-        <div class="filter-group">
+        <div class="filter-group filter-group--rooms">
             <label class="filter-group-label">
                 <span class="dashicons dashicons-building"></span>
                 Rooms
@@ -210,17 +210,18 @@ $total_properties = $properties_query->found_posts;
         </div>
 
         <!-- Price Range -->
-        <div class="filter-group">
+        <div class="filter-group filter-group--price">
             <label class="filter-group-label">
                 <span class="dashicons dashicons-money-alt"></span>
-                Price Range
+                <span class="label-full">Price Range</span>
+                <span class="label-mobile">Max Price</span>
             </label>
             <div class="price-range-inputs">
-                <div class="price-input-wrapper">
+                <div class="price-input-wrapper price-input--min">
                     <span class="currency-symbol">$</span>
                     <input type="number" placeholder="Min" data-filter="price_min">
                 </div>
-                <div class="price-input-wrapper">
+                <div class="price-input-wrapper price-input--max">
                     <span class="currency-symbol">$</span>
                     <input type="number" placeholder="Max" data-filter="price_max">
                 </div>
@@ -228,7 +229,7 @@ $total_properties = $properties_query->found_posts;
         </div>
 
         <!-- Area Range -->
-        <div class="filter-group">
+        <div class="filter-group filter-group--area">
             <label class="filter-group-label">
                 <span class="dashicons dashicons-grid-view"></span>
                 Area (sq ft)
@@ -262,7 +263,7 @@ $total_properties = $properties_query->found_posts;
         <?php endif; ?>
 
         <!-- County / Subcounty -->
-        <div class="filter-group">
+        <div class="filter-group filter-group--location">
             <label class="filter-group-label">
                 <span class="dashicons dashicons-admin-site"></span>
                 County & Subcounty
@@ -283,7 +284,7 @@ $total_properties = $properties_query->found_posts;
         </div>
 
         <!-- Features -->
-        <div class="filter-group">
+        <div class="filter-group filter-group--features">
             <label class="filter-group-label">
                 <span class="dashicons dashicons-star-filled"></span>
                 Features

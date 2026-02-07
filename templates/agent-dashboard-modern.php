@@ -22,30 +22,69 @@ if (!$is_agent) {
 global $wpdb;
 $linked_user_id = $current_user->ID;
 
-// Count properties
-$total_properties = (int) $wpdb->get_var($wpdb->prepare(
-    "SELECT COUNT(*) FROM {$wpdb->posts} WHERE post_type = 'malisafi_property' AND post_author = %d",
-    $linked_user_id
-));
-
-$published = (int) $wpdb->get_var($wpdb->prepare(
-    "SELECT COUNT(*) FROM {$wpdb->posts} WHERE post_type = 'malisafi_property' AND post_author = %d AND post_status = 'publish'",
-    $linked_user_id
-));
-
-$pending = (int) $wpdb->get_var($wpdb->prepare(
-    "SELECT COUNT(*) FROM {$wpdb->posts} WHERE post_type = 'malisafi_property' AND post_author = %d AND post_status = 'pending'",
-    $linked_user_id
-));
-
-// Get recent properties
-$recent_properties = get_posts([
+// Build property list for this agent (author or linked meta)
+$author_ids = get_posts([
     'post_type' => 'malisafi_property',
     'author' => $linked_user_id,
+    'post_status' => array('publish', 'pending', 'draft'),
+    'fields' => 'ids',
+    'posts_per_page' => -1,
+    'no_found_rows' => true
+]);
+
+$meta_ids = get_posts([
+    'post_type' => 'malisafi_property',
+    'post_status' => array('publish', 'pending', 'draft'),
+    'fields' => 'ids',
+    'posts_per_page' => -1,
+    'no_found_rows' => true,
+    'meta_query' => array(
+        'relation' => 'OR',
+        array(
+            'key' => '_malisafi_agent_id',
+            'value' => $linked_user_id,
+            'compare' => '='
+        ),
+        array(
+            'key' => '_property_agent_id',
+            'value' => $linked_user_id,
+            'compare' => '='
+        )
+    )
+]);
+
+$agent_property_ids = array_values(array_unique(array_merge($author_ids, $meta_ids)));
+
+// Count properties
+$total_properties = count($agent_property_ids);
+
+$published = $agent_property_ids ? count(get_posts([
+    'post_type' => 'malisafi_property',
+    'post_status' => array('publish'),
+    'fields' => 'ids',
+    'posts_per_page' => -1,
+    'no_found_rows' => true,
+    'post__in' => $agent_property_ids
+])) : 0;
+
+$pending = $agent_property_ids ? count(get_posts([
+    'post_type' => 'malisafi_property',
+    'post_status' => array('pending'),
+    'fields' => 'ids',
+    'posts_per_page' => -1,
+    'no_found_rows' => true,
+    'post__in' => $agent_property_ids
+])) : 0;
+
+// Get recent properties
+$recent_properties = $agent_property_ids ? get_posts([
+    'post_type' => 'malisafi_property',
+    'post__in' => $agent_property_ids,
+    'post_status' => array('publish', 'pending', 'draft'),
     'posts_per_page' => 5,
     'orderby' => 'date',
     'order' => 'DESC'
-]);
+]) : array();
 
 // Current page
 $current_page = isset($_GET['section']) ? sanitize_text_field($_GET['section']) : 'dashboard';

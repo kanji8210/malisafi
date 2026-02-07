@@ -34,9 +34,14 @@
             this.$btnPrev = $('.btn-prev');
             this.$btnNext = $('.btn-next');
             this.$btnSubmit = $('.btn-submit');
+            this.$btnSaveDraft = $('.btn-save-draft');
             this.$autoSave = $('.autosave-indicator');
             this.$dropzone = $('#dropzone');
             this.$gallery = $('#image-gallery');
+            this.$featuredDropzone = $('#featured-dropzone');
+            this.$featuredPreview = $('#featured-preview');
+            this.$featuredInput = $('#featured-file-input');
+            this.$featuredId = $('#featured_image_id');
         },
 
         bindEvents: function() {
@@ -53,6 +58,10 @@
 
             this.$btnSubmit.on('click', function() {
                 self.submitProperty();
+            });
+
+            this.$btnSaveDraft.on('click', function() {
+                self.saveDraft();
             });
 
             // Auto-save on input change
@@ -80,9 +89,21 @@
                 $('#image-file-input').click();
             });
 
+            $('.btn-browse-featured').on('click', function() {
+                $('#featured-file-input').click();
+            });
+
             // File input change
             $('#image-file-input').on('change', function(e) {
                 self.handleFileSelect(e.target.files);
+            });
+
+            $('#featured-file-input').on('change', function(e) {
+                self.handleFeaturedFileSelect(e.target.files);
+            });
+
+            $('.btn-remove-featured').on('click', function() {
+                self.clearFeaturedImage();
             });
 
             // Prevent form submission
@@ -154,6 +175,16 @@
                 }
                 $(this).removeClass('error');
             });
+
+            if (step === 5 && malisafiSubmission.uploadsEnabled === true) {
+                if (!this.$featuredId.val()) {
+                    isValid = false;
+                    $('#featured-dropzone').addClass('error');
+                    this.showError('Featured image is required before you continue.');
+                } else {
+                    $('#featured-dropzone').removeClass('error');
+                }
+            }
 
             if (!isValid) {
                 this.showError(malisafiSubmission.strings.error || 'Please fill in all required fields');
@@ -263,6 +294,8 @@
             if (malisafiSubmission.uploadsEnabled !== true) {
                 // Hide upload UI and show a notice if a placeholder area exists
                 $('#dropzone').hide();
+                $('#featured-dropzone').hide();
+                $('#featured-preview').hide();
                 $('.upload-progress').hide();
                 $('#image-gallery').hide();
                 return;
@@ -287,25 +320,61 @@
                 self.handleFileSelect(files);
             });
 
+            this.$featuredDropzone.on('dragover', function(e) {
+                e.preventDefault();
+                $(this).addClass('dragover');
+            });
+
+            this.$featuredDropzone.on('dragleave', function(e) {
+                e.preventDefault();
+                $(this).removeClass('dragover');
+            });
+
+            this.$featuredDropzone.on('drop', function(e) {
+                e.preventDefault();
+                $(this).removeClass('dragover');
+                const files = e.originalEvent.dataTransfer.files;
+                self.handleFeaturedFileSelect(files);
+            });
+
             // Make gallery sortable
             this.$gallery.sortable({
-                update: () => {
-                    // Enforce main badge and ensure not exceeding 15 items
-                    const $items = this.$gallery.find('.gallery-item');
-                    if ($items.length > 15) {
-                        // remove overflow items from DOM and state
-                        $items.slice(15).remove();
-                        this.uploadedImages = this.uploadedImages.slice(0, 15);
-                        this.showError('Maximum 15 images allowed. Extra images were ignored.');
-                    }
-                    // Reapply main badge
-                    this.$gallery.find('.main-badge').remove();
-                    this.$gallery.find('.gallery-item').first().append('<span class="main-badge">Main Photo</span>');
-                },
                 update: function() {
+                    // Enforce main badge and ensure not exceeding 15 items
+                    const $items = self.$gallery.find('.gallery-item');
+                    if ($items.length > 15) {
+                        $items.slice(15).remove();
+                        self.uploadedImages = self.uploadedImages.slice(0, 15);
+                        self.showError('Maximum 15 images allowed. Extra images were ignored.');
+                    }
+
                     self.updateImageOrder();
                 }
             });
+        },
+
+        handleFeaturedFileSelect: function(files) {
+            if (!files || files.length === 0) return;
+
+            const selectedFile = Array.from(files).slice(0, 1);
+            const self = this;
+
+            this.validateImageFiles(selectedFile, { minWidth: 1600, minHeight: 900, landscape: true })
+                .then(function(validFiles) {
+                    if (!validFiles.length) {
+                        self.showError('Featured image should be landscape and at least 1600x900.');
+                        return;
+                    }
+                    const formData = new FormData();
+                    formData.append('action', 'malisafi_upload_featured_image');
+                    formData.append('nonce', malisafiSubmission.uploadNonce);
+                    formData.append('property_id', self.propertyId || 0);
+                    formData.append('image', validFiles[0]);
+                    self.uploadFeaturedImage(formData);
+                })
+                .catch(function() {
+                    self.showError('Could not validate featured image.');
+                });
         },
 
         handleFileSelect: function(files) {
@@ -404,6 +473,70 @@
             });
         },
 
+        uploadFeaturedImage: function(formData) {
+            const self = this;
+
+            this.showAutoSave('saving');
+
+            $.ajax({
+                url: malisafiSubmission.ajaxurl,
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function(response) {
+                    if (response.success && response.data.image) {
+                        self.setFeaturedImage(response.data.image);
+                        self.showAutoSave('saved');
+                    } else {
+                        self.showError(response.data.message || malisafiSubmission.strings.uploadError);
+                        self.showAutoSave('error');
+                    }
+                },
+                error: function() {
+                    self.showError(malisafiSubmission.strings.uploadError);
+                    self.showAutoSave('error');
+                }
+            });
+        },
+
+        setFeaturedImage: function(image) {
+            if (!image || !image.url || !image.id) {
+                return;
+            }
+
+            this.$featuredId.val(image.id);
+            this.$featuredPreview.find('img').attr('src', image.url);
+            this.$featuredPreview.show();
+            $('#featured-dropzone').removeClass('error').hide();
+        },
+
+        clearFeaturedImage: function() {
+            const self = this;
+
+            if (!this.$featuredId.val()) {
+                return;
+            }
+
+            $.ajax({
+                url: malisafiSubmission.ajaxurl,
+                type: 'POST',
+                data: {
+                    action: 'malisafi_clear_featured_image',
+                    nonce: malisafiSubmission.nonce,
+                    property_id: this.propertyId
+                },
+                success: function(response) {
+                    if (response.success) {
+                        self.$featuredId.val('');
+                        self.$featuredPreview.hide();
+                        self.$featuredPreview.find('img').attr('src', '');
+                        $('#featured-dropzone').show();
+                    }
+                }
+            });
+        },
+
         addImageToGallery: function(image) {
             // Enforce cap at 15 items
             if (this.uploadedImages.length >= 15) {
@@ -419,7 +552,7 @@
                 .html(
                     '<img src="' + image.url + '" alt="">' +
                     '<button type="button" class="delete-btn" data-id="' + image.id + '">×</button>' +
-                    (isFirst ? '<span class="main-badge">Main Photo</span>' : '')
+                    (isFirst ? '<span class="main-badge">Gallery Cover</span>' : '')
                 );
 
             this.$gallery.append($item);
@@ -469,10 +602,12 @@
 
             this.uploadedImages = order;
 
+            $('#gallery_ids').val(order.join(','));
+
             // Update main badge
             this.$gallery.find('.main-badge').remove();
             if (order.length > 0) {
-                this.$gallery.find('.gallery-item').first().append('<span class="main-badge">Main Photo</span>');
+                this.$gallery.find('.gallery-item').first().append('<span class="main-badge">Gallery Cover</span>');
             }
 
             // Save order
@@ -536,7 +671,18 @@
             $('#preview-subcounty').text($('#property_subcounty').val() || '-');
             $('#preview-city').text($('#property_city').val() || '-');
 
-            // Images
+            // Featured image
+            const $previewFeatured = $('#preview-featured');
+            $previewFeatured.empty();
+            const featuredUrl = this.$featuredPreview.find('img').attr('src');
+
+            if (featuredUrl) {
+                $previewFeatured.append($('<img>').attr('src', featuredUrl));
+            } else {
+                $previewFeatured.html('<p class="no-images">No featured image uploaded</p>');
+            }
+
+            // Gallery images
             const $previewImages = $('#preview-images');
             $previewImages.empty();
 
@@ -549,6 +695,11 @@
             } else {
                 $previewImages.html('<p class="no-images">No images uploaded</p>');
             }
+        },
+
+        saveDraft: function() {
+            this.saveStep();
+            this.showSuccess('Draft saved. You can continue later.');
         },
 
         fetchSubcounties: function(county, selected) {
@@ -596,8 +747,8 @@
 
             if (malisafiSubmission.uploadsEnabled !== true) {
                 // Skip image requirement when uploads are disabled
-            } else if (this.uploadedImages.length === 0) {
-                this.showError('Please upload at least one image');
+            } else if (!this.$featuredId.val()) {
+                this.showError('Please upload a featured image');
                 return;
             }
 
@@ -613,12 +764,7 @@
                 },
                 success: function(response) {
                     if (response.success) {
-                        self.showSuccess(response.data.message);
-                        
-                        // Redirect to property page
-                        setTimeout(function() {
-                            window.location.href = response.data.redirect;
-                        }, 1500);
+                        self.showSubmitSuccess(response.data);
                     } else {
                         self.showError(response.data.message);
                         self.$btnSubmit.prop('disabled', false).text(malisafiSubmission.strings.submitProperty);
@@ -673,11 +819,35 @@
 
             this.toggleSaleLeaseDetails();
 
-            // Load images
-            if (data.gallery_ids) {
-                const imageIds = data.gallery_ids.split(',');
-                // You would need to load image URLs from server
+            if (data.featured_image) {
+                this.setFeaturedImage(data.featured_image);
             }
+
+            if (Array.isArray(data.gallery_images)) {
+                this.renderGalleryImages(data.gallery_images);
+            }
+        },
+
+        renderGalleryImages: function(images) {
+            if (!Array.isArray(images)) {
+                return;
+            }
+
+            const self = this;
+            this.$gallery.empty();
+            this.uploadedImages = [];
+
+            images.forEach(function(image, index) {
+                if (!image || !image.id || !image.url) {
+                    return;
+                }
+                self.addImageToGallery(image);
+                if (index === 0) {
+                    self.$gallery.find('.gallery-item').first().append('<span class="main-badge">Gallery Cover</span>');
+                }
+            });
+
+            this.updateImageOrder();
         },
 
         showError: function(message) {
@@ -695,6 +865,26 @@
             const $success = $('<div class="success-message">' + message + '</div>');
             this.$form.prepend($success);
             $('html, body').animate({ scrollTop: 0 }, 300);
+        },
+
+        showSubmitSuccess: function(data) {
+            const message = data && data.message ? data.message : 'Property submitted successfully!';
+            const addUrl = data && data.add_new_url ? data.add_new_url : '';
+            const viewUrl = data && data.view_url ? data.view_url : '';
+
+            const $success = $(
+                '<div class="success-message success-actions">' +
+                    '<p>' + message + '</p>' +
+                    '<div class="success-buttons">' +
+                        (addUrl ? '<a class="btn btn-secondary" href="' + addUrl + '">Continue Adding</a>' : '') +
+                        (viewUrl ? '<a class="btn btn-primary" href="' + viewUrl + '" target="_blank">View Property</a>' : '') +
+                    '</div>' +
+                '</div>'
+            );
+
+            this.$form.prepend($success);
+            $('html, body').animate({ scrollTop: 0 }, 300);
+            this.$btnSubmit.prop('disabled', false).text(malisafiSubmission.strings.submitProperty);
         }
     };
 

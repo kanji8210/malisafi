@@ -50,6 +50,10 @@
     gap: var(--spacing-sm);
 }
 
+.filters-header h3 .label-mobile {
+    display: none;
+}
+
 .filters-header-actions {
     display: inline-flex;
     gap: var(--spacing-sm);
@@ -233,5 +237,29 @@
         max-height: none;
         overflow: visible;
         padding-right: 0;
+    }
+
+    .filters-header h3 .filters-title {
+        display: none;
+    }
+
+    .filters-header h3 .label-full {
+        display: none;
+    }
+
+    .filters-header h3 .label-mobile {
+        display: inline;
+    }
+
+    .filter-group--search,
+    .filter-group--property-type,
+    .filter-group--rooms,
+    .filter-group--area,
+    .filter-group--features {
+        display: none;
+    }
+
+    .filter-group--price .price-input--min {
+        display: none;
     }
 }

@@ -48,6 +48,105 @@ class Dashboard_Shortcodes {
 
 		add_action('wp_ajax_malisafi_custom_login', [__CLASS__, 'ajax_custom_login']);
 		add_action('wp_ajax_nopriv_malisafi_custom_login', [__CLASS__, 'ajax_custom_login']);
+		add_action('admin_post_malisafi_delete_property', [__CLASS__, 'handle_delete_property']);
+		add_action('admin_post_malisafi_restore_property', [__CLASS__, 'handle_restore_property']);
+		add_action('admin_post_malisafi_delete_property_permanently', [__CLASS__, 'handle_delete_property_permanently']);
+	}
+
+	public static function handle_delete_property() {
+		if (!is_user_logged_in()) {
+			wp_die(__('You must be logged in to delete a property.', 'malisafi-mls'));
+		}
+
+		$property_id = isset($_GET['property_id']) ? (int) $_GET['property_id'] : 0;
+		if (!$property_id) {
+			wp_die(__('Invalid property.', 'malisafi-mls'));
+		}
+
+		check_admin_referer('malisafi_delete_property_' . $property_id);
+
+		$property = get_post($property_id);
+		if (!$property || $property->post_type !== 'malisafi_property') {
+			wp_die(__('Invalid property.', 'malisafi-mls'));
+		}
+
+		if ((int) $property->post_author !== get_current_user_id() && !current_user_can('delete_post', $property_id)) {
+			wp_die(__('You do not have permission to delete this property.', 'malisafi-mls'));
+		}
+
+		wp_trash_post($property_id);
+
+		$redirect = isset($_GET['redirect']) ? esc_url_raw($_GET['redirect']) : wp_get_referer();
+		if (!$redirect) {
+			$redirect = home_url('/agent-dashboard/?section=properties');
+		}
+		$redirect = add_query_arg('mf_deleted', '1', $redirect);
+		wp_safe_redirect($redirect);
+		exit;
+	}
+
+	public static function handle_restore_property() {
+		if (!is_user_logged_in()) {
+			wp_die(__('You must be logged in to restore a property.', 'malisafi-mls'));
+		}
+
+		$property_id = isset($_GET['property_id']) ? (int) $_GET['property_id'] : 0;
+		if (!$property_id) {
+			wp_die(__('Invalid property.', 'malisafi-mls'));
+		}
+
+		check_admin_referer('malisafi_restore_property_' . $property_id);
+
+		$property = get_post($property_id);
+		if (!$property || $property->post_type !== 'malisafi_property') {
+			wp_die(__('Invalid property.', 'malisafi-mls'));
+		}
+
+		if ((int) $property->post_author !== get_current_user_id() && !current_user_can('edit_post', $property_id)) {
+			wp_die(__('You do not have permission to restore this property.', 'malisafi-mls'));
+		}
+
+		wp_untrash_post($property_id);
+
+		$redirect = isset($_GET['redirect']) ? esc_url_raw($_GET['redirect']) : wp_get_referer();
+		if (!$redirect) {
+			$redirect = home_url('/agent-dashboard/?section=properties');
+		}
+		$redirect = add_query_arg('mf_restored', '1', $redirect);
+		wp_safe_redirect($redirect);
+		exit;
+	}
+
+	public static function handle_delete_property_permanently() {
+		if (!is_user_logged_in()) {
+			wp_die(__('You must be logged in to delete a property.', 'malisafi-mls'));
+		}
+
+		$property_id = isset($_GET['property_id']) ? (int) $_GET['property_id'] : 0;
+		if (!$property_id) {
+			wp_die(__('Invalid property.', 'malisafi-mls'));
+		}
+
+		check_admin_referer('malisafi_delete_property_permanently_' . $property_id);
+
+		$property = get_post($property_id);
+		if (!$property || $property->post_type !== 'malisafi_property') {
+			wp_die(__('Invalid property.', 'malisafi-mls'));
+		}
+
+		if ((int) $property->post_author !== get_current_user_id() && !current_user_can('delete_post', $property_id)) {
+			wp_die(__('You do not have permission to delete this property.', 'malisafi-mls'));
+		}
+
+		wp_delete_post($property_id, true);
+
+		$redirect = isset($_GET['redirect']) ? esc_url_raw($_GET['redirect']) : wp_get_referer();
+		if (!$redirect) {
+			$redirect = home_url('/agent-dashboard/?section=properties');
+		}
+		$redirect = add_query_arg('mf_deleted_permanently', '1', $redirect);
+		wp_safe_redirect($redirect);
+		exit;
 	}
 
 	private static function require_login() {
@@ -70,6 +169,13 @@ class Dashboard_Shortcodes {
 		if (!class_exists('MalisafiMLS\\Property_Submission')) {
 			return '<div class="malisafi-access-denied"><p>' . __('Property submission is currently unavailable.', 'malisafi-mls') . '</p></div>';
 		}
+
+		wp_enqueue_style(
+			'malisafi-property-submission',
+			MALISAFI_MLS_URL . 'assets/css/property-submission.css',
+			array('malisafi-mls-variables'),
+			MALISAFI_MLS_VERSION
+		);
 
 		return \MalisafiMLS\Property_Submission::render_submission_form($atts);
 	}

@@ -1,0 +1,352 @@
+/*
+ * Property Submission Wizard Styles
+ *
+ * @package MalisafiMLS
+ */
+
+.malisafi-submission-wizard {
+    max-width: 980px;
+    margin: 0 auto;
+    padding: 24px 16px 40px;
+    color: var(--text-base);
+}
+
+.wizard-progress {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 10px;
+    margin-bottom: 24px;
+}
+
+.progress-step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    text-align: center;
+    color: var(--text-links);
+    font-size: 12px;
+}
+
+.progress-step .step-number {
+    width: 32px;
+    height: 32px;
+    border-radius: 999px;
+    display: grid;
+    place-items: center;
+    border: 2px solid var(--color-light-gray);
+    color: var(--text-base);
+    background: var(--color-ash-white);
+    font-weight: 600;
+}
+
+.progress-step.active .step-number,
+.progress-step.completed .step-number {
+    border-color: var(--color-blue);
+    background: var(--color-blue);
+    color: var(--btn-primary-text);
+}
+
+.progress-step.completed .step-label {
+    color: var(--color-blue);
+}
+
+.wizard-form {
+    background: var(--color-ash-white);
+    border: 1px solid var(--color-light-gray);
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: var(--shadow-sm);
+}
+
+.wizard-step {
+    display: none;
+}
+
+.wizard-step.active {
+    display: block;
+}
+
+.wizard-step h2 {
+    margin-bottom: 8px;
+    color: var(--text-headings);
+}
+
+.step-description {
+    margin: 0 0 20px 0;
+    color: var(--text-links);
+}
+
+.form-row {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 16px;
+}
+
+.form-row-group {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+}
+
+.form-control {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid var(--color-light-gray);
+    border-radius: 8px;
+    background: #fff;
+    color: var(--text-base);
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: var(--color-blue);
+    box-shadow: 0 0 0 3px var(--mls-focus-ring);
+}
+
+label.required::after {
+    content: " *";
+    color: var(--btn-danger);
+    font-weight: 600;
+}
+
+.field-hint {
+    font-size: 12px;
+    color: var(--text-links);
+}
+
+.gps-input-group {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 8px;
+}
+
+.checkbox-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+}
+
+.checkbox-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 10px;
+    background: #fff;
+    border: 1px solid var(--color-light-gray);
+    border-radius: 8px;
+}
+
+.checkbox-item input {
+    margin: 0;
+}
+
+.image-upload-area {
+    border: 2px dashed var(--color-light-gray);
+    border-radius: 12px;
+    padding: 24px;
+    background: #fff;
+    text-align: center;
+}
+
+.image-upload-area.error {
+    border-color: var(--btn-danger);
+    box-shadow: 0 0 0 3px rgba(214, 54, 56, 0.12);
+}
+
+.image-section {
+    margin-bottom: 24px;
+}
+
+.image-section h3 {
+    margin: 0 0 6px 0;
+    color: var(--text-headings);
+}
+
+.image-section .field-hint {
+    margin-bottom: 12px;
+}
+
+.featured-preview {
+    margin-top: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    align-items: flex-start;
+}
+
+.featured-preview img {
+    width: 100%;
+    max-width: 360px;
+    border-radius: 12px;
+    border: 1px solid var(--color-light-gray);
+    box-shadow: var(--shadow-sm);
+}
+
+.image-gallery {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 12px;
+    margin-top: 16px;
+}
+
+.gallery-item {
+    position: relative;
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1px solid var(--color-light-gray);
+    background: #fff;
+}
+
+.gallery-item img {
+    display: block;
+    width: 100%;
+    height: 100px;
+    object-fit: cover;
+}
+
+.gallery-item .delete-btn {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    border: none;
+    background: rgba(0, 0, 0, 0.6);
+    color: #fff;
+    width: 24px;
+    height: 24px;
+    border-radius: 999px;
+    cursor: pointer;
+    line-height: 1;
+}
+
+.main-badge {
+    position: absolute;
+    left: 6px;
+    bottom: 6px;
+    background: rgba(30, 82, 119, 0.85);
+    color: #fff;
+    padding: 2px 6px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.preview-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.preview-item {
+    background: #fff;
+    border: 1px solid var(--color-light-gray);
+    padding: 10px 12px;
+    border-radius: 8px;
+}
+
+.wizard-navigation {
+    display: flex;
+    gap: 12px;
+    justify-content: space-between;
+    margin-top: 24px;
+}
+
+.draft-hint {
+    margin-top: 12px;
+    text-align: center;
+}
+
+.btn {
+    border: 1px solid transparent;
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.btn-primary {
+    background: var(--btn-primary-bg);
+    color: var(--btn-primary-text);
+}
+
+.btn-secondary {
+    background: var(--btn-secondary-bg);
+    color: var(--btn-secondary-text);
+    border-color: var(--color-light-gray);
+}
+
+.btn-success {
+    background: var(--wp-green);
+    color: var(--btn-primary-text);
+}
+
+.autosave-indicator {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin: 0 0 16px 0;
+    color: var(--text-links);
+    opacity: 0;
+    transition: opacity var(--transition-fast);
+}
+
+.autosave-indicator.show {
+    opacity: 1;
+}
+
+.success-message {
+    background: rgba(0, 163, 42, 0.08);
+    border: 1px solid rgba(0, 163, 42, 0.2);
+    color: var(--text-base);
+    border-radius: 10px;
+    padding: 16px;
+    margin-bottom: 16px;
+}
+
+.success-actions p {
+    margin: 0 0 12px 0;
+    font-weight: 600;
+}
+
+.success-buttons {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+input.error,
+select.error,
+textarea.error {
+    border-color: var(--btn-danger);
+    box-shadow: 0 0 0 3px rgba(214, 54, 56, 0.12);
+}
+
+@media (max-width: 900px) {
+    .wizard-progress {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        row-gap: 14px;
+    }
+
+    .form-row-group {
+        grid-template-columns: 1fr;
+    }
+
+    .checkbox-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .wizard-navigation {
+        flex-direction: column;
+    }
+}
+
+@media (max-width: 600px) {
+    .wizard-form {
+        padding: 18px;
+    }
+
+    .gps-input-group {
+        grid-template-columns: 1fr;
+    }
+}
