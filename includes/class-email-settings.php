@@ -24,6 +24,7 @@ class Email_Settings {
         add_action('admin_init', array(__CLASS__, 'register_settings'));
         add_action('malisafi_inquiry_created', array(__CLASS__, 'send_agency_notification'), 10, 2);
         add_action('malisafi_user_registered', array(__CLASS__, 'send_verification_email'), 10, 4);
+        add_action('init', array(__CLASS__, 'check_verification_link'));
         add_action('wp_ajax_malisafi_verify_email', array(__CLASS__, 'verify_email'));
         add_action('wp_ajax_nopriv_malisafi_verify_email', array(__CLASS__, 'verify_email'));
     }
@@ -337,6 +338,15 @@ The {site_name} Team', 'malisafi-mls');
     }
 
     /**
+     * Check for email verification link on page load
+     */
+    public static function check_verification_link() {
+        if (isset($_GET['action']) && $_GET['action'] === 'verify_email') {
+            self::verify_email();
+        }
+    }
+
+    /**
      * Handle email verification
      */
     public static function verify_email() {
@@ -344,22 +354,27 @@ The {site_name} Team', 'malisafi-mls');
         $user_id = isset($_GET['user_id']) ? intval($_GET['user_id']) : 0;
 
         if (empty($token) || !$user_id) {
+            error_log('Malisafi: Invalid verification link - token: ' . $token . ', user_id: ' . $user_id);
             wp_die(__('Invalid verification link.', 'malisafi-mls'));
         }
 
         $user = get_user_by('id', $user_id);
         if (!$user) {
+            error_log('Malisafi: User not found for verification - user_id: ' . $user_id);
             wp_die(__('User not found.', 'malisafi-mls'));
         }
 
         $stored_token = get_user_meta($user_id, '_malisafi_email_verification_token', true);
         if (empty($stored_token) || $stored_token !== $token) {
+            error_log('Malisafi: Invalid token - stored: ' . $stored_token . ', provided: ' . $token . ', user_id: ' . $user_id);
             wp_die(__('Invalid or expired verification token.', 'malisafi-mls'));
         }
 
         // Verify email
         update_user_meta($user_id, '_malisafi_email_verified', '1');
         delete_user_meta($user_id, '_malisafi_email_verification_token');
+        
+        error_log('Malisafi: Email verified successfully for user_id: ' . $user_id);
 
         // Send admin notification
         $admin_email = get_option('malisafi_admin_email', get_option('admin_email'));
