@@ -33,16 +33,31 @@ class Property_Filters_Ajax {
      * Enqueue frontend scripts and styles
      */
     public function enqueue_scripts() {
-        // Always enqueue on frontend (will be used by shortcode)
-        if (!is_admin()) {
-            // Modern filters
+        if (is_admin()) {
+            return;
+        }
+
+        $post = get_post();
+        if (!is_a($post, 'WP_Post')) {
+            return;
+        }
+
+        $has_modern = has_shortcode($post->post_content, 'malisafi_properties')
+            || has_shortcode($post->post_content, 'malisafi_properties_modern');
+        $has_minimalist = has_shortcode($post->post_content, 'malisafi_properties_minimalist');
+
+        if (!$has_modern && !$has_minimalist) {
+            return;
+        }
+
+        if ($has_modern) {
             wp_enqueue_style(
-                'malisafi-property-filters',
-                MALISAFI_MLS_URL . 'assets/css/property-filters.css',
-                array(),
+                'malisafi-property-filters-modern',
+                MALISAFI_MLS_URL . 'assets/css/property-filters-modern.css',
+                array('malisafi-mls-variables'),
                 MALISAFI_MLS_VERSION
             );
-            
+
             wp_enqueue_script(
                 'malisafi-property-filters',
                 MALISAFI_MLS_URL . 'assets/js/property-filters.js',
@@ -50,59 +65,20 @@ class Property_Filters_Ajax {
                 MALISAFI_MLS_VERSION,
                 true
             );
-            
+
             wp_localize_script('malisafi-property-filters', 'malisafiFilters', array(
                 'ajaxurl' => admin_url('admin-ajax.php'),
                 'nonce' => wp_create_nonce('malisafi_filter_nonce'),
                 'isLoggedIn' => is_user_logged_in(),
                 'homeUrl' => home_url()
             ));
-            
-            // Enqueue property moderation scripts (for report functionality)
-            if (class_exists('Malisafi_Property_Moderation')) {
-                wp_enqueue_style(
-                    'malisafi-mls-moderation',
-                    MALISAFI_MLS_URL . 'public/css/property-moderation.css',
-                    array(),
-                    MALISAFI_MLS_VERSION
-                );
-                
-                wp_enqueue_script(
-                    'malisafi-mls-moderation',
-                    MALISAFI_MLS_URL . 'public/js/property-moderation.js',
-                    array('jquery'),
-                    MALISAFI_MLS_VERSION,
-                    true
-                );
-                
-                $report_reasons = \Malisafi_Property_Moderation::get_report_reasons();
-                
-                wp_localize_script('malisafi-mls-moderation', 'malisafiModeration', array(
-                    'ajaxUrl' => admin_url('admin-ajax.php'),
-                    'nonce' => wp_create_nonce('malisafi_report_property'),
-                    'isLoggedIn' => is_user_logged_in(),
-                    'reportReasons' => $report_reasons,
-                    'i18n' => array(
-                        'reportProperty' => __('Report Property', 'malisafi-mls'),
-                        'reason' => __('Reason', 'malisafi-mls'),
-                        'selectReason' => __('Select a reason...', 'malisafi-mls'),
-                        'additionalDetails' => __('Additional Details (optional)', 'malisafi-mls'),
-                        'detailsPlaceholder' => __('Please provide more information...', 'malisafi-mls'),
-                        'submitReport' => __('Submit Report', 'malisafi-mls'),
-                        'cancel' => __('Cancel', 'malisafi-mls'),
-                        'loginRequired' => __('You must be logged in to report a property.', 'malisafi-mls'),
-                        'selectReasonError' => __('Please select a reason for reporting.', 'malisafi-mls'),
-                        'submitting' => __('Submitting...', 'malisafi-mls'),
-                        'errorOccurred' => __('An error occurred. Please try again.', 'malisafi-mls')
-                    )
-                ));
-            }
-            
-            // Minimalist filters
+        }
+
+        if ($has_minimalist) {
             wp_enqueue_style(
                 'malisafi-property-filters-minimalist',
                 MALISAFI_MLS_URL . 'assets/css/property-filters-minimalist.css',
-                array(),
+                array('malisafi-mls-variables'),
                 '1.0.0'
             );
             
@@ -114,11 +90,49 @@ class Property_Filters_Ajax {
                 true
             );
             
-            // Same localized data for minimalist version
             wp_localize_script('malisafi-property-filters-minimalist', 'malisafiFilters', array(
                 'ajaxurl' => admin_url('admin-ajax.php'),
                 'nonce' => wp_create_nonce('malisafi_filter_nonce'),
                 'isLoggedIn' => is_user_logged_in()
+            ));
+        }
+
+        if (class_exists('Malisafi_Property_Moderation')) {
+            wp_enqueue_style(
+                'malisafi-mls-moderation',
+                MALISAFI_MLS_URL . 'public/css/property-moderation.css',
+                array(),
+                MALISAFI_MLS_VERSION
+            );
+            
+            wp_enqueue_script(
+                'malisafi-mls-moderation',
+                MALISAFI_MLS_URL . 'public/js/property-moderation.js',
+                array('jquery'),
+                MALISAFI_MLS_VERSION,
+                true
+            );
+            
+            $report_reasons = \Malisafi_Property_Moderation::get_report_reasons();
+            
+            wp_localize_script('malisafi-mls-moderation', 'malisafiModeration', array(
+                'ajaxUrl' => admin_url('admin-ajax.php'),
+                'nonce' => wp_create_nonce('malisafi_report_property'),
+                'isLoggedIn' => is_user_logged_in(),
+                'reportReasons' => $report_reasons,
+                'i18n' => array(
+                    'reportProperty' => __('Report Property', 'malisafi-mls'),
+                    'reason' => __('Reason', 'malisafi-mls'),
+                    'selectReason' => __('Select a reason...', 'malisafi-mls'),
+                    'additionalDetails' => __('Additional Details (optional)', 'malisafi-mls'),
+                    'detailsPlaceholder' => __('Please provide more information...', 'malisafi-mls'),
+                    'submitReport' => __('Submit Report', 'malisafi-mls'),
+                    'cancel' => __('Cancel', 'malisafi-mls'),
+                    'loginRequired' => __('You must be logged in to report a property.', 'malisafi-mls'),
+                    'selectReasonError' => __('Please select a reason for reporting.', 'malisafi-mls'),
+                    'submitting' => __('Submitting...', 'malisafi-mls'),
+                    'errorOccurred' => __('An error occurred. Please try again.', 'malisafi-mls')
+                )
             ));
         }
     }
@@ -128,13 +142,6 @@ class Property_Filters_Ajax {
      */
     public function enqueue_admin_scripts($hook) {
         if (strpos($hook, 'malisafi') !== false) {
-            wp_enqueue_style(
-                'malisafi-property-filters',
-                MALISAFI_MLS_URL . 'assets/css/property-filters.css',
-                array(),
-                '1.0.0'
-            );
-            
             wp_enqueue_script(
                 'malisafi-property-filters',
                 MALISAFI_MLS_URL . 'assets/js/property-filters.js',

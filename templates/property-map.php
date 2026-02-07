@@ -228,7 +228,6 @@ if ($atts['cluster'] === 'yes' && count($properties) > 10) {
 
 // Enqueue custom map script
 wp_enqueue_script('malisafi-property-map', plugins_url('assets/js/property-map.js', dirname(__FILE__)), array('jquery', 'leaflet'), '1.0', true);
-wp_enqueue_style('malisafi-property-map', plugins_url('assets/css/property-map.css', dirname(__FILE__)), array('leaflet'), '1.0');
 
 // Localize script with property data
 wp_localize_script('malisafi-property-map', 'malisafiMapData', array(

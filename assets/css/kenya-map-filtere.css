@@ -204,4 +204,15 @@
   .malisafi-kenya-map {
     display: none;
   }
+
+  .malisafi-kenya-form-column {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+  }
+
+  .malisafi-kenya-filter-form {
+    width: min(100%, 520px);
+    margin: 0 auto;
+  }
 }

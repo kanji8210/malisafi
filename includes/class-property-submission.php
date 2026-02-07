@@ -44,13 +44,6 @@ class Property_Submission {
             wp_enqueue_media();
             wp_enqueue_script('jquery-ui-sortable');
             
-            wp_enqueue_style(
-                'malisafi-property-submission',
-                MALISAFI_MLS_URL . 'assets/css/property-submission.css',
-                array(),
-                MALISAFI_MLS_VERSION
-            );
-            
             wp_enqueue_script(
                 'malisafi-property-submission',
                 MALISAFI_MLS_URL . 'assets/js/property-submission.js',

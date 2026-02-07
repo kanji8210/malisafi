@@ -71,13 +71,6 @@ class Dashboard_Shortcodes {
 			return '<div class="malisafi-access-denied"><p>' . __('Property submission is currently unavailable.', 'malisafi-mls') . '</p></div>';
 		}
 
-		wp_enqueue_style(
-			'malisafi-property-submission',
-			MALISAFI_MLS_URL . 'assets/css/property-submission.css',
-			array(),
-			MALISAFI_MLS_VERSION
-		);
-
 		return \MalisafiMLS\Property_Submission::render_submission_form($atts);
 	}
 
