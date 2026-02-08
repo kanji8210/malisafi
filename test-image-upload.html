@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Upload Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .upload-area { border: 2px dashed #ccc; padding: 20px; margin: 10px 0; text-align: center; }
+        .upload-area.dragover { border-color: #007cba; background: #f0f8ff; }
+        .btn { background: #007cba; color: white; border: none; padding: 10px 20px; cursor: pointer; margin: 5px; }
+        .btn:hover { background: #005a87; }
+        .progress { width: 100%; height: 20px; background: #f0f0f0; margin: 10px 0; }
+        .progress-fill { height: 100%; background: #007cba; width: 0%; }
+        .gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 10px; margin-top: 20px; }
+        .gallery img { width: 100%; height: 100px; object-fit: cover; border: 1px solid #ccc; }
+    </style>
+</head>
+<body>
+    <h1>Image Upload Test</h1>
+    <p>This page tests the image upload functionality directly.</p>
+
+    <div class="upload-area" id="dropzone">
+        <p>Drag & drop images here or click browse</p>
+        <button class="btn" id="browseBtn">Browse Images</button>
+        <input type="file" id="fileInput" multiple accept="image/*" style="display: none;">
+    </div>
+
+    <div class="progress" id="progress" style="display: none;">
+        <div class="progress-fill" id="progressFill"></div>
+    </div>
+
+    <div class="gallery" id="gallery"></div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            const $dropzone = $('#dropzone');
+            const $fileInput = $('#fileInput');
+            const $progress = $('#progress');
+            const $progressFill = $('#progressFill');
+            const $gallery = $('#gallery');
+
+            // Browse button
+            $('#browseBtn').on('click', function() {
+                $fileInput.click();
+            });
+
+            // Drag and drop
+            $dropzone.on('dragover', function(e) {
+                e.preventDefault();
+                $dropzone.addClass('dragover');
+            });
+
+            $dropzone.on('dragleave', function(e) {
+                e.preventDefault();
+                $dropzone.removeClass('dragover');
+            });
+
+            $dropzone.on('drop', function(e) {
+                e.preventDefault();
+                $dropzone.removeClass('dragover');
+                handleFiles(e.originalEvent.dataTransfer.files);
+            });
+
+            // File input change
+            $fileInput.on('change', function(e) {
+                handleFiles(e.target.files);
+            });
+
+            function handleFiles(files) {
+                console.log('Files selected:', files);
+                if (!files || files.length === 0) return;
+
+                // Validate files
+                const validFiles = Array.from(files).filter(file => {
+                    return file.type.startsWith('image/') && file.size <= 10 * 1024 * 1024; // 10MB
+                });
+
+                if (validFiles.length === 0) {
+                    alert('No valid image files selected. Please select images under 10MB.');
+                    return;
+                }
+
+                // Upload files
+                uploadFiles(validFiles);
+            }
+
+            function uploadFiles(files) {
+                $progress.show();
+                $progressFill.css('width', '0%');
+
+                const formData = new FormData();
+                formData.append('action', 'malisafi_upload_property_images');
+                formData.append('nonce', 'test-nonce'); // This will fail, but shows the request
+
+                files.forEach(file => {
+                    formData.append('images[]', file);
+                });
+
+                $.ajax({
+                    url: '/wp-admin/admin-ajax.php',
+                    type: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    xhr: function() {
+                        const xhr = new window.XMLHttpRequest();
+                        xhr.upload.addEventListener('progress', function(e) {
+                            if (e.lengthComputable) {
+                                const percent = Math.round((e.loaded / e.total) * 100);
+                                $progressFill.css('width', percent + '%');
+                            }
+                        }, false);
+                        return xhr;
+                    },
+                    success: function(response) {
+                        console.log('Upload response:', response);
+                        $progress.hide();
+
+                        if (response.success && response.data && response.data.images) {
+                            response.data.images.forEach(image => {
+                                $gallery.append(`<img src="${image.url}" alt="${image.filename}">`);
+                            });
+                        } else {
+                            alert('Upload failed: ' + (response.data ? response.data.message : 'Unknown error'));
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('Upload error:', status, error, xhr);
+                        $progress.hide();
+                        alert('Upload failed. Check console for details.');
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>

@@ -13,9 +13,20 @@
         formData: {},
         autoSaveTimeout: null,
         uploadedImages: [],
+        initialized: false,
 
         init: function() {
             console.log('PropertySubmission.init called');
+            if (this.initialized) {
+                console.log('Already initialized, skipping');
+                return;
+            }
+            
+            if (!$('#property-submission-form').length) {
+                console.log('Property submission form not found, skipping initialization');
+                return;
+            }
+            
             this.propertyId = $('#property_id').val() || 0;
             console.log('Property ID:', this.propertyId);
             this.cacheElements();
@@ -27,6 +38,9 @@
             if (this.propertyId) {
                 this.loadDraft();
             }
+            
+            this.initialized = true;
+            console.log('PropertySubmission initialized successfully');
         },
 
         cacheElements: function() {
@@ -98,6 +112,12 @@
                 $('#image-file-input').click();
             });
 
+            // Featured image browse button
+            $('.btn-browse-featured').on('click', function() {
+                console.log('Browse featured image button clicked');
+                $('#featured-file-input').click();
+            });
+
             $('.btn-browse-featured').on('click', function() {
                 console.log('Browse featured button clicked');
                 $('#featured-file-input').click();
@@ -105,10 +125,12 @@
 
             // File input change
             $('#image-file-input').on('change', function(e) {
+                console.log('Image file input changed, files:', e.target.files);
                 self.handleFileSelect(e.target.files);
             });
 
             $('#featured-file-input').on('change', function(e) {
+                console.log('Featured file input changed, files:', e.target.files);
                 self.handleFeaturedFileSelect(e.target.files);
             });
 
@@ -304,7 +326,9 @@
 
         // Image Upload Functions
         initImageUpload: function() {
+            console.log('initImageUpload called, uploadsEnabled:', malisafiSubmission ? malisafiSubmission.uploadsEnabled : 'malisafiSubmission not defined');
             if (malisafiSubmission.uploadsEnabled !== true) {
+                console.log('Uploads disabled, hiding upload UI');
                 // Hide upload UI and show a notice if a placeholder area exists
                 $('#dropzone').hide();
                 $('#featured-dropzone').hide();
@@ -313,6 +337,7 @@
                 $('#image-gallery').hide();
                 return;
             }
+            console.log('Uploads enabled, setting up image upload handlers');
             const self = this;
 
             // Drag and drop
@@ -960,12 +985,21 @@
     // Initialize on document ready
     $(document).ready(function() {
         console.log('Document ready, checking for property submission form');
-        if ($('#property-submission-form').length) {
-            console.log('Property submission form found, initializing...');
-            PropertySubmission.init();
-        } else {
-            console.log('Property submission form not found');
-        }
+        PropertySubmission.init();
+        
+        // Also check periodically in case form is loaded dynamically
+        let checkCount = 0;
+        const checkInterval = setInterval(function() {
+            if ($('#property-submission-form').length && !PropertySubmission.initialized) {
+                console.log('Property submission form found (delayed), initializing...');
+                PropertySubmission.init();
+                clearInterval(checkInterval);
+            }
+            checkCount++;
+            if (checkCount > 20) { // Stop checking after 10 seconds
+                clearInterval(checkInterval);
+            }
+        }, 500);
     });
 
 })(jQuery);
