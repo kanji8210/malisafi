@@ -207,9 +207,18 @@ $property_manager = MalisafiMLS\Property_Manager::get_instance();
                         $property_id = get_the_ID();
                         $property_data = $property_manager->get_property_data($property_id);
                         
-                        // Get status from taxonomy
-                        $status_terms = wp_get_post_terms($property_id, 'malisafi_property_status');
-                        $status = (!empty($status_terms) && !is_wp_error($status_terms)) ? $status_terms[0]->name : '';
+                        // Get status from listing_type meta
+                        $listing_type = get_post_meta($property_id, '_malisafi_listing_type', true);
+                        $status = '';
+                        if (!empty($listing_type)) {
+                            $status_map = array(
+                                'sale' => 'For Sale',
+                                'rent' => 'For Rent',
+                                'lease' => 'For Lease',
+                                'short_term' => 'Short Term Rent'
+                            );
+                            $status = isset($status_map[$listing_type]) ? $status_map[$listing_type] : ucfirst($listing_type);
+                        }
                         
                         $featured = get_post_meta($property_id, '_malisafi_featured', true);
                         $image_url = get_the_post_thumbnail_url($property_id, 'medium');

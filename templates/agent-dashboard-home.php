@@ -135,9 +135,18 @@ error_log('MALISAFI DEBUG: Dashboard stats - Total: ' . $total_properties . ', P
                                     echo '<div class="placeholder-img"><span class="dashicons dashicons-admin-home"></span></div>';
                                 }
                                 
-                                // Add status badge - always show, get from taxonomy
-                                $status_terms = wp_get_post_terms($property->ID, 'malisafi_property_status');
-                                $property_status = (!empty($status_terms) && !is_wp_error($status_terms)) ? $status_terms[0]->name : '';
+                                // Add status badge - always show, get from listing_type
+                                $listing_type = get_post_meta($property->ID, '_malisafi_listing_type', true);
+                                $property_status = '';
+                                if (!empty($listing_type)) {
+                                    $status_map = array(
+                                        'sale' => 'For Sale',
+                                        'rent' => 'For Rent',
+                                        'lease' => 'For Lease',
+                                        'short_term' => 'Short Term Rent'
+                                    );
+                                    $property_status = isset($status_map[$listing_type]) ? $status_map[$listing_type] : ucfirst($listing_type);
+                                }
                                 if (!empty($property_status)) {
                                     $status_display = ucwords(str_replace('-', ' ', $property_status));
                                     $status_class = 'status-' . sanitize_html_class(strtolower(str_replace(' ', '-', $property_status)));

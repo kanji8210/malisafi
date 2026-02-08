@@ -281,9 +281,18 @@ $total_properties = intval($total_published) + intval($total_pending);
                     $price = get_post_meta($property->ID, '_property_price', true);
                     $bedrooms = get_post_meta($property->ID, '_property_bedrooms', true);
                     $bathrooms = get_post_meta($property->ID, '_property_bathrooms', true);
-                    // Get status from taxonomy
-                    $status_terms = wp_get_post_terms($property->ID, 'malisafi_property_status');
-                    $property_status = (!empty($status_terms) && !is_wp_error($status_terms)) ? $status_terms[0]->name : '';
+                    // Get status from listing_type meta
+                    $listing_type = get_post_meta($property->ID, '_malisafi_listing_type', true);
+                    $property_status = '';
+                    if (!empty($listing_type)) {
+                        $status_map = array(
+                            'sale' => 'For Sale',
+                            'rent' => 'For Rent',
+                            'lease' => 'For Lease',
+                            'short_term' => 'Short Term Rent'
+                        );
+                        $property_status = isset($status_map[$listing_type]) ? $status_map[$listing_type] : ucfirst($listing_type);
+                    }
                 ?>
                     <div class="property-card">
                         <a href="<?php echo get_permalink($property->ID); ?>" class="property-image">

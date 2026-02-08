@@ -176,10 +176,16 @@ if ($properties_query->have_posts()) {
                 $property_data['type'] = $types[0]->name;
             }
             
-            // Get property status
-            $statuses = wp_get_post_terms($property_id, 'malisafi_property_status');
-            if (!empty($statuses) && !is_wp_error($statuses)) {
-                $property_data['status'] = $statuses[0]->name;
+            // Get property status from listing_type
+            $listing_type = get_post_meta($property_id, '_malisafi_listing_type', true);
+            if (!empty($listing_type)) {
+                $status_map = array(
+                    'sale' => 'For Sale',
+                    'rent' => 'For Rent',
+                    'lease' => 'For Lease',
+                    'short_term' => 'Short Term Rent'
+                );
+                $property_data['status'] = isset($status_map[$listing_type]) ? $status_map[$listing_type] : ucfirst($listing_type);
             }
             
             $properties[] = $property_data;
