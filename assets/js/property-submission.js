@@ -33,6 +33,7 @@
             this.bindEvents();
             this.initImageUpload();
             this.toggleSaleLeaseDetails();
+            this.updateStep(); // Show the current step
             
             // Load draft if editing
             if (this.propertyId) {
@@ -58,6 +59,11 @@
             this.$featuredPreview = $('#featured-preview');
             this.$featuredInput = $('#featured-file-input');
             this.$featuredId = $('#featured_image_id');
+            this.$btnBrowseImages = $('.btn-browse-images');
+            this.$btnBrowseFeatured = $('.btn-browse-featured');
+            this.$btnRemoveFeatured = $('.btn-remove-featured');
+            
+            console.log('DEBUG: Cached elements - btnBrowseImages:', this.$btnBrowseImages.length, 'btnBrowseFeatured:', this.$btnBrowseFeatured.length);
         },
 
         bindEvents: function() {
@@ -106,20 +112,14 @@
                 self.extractCoordsFromMapsURL();
             });
 
-            // Image browse button
-            $('.btn-browse-images').on('click', function() {
-                console.log('Browse images button clicked');
+            this.$btnBrowseImages.on('click', function() {
+                console.log('Browse images button clicked - element:', this);
                 $('#image-file-input').click();
             });
 
             // Featured image browse button
-            $('.btn-browse-featured').on('click', function() {
-                console.log('Browse featured image button clicked');
-                $('#featured-file-input').click();
-            });
-
-            $('.btn-browse-featured').on('click', function() {
-                console.log('Browse featured button clicked');
+            this.$btnBrowseFeatured.on('click', function() {
+                console.log('Browse featured image button clicked - element:', this);
                 $('#featured-file-input').click();
             });
 
@@ -134,7 +134,7 @@
                 self.handleFeaturedFileSelect(e.target.files);
             });
 
-            $('.btn-remove-featured').on('click', function() {
+            this.$btnRemoveFeatured.on('click', function() {
                 self.clearFeaturedImage();
             });
 
