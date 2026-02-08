@@ -14,6 +14,8 @@ class Property_Submission {
      * Initialize
      */
     public static function init() {
+        error_log('Property_Submission::init() called');
+        
         // AJAX handlers
         add_action('wp_ajax_malisafi_save_property_step', array(__CLASS__, 'ajax_save_property_step'));
         add_action('wp_ajax_malisafi_submit_property', array(__CLASS__, 'ajax_submit_property'));
@@ -37,6 +39,8 @@ class Property_Submission {
         
         // Enqueue scripts and styles
         add_action('wp_enqueue_scripts', array(__CLASS__, 'enqueue_assets'));
+        
+        error_log('Property_Submission::init() completed');
     }
     
     /**
@@ -63,6 +67,8 @@ class Property_Submission {
                           has_shortcode(get_post()->post_content, 'malisafi_property_submit') ||
                           has_shortcode(get_post()->post_content, 'malisafi_agent_add_property')) ||
             (isset($_GET['malisafi_action']) && $_GET['malisafi_action'] === 'submit_property')) {
+            error_log('Enqueuing property submission assets');
+            
             wp_enqueue_media();
             wp_enqueue_script('jquery-ui-sortable');
 
@@ -245,6 +251,20 @@ class Property_Submission {
         $property_id = isset($_POST['property_id']) ? intval($_POST['property_id']) : 0;
         $step = isset($_POST['step']) ? sanitize_text_field($_POST['step']) : '';
         $data = isset($_POST['data']) ? $_POST['data'] : array();
+        
+        // Handle JSON data
+        if (is_string($data)) {
+            $data = json_decode($data, true);
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                $data = array();
+            }
+        }
+        
+        // Debug logging
+        error_log('Malisafi Property Save Debug:');
+        error_log('Property ID: ' . $property_id);
+        error_log('Step: ' . $step);
+        error_log('Data: ' . print_r($data, true));
         
         // Validate data using Validator
         require_once MALISAFI_MLS_PATH . 'includes/class-validator.php';
@@ -976,6 +996,7 @@ class Property_Submission {
             'sustainability' => get_post_meta($property_id, '_malisafi_sustainability', true),
             'green_certification' => get_post_meta($property_id, '_malisafi_green_certification', true),
             'features' => get_post_meta($property_id, '_malisafi_features', true),
+            'amenities' => get_post_meta($property_id, '_malisafi_amenities', true),
             'gallery_ids' => $gallery_ids_raw,
             'featured_image' => $featured_image,
             'gallery_images' => $gallery_images

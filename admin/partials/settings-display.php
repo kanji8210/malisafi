@@ -23,6 +23,9 @@ if (!defined('WPINC')) {
         <a href="<?php echo esc_url(admin_url('admin.php?page=malisafi-settings&tab=features')); ?>" class="nav-tab <?php echo isset($_GET['tab']) && $_GET['tab'] === 'features' ? 'nav-tab-active' : ''; ?>">
             <?php _e('Features', 'malisafi-mls'); ?>
         </a>
+        <a href="<?php echo esc_url(admin_url('admin.php?page=malisafi-settings&tab=limits')); ?>" class="nav-tab <?php echo isset($_GET['tab']) && $_GET['tab'] === 'limits' ? 'nav-tab-active' : ''; ?>">
+            <?php _e('User Limits', 'malisafi-mls'); ?>
+        </a>
         <a href="<?php echo esc_url(admin_url('admin.php?page=malisafi-email-settings')); ?>" class="nav-tab">
             <?php _e('Email Settings', 'malisafi-mls'); ?>
         </a>
@@ -224,6 +227,73 @@ if (!defined('WPINC')) {
                         ));
                         ?>
                         <p class="description"><?php _e('Choose the page used as the agent profile template.', 'malisafi-mls'); ?></p>
+                    </td>
+                </tr>
+            </table>
+            
+        <?php } elseif ($active_tab === 'limits') {
+            settings_fields('malisafi_mls_limits');
+            do_settings_sections('malisafi_mls_limits');
+            ?>
+            
+            <table class="form-table">
+                <tr>
+                    <th scope="row">
+                        <label for="malisafi_mls_client_max_listings"><?php _e('Client Max Listings', 'malisafi-mls'); ?></label>
+                    </th>
+                    <td>
+                        <input type="number" id="malisafi_mls_client_max_listings" name="malisafi_mls_client_max_listings" value="<?php echo esc_attr(get_option('malisafi_mls_client_max_listings', 5)); ?>" min="0" class="small-text">
+                        <p class="description"><?php _e('Maximum number of properties clients can list.', 'malisafi-mls'); ?></p>
+                    </td>
+                </tr>
+                
+                <tr>
+                    <th scope="row">
+                        <label for="malisafi_mls_agent_basic_max_listings"><?php _e('Basic Agent Max Listings', 'malisafi-mls'); ?></label>
+                    </th>
+                    <td>
+                        <input type="number" id="malisafi_mls_agent_basic_max_listings" name="malisafi_mls_agent_basic_max_listings" value="<?php echo esc_attr(get_option('malisafi_mls_agent_basic_max_listings', 10)); ?>" min="0" class="small-text">
+                        <p class="description"><?php _e('Maximum number of properties basic agents can list.', 'malisafi-mls'); ?></p>
+                    </td>
+                </tr>
+                
+                <tr>
+                    <th scope="row">
+                        <label for="malisafi_mls_agent_premium_max_listings"><?php _e('Premium Agent Max Listings', 'malisafi-mls'); ?></label>
+                    </th>
+                    <td>
+                        <input type="number" id="malisafi_mls_agent_premium_max_listings" name="malisafi_mls_agent_premium_max_listings" value="<?php echo esc_attr(get_option('malisafi_mls_agent_premium_max_listings', 50)); ?>" min="0" class="small-text">
+                        <p class="description"><?php _e('Maximum number of properties premium agents can list.', 'malisafi-mls'); ?></p>
+                    </td>
+                </tr>
+                
+                <tr>
+                    <th scope="row">
+                        <label for="malisafi_mls_owner_max_listings"><?php _e('Owner Max Listings', 'malisafi-mls'); ?></label>
+                    </th>
+                    <td>
+                        <input type="number" id="malisafi_mls_owner_max_listings" name="malisafi_mls_owner_max_listings" value="<?php echo esc_attr(get_option('malisafi_mls_owner_max_listings', 20)); ?>" min="0" class="small-text">
+                        <p class="description"><?php _e('Maximum number of properties owners can list.', 'malisafi-mls'); ?></p>
+                    </td>
+                </tr>
+                
+                <tr>
+                    <th scope="row">
+                        <label for="malisafi_mls_developer_max_listings"><?php _e('Developer Max Listings', 'malisafi-mls'); ?></label>
+                    </th>
+                    <td>
+                        <input type="number" id="malisafi_mls_developer_max_listings" name="malisafi_mls_developer_max_listings" value="<?php echo esc_attr(get_option('malisafi_mls_developer_max_listings', 100)); ?>" min="0" class="small-text">
+                        <p class="description"><?php _e('Maximum number of properties developers can list.', 'malisafi-mls'); ?></p>
+                    </td>
+                </tr>
+                
+                <tr>
+                    <th scope="row">
+                        <label for="malisafi_mls_moderator_max_listings"><?php _e('Moderator Max Listings', 'malisafi-mls'); ?></label>
+                    </th>
+                    <td>
+                        <input type="number" id="malisafi_mls_moderator_max_listings" name="malisafi_mls_moderator_max_listings" value="<?php echo esc_attr(get_option('malisafi_mls_moderator_max_listings', 0)); ?>" min="0" class="small-text">
+                        <p class="description"><?php _e('Maximum number of properties moderators can list (0 = unlimited).', 'malisafi-mls'); ?></p>
                     </td>
                 </tr>
             </table>

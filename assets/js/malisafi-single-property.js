@@ -3,11 +3,15 @@
  * Handles gallery navigation, favorite toggle, agent rating, modals, etc.
  */
 
+console.log('Malisafi Single Property JS file loaded');
+
 (function($) {
     'use strict';
 
     // DOM Ready
     $(document).ready(function() {
+        console.log('Malisafi Single Property JS loaded');
+        
         // Ensure no modals are open by default
         $('.malisafi-modal').removeClass('open').hide();
         $('body').removeClass('modal-open');
@@ -16,11 +20,21 @@
         var currentImageIndex = 0;
         var totalImages = 0;
         
+        // Initialize components after a short delay to ensure DOM is ready
+        setTimeout(function() {
+            console.log('Initializing gallery...');
+            initGallery();
+            console.log('Gallery initialization complete');
+        }, 100);
+        
         // Initialize gallery
         function initGallery() {
             var $thumbnails = $('.gallery-thumbnails .thumbnail');
             var $mainImage = $('.main-image');
             totalImages = $thumbnails.length;
+            
+            console.log('Gallery init - thumbnails found:', totalImages);
+            console.log('Gallery init - main image found:', $mainImage.length);
             
             if (totalImages > 0) {
                 // Update counter
@@ -30,6 +44,7 @@
                 // Thumbnail click
                 $thumbnails.on('click', function() {
                     var index = $(this).data('index');
+                    console.log('Thumbnail clicked, index:', index);
                     navigateToImage(index);
                 });
                 
@@ -57,6 +72,8 @@
                         }
                     }
                 });
+            } else {
+                console.log('No thumbnails found - gallery not initialized');
             }
         }
         
@@ -432,9 +449,6 @@
             $('.malisafi-modal').removeClass('open').hide();
             $('body').removeClass('modal-open');
         };
-        
-        // Initialize gallery
-        initGallery();
         
     });
     

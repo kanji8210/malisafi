@@ -73,6 +73,14 @@ class Admin {
         register_setting('malisafi_mls_features', 'malisafi_mls_enable_property_comparison');
         register_setting('malisafi_mls_features', 'malisafi_mls_enable_agent_profiles');
 
+        // User limits settings
+        register_setting('malisafi_mls_limits', 'malisafi_mls_client_max_listings');
+        register_setting('malisafi_mls_limits', 'malisafi_mls_agent_basic_max_listings');
+        register_setting('malisafi_mls_limits', 'malisafi_mls_agent_premium_max_listings');
+        register_setting('malisafi_mls_limits', 'malisafi_mls_owner_max_listings');
+        register_setting('malisafi_mls_limits', 'malisafi_mls_developer_max_listings');
+        register_setting('malisafi_mls_limits', 'malisafi_mls_moderator_max_listings');
+
         // Pages required by the plugin — register them in the Features option
         // group so the single settings form can save all values at once.
         register_setting('malisafi_mls_features', 'malisafi_mls_submission_page');
@@ -103,6 +111,13 @@ class Admin {
             'malisafi_mls_features'
         );
 
+        add_settings_section(
+            'malisafi_mls_limits_section',
+            __('User Limits', 'malisafi-mls'),
+            array($this, 'limits_section_callback'),
+            'malisafi_mls_limits'
+        );
+
         // Ensure settings API checks our custom capability instead of the
         // default 'manage_options' for these groups so roles with
         // 'manage_malisafi_settings' or dedicated page capability can save.
@@ -111,6 +126,7 @@ class Admin {
         // pages manager to save feature flags. We pick the capability that the
         // current user already has so administrators keep access.
         add_filter('option_page_capability_malisafi_mls_features', array($this, 'option_page_capability_features'));
+        add_filter('option_page_capability_malisafi_mls_limits', array($this, 'option_page_capability'));
 
         // Backwards compatibility: if some code or cached form posts the
         // older 'malisafi_mls_pages' option_page we must allow admins to
@@ -141,6 +157,13 @@ class Admin {
      */
     public function pages_section_callback() {
         echo '<p>' . __('Select pages used by the plugin (submission, favorites, agent profile).', 'malisafi-mls') . '</p>';
+    }
+
+    /**
+     * Limits section callback
+     */
+    public function limits_section_callback() {
+        echo '<p>' . __('Configure property listing limits for each user role.', 'malisafi-mls') . '</p>';
     }
 
     /**

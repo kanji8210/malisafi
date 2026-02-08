@@ -41,6 +41,8 @@ class Property_Actions_Ajax {
      */
     public function enqueue_scripts() {
         if (is_singular('malisafi_property')) {
+            error_log('Malisafi: Enqueuing single property scripts for post type: ' . get_post_type());
+            
             wp_enqueue_style(
                 'malisafi-single-property',
                 MALISAFI_MLS_URL . 'assets/css/single-property.css',
@@ -76,6 +78,8 @@ class Property_Actions_Ajax {
                 'login_url' => $login_url,
                 'register_client_url' => $register_client_url
             ));
+        } else {
+            error_log('Malisafi: NOT enqueuing single property scripts. Current post type: ' . get_post_type() . ', is_singular check: ' . (is_singular('malisafi_property') ? 'true' : 'false'));
         }
     }
     

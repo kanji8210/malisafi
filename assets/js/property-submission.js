@@ -12,38 +12,35 @@
         propertyId: 0,
         formData: {},
         autoSaveTimeout: null,
-        uploadedImages: [],
         initialized: false,
+        uploadedImages: [],
 
         init: function() {
-            console.log('PropertySubmission.init called');
             if (this.initialized) {
-                console.log('Already initialized, skipping');
                 return;
             }
             
             if (!$('#property-submission-form').length) {
-                console.log('Property submission form not found, skipping initialization');
                 return;
             }
             
             this.propertyId = $('#property_id').val() || 0;
-            console.log('Property ID:', this.propertyId);
             this.cacheElements();
             this.bindEvents();
-            this.initImageUpload();
             this.toggleSaleLeaseDetails();
             
             // Load draft if editing
             if (this.propertyId && this.propertyId !== '0' && this.propertyId !== 0) {
-                console.log('Loading draft for property ID:', this.propertyId);
                 this.loadDraft();
-            } else {
-                console.log('New property, skipping draft load');
             }
             
+            // Show the first step
+            this.updateStep();
+            
+            // Initialize image upload
+            this.initImageUpload();
+            
             this.initialized = true;
-            console.log('PropertySubmission initialized successfully');
         },
 
         cacheElements: function() {
@@ -55,15 +52,10 @@
             this.$btnSubmit = $('.btn-submit');
             this.$btnSaveDraft = $('.btn-save-draft');
             this.$autoSave = $('.autosave-indicator');
-            this.$dropzone = $('#dropzone');
+            
+            // Image upload elements - cache if they exist
             this.$gallery = $('#image-gallery');
-            this.$featuredDropzone = $('#featured-dropzone');
             this.$featuredPreview = $('#featured-preview');
-            this.$featuredInput = $('#featured-file-input');
-            this.$featuredId = $('#featured_image_id');
-            this.$btnBrowseImages = $('.btn-browse-images');
-            this.$btnBrowseFeatured = $('.btn-browse-featured');
-            this.$btnRemoveFeatured = $('.btn-remove-featured');
         },
 
         bindEvents: function() {
@@ -83,7 +75,6 @@
             });
 
             this.$btnSaveDraft.on('click', function() {
-                console.log('Save draft button clicked - handler called');
                 self.saveDraft();
             });
 
@@ -110,32 +101,6 @@
             // Extract coordinates from Google Maps URL
             $('.btn-extract-coords').on('click', function() {
                 self.extractCoordsFromMapsURL();
-            });
-
-            this.$btnBrowseImages.on('click', function() {
-                console.log('Browse images button clicked - element:', this);
-                $('#image-file-input').click();
-            });
-
-            // Featured image browse button
-            this.$btnBrowseFeatured.on('click', function() {
-                console.log('Browse featured image button clicked - element:', this);
-                $('#featured-file-input').click();
-            });
-
-            // File input change
-            $('#image-file-input').on('change', function(e) {
-                console.log('Image file input changed, files:', e.target.files);
-                self.handleFileSelect(e.target.files);
-            });
-
-            $('#featured-file-input').on('change', function(e) {
-                console.log('Featured file input changed, files:', e.target.files);
-                self.handleFeaturedFileSelect(e.target.files);
-            });
-
-            this.$btnRemoveFeatured.on('click', function() {
-                self.clearFeaturedImage();
             });
 
             // Prevent form submission
@@ -230,14 +195,29 @@
             const self = this;
             
             this.autoSaveTimeout = setTimeout(function() {
-                self.saveStep();
+                // Only auto-save if we have some basic data
+                const stepData = self.getStepData(self.currentStep);
+                const hasData = Object.keys(stepData).length > 0 && 
+                               Object.values(stepData).some(value => value !== '' && value !== null && value !== undefined);
+                
+                if (hasData) {
+                    self.saveStep();
+                }
             }, 2000); // Save 2 seconds after last change
         },
 
         saveStep: function() {
             const self = this;
             const stepData = this.getStepData(this.currentStep);
-
+            
+            // Don't save if we don't have any data
+            const hasData = Object.keys(stepData).length > 0 && 
+                           Object.values(stepData).some(value => value !== '' && value !== null && value !== undefined);
+            
+            if (!hasData) {
+                return;
+            }
+            
             this.showAutoSave('saving');
 
             $.ajax({
@@ -251,7 +231,6 @@
                     data: stepData
                 },
                 success: function(response) {
-                    console.log('Save step AJAX response:', response);
                     if (response.success) {
                         if (response.data.property_id) {
                             self.propertyId = response.data.property_id;
@@ -259,7 +238,6 @@
                         }
                         self.showAutoSave('saved');
                     } else {
-                        console.error('Save step failed:', response);
                         self.showAutoSave('error');
                     }
                 },
@@ -288,237 +266,305 @@
 
             $step.find('input, textarea, select').each(function() {
                 const $field = $(this);
-                const name = $field.attr('name');
+                let name = $field.attr('name');
                 
                 if (!name) return;
 
+                // Remove array notation from name for data key
+                const dataKey = name.replace(/\[\]$/, '');
+                
                 if ($field.attr('type') === 'checkbox') {
-                    if (!data[name]) data[name] = [];
+                    if (!data[dataKey]) data[dataKey] = [];
                     if ($field.is(':checked')) {
-                        data[name].push($field.val());
+                        data[dataKey].push($field.val());
                     }
                 } else {
-                    data[name] = $field.val();
+                    data[dataKey] = $field.val();
                 }
             });
 
             return data;
         },
 
-        showAutoSave: function(status) {
-            const $indicator = this.$autoSave;
-            $indicator.removeClass('saving saved error').addClass(status + ' show');
-
-            const messages = {
-                saving: malisafiSubmission.strings.saving,
-                saved: malisafiSubmission.strings.saved,
-                error: malisafiSubmission.strings.error
-            };
-
-            $indicator.find('.status-text').text(messages[status] || '');
-
-            if (status === 'saved' || status === 'error') {
-                setTimeout(function() {
-                    $indicator.removeClass('show');
-                }, 2000);
+        showUploadProgress: function(message) {
+            let $progress = $('.upload-progress');
+            if (!$progress.length) {
+                $progress = $('<div class="upload-progress"><div class="progress-text"></div></div>');
+                $('body').append($progress);
             }
+            $progress.find('.progress-text').text(message);
+            $progress.show();
         },
 
-        // Image Upload Functions
+        hideUploadProgress: function() {
+            $('.upload-progress').hide();
+        },
+
+        showUploadSuccess: function(message) {
+            this.showUploadMessage(message, 'success');
+        },
+
+        showUploadError: function(message) {
+            this.showUploadMessage(message, 'error');
+        },
+
+        showUploadMessage: function(message, type) {
+            // Remove any existing messages
+            $('.upload-message').remove();
+            
+            const $message = $('<div class="upload-message ' + type + '"><div class="message-content">' + message + '</div><button class="close-btn">×</button></div>');
+            
+            // Add close functionality
+            $message.find('.close-btn').on('click', function() {
+                $message.fadeOut(function() { $(this).remove(); });
+            });
+            
+            // Auto-hide after 5 seconds
+            setTimeout(function() {
+                $message.fadeOut(function() { $(this).remove(); });
+            }, 5000);
+            
+            $('body').append($message);
+            $message.fadeIn();
+        },
+
+        // Image Upload Functions - RECREATED
         initImageUpload: function() {
-            console.log('initImageUpload called, uploadsEnabled:', malisafiSubmission ? malisafiSubmission.uploadsEnabled : 'malisafiSubmission not defined');
-            if (malisafiSubmission.uploadsEnabled !== true) {
-                console.log('Uploads disabled, hiding upload UI');
-                // Hide upload UI and show a notice if a placeholder area exists
-                $('#dropzone').hide();
-                $('#featured-dropzone').hide();
-                $('#featured-preview').hide();
-                $('.upload-progress').hide();
-                $('#image-gallery').hide();
-                return;
-            }
-            console.log('Uploads enabled, setting up image upload handlers');
-            const self = this;
-
-            // Drag and drop
-            this.$dropzone.on('dragover', function(e) {
-                e.preventDefault();
-                $(this).addClass('dragover');
-            });
-
-            this.$dropzone.on('dragleave', function(e) {
-                e.preventDefault();
-                $(this).removeClass('dragover');
-            });
-
-            this.$dropzone.on('drop', function(e) {
-                e.preventDefault();
-                $(this).removeClass('dragover');
-                const files = e.originalEvent.dataTransfer.files;
-                self.handleFileSelect(files);
-            });
-
-            this.$featuredDropzone.on('dragover', function(e) {
-                e.preventDefault();
-                $(this).addClass('dragover');
-            });
-
-            this.$featuredDropzone.on('dragleave', function(e) {
-                e.preventDefault();
-                $(this).removeClass('dragover');
-            });
-
-            this.$featuredDropzone.on('drop', function(e) {
-                e.preventDefault();
-                $(this).removeClass('dragover');
-                const files = e.originalEvent.dataTransfer.files;
-                self.handleFeaturedFileSelect(files);
-            });
-
-            // Make gallery sortable
-            this.$gallery.sortable({
-                update: function() {
-                    // Enforce main badge and ensure not exceeding 15 items
-                    const $items = self.$gallery.find('.gallery-item');
-                    if ($items.length > 15) {
-                        $items.slice(15).remove();
-                        self.uploadedImages = self.uploadedImages.slice(0, 15);
-                        self.showError('Maximum 15 images allowed. Extra images were ignored.');
-                    }
-
-                    self.updateImageOrder();
-                }
-            });
-        },
-
-        handleFeaturedFileSelect: function(files) {
-            if (!files || files.length === 0) return;
-
-            const selectedFile = Array.from(files).slice(0, 1);
-            const self = this;
-
-            this.validateImageFiles(selectedFile, { minWidth: 1600, minHeight: 900, landscape: true })
-                .then(function(validFiles) {
-                    if (!validFiles.length) {
-                        self.showError('Featured image should be landscape and at least 1600x900.');
+            const $dropzone = $('#dropzone');
+            const $featuredDropzone = $('#featured-dropzone');
+            
+            if ($dropzone.length) {
+                // Gallery image upload
+                $dropzone.on('dragover', function(e) {
+                    e.preventDefault();
+                    $(this).addClass('drag-over').removeClass('dropzone-error');
+                });
+                
+                $dropzone.on('dragleave', function(e) {
+                    e.preventDefault();
+                    $(this).removeClass('drag-over dropzone-error');
+                });
+                
+                $dropzone.on('drop', function(e) {
+                    e.preventDefault();
+                    $(this).removeClass('drag-over');
+                    
+                    const files = e.originalEvent.dataTransfer.files;
+                    const currentCount = $('#image-gallery .gallery-item').length;
+                    
+                    // Check if any files are images
+                    const imageFiles = Array.from(files).filter(file => file.type.match('image.*'));
+                    
+                    if (imageFiles.length === 0) {
+                        $(this).addClass('dropzone-error');
+                        this.showUploadError('Please drop image files only. Supported formats: JPEG, PNG, WebP');
+                        setTimeout(() => {
+                            $(this).removeClass('dropzone-error');
+                        }, 2000);
                         return;
                     }
-                    const formData = new FormData();
-                    formData.append('action', 'malisafi_upload_featured_image');
-                    formData.append('nonce', malisafiSubmission.uploadNonce);
-                    formData.append('property_id', self.propertyId || 0);
-                    formData.append('image', validFiles[0]);
-                    self.uploadFeaturedImage(formData);
-                })
-                .catch(function() {
-                    self.showError('Could not validate featured image.');
-                });
-        },
-
-        handleFileSelect: function(files) {
-            console.log('Files selected:', files);
-            if (!files || files.length === 0) return;
-
-            const remainingSlots = Math.max(0, 15 - this.uploadedImages.length);
-            if (remainingSlots === 0) {
-                this.showError('You can upload up to 15 images per listing.');
-                return;
-            }
-
-            const inputFiles = Array.from(files).slice(0, remainingSlots);
-            const self = this;
-            this.validateImageFiles(inputFiles, { minWidth: 1200, minHeight: 800, landscape: true })
-                .then(function(validFiles) {
-                    if (!validFiles.length) {
-                        self.showError('No valid images to upload. Use landscape images at least 1200x800.');
+                    
+                    // Check size limits
+                    const oversizedFiles = imageFiles.filter(file => file.size > 10 * 1024 * 1024);
+                    if (oversizedFiles.length > 0) {
+                        $(this).addClass('dropzone-error');
+                        this.showUploadError('Some files are too large. Maximum size is 10MB per image.');
+                        setTimeout(() => {
+                            $(this).removeClass('dropzone-error');
+                        }, 2000);
                         return;
                     }
-                    const formData = new FormData();
-                    formData.append('action', 'malisafi_upload_property_images');
-                    formData.append('nonce', malisafiSubmission.uploadNonce);
-                    validFiles.forEach(function(file) { formData.append('images[]', file); });
-                    self.uploadImages(formData);
-                })
-                .catch(function() {
-                    self.showError('Could not validate selected images.');
+                    
+                    // Check total count
+                    if (currentCount >= 15) {
+                        $(this).addClass('dropzone-error');
+                        this.showUploadError('Maximum 15 images allowed. Please remove some images first.');
+                        setTimeout(() => {
+                            $(this).removeClass('dropzone-error');
+                        }, 2000);
+                        return;
+                    }
+                    
+                    this.handleGalleryFiles(files);
+                }.bind(this));
+                
+                // Browse button for gallery
+                $('.btn-browse-images').on('click', function() {
+                    $('#image-file-input').click();
                 });
+                
+                $('#image-file-input').on('change', function(e) {
+                    this.handleGalleryFiles(e.target.files);
+                }.bind(this));
+            }
+            
+            if ($featuredDropzone.length) {
+                // Featured image upload
+                $featuredDropzone.on('dragover', function(e) {
+                    e.preventDefault();
+                    $(this).addClass('drag-over').removeClass('dropzone-error');
+                });
+                
+                $featuredDropzone.on('dragleave', function(e) {
+                    e.preventDefault();
+                    $(this).removeClass('drag-over dropzone-error');
+                });
+                
+                $featuredDropzone.on('drop', function(e) {
+                    e.preventDefault();
+                    $(this).removeClass('drag-over');
+                    
+                    const files = e.originalEvent.dataTransfer.files;
+                    if (files.length === 0) return;
+                    
+                    const file = files[0];
+                    
+                    // Validate file type
+                    if (!file.type.match('image.*')) {
+                        $(this).addClass('dropzone-error');
+                        this.showUploadError('Please drop an image file. Supported formats: JPEG, PNG, WebP');
+                        setTimeout(() => {
+                            $(this).removeClass('dropzone-error');
+                        }, 2000);
+                        return;
+                    }
+                    
+                    // Validate file size
+                    if (file.size > 10 * 1024 * 1024) {
+                        $(this).addClass('dropzone-error');
+                        this.showUploadError('File is too large. Maximum size is 10MB. Your file is ' + (file.size / 1024 / 1024).toFixed(1) + 'MB');
+                        setTimeout(() => {
+                            $(this).removeClass('dropzone-error');
+                        }, 2000);
+                        return;
+                    }
+                    
+                    this.handleFeaturedFile(file);
+                }.bind(this));
+                
+                // Browse button for featured
+                $('.btn-browse-featured').on('click', function() {
+                    $('#featured-file-input').click();
+                });
+                
+                $('#featured-file-input').on('change', function(e) {
+                    this.handleFeaturedFile(e.target.files[0]);
+                }.bind(this));
+                
+                // Remove featured image
+                $('.btn-remove-featured').on('click', function() {
+                    this.removeFeaturedImage();
+                }.bind(this));
+            }
         },
 
-       validateImageFiles: function(files, opts) {
-           const minWidth = opts && opts.minWidth ? opts.minWidth : 0;
-           const minHeight = opts && opts.minHeight ? opts.minHeight : 0;
-           const requireLandscape = opts && opts.landscape === true;
+        handleGalleryFiles: function(files) {
+            if (!files || files.length === 0) return;
+            
+            // Limit to 15 images total
+            const currentCount = $('#image-gallery .gallery-item').length;
+            const maxNew = Math.min(files.length, 15 - currentCount);
+            
+            if (maxNew <= 0) {
+                this.showUploadError('Maximum 15 images allowed per property. You already have ' + currentCount + ' images. Please remove some before adding more.');
+                return;
+            }
+            
+            if (files.length > maxNew) {
+                this.showUploadError('Too many files selected. Only the first ' + maxNew + ' files will be uploaded (maximum 15 total).');
+            }
+            
+            const filesToUpload = Array.from(files).slice(0, maxNew);
+            
+            filesToUpload.forEach(function(file) {
+                this.uploadGalleryImage(file);
+            }.bind(this));
+        },
 
-           const checks = files.map(function(file) {
-               return new Promise(function(resolve) {
-                   const img = new Image();
-                   const url = URL.createObjectURL(file);
-                   img.onload = function() {
-                       const isLandscape = img.width > img.height;
-                       const okLandscape = !requireLandscape || isLandscape;
-                       const okSize = img.width >= minWidth && img.height >= minHeight;
-                       URL.revokeObjectURL(url);
-                       resolve(okLandscape && okSize ? file : null);
-                   };
-                   img.onerror = function() {
-                       URL.revokeObjectURL(url);
-                       resolve(null);
-                   };
-                   img.src = url;
-               });
-           });
-           return Promise.all(checks).then(function(results) { return results.filter(Boolean); });
-       },
+        handleFeaturedFile: function(file) {
+            if (!file) return;
+            this.uploadFeaturedImage(file);
+        },
 
-        uploadImages: function(formData) {
-            const self = this;
-
-            $('.upload-progress').show();
-            $('.progress-fill').css('width', '0%');
-
+        uploadGalleryImage: function(file) {
+            // Validate file type
+            if (!file.type.match('image.*')) {
+                this.showUploadError('Please select image files only. Supported formats: JPEG, PNG, WebP');
+                return;
+            }
+            
+            // Validate file size (10MB max)
+            if (file.size > 10 * 1024 * 1024) {
+                this.showUploadError('File size must be less than 10MB. Your file is ' + (file.size / 1024 / 1024).toFixed(1) + 'MB');
+                return;
+            }
+            
+            const formData = new FormData();
+            formData.append('action', 'malisafi_upload_property_images');
+            formData.append('nonce', malisafiSubmission.uploadNonce);
+            formData.append('property_id', this.propertyId || 0);
+            formData.append('images[]', file);
+            
+            // Show progress
+            this.showUploadProgress('Uploading ' + file.name + '...');
+            
             $.ajax({
                 url: malisafiSubmission.ajaxurl,
                 type: 'POST',
                 data: formData,
                 processData: false,
                 contentType: false,
-                xhr: function() {
-                    const xhr = new window.XMLHttpRequest();
-                    xhr.upload.addEventListener('progress', function(e) {
-                        if (e.lengthComputable) {
-                            const percent = Math.round((e.loaded / e.total) * 100);
-                            $('.progress-fill').css('width', percent + '%');
-                            $('.progress-text').text(percent + '%');
-                        }
-                    }, false);
-                    return xhr;
-                },
                 success: function(response) {
-                    console.log('Image upload response:', response);
-                    $('.upload-progress').hide();
-                    
+                    this.hideUploadProgress();
                     if (response.success && response.data.images) {
                         response.data.images.forEach(function(image) {
-                            self.addImageToGallery(image);
-                        });
-                        self.updateImageOrder();
+                            this.addGalleryImage(image);
+                        }.bind(this));
+                        this.showUploadSuccess('Image uploaded successfully');
                     } else {
-                        self.showError(response.data.message || malisafiSubmission.strings.uploadError);
+                        this.showUploadError(response.data.message || 'Upload failed');
                     }
-                },
+                }.bind(this),
                 error: function(xhr, status, error) {
-                    console.error('Image upload error:', status, error, xhr);
-                    $('.upload-progress').hide();
-                    self.showError(malisafiSubmission.strings.uploadError);
-                }
+                    this.hideUploadProgress();
+                    let errorMessage = 'Upload failed due to network error';
+                    
+                    if (xhr.status === 413) {
+                        errorMessage = 'File is too large for server limits. Try a smaller image.';
+                    } else if (xhr.status === 500) {
+                        errorMessage = 'Server error occurred. Please try again later.';
+                    } else if (xhr.status === 403) {
+                        errorMessage = 'Permission denied. Please refresh the page and try again.';
+                    } else if (status === 'timeout') {
+                        errorMessage = 'Upload timed out. Please check your connection and try again.';
+                    }
+                    
+                    this.showUploadError(errorMessage);
+                }.bind(this)
             });
         },
 
-        uploadFeaturedImage: function(formData) {
-            const self = this;
-
-            this.showAutoSave('saving');
-
+        uploadFeaturedImage: function(file) {
+            // Validate file type
+            if (!file.type.match('image.*')) {
+                this.showUploadError('Please select an image file. Supported formats: JPEG, PNG, WebP');
+                return;
+            }
+            
+            // Validate file size (10MB max)
+            if (file.size > 10 * 1024 * 1024) {
+                this.showUploadError('File size must be less than 10MB. Your file is ' + (file.size / 1024 / 1024).toFixed(1) + 'MB');
+                return;
+            }
+            
+            const formData = new FormData();
+            formData.append('action', 'malisafi_upload_featured_image');
+            formData.append('nonce', malisafiSubmission.uploadNonce);
+            formData.append('property_id', this.propertyId || 0);
+            formData.append('image', file);
+            
+            this.showUploadProgress('Uploading featured image...');
+            
             $.ajax({
                 url: malisafiSubmission.ajaxurl,
                 type: 'POST',
@@ -526,89 +572,53 @@
                 processData: false,
                 contentType: false,
                 success: function(response) {
+                    this.hideUploadProgress();
                     if (response.success && response.data.image) {
-                        self.setFeaturedImage(response.data.image);
-                        self.showAutoSave('saved');
+                        this.setFeaturedImage(response.data.image);
+                        this.showUploadSuccess('Featured image uploaded successfully');
                     } else {
-                        self.showError(response.data.message || malisafiSubmission.strings.uploadError);
-                        self.showAutoSave('error');
+                        this.showUploadError(response.data.message || 'Upload failed');
                     }
-                },
-                error: function() {
-                    self.showError(malisafiSubmission.strings.uploadError);
-                    self.showAutoSave('error');
-                }
+                }.bind(this),
+                error: function(xhr, status, error) {
+                    this.hideUploadProgress();
+                    let errorMessage = 'Upload failed due to network error';
+                    
+                    if (xhr.status === 413) {
+                        errorMessage = 'File is too large for server limits. Try a smaller image.';
+                    } else if (xhr.status === 500) {
+                        errorMessage = 'Server error occurred. Please try again later.';
+                    } else if (xhr.status === 403) {
+                        errorMessage = 'Permission denied. Please refresh the page and try again.';
+                    } else if (status === 'timeout') {
+                        errorMessage = 'Upload timed out. Please check your connection and try again.';
+                    }
+                    
+                    this.showUploadError(errorMessage);
+                }.bind(this)
             });
         },
 
-        setFeaturedImage: function(image) {
-            if (!image || !image.url || !image.id) {
-                return;
-            }
-
-            this.$featuredId.val(image.id);
-            this.$featuredPreview.find('img').attr('src', image.url);
-            this.$featuredPreview.show();
-            $('#featured-dropzone').removeClass('error').hide();
-        },
-
-        clearFeaturedImage: function() {
-            const self = this;
-
-            if (!this.$featuredId.val()) {
-                return;
-            }
-
-            $.ajax({
-                url: malisafiSubmission.ajaxurl,
-                type: 'POST',
-                data: {
-                    action: 'malisafi_clear_featured_image',
-                    nonce: malisafiSubmission.nonce,
-                    property_id: this.propertyId
-                },
-                success: function(response) {
-                    if (response.success) {
-                        self.$featuredId.val('');
-                        self.$featuredPreview.hide();
-                        self.$featuredPreview.find('img').attr('src', '');
-                        $('#featured-dropzone').show();
-                    }
-                }
-            });
-        },
-
-        addImageToGallery: function(image) {
-            // Enforce cap at 15 items
-            if (this.uploadedImages.length >= 15) {
-                this.showError('Maximum 15 images allowed. Extra images were ignored.');
-                return;
-            }
-            const isFirst = this.uploadedImages.length === 0;
-            this.uploadedImages.push(image.id);
-
-            const $item = $('<div>')
-                .addClass('gallery-item')
+        addGalleryImage: function(image) {
+            const $gallery = $('#image-gallery');
+            const $item = $('<div class="gallery-item">')
                 .attr('data-id', image.id)
-                .html(
-                    '<img src="' + image.url + '" alt="">' +
-                    '<button type="button" class="delete-btn" data-id="' + image.id + '">×</button>' +
-                    (isFirst ? '<span class="main-badge">Gallery Cover</span>' : '')
-                );
-
-            this.$gallery.append($item);
-
+                .html('<img src="' + image.url + '" alt=""><button class="delete-btn" data-id="' + image.id + '">×</button>');
+            
+            $gallery.append($item);
+            
             // Bind delete
             $item.find('.delete-btn').on('click', function() {
-                if (confirm(malisafiSubmission.strings.confirmDelete)) {
-                    PropertySubmission.deleteImage(image.id);
+                if (confirm('Delete this image?')) {
+                    this.deleteGalleryImage($(this).data('id'));
                 }
-            });
+            }.bind(this));
+            
+            // Update order
+            this.updateGalleryOrder();
         },
 
-        deleteImage: function(imageId) {
-            const self = this;
-
+        deleteGalleryImage: function(imageId) {
             $.ajax({
                 url: malisafiSubmission.ajaxurl,
                 type: 'POST',
@@ -620,38 +630,47 @@
                 },
                 success: function(response) {
                     if (response.success) {
-                        $('.gallery-item[data-id="' + imageId + '"]').fadeOut(function() {
-                            $(this).remove();
-                            self.uploadedImages = self.uploadedImages.filter(id => id !== imageId);
-                            
-                            // Update main badge
-                            if (self.uploadedImages.length > 0) {
-                                self.$gallery.find('.main-badge').remove();
-                                self.$gallery.find('.gallery-item').first().append('<span class="main-badge">Main Photo</span>');
-                            }
-                        });
+                        $('.gallery-item[data-id="' + imageId + '"]').remove();
+                        this.updateGalleryOrder();
+                    }
+                }.bind(this)
+            });
+        },
+
+        setFeaturedImage: function(image) {
+            $('#featured_image_id').val(image.id);
+            $('#featured-preview img').attr('src', image.url);
+            $('#featured-preview').show();
+            $('#featured-dropzone').hide();
+        },
+
+        removeFeaturedImage: function() {
+            $.ajax({
+                url: malisafiSubmission.ajaxurl,
+                type: 'POST',
+                data: {
+                    action: 'malisafi_clear_featured_image',
+                    nonce: malisafiSubmission.nonce,
+                    property_id: this.propertyId
+                },
+                success: function(response) {
+                    if (response.success) {
+                        $('#featured_image_id').val('');
+                        $('#featured-preview').hide();
+                        $('#featured-dropzone').show();
                     }
                 }
             });
         },
 
-        updateImageOrder: function() {
+        updateGalleryOrder: function() {
             const order = [];
-            this.$gallery.find('.gallery-item').each(function() {
-                order.push($(this).attr('data-id'));
+            $('#image-gallery .gallery-item').each(function() {
+                order.push($(this).data('id'));
             });
-
-            this.uploadedImages = order;
-
             $('#gallery_ids').val(order.join(','));
-
-            // Update main badge
-            this.$gallery.find('.main-badge').remove();
-            if (order.length > 0) {
-                this.$gallery.find('.gallery-item').first().append('<span class="main-badge">Gallery Cover</span>');
-            }
-
-            // Save order
+            
+            // Save order if we have a property ID
             if (this.propertyId && order.length > 0) {
                 $.ajax({
                     url: malisafiSubmission.ajaxurl,
@@ -791,7 +810,6 @@
         },
 
         saveDraft: function() {
-            console.log('Save draft button clicked');
             this.saveStep();
             this.showSuccess('Draft saved. You can continue later.');
         },
@@ -883,7 +901,7 @@
                     property_id: this.propertyId
                 },
                 success: function(response) {
-                    if (response.success && response.data.data) {
+                    if (response.success && response.data && response.data.data) {
                         self.populateForm(response.data.data);
                     }
                 }
@@ -893,14 +911,26 @@
         populateForm: function(data) {
             // Populate all fields
             for (const key in data) {
-                const $field = $('[name="' + key + '"]');
+                // Handle array fields (checkboxes) - try both with and without []
+                let $field = $('[name="' + key + '"]');
+                if (!$field.length) {
+                    $field = $('[name="' + key + '[]"]');
+                }
+                
                 if ($field.length) {
+                    // Skip file inputs as they cannot be set programmatically
+                    if ($field.attr('type') === 'file') {
+                        continue;
+                    }
+                    
                     if ($field.attr('type') === 'checkbox') {
-                        if (Array.isArray(data[key])) {
-                            data[key].forEach(function(val) {
-                                $('[name="' + key + '"][value="' + val + '"]').prop('checked', true);
-                            });
-                        }
+                        // Handle checkboxes - check/uncheck based on array values
+                        const values = Array.isArray(data[key]) ? data[key] : [];
+                        $field.each(function() {
+                            const $checkbox = $(this);
+                            const isChecked = values.includes($checkbox.val());
+                            $checkbox.prop('checked', isChecked);
+                        });
                     } else {
                         $field.val(data[key]);
                     }
@@ -917,31 +947,36 @@
                 this.setFeaturedImage(data.featured_image);
             }
 
-            if (Array.isArray(data.gallery_images)) {
+            if (data.gallery_images && Array.isArray(data.gallery_images)) {
                 this.renderGalleryImages(data.gallery_images);
             }
         },
 
         renderGalleryImages: function(images) {
-            if (!Array.isArray(images)) {
+            if (!Array.isArray(images) || images.length === 0) {
+                return;
+            }
+
+            const $gallery = $('#image-gallery');
+            if (!$gallery.length) {
                 return;
             }
 
             const self = this;
-            this.$gallery.empty();
+            $gallery.empty();
             this.uploadedImages = [];
 
             images.forEach(function(image, index) {
                 if (!image || !image.id || !image.url) {
                     return;
                 }
-                self.addImageToGallery(image);
+                self.addGalleryImage(image);
                 if (index === 0) {
-                    self.$gallery.find('.gallery-item').first().append('<span class="main-badge">Gallery Cover</span>');
+                    $gallery.find('.gallery-item').first().append('<span class="main-badge">Gallery Cover</span>');
                 }
             });
 
-            this.updateImageOrder();
+            this.updateGalleryOrder();
         },
 
         showError: function(message) {
@@ -984,14 +1019,12 @@
 
     // Initialize on document ready
     $(document).ready(function() {
-        console.log('Document ready, checking for property submission form');
         PropertySubmission.init();
         
         // Also check periodically in case form is loaded dynamically
         let checkCount = 0;
         const checkInterval = setInterval(function() {
             if ($('#property-submission-form').length && !PropertySubmission.initialized) {
-                console.log('Property submission form found (delayed), initializing...');
                 PropertySubmission.init();
                 clearInterval(checkInterval);
             }

@@ -347,6 +347,50 @@ textarea.error {
     }
 }
 
+/* Sale/Lease Details Section */
+.sale-lease-details {
+    margin-top: 32px;
+    padding: 24px;
+    background: var(--color-ash-white);
+    border: 1px solid var(--color-light-gray);
+    border-radius: 8px;
+}
+
+.sale-lease-details h3 {
+    margin: 0 0 8px 0;
+    color: var(--text-base);
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.sale-lease-details .step-description {
+    margin: 0 0 20px 0;
+    color: var(--text-secondary);
+    font-size: 14px;
+}
+
+.checkbox-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 12px;
+    margin: 8px 0;
+}
+
+.checkbox-grid label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    color: var(--text-base);
+    cursor: pointer;
+}
+
+.checkbox-grid input[type="checkbox"] {
+    margin: 0;
+    width: 16px;
+    height: 16px;
+}
+
 @media (max-width: 600px) {
     .wizard-form {
         padding: 18px;
@@ -355,4 +399,91 @@ textarea.error {
     .gps-input-group {
         grid-template-columns: 1fr;
     }
+    
+    .sale-lease-details {
+        padding: 16px;
+    }
+    
+    .checkbox-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Upload Messages and Progress */
+.upload-progress {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 20px 30px;
+    border-radius: 8px;
+    z-index: 10000;
+    display: none;
+    font-size: 14px;
+    text-align: center;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.upload-progress .progress-text {
+    margin: 0;
+}
+
+.upload-message {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    max-width: 400px;
+    z-index: 10000;
+    display: none;
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    font-size: 14px;
+    line-height: 1.4;
+}
+
+.upload-message.success {
+    background: #d4edda;
+    border: 1px solid #c3e6cb;
+    color: #155724;
+}
+
+.upload-message.error {
+    background: #f8d7da;
+    border: 1px solid #f5c6cb;
+    color: #721c24;
+}
+
+.upload-message .message-content {
+    padding: 15px 20px;
+    margin: 0;
+}
+
+.upload-message .close-btn {
+    position: absolute;
+    top: 5px;
+    right: 10px;
+    background: none;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+    color: inherit;
+    opacity: 0.7;
+    line-height: 1;
+}
+
+.upload-message .close-btn:hover {
+    opacity: 1;
+}
+
+/* Enhanced dropzone feedback */
+.dropzone-error {
+    border-color: #dc3545 !important;
+    background-color: #f8d7da !important;
+}
+
+.dropzone-success {
+    border-color: #28a745 !important;
+    background-color: #d4edda !important;
 }

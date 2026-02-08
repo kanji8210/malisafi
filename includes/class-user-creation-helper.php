@@ -140,47 +140,8 @@ class User_Creation_Helper {
         global $wpdb;
         $table = $wpdb->prefix . 'mf_user_limits';
         
-        // Define limits based on role
-        $limits_map = array(
-            'malisafi_client' => array(
-                'max_listings' => 0,
-                'featured_listings' => 0,
-                'can_boost' => false,
-                'analytics_access' => false
-            ),
-            'malisafi_agent_basic' => array(
-                'max_listings' => 5,
-                'featured_listings' => 1,
-                'can_boost' => false,
-                'analytics_access' => false
-            ),
-            'malisafi_agent_premium' => array(
-                'max_listings' => -1, // Unlimited
-                'featured_listings' => 5,
-                'can_boost' => true,
-                'analytics_access' => true
-            ),
-            'malisafi_owner' => array(
-                'max_listings' => 3,
-                'featured_listings' => 0,
-                'can_boost' => false,
-                'analytics_access' => false
-            ),
-            'malisafi_developer' => array(
-                'max_listings' => -1, // Unlimited
-                'featured_listings' => 10,
-                'can_boost' => true,
-                'analytics_access' => true
-            ),
-            'malisafi_moderator' => array(
-                'max_listings' => 0,
-                'featured_listings' => 0,
-                'can_boost' => false,
-                'analytics_access' => true
-            )
-        );
-        
-        $limits = $limits_map[$role] ?? $limits_map['malisafi_client'];
+        // Get configurable limits from admin settings
+        $limits = self::get_role_limits($role);
         
         $wpdb->insert(
             $table,
@@ -384,5 +345,77 @@ class User_Creation_Helper {
         }
         
         return $limits->used_listings >= $limits->max_listings;
+    }
+
+    /**
+     * Get role-based limits from admin settings
+     *
+     * @param string $role User role
+     * @return array Role limits array
+     */
+    private static function get_role_limits($role) {
+        // Map roles to their corresponding admin settings
+        $role_settings_map = array(
+            'malisafi_client' => array(
+                'max_listings' => 'malisafi_mls_client_max_listings',
+                'featured_listings' => 0,
+                'can_boost' => false,
+                'analytics_access' => false
+            ),
+            'malisafi_agent_basic' => array(
+                'max_listings' => 'malisafi_mls_agent_basic_max_listings',
+                'featured_listings' => 1,
+                'can_boost' => false,
+                'analytics_access' => false
+            ),
+            'malisafi_agent_premium' => array(
+                'max_listings' => 'malisafi_mls_agent_premium_max_listings',
+                'featured_listings' => 5,
+                'can_boost' => true,
+                'analytics_access' => true
+            ),
+            'malisafi_owner' => array(
+                'max_listings' => 'malisafi_mls_owner_max_listings',
+                'featured_listings' => 0,
+                'can_boost' => false,
+                'analytics_access' => false
+            ),
+            'malisafi_developer' => array(
+                'max_listings' => 'malisafi_mls_developer_max_listings',
+                'featured_listings' => 10,
+                'can_boost' => true,
+                'analytics_access' => true
+            ),
+            'malisafi_moderator' => array(
+                'max_listings' => 'malisafi_mls_moderator_max_listings',
+                'featured_listings' => 0,
+                'can_boost' => false,
+                'analytics_access' => true
+            )
+        );
+
+        $role_config = $role_settings_map[$role] ?? $role_settings_map['malisafi_client'];
+
+        // Get the max_listings value from admin settings, with defaults
+        $max_listings_option = get_option($role_config['max_listings'], null);
+        if ($max_listings_option === null) {
+            // Fallback to hardcoded defaults if option doesn't exist
+            $defaults = array(
+                'malisafi_mls_client_max_listings' => 5,
+                'malisafi_mls_agent_basic_max_listings' => 10,
+                'malisafi_mls_agent_premium_max_listings' => -1,
+                'malisafi_mls_owner_max_listings' => 3,
+                'malisafi_mls_developer_max_listings' => -1,
+                'malisafi_mls_moderator_max_listings' => 0
+            );
+            $max_listings_option = $defaults[$role_config['max_listings']] ?? 0;
+        }
+
+        return array(
+            'max_listings' => intval($max_listings_option),
+            'featured_listings' => $role_config['featured_listings'],
+            'can_boost' => $role_config['can_boost'],
+            'analytics_access' => $role_config['analytics_access']
+        );
     }
 }

@@ -152,7 +152,7 @@ class Core {
         
         // Initialize property submission system
         require_once MALISAFI_MLS_PATH . 'includes/class-property-submission.php';
-        Property_Submission::init();
+        \MalisafiMLS\Property_Submission::init();
 
         // Initialize project submission system
         Project_Submission::init();

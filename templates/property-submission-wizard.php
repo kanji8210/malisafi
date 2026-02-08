@@ -13,15 +13,6 @@ $property_id = isset($_GET['property_id']) ? intval($_GET['property_id']) : 0;
 $can_assign_agent = current_user_can('manage_options') || current_user_can('edit_others_properties') || current_user_can('malisafi_moderate_properties');
 ?>
 
-<!-- DEBUG: Property Submission Wizard Loading -->
-<div style="background: #f0f0f0; padding: 10px; margin: 10px 0; border: 1px solid #ccc;">
-    <strong>DEBUG:</strong> Property Submission Wizard loaded<br>
-    User: <?php echo esc_html($current_user->display_name); ?><br>
-    Property ID: <?php echo $property_id; ?><br>
-    Current URL: <?php echo esc_url($_SERVER['REQUEST_URI']); ?><br>
-    Timestamp: <?php echo time(); ?>
-</div>
-
 <div class="malisafi-submission-wizard">
     <!-- Progress Steps -->
     <div class="wizard-progress">
@@ -197,7 +188,7 @@ $can_assign_agent = current_user_can('manage_options') || current_user_can('edit
             </div>
             <?php endif; ?>
 
-            <div class="sale-lease-details">
+            <div class="sale-lease-details" style="display: none;">
                 <h3><?php _e('Buyer & Investor Details (Sale/Lease)', 'malisafi-mls'); ?></h3>
                 <p class="step-description"><?php _e('Optional details for buyers and investors', 'malisafi-mls'); ?></p>
 
@@ -380,28 +371,28 @@ $can_assign_agent = current_user_can('manage_options') || current_user_can('edit
             <div class="features-section">
                 <h3><?php _e('Key Features', 'malisafi-mls'); ?></h3>
                 <div class="checkbox-grid">
-                    <label class="checkbox-item"><input type="checkbox" name="features" value="parking"> <span class="icon">🚗</span> <span class="label"><?php _e('Parking', 'malisafi-mls'); ?></span></label>
-                    <label class="checkbox-item"><input type="checkbox" name="features" value="garden"> <span class="icon">🌳</span> <span class="label"><?php _e('Garden', 'malisafi-mls'); ?></span></label>
-                    <label class="checkbox-item"><input type="checkbox" name="features" value="balcony"> <span class="icon">🏠</span> <span class="label"><?php _e('Balcony', 'malisafi-mls'); ?></span></label>
-                    <label class="checkbox-item"><input type="checkbox" name="features" value="terrace"> <span class="icon">☀️</span> <span class="label"><?php _e('Terrace', 'malisafi-mls'); ?></span></label>
-                    <label class="checkbox-item"><input type="checkbox" name="features" value="pool"> <span class="icon">🏊</span> <span class="label"><?php _e('Swimming Pool', 'malisafi-mls'); ?></span></label>
-                    <label class="checkbox-item"><input type="checkbox" name="features" value="gym"> <span class="icon">💪</span> <span class="label"><?php _e('Gym', 'malisafi-mls'); ?></span></label>
-                    <label class="checkbox-item"><input type="checkbox" name="features" value="security"> <span class="icon">🔒</span> <span class="label"><?php _e('24/7 Security', 'malisafi-mls'); ?></span></label>
-                    <label class="checkbox-item"><input type="checkbox" name="features" value="furnished"> <span class="icon">🛋️</span> <span class="label"><?php _e('Furnished', 'malisafi-mls'); ?></span></label>
+                    <label class="checkbox-item"><input type="checkbox" name="features[]" value="parking"> <span class="icon">🚗</span> <span class="label"><?php _e('Parking', 'malisafi-mls'); ?></span></label>
+                    <label class="checkbox-item"><input type="checkbox" name="features[]" value="garden"> <span class="icon">🌳</span> <span class="label"><?php _e('Garden', 'malisafi-mls'); ?></span></label>
+                    <label class="checkbox-item"><input type="checkbox" name="features[]" value="balcony"> <span class="icon">🏠</span> <span class="label"><?php _e('Balcony', 'malisafi-mls'); ?></span></label>
+                    <label class="checkbox-item"><input type="checkbox" name="features[]" value="terrace"> <span class="icon">☀️</span> <span class="label"><?php _e('Terrace', 'malisafi-mls'); ?></span></label>
+                    <label class="checkbox-item"><input type="checkbox" name="features[]" value="pool"> <span class="icon">🏊</span> <span class="label"><?php _e('Swimming Pool', 'malisafi-mls'); ?></span></label>
+                    <label class="checkbox-item"><input type="checkbox" name="features[]" value="gym"> <span class="icon">💪</span> <span class="label"><?php _e('Gym', 'malisafi-mls'); ?></span></label>
+                    <label class="checkbox-item"><input type="checkbox" name="features[]" value="security"> <span class="icon">🔒</span> <span class="label"><?php _e('24/7 Security', 'malisafi-mls'); ?></span></label>
+                    <label class="checkbox-item"><input type="checkbox" name="features[]" value="furnished"> <span class="icon">🛋️</span> <span class="label"><?php _e('Furnished', 'malisafi-mls'); ?></span></label>
                 </div>
             </div>
 
             <div class="features-section">
                 <h3><?php _e('Amenities', 'malisafi-mls'); ?></h3>
                 <div class="checkbox-grid">
-                    <label class="checkbox-item"><input type="checkbox" name="amenities" value="wifi"> <span class="icon">📶</span> <span class="label"><?php _e('WiFi', 'malisafi-mls'); ?></span></label>
-                    <label class="checkbox-item"><input type="checkbox" name="amenities" value="ac"> <span class="icon">❄️</span> <span class="label"><?php _e('Air Conditioning', 'malisafi-mls'); ?></span></label>
-                    <label class="checkbox-item"><input type="checkbox" name="amenities" value="heating"> <span class="icon">🔥</span> <span class="label"><?php _e('Heating', 'malisafi-mls'); ?></span></label>
-                    <label class="checkbox-item"><input type="checkbox" name="amenities" value="elevator"> <span class="icon">🛗</span> <span class="label"><?php _e('Elevator', 'malisafi-mls'); ?></span></label>
-                    <label class="checkbox-item"><input type="checkbox" name="amenities" value="backup_generator"> <span class="icon">⚡</span> <span class="label"><?php _e('Backup Generator', 'malisafi-mls'); ?></span></label>
-                    <label class="checkbox-item"><input type="checkbox" name="amenities" value="water_backup"> <span class="icon">💧</span> <span class="label"><?php _e('Water Backup', 'malisafi-mls'); ?></span></label>
-                    <label class="checkbox-item"><input type="checkbox" name="amenities" value="playground"> <span class="icon">🎮</span> <span class="label"><?php _e('Playground', 'malisafi-mls'); ?></span></label>
-                    <label class="checkbox-item"><input type="checkbox" name="amenities" value="clubhouse"> <span class="icon">🏛️</span> <span class="label"><?php _e('Clubhouse', 'malisafi-mls'); ?></span></label>
+                    <label class="checkbox-item"><input type="checkbox" name="amenities[]" value="wifi"> <span class="icon">📶</span> <span class="label"><?php _e('WiFi', 'malisafi-mls'); ?></span></label>
+                    <label class="checkbox-item"><input type="checkbox" name="amenities[]" value="ac"> <span class="icon">❄️</span> <span class="label"><?php _e('Air Conditioning', 'malisafi-mls'); ?></span></label>
+                    <label class="checkbox-item"><input type="checkbox" name="amenities[]" value="heating"> <span class="icon">🔥</span> <span class="label"><?php _e('Heating', 'malisafi-mls'); ?></span></label>
+                    <label class="checkbox-item"><input type="checkbox" name="amenities[]" value="elevator"> <span class="icon">🛗</span> <span class="label"><?php _e('Elevator', 'malisafi-mls'); ?></span></label>
+                    <label class="checkbox-item"><input type="checkbox" name="amenities[]" value="backup_generator"> <span class="icon">⚡</span> <span class="label"><?php _e('Backup Generator', 'malisafi-mls'); ?></span></label>
+                    <label class="checkbox-item"><input type="checkbox" name="amenities[]" value="water_backup"> <span class="icon">💧</span> <span class="label"><?php _e('Water Backup', 'malisafi-mls'); ?></span></label>
+                    <label class="checkbox-item"><input type="checkbox" name="amenities[]" value="playground"> <span class="icon">🎮</span> <span class="label"><?php _e('Playground', 'malisafi-mls'); ?></span></label>
+                    <label class="checkbox-item"><input type="checkbox" name="amenities[]" value="clubhouse"> <span class="icon">🏛️</span> <span class="label"><?php _e('Clubhouse', 'malisafi-mls'); ?></span></label>
                 </div>
             </div>
         </div>
@@ -410,12 +401,6 @@ $can_assign_agent = current_user_can('manage_options') || current_user_can('edit
         <div class="wizard-step" id="step-5">
             <h2><?php _e('Property Images', 'malisafi-mls'); ?></h2>
             <p class="step-description"><?php _e('Upload your featured image first (required), then add a gallery of additional images.', 'malisafi-mls'); ?></p>
-
-            <!-- DEBUG: Image Section Loaded -->
-            <div style="background: #e8f5e8; padding: 10px; margin: 10px 0; border: 1px solid #4caf50;">
-                <strong>DEBUG:</strong> Image upload section rendered<br>
-                Step 5 should show image upload buttons below
-            </div>
 
             <div class="image-section">
                 <h3><?php _e('Featured Image', 'malisafi-mls'); ?></h3>

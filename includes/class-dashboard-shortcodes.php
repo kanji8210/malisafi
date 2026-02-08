@@ -174,12 +174,40 @@ class Dashboard_Shortcodes {
 			return '<div class="malisafi-access-denied"><p>' . __('Property submission is currently unavailable.', 'malisafi-mls') . '</p></div>';
 		}
 
+		// Enqueue assets for property submission
 		wp_enqueue_style(
 			'malisafi-property-submission',
 			MALISAFI_MLS_URL . 'assets/css/property-submission.css',
 			array('malisafi-mls-variables'),
 			MALISAFI_MLS_VERSION
 		);
+
+		wp_enqueue_script(
+			'malisafi-property-submission',
+			MALISAFI_MLS_URL . 'assets/js/property-submission.js',
+			array('jquery', 'jquery-ui-sortable'),
+			MALISAFI_MLS_VERSION,
+			true
+		);
+
+		wp_localize_script('malisafi-property-submission', 'malisafiSubmission', array(
+			'ajaxurl' => admin_url('admin-ajax.php'),
+			'nonce' => wp_create_nonce('malisafi_property_submission'),
+			'uploadNonce' => wp_create_nonce('malisafi_upload_images'),
+			'refNonce' => wp_create_nonce('malisafi_generate_ref_id'),
+			'uploadsEnabled' => true,
+			'strings' => array(
+				'saving' => __('Saving...', 'malisafi-mls'),
+				'saved' => __('Saved', 'malisafi-mls'),
+				'error' => __('Error saving', 'malisafi-mls'),
+				'uploading' => __('Uploading...', 'malisafi-mls'),
+				'uploadError' => __('Upload failed', 'malisafi-mls'),
+				'confirmDelete' => __('Are you sure you want to delete this image?', 'malisafi-mls'),
+				'submitProperty' => __('Submit Property', 'malisafi-mls'),
+				'submitting' => __('Submitting...', 'malisafi-mls'),
+				'success' => __('Property submitted successfully!', 'malisafi-mls'),
+			)
+		));
 
 		return \MalisafiMLS\Property_Submission::render_submission_form($atts);
 	}
