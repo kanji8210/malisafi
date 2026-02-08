@@ -384,10 +384,10 @@
                     }
                     
                     // Check size limits
-                    const oversizedFiles = imageFiles.filter(file => file.size > 10 * 1024 * 1024);
+                    const oversizedFiles = imageFiles.filter(file => file.size > 15 * 1024 * 1024);
                     if (oversizedFiles.length > 0) {
                         $(this).addClass('dropzone-error');
-                        this.showUploadError('Some files are too large. Maximum size is 10MB per image.');
+                        this.showUploadError('Some files are too large. Maximum size is 15MB per image.');
                         setTimeout(() => {
                             $(this).removeClass('dropzone-error');
                         }, 2000);
@@ -449,9 +449,9 @@
                     }
                     
                     // Validate file size
-                    if (file.size > 10 * 1024 * 1024) {
+                    if (file.size > 15 * 1024 * 1024) {
                         $(this).addClass('dropzone-error');
-                        this.showUploadError('File is too large. Maximum size is 10MB. Your file is ' + (file.size / 1024 / 1024).toFixed(1) + 'MB');
+                        this.showUploadError('File is too large. Maximum size is 15MB. Your file is ' + (file.size / 1024 / 1024).toFixed(1) + 'MB');
                         setTimeout(() => {
                             $(this).removeClass('dropzone-error');
                         }, 2000);
@@ -512,9 +512,9 @@
                 return;
             }
             
-            // Validate file size (10MB max)
-            if (file.size > 10 * 1024 * 1024) {
-                this.showUploadError('File size must be less than 10MB. Your file is ' + (file.size / 1024 / 1024).toFixed(1) + 'MB');
+            // Validate file size (15MB max)
+            if (file.size > 15 * 1024 * 1024) {
+                this.showUploadError('File size must be less than 15MB. Your file is ' + (file.size / 1024 / 1024).toFixed(1) + 'MB');
                 return;
             }
             
@@ -570,9 +570,9 @@
                 return;
             }
             
-            // Validate file size (10MB max)
-            if (file.size > 10 * 1024 * 1024) {
-                this.showUploadError('File size must be less than 10MB. Your file is ' + (file.size / 1024 / 1024).toFixed(1) + 'MB');
+            // Validate file size (15MB max)
+            if (file.size > 15 * 1024 * 1024) {
+                this.showUploadError('File size must be less than 15MB. Your file is ' + (file.size / 1024 / 1024).toFixed(1) + 'MB');
                 return;
             }
             

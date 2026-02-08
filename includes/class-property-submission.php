@@ -677,8 +677,7 @@ class Property_Submission {
                 'thumb' => 'medium'
             ),
             'min_width' => 1600,
-            'min_height' => 900,
-            'require_landscape' => true
+            'min_height' => 900
         ));
 
         if (is_wp_error($upload_result)) {
@@ -747,8 +746,7 @@ class Property_Submission {
                         'thumb' => 'thumbnail'
                     ),
                     'min_width' => 1200,
-                    'min_height' => 800,
-                    'require_landscape' => true
+                    'min_height' => 800
                 ));
 
                 if (!is_wp_error($upload_result)) {
@@ -767,8 +765,7 @@ class Property_Submission {
                     'thumb' => 'thumbnail'
                 ),
                 'min_width' => 1200,
-                'min_height' => 800,
-                'require_landscape' => true
+                'min_height' => 800
             ));
 
             if (!is_wp_error($upload_result)) {

@@ -18,8 +18,8 @@ class Image_Handler {
     /** @var array Allowed MIME types */
     private const ALLOWED_TYPES = array('image/jpeg', 'image/png', 'image/webp');
 
-    /** @var int Max upload size (10MB) */
-    private const MAX_SIZE = 10485760;
+    /** @var int Max upload size (15MB) */
+    private const MAX_SIZE = 15728640;
 
     /** @var array Minimum dimensions for landscape images */
     private const MIN_LANDSCAPE = array('width' => 1200, 'height' => 800);
@@ -143,7 +143,7 @@ class Image_Handler {
         if (!empty($max_size) && intval($file['size']) > $max_size) {
             return new \WP_Error(
                 'file_too_large',
-                sprintf(__('File %s is too large (max 10MB)', 'malisafi-mls'), $file['name'])
+                sprintf(__('File %s is too large (max 15MB)', 'malisafi-mls'), $file['name'])
             );
         }
 
