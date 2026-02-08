@@ -44,6 +44,16 @@ if (!defined('ABSPATH')) exit;
     ]);
 
     $edit_base = \MalisafiMLS\Page_Manager::get_page_url('agent_add_property');
+    
+    // Fallback: If agent_add_property page doesn't exist, use the general submit property page
+    if (!$edit_base || $edit_base === home_url('/')) {
+        $edit_base = \MalisafiMLS\Page_Manager::get_page_url('submit_property');
+    }
+    
+    // Final fallback: If no page exists, create a direct link to the shortcode handler
+    if (!$edit_base || $edit_base === home_url('/')) {
+        $edit_base = home_url('/?malisafi_action=submit_property');
+    }
     ?>
 
     <?php if ($query->have_posts()) : ?>

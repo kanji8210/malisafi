@@ -14,7 +14,7 @@ class Property_Submission {
      * Initialize
      */
     public static function init() {
-        // AJAX handlersproperty su
+        // AJAX handlers
         add_action('wp_ajax_malisafi_save_property_step', array(__CLASS__, 'ajax_save_property_step'));
         add_action('wp_ajax_malisafi_submit_property', array(__CLASS__, 'ajax_submit_property'));
         add_action('wp_ajax_malisafi_upload_property_images', array(__CLASS__, 'ajax_upload_images'));
@@ -25,6 +25,9 @@ class Property_Submission {
         add_action('wp_ajax_malisafi_get_property_draft', array(__CLASS__, 'ajax_get_draft'));
         add_action('wp_ajax_malisafi_get_subcounties', array(__CLASS__, 'ajax_get_subcounties'));
         add_action('wp_ajax_nopriv_malisafi_get_subcounties', array(__CLASS__, 'ajax_get_subcounties'));
+        
+        // Handle direct property submission requests
+        add_action('wp', array(__CLASS__, 'handle_direct_requests'));
         
         // Shortcode for property submission form
         add_shortcode('malisafi_submit_property', array(__CLASS__, 'render_submission_form'));
@@ -37,12 +40,29 @@ class Property_Submission {
     }
     
     /**
+     * Handle direct property submission requests
+     */
+    public static function handle_direct_requests() {
+        if (isset($_GET['malisafi_action']) && $_GET['malisafi_action'] === 'submit_property') {
+            // Output the submission form directly
+            echo '<!DOCTYPE html><html><head>';
+            wp_head();
+            echo '</head><body>';
+            echo self::render_submission_form(array());
+            wp_footer();
+            echo '</body></html>';
+            exit;
+        }
+    }
+    
+    /**
      * Enqueue assets
      */
     public static function enqueue_assets() {
         if (is_page() && (has_shortcode(get_post()->post_content, 'malisafi_submit_property') ||
                           has_shortcode(get_post()->post_content, 'malisafi_property_submit') ||
-                          has_shortcode(get_post()->post_content, 'malisafi_agent_add_property'))) {
+                          has_shortcode(get_post()->post_content, 'malisafi_agent_add_property')) ||
+            (isset($_GET['malisafi_action']) && $_GET['malisafi_action'] === 'submit_property')) {
             wp_enqueue_media();
             wp_enqueue_script('jquery-ui-sortable');
 
