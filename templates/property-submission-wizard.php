@@ -13,10 +13,19 @@ $property_id = isset($_GET['property_id']) ? intval($_GET['property_id']) : 0;
 $can_assign_agent = current_user_can('manage_options') || current_user_can('edit_others_properties') || current_user_can('malisafi_moderate_properties');
 ?>
 
+<!-- DEBUG: Property Submission Wizard Loading -->
+<div style="background: #f0f0f0; padding: 10px; margin: 10px 0; border: 1px solid #ccc;">
+    <strong>DEBUG:</strong> Property Submission Wizard loaded<br>
+    User: <?php echo esc_html($current_user->display_name); ?><br>
+    Property ID: <?php echo $property_id; ?><br>
+    Current URL: <?php echo esc_url($_SERVER['REQUEST_URI']); ?><br>
+    Timestamp: <?php echo time(); ?>
+</div>
+
 <div class="malisafi-submission-wizard">
     <!-- Progress Steps -->
     <div class="wizard-progress">
-        <div class="progress-step active" data-step="1">
+        <div class="progress-step" data-step="1">
             <div class="step-number">1</div>
             <div class="step-label"><?php _e('Basic Info', 'malisafi-mls'); ?></div>
         </div>
@@ -32,7 +41,7 @@ $can_assign_agent = current_user_can('manage_options') || current_user_can('edit
             <div class="step-number">4</div>
             <div class="step-label"><?php _e('Features', 'malisafi-mls'); ?></div>
         </div>
-        <div class="progress-step" data-step="5">
+        <div class="progress-step active" data-step="5">
             <div class="step-number">5</div>
             <div class="step-label"><?php _e('Images', 'malisafi-mls'); ?></div>
         </div>
@@ -53,7 +62,7 @@ $can_assign_agent = current_user_can('manage_options') || current_user_can('edit
         <input type="hidden" name="property_id" id="property_id" value="<?php echo esc_attr($property_id); ?>">
 
         <!-- Step 1: Basic Information -->
-        <div class="wizard-step active" id="step-1">
+        <div class="wizard-step" id="step-1">
             <h2><?php _e('Basic Information', 'malisafi-mls'); ?></h2>
             <p class="step-description"><?php _e('Tell us about your property', 'malisafi-mls'); ?></p>
 
@@ -398,9 +407,15 @@ $can_assign_agent = current_user_can('manage_options') || current_user_can('edit
         </div>
 
         <!-- Step 5: Images -->
-        <div class="wizard-step" id="step-5">
+        <div class="wizard-step active" id="step-5">
             <h2><?php _e('Property Images', 'malisafi-mls'); ?></h2>
             <p class="step-description"><?php _e('Upload your featured image first (required), then add a gallery of additional images.', 'malisafi-mls'); ?></p>
+
+            <!-- DEBUG: Image Section Loaded -->
+            <div style="background: #e8f5e8; padding: 10px; margin: 10px 0; border: 1px solid #4caf50;">
+                <strong>DEBUG:</strong> Image upload section rendered<br>
+                Step 5 should show image upload buttons below
+            </div>
 
             <div class="image-section">
                 <h3><?php _e('Featured Image', 'malisafi-mls'); ?></h3>
@@ -528,4 +543,21 @@ $can_assign_agent = current_user_can('manage_options') || current_user_can('edit
         </div>
         <p class="field-hint draft-hint"><?php _e('Save a draft to continue later. Your progress is also auto-saved as you go.', 'malisafi-mls'); ?></p>
     </form>
+
+    <!-- DEBUG: JavaScript Loading Test -->
+    <script>
+        console.log('DEBUG: Property submission template JavaScript test');
+        console.log('DEBUG: malisafiSubmission object:', typeof malisafiSubmission !== 'undefined' ? malisafiSubmission : 'NOT FOUND');
+        console.log('DEBUG: jQuery available:', typeof jQuery !== 'undefined' ? 'YES' : 'NO');
+        console.log('DEBUG: Form element exists:', document.getElementById('property-submission-form') ? 'YES' : 'NO');
+        
+        // Test if our buttons exist
+        setTimeout(function() {
+            console.log('DEBUG: Checking for image upload buttons...');
+            console.log('Browse images button:', document.querySelector('.btn-browse-images') ? 'FOUND' : 'NOT FOUND');
+            console.log('Featured browse button:', document.querySelector('.btn-browse-featured') ? 'FOUND' : 'NOT FOUND');
+            console.log('Dropzone:', document.getElementById('dropzone') ? 'FOUND' : 'NOT FOUND');
+            console.log('Featured dropzone:', document.getElementById('featured-dropzone') ? 'FOUND' : 'NOT FOUND');
+        }, 1000);
+    </script>
 </div>

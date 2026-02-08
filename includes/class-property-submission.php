@@ -623,31 +623,6 @@ class Property_Submission {
     }
     
     /**
-     * AJAX: Upload property images
-     */
-    public static function ajax_upload_images() {
-        check_ajax_referer('malisafi_upload_images', 'nonce');
-        
-        if (!self::user_can_submit()) {
-            wp_send_json_error(array('message' => __('Permission denied', 'malisafi-mls')));
-        }
-        
-        if (empty($_FILES['images'])) {
-            wp_send_json_error(array('message' => __('No images uploaded', 'malisafi-mls')));
-        }
-        $result = Image_Handler::upload_multiple($_FILES['images']);
-
-        if (!empty($result['images'])) {
-            wp_send_json_success($result);
-        }
-
-        wp_send_json_error(array(
-            'message' => __('Upload failed', 'malisafi-mls'),
-            'errors' => $result['errors']
-        ));
-    }
-
-    /**
      * AJAX: Upload featured image
      */
     public static function ajax_upload_featured_image() {
@@ -657,52 +632,191 @@ class Property_Submission {
             wp_send_json_error(array('message' => __('Permission denied', 'malisafi-mls')));
         }
 
+        $property_id = isset($_POST['property_id']) ? intval($_POST['property_id']) : 0;
+
+        // Check if property exists and user owns it
+        if ($property_id) {
+            $property = get_post($property_id);
+            if (!$property || $property->post_author != get_current_user_id()) {
+                wp_send_json_error(array('message' => __('Invalid property', 'malisafi-mls')));
+            }
+        }
+
+        // Handle file upload
         if (empty($_FILES['image'])) {
             wp_send_json_error(array('message' => __('No image uploaded', 'malisafi-mls')));
         }
 
-        $upload = Image_Handler::upload_single($_FILES['image'], array(
+        $file = $_FILES['image'];
+
+        // Upload using Image_Handler
+        $upload_result = Image_Handler::upload_single($file, array(
             'validate_dimensions' => true,
             'size_map' => array(
                 'url' => 'large',
-                'thumb' => 'thumbnail'
-            )
+                'thumb' => 'medium'
+            ),
+            'min_width' => 1600,
+            'min_height' => 900,
+            'require_landscape' => true
         ));
 
-        if (!is_wp_error($upload)) {
-            $image = $upload;
-            $property_id = isset($_POST['property_id']) ? intval($_POST['property_id']) : 0;
-
-            if ($property_id) {
-                $property = get_post($property_id);
-                if ($property && (int) $property->post_author === get_current_user_id()) {
-                    set_post_thumbnail($property_id, (int) $image['id']);
-                }
-            }
-
-            wp_send_json_success(array('image' => $image));
+        if (is_wp_error($upload_result)) {
+            wp_send_json_error(array('message' => $upload_result->get_error_message()));
         }
 
-        wp_send_json_error(array(
-            'message' => __('Upload failed', 'malisafi-mls'),
-            'errors' => is_wp_error($upload) ? array($upload->get_error_message()) : array()
+        // If we have a property ID, set as featured image
+        if ($property_id) {
+            set_post_thumbnail($property_id, $upload_result['id']);
+        }
+
+        wp_send_json_success(array(
+            'message' => __('Featured image uploaded successfully', 'malisafi-mls'),
+            'image' => array(
+                'id' => $upload_result['id'],
+                'url' => $upload_result['sizes']['url']
+            )
         ));
     }
-    
+
+    /**
+     * AJAX: Upload gallery images
+     */
+    public static function ajax_upload_images() {
+        check_ajax_referer('malisafi_upload_images', 'nonce');
+
+        if (!self::user_can_submit()) {
+            wp_send_json_error(array('message' => __('Permission denied', 'malisafi-mls')));
+        }
+
+        $property_id = isset($_POST['property_id']) ? intval($_POST['property_id']) : 0;
+
+        // Check if property exists and user owns it
+        if ($property_id) {
+            $property = get_post($property_id);
+            if (!$property || $property->post_author != get_current_user_id()) {
+                wp_send_json_error(array('message' => __('Invalid property', 'malisafi-mls')));
+            }
+        }
+
+        // Handle multiple file uploads
+        if (empty($_FILES['images'])) {
+            wp_send_json_error(array('message' => __('No images uploaded', 'malisafi-mls')));
+        }
+
+        $uploaded_images = array();
+        $files = $_FILES['images'];
+
+        // Handle both single file and multiple files
+        if (is_array($files['name'])) {
+            // Multiple files
+            $file_count = count($files['name']);
+            for ($i = 0; $i < $file_count; $i++) {
+                $file = array(
+                    'name' => $files['name'][$i],
+                    'type' => $files['type'][$i],
+                    'tmp_name' => $files['tmp_name'][$i],
+                    'error' => $files['error'][$i],
+                    'size' => $files['size'][$i]
+                );
+
+                $upload_result = Image_Handler::upload_single($file, array(
+                    'validate_dimensions' => true,
+                    'size_map' => array(
+                        'url' => 'medium',
+                        'thumb' => 'thumbnail'
+                    ),
+                    'min_width' => 1200,
+                    'min_height' => 800,
+                    'require_landscape' => true
+                ));
+
+                if (!is_wp_error($upload_result)) {
+                    $uploaded_images[] = array(
+                        'id' => $upload_result['id'],
+                        'url' => $upload_result['sizes']['url']
+                    );
+                }
+            }
+        } else {
+            // Single file
+            $upload_result = Image_Handler::upload_single($files, array(
+                'validate_dimensions' => true,
+                'size_map' => array(
+                    'url' => 'medium',
+                    'thumb' => 'thumbnail'
+                ),
+                'min_width' => 1200,
+                'min_height' => 800,
+                'require_landscape' => true
+            ));
+
+            if (!is_wp_error($upload_result)) {
+                $uploaded_images[] = array(
+                    'id' => $upload_result['id'],
+                    'url' => $upload_result['sizes']['url']
+                );
+            }
+        }
+
+        if (empty($uploaded_images)) {
+            wp_send_json_error(array('message' => __('No valid images were uploaded', 'malisafi-mls')));
+        }
+
+        // If we have a property ID, update gallery
+        if ($property_id) {
+            $existing_gallery = get_post_meta($property_id, '_malisafi_gallery_ids', true);
+            $existing_ids = $existing_gallery ? array_filter(array_map('intval', explode(',', $existing_gallery))) : array();
+
+            $new_ids = array_map(function($img) { return $img['id']; }, $uploaded_images);
+            $updated_gallery = array_merge($existing_ids, $new_ids);
+
+            update_post_meta($property_id, '_malisafi_gallery_ids', implode(',', $updated_gallery));
+
+            // Set first image as featured if none exists
+            if (empty($existing_ids) && !has_post_thumbnail($property_id)) {
+                set_post_thumbnail($property_id, $new_ids[0]);
+            }
+        }
+
+        wp_send_json_success(array(
+            'message' => sprintf(__('Successfully uploaded %d image(s)', 'malisafi-mls'), count($uploaded_images)),
+            'images' => $uploaded_images
+        ));
+    }
+
     /**
      * AJAX: Delete property image
      */
     public static function ajax_delete_image() {
-        check_ajax_referer('malisafi_property_submission', 'nonce');
-        
-        $image_id = isset($_POST['image_id']) ? intval($_POST['image_id']) : 0;
-        
-        if (!$image_id) {
-            wp_send_json_error(array('message' => __('Invalid image', 'malisafi-mls')));
+        check_ajax_referer('malisafi_upload_images', 'nonce');
+
+        if (!self::user_can_submit()) {
+            wp_send_json_error(array('message' => __('Permission denied', 'malisafi-mls')));
         }
-        
-        // Verify ownership through property
+
         $property_id = isset($_POST['property_id']) ? intval($_POST['property_id']) : 0;
+        $image_id = isset($_POST['image_id']) ? intval($_POST['image_id']) : 0;
+
+        if (!$property_id || !$image_id) {
+            wp_send_json_error(array('message' => __('Invalid data', 'malisafi-mls')));
+        }
+
+        // Verify ownership
+        $property = get_post($property_id);
+        if (!$property || $property->post_author != get_current_user_id()) {
+            wp_send_json_error(array('message' => __('Permission denied', 'malisafi-mls')));
+        }
+
+        // Check if image belongs to property
+        $gallery_ids_raw = get_post_meta($property_id, '_malisafi_gallery_ids', true);
+        $gallery_ids = $gallery_ids_raw ? array_filter(array_map('intval', explode(',', $gallery_ids_raw))) : array();
+
+        if (!in_array($image_id, $gallery_ids)) {
+            wp_send_json_error(array('message' => __('Image not found in property gallery', 'malisafi-mls')));
+        }
+
+        // Delete the image
         $deleted = Image_Handler::delete_image($image_id, array(
             'property_id' => $property_id,
             'user_id' => get_current_user_id(),
@@ -712,6 +826,10 @@ class Property_Submission {
             wp_send_json_error(array('message' => $deleted->get_error_message()));
         }
 
+        // Remove from gallery
+        $updated_gallery = array_diff($gallery_ids, array($image_id));
+        update_post_meta($property_id, '_malisafi_gallery_ids', implode(',', $updated_gallery));
+
         wp_send_json_success(array('message' => __('Image deleted', 'malisafi-mls')));
     }
 
@@ -719,15 +837,20 @@ class Property_Submission {
      * AJAX: Clear featured image
      */
     public static function ajax_clear_featured_image() {
-        check_ajax_referer('malisafi_property_submission', 'nonce');
+        check_ajax_referer('malisafi_upload_images', 'nonce');
+
+        if (!self::user_can_submit()) {
+            wp_send_json_error(array('message' => __('Permission denied', 'malisafi-mls')));
+        }
 
         $property_id = isset($_POST['property_id']) ? intval($_POST['property_id']) : 0;
         if (!$property_id) {
             wp_send_json_error(array('message' => __('Invalid property', 'malisafi-mls')));
         }
 
+        // Verify ownership
         $property = get_post($property_id);
-        if (!$property || (int) $property->post_author !== get_current_user_id()) {
+        if (!$property || $property->post_author != get_current_user_id()) {
             wp_send_json_error(array('message' => __('Permission denied', 'malisafi-mls')));
         }
 
@@ -735,37 +858,41 @@ class Property_Submission {
 
         wp_send_json_success(array('message' => __('Featured image cleared', 'malisafi-mls')));
     }
-    
+
     /**
      * AJAX: Reorder images
      */
     public static function ajax_reorder_images() {
-        check_ajax_referer('malisafi_property_submission', 'nonce');
-        
+        check_ajax_referer('malisafi_upload_images', 'nonce');
+
+        if (!self::user_can_submit()) {
+            wp_send_json_error(array('message' => __('Permission denied', 'malisafi-mls')));
+        }
+
         $property_id = isset($_POST['property_id']) ? intval($_POST['property_id']) : 0;
         $order = isset($_POST['order']) && is_array($_POST['order']) ? array_map('intval', $_POST['order']) : array();
-        
+
         if (!$property_id || empty($order)) {
             wp_send_json_error(array('message' => __('Invalid data', 'malisafi-mls')));
         }
-        
+
         // Verify ownership
         $property = get_post($property_id);
         if (!$property || $property->post_author != get_current_user_id()) {
             wp_send_json_error(array('message' => __('Permission denied', 'malisafi-mls')));
         }
-        
+
         // Save new order
         update_post_meta($property_id, '_malisafi_gallery_ids', implode(',', $order));
-        
+
         // Update featured image if needed
         if (!empty($order) && !has_post_thumbnail($property_id)) {
             set_post_thumbnail($property_id, $order[0]);
         }
-        
+
         wp_send_json_success(array('message' => __('Order updated', 'malisafi-mls')));
     }
-    
+
     /**
      * Render success page for frontend
      */

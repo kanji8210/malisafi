@@ -119,39 +119,6 @@ class Image_Handler {
     }
 
     /**
-     * Delete an image with optional ownership verification
-     *
-     * @param int   $image_id    Attachment ID
-     * @param array $options     Optional: property_id, user_id
-     * @return true|\WP_Error
-     */
-    public static function delete_image($image_id, $options = array()) {
-        $image_id = intval($image_id);
-        if (!$image_id) {
-            return new \WP_Error('invalid_image', __('Invalid image', 'malisafi-mls'));
-        }
-
-        $opts = self::merge_options($options, array(
-            'property_id' => 0,
-            'user_id' => get_current_user_id(),
-        ));
-
-        if (!empty($opts['property_id'])) {
-            $property = get_post($opts['property_id']);
-            if (!$property || intval($property->post_author) !== intval($opts['user_id'])) {
-                return new \WP_Error('permission_denied', __('You do not have permission to delete this image.', 'malisafi-mls'));
-            }
-        }
-
-        $deleted = wp_delete_attachment($image_id, true);
-        if ($deleted) {
-            return true;
-        }
-
-        return new \WP_Error('delete_failed', __('Failed to delete image', 'malisafi-mls'));
-    }
-
-    /**
      * Validate a file before upload
      *
      * @param array $file   File array
@@ -259,6 +226,48 @@ class Image_Handler {
         }
 
         return $response;
+    }
+
+    /**
+     * Delete an image attachment
+     *
+     * @param int $attachment_id The attachment ID to delete
+     * @param array $options Optional: property_id, user_id for ownership verification
+     * @return bool|\WP_Error
+     */
+    public static function delete_image($attachment_id, $options = array()) {
+        $attachment_id = intval($attachment_id);
+        if (!$attachment_id) {
+            return new \WP_Error('invalid_attachment', __('Invalid attachment ID', 'malisafi-mls'));
+        }
+
+        // Verify ownership if property_id provided
+        if (isset($options['property_id']) && isset($options['user_id'])) {
+            $property_id = intval($options['property_id']);
+            $user_id = intval($options['user_id']);
+
+            $property = get_post($property_id);
+            if (!$property || $property->post_author != $user_id) {
+                return new \WP_Error('permission_denied', __('Permission denied', 'malisafi-mls'));
+            }
+
+            // Check if attachment belongs to property
+            $featured_id = get_post_thumbnail_id($property_id);
+            $gallery_ids_raw = get_post_meta($property_id, '_malisafi_gallery_ids', true);
+            $gallery_ids = $gallery_ids_raw ? array_filter(array_map('intval', explode(',', $gallery_ids_raw))) : array();
+
+            if ($attachment_id !== $featured_id && !in_array($attachment_id, $gallery_ids)) {
+                return new \WP_Error('not_property_image', __('Image does not belong to this property', 'malisafi-mls'));
+            }
+        }
+
+        // Delete the attachment
+        $deleted = wp_delete_attachment($attachment_id, true);
+        if (!$deleted) {
+            return new \WP_Error('delete_failed', __('Failed to delete image', 'malisafi-mls'));
+        }
+
+        return true;
     }
 
     /**

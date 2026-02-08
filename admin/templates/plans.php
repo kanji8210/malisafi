@@ -66,6 +66,26 @@ if (!is_array($plans)) {
                         <label><?php _e('Stripe Price ID', 'malisafi-mls'); ?>: </label>
                         <input type="text" name="plans[<?php echo $uid; ?>][stripe_price_id]" value="<?php echo esc_attr(!empty($p['stripe_price_id'])?$p['stripe_price_id']:''); ?>" />
                     </p>
+                    
+                    <h3 style="margin-top:20px;"><?php _e('Property Limits', 'malisafi-mls'); ?></h3>
+                    <p>
+                        <label><?php _e('Max Properties', 'malisafi-mls'); ?>: </label>
+                        <input type="number" name="plans[<?php echo $uid; ?>][max_listings]" value="<?php echo esc_attr(!empty($p['max_listings'])?$p['max_listings']:'0'); ?>" min="0" style="width:100px;" />
+                        <small><?php _e('(0 = unlimited)', 'malisafi-mls'); ?></small>
+                    </p>
+                    <p>
+                        <label><?php _e('Featured Properties', 'malisafi-mls'); ?>: </label>
+                        <input type="number" name="plans[<?php echo $uid; ?>][featured_listings]" value="<?php echo esc_attr(!empty($p['featured_listings'])?$p['featured_listings']:'0'); ?>" min="0" style="width:100px;" />
+                    </p>
+                    <p>
+                        <label><?php _e('Can Boost Properties', 'malisafi-mls'); ?>: </label>
+                        <input type="checkbox" name="plans[<?php echo $uid; ?>][can_boost]" value="1" <?php checked(!empty($p['can_boost'])); ?> />
+                    </p>
+                    <p>
+                        <label><?php _e('Analytics Access', 'malisafi-mls'); ?>: </label>
+                        <input type="checkbox" name="plans[<?php echo $uid; ?>][analytics_access]" value="1" <?php checked(!empty($p['analytics_access'])); ?> />
+                    </p>
+                    
                     <p>
                         <button class="button button-secondary remove-plan" type="button"><?php _e('Delete Plan', 'malisafi-mls'); ?></button>
                     </p>

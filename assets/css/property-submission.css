@@ -155,6 +155,12 @@ label.required::after {
     box-shadow: 0 0 0 3px rgba(214, 54, 56, 0.12);
 }
 
+.image-upload-area.drag-over {
+    border-color: var(--color-blue);
+    background: rgba(30, 82, 119, 0.05);
+    box-shadow: 0 0 0 3px rgba(30, 82, 119, 0.12);
+}
+
 .image-section {
     margin-bottom: 24px;
 }

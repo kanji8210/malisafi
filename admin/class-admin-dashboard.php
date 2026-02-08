@@ -259,6 +259,10 @@ class Malisafi_Admin_Dashboard {
                     $currency = sanitize_text_field($p['currency']);
                     $interval = sanitize_text_field($p['interval']);
                     $stripe = sanitize_text_field($p['stripe_price_id']);
+                    $max_listings = isset($p['max_listings']) ? intval($p['max_listings']) : 0;
+                    $featured_listings = isset($p['featured_listings']) ? intval($p['featured_listings']) : 0;
+                    $can_boost = isset($p['can_boost']) ? 1 : 0;
+                    $analytics_access = isset($p['analytics_access']) ? 1 : 0;
                     $features = array();
                     if (!empty($p['features'])) {
                         if (is_array($p['features'])) {
@@ -284,6 +288,10 @@ class Malisafi_Admin_Dashboard {
                         'interval' => $interval,
                         'features' => $features,
                         'stripe_price_id' => $stripe,
+                        'max_listings' => $max_listings,
+                        'featured_listings' => $featured_listings,
+                        'can_boost' => $can_boost,
+                        'analytics_access' => $analytics_access,
                     );
                 }
 

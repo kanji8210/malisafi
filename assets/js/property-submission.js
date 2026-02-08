@@ -7,7 +7,7 @@
     'use strict';
 
     const PropertySubmission = {
-        currentStep: 1,
+        currentStep: 5, // Start on images step for debugging
         totalSteps: 6,
         propertyId: 0,
         formData: {},

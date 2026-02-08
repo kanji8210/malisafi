@@ -226,6 +226,10 @@ composer install</pre>
                 'price' => 29.99,
                 'currency' => 'USD',
                 'interval' => 'month',
+                'max_listings' => 5,
+                'featured_listings' => 0,
+                'can_boost' => 0,
+                'analytics_access' => 1,
                 'features' => array(
                     __('5 property listings', 'malisafi-mls'),
                     __('Basic analytics', 'malisafi-mls'),
@@ -238,6 +242,10 @@ composer install</pre>
                 'price' => 99.99,
                 'currency' => 'USD',
                 'interval' => 'month',
+                'max_listings' => -1,
+                'featured_listings' => 5,
+                'can_boost' => 1,
+                'analytics_access' => 1,
                 'features' => array(
                     __('Unlimited property listings', 'malisafi-mls'),
                     __('Featured listings', 'malisafi-mls'),
@@ -252,6 +260,10 @@ composer install</pre>
                 'price' => 19.99,
                 'currency' => 'USD',
                 'interval' => 'month',
+                'max_listings' => 3,
+                'featured_listings' => 0,
+                'can_boost' => 0,
+                'analytics_access' => 1,
                 'features' => array(
                     __('3 property listings', 'malisafi-mls'),
                     __('Basic analytics', 'malisafi-mls'),
@@ -264,6 +276,10 @@ composer install</pre>
                 'price' => 199.99,
                 'currency' => 'USD',
                 'interval' => 'month',
+                'max_listings' => -1,
+                'featured_listings' => 10,
+                'can_boost' => 1,
+                'analytics_access' => 1,
                 'features' => array(
                     __('Unlimited projects', 'malisafi-mls'),
                     __('Bulk import', 'malisafi-mls'),
@@ -704,20 +720,23 @@ composer install</pre>
         global $wpdb;
         $table = $wpdb->prefix . 'mf_user_limits';
         
-        $limits = array(
-            'agent_basic' => array('max_listings' => 5, 'featured_listings' => 0, 'can_boost' => 0),
-            'agent_premium' => array('max_listings' => -1, 'featured_listings' => 5, 'can_boost' => 1),
-            'owner_basic' => array('max_listings' => 3, 'featured_listings' => 0, 'can_boost' => 0),
-            'developer' => array('max_listings' => -1, 'featured_listings' => 10, 'can_boost' => 1),
-        );
+        // Get configurable plans
+        $plans = self::get_plans();
         
-        if (isset($limits[$plan])) {
+        if (isset($plans[$plan])) {
+            $plan_data = $plans[$plan];
+            $limits = array(
+                'max_listings' => isset($plan_data['max_listings']) ? $plan_data['max_listings'] : 0,
+                'featured_listings' => isset($plan_data['featured_listings']) ? $plan_data['featured_listings'] : 0,
+                'can_boost' => isset($plan_data['can_boost']) ? $plan_data['can_boost'] : 0,
+                'analytics_access' => isset($plan_data['analytics_access']) ? $plan_data['analytics_access'] : 1
+            );
+            
             $wpdb->replace(
                 $table,
                 array_merge(
                     array('user_id' => $user_id),
-                    $limits[$plan],
-                    array('analytics_access' => 1)
+                    $limits
                 ),
                 array('%d', '%d', '%d', '%d', '%d')
             );
