@@ -15,7 +15,9 @@
         uploadedImages: [],
 
         init: function() {
+            console.log('PropertySubmission.init called');
             this.propertyId = $('#property_id').val() || 0;
+            console.log('Property ID:', this.propertyId);
             this.cacheElements();
             this.bindEvents();
             this.initImageUpload();
@@ -61,6 +63,7 @@
             });
 
             this.$btnSaveDraft.on('click', function() {
+                console.log('Save draft button clicked - handler called');
                 self.saveDraft();
             });
 
@@ -84,12 +87,19 @@
                 self.getLocation();
             });
 
+            // Extract coordinates from Google Maps URL
+            $('.btn-extract-coords').on('click', function() {
+                self.extractCoordsFromMapsURL();
+            });
+
             // Image browse button
             $('.btn-browse-images').on('click', function() {
+                console.log('Browse images button clicked');
                 $('#image-file-input').click();
             });
 
             $('.btn-browse-featured').on('click', function() {
+                console.log('Browse featured button clicked');
                 $('#featured-file-input').click();
             });
 
@@ -219,6 +229,7 @@
                     data: stepData
                 },
                 success: function(response) {
+                    console.log('Save step AJAX response:', response);
                     if (response.success) {
                         if (response.data.property_id) {
                             self.propertyId = response.data.property_id;
@@ -226,10 +237,12 @@
                         }
                         self.showAutoSave('saved');
                     } else {
+                        console.error('Save step failed:', response);
                         self.showAutoSave('error');
                     }
                 },
-                error: function() {
+                error: function(xhr, status, error) {
+                    console.error('Save step AJAX error:', status, error, xhr);
                     self.showAutoSave('error');
                 }
             });
@@ -378,6 +391,7 @@
         },
 
         handleFileSelect: function(files) {
+            console.log('Files selected:', files);
             if (!files || files.length === 0) return;
 
             const remainingSlots = Math.max(0, 15 - this.uploadedImages.length);
@@ -455,6 +469,7 @@
                     return xhr;
                 },
                 success: function(response) {
+                    console.log('Image upload response:', response);
                     $('.upload-progress').hide();
                     
                     if (response.success && response.data.images) {
@@ -466,7 +481,8 @@
                         self.showError(response.data.message || malisafiSubmission.strings.uploadError);
                     }
                 },
-                error: function() {
+                error: function(xhr, status, error) {
+                    console.error('Image upload error:', status, error, xhr);
                     $('.upload-progress').hide();
                     self.showError(malisafiSubmission.strings.uploadError);
                 }
@@ -647,6 +663,58 @@
             );
         },
 
+        extractCoordsFromMapsURL: function() {
+            const mapsUrl = $('#google_maps_url').val().trim();
+            if (!mapsUrl) {
+                alert('Please enter a Google Maps URL first');
+                return;
+            }
+
+            $('.btn-extract-coords').text('Extracting...').prop('disabled', true);
+
+            try {
+                // Extract coordinates from various Google Maps URL formats
+                let coords = null;
+
+                // Try to match different Google Maps URL patterns
+                const patterns = [
+                    // https://maps.google.com/?q=-1.2921,36.8219
+                    /q=([-+]?\d*\.?\d+),\s*([-+]?\d*\.?\d+)/,
+                    // https://www.google.com/maps/@-1.2921,36.8219,15z
+                    /@([-+]?\d*\.?\d+),\s*([-+]?\d*\.?\d+)/,
+                    // https://maps.google.com/maps?q=-1.2921,36.8219
+                    /\?q=([-+]?\d*\.?\d+),\s*([-+]?\d*\.?\d+)/,
+                    // Direct coordinates
+                    /^([-+]?\d*\.?\d+),\s*([-+]?\d*\.?\d+)$/
+                ];
+
+                for (const pattern of patterns) {
+                    const match = mapsUrl.match(pattern);
+                    if (match) {
+                        const lat = parseFloat(match[1]);
+                        const lng = parseFloat(match[2]);
+                        if (lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180) {
+                            coords = lat.toFixed(6) + ', ' + lng.toFixed(6);
+                            break;
+                        }
+                    }
+                }
+
+                if (coords) {
+                    $('#property_gps').val(coords);
+                    this.showSuccess('Coordinates extracted successfully!');
+                } else {
+                    alert('Could not extract coordinates from this URL. Please make sure it contains latitude and longitude.');
+                }
+
+            } catch (error) {
+                console.error('Error extracting coordinates:', error);
+                alert('Error processing the URL. Please check the format.');
+            }
+
+            $('.btn-extract-coords').html('<span class="icon">\u{1F4CC}</span> Extract Coordinates').prop('disabled', false);
+        },
+
         updatePreview: function() {
             // Basic info
             $('#preview-title').text($('#property_title').val() || '-');
@@ -698,6 +766,7 @@
         },
 
         saveDraft: function() {
+            console.log('Save draft button clicked');
             this.saveStep();
             this.showSuccess('Draft saved. You can continue later.');
         },
@@ -890,8 +959,12 @@
 
     // Initialize on document ready
     $(document).ready(function() {
+        console.log('Document ready, checking for property submission form');
         if ($('#property-submission-form').length) {
+            console.log('Property submission form found, initializing...');
             PropertySubmission.init();
+        } else {
+            console.log('Property submission form not found');
         }
     });
 

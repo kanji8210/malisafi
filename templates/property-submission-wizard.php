@@ -341,6 +341,18 @@ $can_assign_agent = current_user_can('manage_options') || current_user_can('edit
                 </div>
             </div>
 
+            <div class="form-row">
+                <label for="google_maps_url"><?php _e('Google Maps URL (Optional)', 'malisafi-mls'); ?></label>
+                <div class="maps-input-group">
+                    <input type="url" id="google_maps_url" name="google_maps_url" class="form-control" placeholder="https://maps.google.com/?q=-1.2921,36.8219">
+                    <button type="button" class="btn btn-secondary btn-extract-coords">
+                        <span class="icon">📌</span>
+                        <?php _e('Extract Coordinates', 'malisafi-mls'); ?>
+                    </button>
+                </div>
+                <p class="field-hint"><?php _e('Paste a Google Maps URL to automatically extract GPS coordinates.', 'malisafi-mls'); ?></p>
+            </div>
+
             <div class="field-hint privacy-notice" style="background: #e8f4f8; padding: 10px; border-radius: 4px; margin-top: 8px; border-left: 3px solid #0073aa;">
                 <p style="margin: 0 0 5px 0; font-weight: 600; color: #0073aa; font-size: 13px;">
                     <span style="font-size: 16px;">🛡️</span> <?php _e('Privacy Protection', 'malisafi-mls'); ?>
