@@ -691,13 +691,13 @@ class Property_Submission {
 
         // Upload using Image_Handler
         $upload_result = Image_Handler::upload_single($file, array(
-            'validate_dimensions' => true,
+            'validate_dimensions' => false, // Made optional for flexibility
             'size_map' => array(
                 'url' => 'large',
                 'thumb' => 'medium'
             ),
-            'min_width' => 1600,
-            'min_height' => 900
+            'min_width' => 800,  // Reduced from 1600
+            'min_height' => 600  // Reduced from 900
         ));
 
         if (is_wp_error($upload_result)) {
@@ -760,13 +760,13 @@ class Property_Submission {
                 );
 
                 $upload_result = Image_Handler::upload_single($file, array(
-                    'validate_dimensions' => true,
+                    'validate_dimensions' => false,
                     'size_map' => array(
                         'url' => 'medium',
                         'thumb' => 'thumbnail'
                     ),
-                    'min_width' => 1200,
-                    'min_height' => 800
+                    'min_width' => 800,
+                    'min_height' => 600
                 ));
 
                 if (!is_wp_error($upload_result)) {
@@ -779,13 +779,13 @@ class Property_Submission {
         } else {
             // Single file
             $upload_result = Image_Handler::upload_single($files, array(
-                'validate_dimensions' => true,
+                'validate_dimensions' => false,
                 'size_map' => array(
                     'url' => 'medium',
                     'thumb' => 'thumbnail'
                 ),
-                'min_width' => 1200,
-                'min_height' => 800
+                'min_width' => 800,
+                'min_height' => 600
             ));
 
             if (!is_wp_error($upload_result)) {

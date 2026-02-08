@@ -22,10 +22,10 @@ class Image_Handler {
     private const MAX_SIZE = 15728640;
 
     /** @var array Minimum dimensions for landscape images */
-    private const MIN_LANDSCAPE = array('width' => 1200, 'height' => 800);
+    private const MIN_LANDSCAPE = array('width' => 800, 'height' => 600);
 
     /** @var array Minimum dimensions for portrait images */
-    private const MIN_PORTRAIT = array('width' => 1600, 'height' => 2000);
+    private const MIN_PORTRAIT = array('width' => 600, 'height' => 800);
 
     /**
      * Upload a single image
