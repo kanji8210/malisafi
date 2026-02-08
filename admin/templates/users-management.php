@@ -19,7 +19,10 @@ if (isset($_GET['message'])) {
     $messages = array(
         'user_added' => __('User successfully added.', 'malisafi-mls'),
         'user_updated' => __('User successfully updated.', 'malisafi-mls'),
-        'user_deleted' => __('User successfully deleted.', 'malisafi-mls')
+        'user_deleted' => __('User successfully deleted.', 'malisafi-mls'),
+        'email_verified' => __('User email has been verified.', 'malisafi-mls'),
+        'password_reset_sent' => __('Password reset email has been sent.', 'malisafi-mls'),
+        'verification_email_sent' => __('Verification email has been sent.', 'malisafi-mls')
     );
     
     if (isset($messages[$_GET['message']])) {
@@ -88,6 +91,7 @@ if (isset($_GET['error'])) {
                     <th class="manage-column column-username"><?php _e('Username', 'malisafi-mls'); ?></th>
                     <th class="manage-column column-name"><?php _e('Name', 'malisafi-mls'); ?></th>
                     <th class="manage-column column-email"><?php _e('Email', 'malisafi-mls'); ?></th>
+                    <th class="manage-column column-email-verified"><?php _e('Email Verified', 'malisafi-mls'); ?></th>
                     <th class="manage-column column-role"><?php _e('Role', 'malisafi-mls'); ?></th>
                     <th class="manage-column column-subscription"><?php _e('Subscription', 'malisafi-mls'); ?></th>
                     <th class="manage-column column-registered"><?php _e('Registered', 'malisafi-mls'); ?></th>
@@ -111,6 +115,16 @@ if (isset($_GET['error'])) {
                                 <a href="mailto:<?php echo esc_attr($user->user_email); ?>">
                                     <?php echo esc_html($user->user_email); ?>
                                 </a>
+                            </td>
+                            <td class="column-email-verified">
+                                <?php 
+                                $email_verified = get_user_meta($user->ID, '_malisafi_email_verified', true) === '1';
+                                if ($email_verified) {
+                                    echo '<span class="status-verified" style="color: #28a745;">✓ ' . __('Verified', 'malisafi-mls') . '</span>';
+                                } else {
+                                    echo '<span class="status-unverified" style="color: #dc3545;">✗ ' . __('Unverified', 'malisafi-mls') . '</span>';
+                                }
+                                ?>
                             </td>
                             <td class="column-role">
                                 <?php 
@@ -136,6 +150,21 @@ if (isset($_GET['error'])) {
                                 <a href="<?php echo admin_url('admin.php?page=malisafi-users&action=edit&user_id=' . $user->ID); ?>" class="button button-small">
                                     <?php _e('Edit', 'malisafi-mls'); ?>
                                 </a>
+                                <?php 
+                                $email_verified = get_user_meta($user->ID, '_malisafi_email_verified', true) === '1';
+                                if (!$email_verified && get_option('malisafi_email_verification_enabled')) : 
+                                ?>
+                                    <a href="<?php echo wp_nonce_url(admin_url('admin-post.php?action=malisafi_verify_email&user_id=' . $user->ID), 'malisafi_verify_email_' . $user->ID); ?>" 
+                                       class="button button-small button-primary" 
+                                       onclick="return confirm('<?php _e('Are you sure you want to manually verify this user\'s email?', 'malisafi-mls'); ?>');">
+                                        <?php _e('Verify Email', 'malisafi-mls'); ?>
+                                    </a>
+                                    <a href="<?php echo wp_nonce_url(admin_url('admin-post.php?action=malisafi_send_password_reset&user_id=' . $user->ID), 'malisafi_send_password_reset_' . $user->ID); ?>" 
+                                       class="button button-small" 
+                                       onclick="return confirm('<?php _e('Send password reset email to this user?', 'malisafi-mls'); ?>');">
+                                        <?php _e('Reset Password', 'malisafi-mls'); ?>
+                                    </a>
+                                <?php endif; ?>
                                 <?php if ($user->ID !== get_current_user_id()) : ?>
                                     <a href="<?php echo wp_nonce_url(admin_url('admin-post.php?action=malisafi_delete_user&user_id=' . $user->ID), 'malisafi_delete_user_' . $user->ID); ?>" 
                                        class="button button-small button-link-delete" 
@@ -537,6 +566,31 @@ if (isset($_GET['error'])) {
                             <input type="email" name="email" id="email" class="regular-text" value="<?php echo esc_attr($edit_user->user_email); ?>" required>
                         </td>
                     </tr>
+                    
+                    <?php if (get_option('malisafi_email_verification_enabled')) : ?>
+                    <tr>
+                        <th scope="row">
+                            <label><?php _e('Email Verification', 'malisafi-mls'); ?></label>
+                        </th>
+                        <td>
+                            <?php 
+                            $email_verified = get_user_meta($user_id, '_malisafi_email_verified', true) === '1';
+                            ?>
+                            <label>
+                                <input type="checkbox" name="email_verified" value="1" <?php checked($email_verified); ?>>
+                                <?php _e('Email is verified', 'malisafi-mls'); ?>
+                            </label>
+                            <p class="description">
+                                <?php _e('Check this box to manually mark the user\'s email as verified.', 'malisafi-mls'); ?>
+                                <?php if (!$email_verified) : ?>
+                                    <br><a href="<?php echo wp_nonce_url(admin_url('admin-post.php?action=malisafi_send_verification_email&user_id=' . $user_id), 'malisafi_send_verification_email_' . $user_id); ?>" class="button button-small">
+                                        <?php _e('Resend Verification Email', 'malisafi-mls'); ?>
+                                    </a>
+                                <?php endif; ?>
+                            </p>
+                        </td>
+                    </tr>
+                    <?php endif; ?>
                     
                     <tr>
                         <th scope="row">

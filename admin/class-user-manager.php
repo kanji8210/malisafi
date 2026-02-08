@@ -19,6 +19,9 @@ class Malisafi_User_Manager {
         add_action('admin_post_malisafi_add_user', array(__CLASS__, 'handle_add_user'));
         add_action('admin_post_malisafi_edit_user', array(__CLASS__, 'handle_edit_user'));
         add_action('admin_post_malisafi_delete_user', array(__CLASS__, 'handle_delete_user'));
+        add_action('admin_post_malisafi_verify_email', array(__CLASS__, 'handle_verify_email'));
+        add_action('admin_post_malisafi_send_password_reset', array(__CLASS__, 'handle_send_password_reset'));
+        add_action('admin_post_malisafi_send_verification_email', array(__CLASS__, 'handle_send_verification_email'));
         add_action('wp_ajax_malisafi_check_email', array(__CLASS__, 'ajax_check_email'));
     }
     
@@ -313,6 +316,16 @@ class Malisafi_User_Manager {
             wp_set_password($_POST['password'], $user_id);
         }
         
+        // Update email verification status
+        if (get_option('malisafi_email_verification_enabled')) {
+            if (isset($_POST['email_verified']) && $_POST['email_verified'] === '1') {
+                update_user_meta($user_id, '_malisafi_email_verified', '1');
+                delete_user_meta($user_id, '_malisafi_email_verification_token');
+            } else {
+                update_user_meta($user_id, '_malisafi_email_verified', '0');
+            }
+        }
+        
         wp_redirect(add_query_arg(array(
             'page' => 'malisafi-users',
             'message' => 'user_updated',
@@ -417,5 +430,117 @@ class Malisafi_User_Manager {
             esc_attr($color),
             esc_html($role_name)
         );
+    }
+    
+    /**
+     * Handle manual email verification
+     */
+    public static function handle_verify_email() {
+        // Security check
+        check_admin_referer('malisafi_verify_email_' . $_GET['user_id']);
+        
+        if (!current_user_can('manage_malisafi_settings')) {
+            wp_die(__('You do not have permission to verify emails.', 'malisafi-mls'));
+        }
+        
+        $user_id = intval($_GET['user_id']);
+        $user = get_user_by('id', $user_id);
+        
+        if (!$user) {
+            wp_die(__('User not found.', 'malisafi-mls'));
+        }
+        
+        // Mark email as verified
+        update_user_meta($user_id, '_malisafi_email_verified', '1');
+        delete_user_meta($user_id, '_malisafi_email_verification_token');
+        
+        // Log the action
+        error_log('Malisafi: Email manually verified for user ' . $user->user_login . ' by admin ' . wp_get_current_user()->user_login);
+        
+        // Redirect back with success message
+        wp_redirect(add_query_arg('message', 'email_verified', admin_url('admin.php?page=malisafi-users')));
+        exit;
+    }
+    
+    /**
+     * Handle sending password reset email
+     */
+    public static function handle_send_password_reset() {
+        // Security check
+        check_admin_referer('malisafi_send_password_reset_' . $_GET['user_id']);
+        
+        if (!current_user_can('manage_malisafi_settings')) {
+            wp_die(__('You do not have permission to send password resets.', 'malisafi-mls'));
+        }
+        
+        $user_id = intval($_GET['user_id']);
+        $user = get_user_by('id', $user_id);
+        
+        if (!$user) {
+            wp_die(__('User not found.', 'malisafi-mls'));
+        }
+        
+        // Send password reset email
+        $reset_key = get_password_reset_key($user);
+        if (!is_wp_error($reset_key)) {
+            $reset_url = network_site_url("wp-login.php?action=rp&key=$reset_key&login=" . rawurlencode($user->user_login), 'login');
+            
+            $subject = __('Password Reset Request', 'malisafi-mls');
+            $message = sprintf(
+                __('Hello %s,
+
+Someone requested a password reset for your account. If this was you, click the link below to reset your password:
+
+%s
+
+If you did not request a password reset, please ignore this email.
+
+Best regards,
+The %s Team',
+                'malisafi-mls'),
+                $user->display_name,
+                $reset_url,
+                get_bloginfo('name')
+            );
+            
+            wp_mail($user->user_email, $subject, $message);
+        }
+        
+        // Redirect back with success message
+        wp_redirect(add_query_arg('message', 'password_reset_sent', admin_url('admin.php?page=malisafi-users')));
+        exit;
+    }
+    
+    /**
+     * Handle resending verification email
+     */
+    public static function handle_send_verification_email() {
+        // Security check
+        check_admin_referer('malisafi_send_verification_email_' . $_GET['user_id']);
+        
+        if (!current_user_can('manage_malisafi_settings')) {
+            wp_die(__('You do not have permission to send verification emails.', 'malisafi-mls'));
+        }
+        
+        $user_id = intval($_GET['user_id']);
+        
+        // Use the existing email settings class to send verification email
+        if (class_exists('MalisafiMLS\Email_Settings')) {
+            // Get user data for the email
+            $user = get_user_by('id', $user_id);
+            if ($user) {
+                $user_data = array(
+                    'first_name' => $user->first_name,
+                    'last_name' => $user->last_name
+                );
+                
+                // Trigger the verification email
+                do_action('malisafi_user_registered', $user_id, $user->roles[0] ?? 'client', 'client', $user_data);
+            }
+        }
+        
+        // Redirect back with success message
+        wp_redirect(add_query_arg('message', 'verification_email_sent', admin_url('admin.php?page=malisafi-users')));
+        exit;
     }
 }

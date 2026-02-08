@@ -48,6 +48,7 @@ class Email_Settings {
      */
     public static function register_settings() {
         register_setting('malisafi_email_settings', 'malisafi_email_verification_enabled');
+        register_setting('malisafi_email_settings', 'malisafi_email_verification_fallback');
         register_setting('malisafi_email_settings', 'malisafi_admin_email');
         register_setting('malisafi_email_settings', 'malisafi_email_from_name');
         register_setting('malisafi_email_settings', 'malisafi_email_from_address');
@@ -134,6 +135,17 @@ class Email_Settings {
                             <p class="description">
                                 <?php _e('Available placeholders: {first_name}, {verification_link}, {site_name}, {site_url}', 'malisafi-mls'); ?>
                             </p>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <th scope="row"><?php _e('Email Verification Fallback', 'malisafi-mls'); ?></th>
+                        <td>
+                            <select name="malisafi_email_verification_fallback">
+                                <option value="none" <?php selected(get_option('malisafi_email_verification_fallback', 'none'), 'none'); ?>><?php _e('No fallback - require manual verification', 'malisafi-mls'); ?></option>
+                                <option value="password_reset" <?php selected(get_option('malisafi_email_verification_fallback', 'none'), 'password_reset'); ?>><?php _e('Send password reset email if verification fails', 'malisafi-mls'); ?></option>
+                            </select>
+                            <p class="description"><?php _e('What to do when email verification is required but the verification email cannot be sent.', 'malisafi-mls'); ?></p>
                         </td>
                     </tr>
 
