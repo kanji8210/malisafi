@@ -243,7 +243,12 @@
                 },
                 error: function(xhr, status, error) {
                     console.error('Save step AJAX error:', status, error, xhr);
-                    self.showAutoSave('error');
+                    if (xhr.status === 403) {
+                        self.showAutoSave('error');
+                        alert('Your session has expired. Please refresh the page and log in again.');
+                    } else {
+                        self.showAutoSave('error');
+                    }
                 }
             });
         },
@@ -415,6 +420,12 @@
                 $('#image-file-input').on('change', function(e) {
                     this.handleGalleryFiles(e.target.files);
                 }.bind(this));
+                
+                $('#replace-image-input').on('change', function(e) {
+                    if (e.target.files.length > 0) {
+                        this.handleReplaceFile(e.target.files[0]);
+                    }
+                }.bind(this));
             }
             
             if ($featuredDropzone.length) {
@@ -473,6 +484,12 @@
                 // Remove featured image
                 $('.btn-remove-featured').on('click', function() {
                     this.removeFeaturedImage();
+                }.bind(this));
+                
+                // Replace featured image
+                $('.btn-replace-featured').on('click', function() {
+                    $('#featured-preview').hide();
+                    $('#featured-dropzone').show();
                 }.bind(this));
             }
         },
@@ -608,7 +625,7 @@
                     } else if (xhr.status === 500) {
                         errorMessage = 'Server error occurred. Please try again later.';
                     } else if (xhr.status === 403) {
-                        errorMessage = 'Permission denied. Please refresh the page and try again.';
+                        errorMessage = 'Permission denied. Your session may have expired. Please refresh the page and try again.';
                     } else if (status === 'timeout') {
                         errorMessage = 'Upload timed out. Please check your connection and try again.';
                     }
@@ -618,23 +635,54 @@
             });
         },
 
-        addGalleryImage: function(image) {
-            const $gallery = $('#image-gallery');
-            const $item = $('<div class="gallery-item">')
-                .attr('data-id', image.id)
-                .html('<img src="' + image.url + '" alt=""><button class="delete-btn" data-id="' + image.id + '">×</button>');
+        replaceGalleryImage: function(imageId) {
+            this.replaceImageId = imageId;
+            $('#replace-image-input').click();
+        },
+
+        handleReplaceFile: function(file) {
+            if (!file || !this.replaceImageId) return;
             
-            $gallery.append($item);
+            const formData = new FormData();
+            formData.append('action', 'malisafi_upload_property_images');
+            formData.append('nonce', malisafiSubmission.uploadNonce);
+            formData.append('property_id', this.propertyId || 0);
+            formData.append('replace_id', this.replaceImageId);
+            formData.append('images[]', file);
             
-            // Bind delete
-            $item.find('.delete-btn').on('click', function() {
-                if (confirm('Delete this image?')) {
-                    this.deleteGalleryImage($(this).data('id'));
-                }
-            }.bind(this));
+            this.showUploadProgress('Replacing image...');
             
-            // Update order
-            this.updateGalleryOrder();
+            $.ajax({
+                url: malisafiSubmission.ajaxurl,
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function(response) {
+                    this.hideUploadProgress();
+                    if (response.success && response.data.images) {
+                        // Remove old image from UI
+                        $('.gallery-item[data-id="' + this.replaceImageId + '"]').remove();
+                        // Add new image
+                        response.data.images.forEach(function(image) {
+                            this.addGalleryImage(image);
+                        }.bind(this));
+                        this.showUploadSuccess('Image replaced successfully');
+                    } else {
+                        this.showUploadError(response.data.message || 'Replace failed');
+                    }
+                    this.replaceImageId = null;
+                }.bind(this),
+                error: function(xhr, status, error) {
+                    this.hideUploadProgress();
+                    let errorMessage = 'Replace failed due to network error';
+                    if (xhr.status === 403) {
+                        errorMessage = 'Permission denied. Your session may have expired. Please refresh the page and try again.';
+                    }
+                    this.showUploadError(errorMessage);
+                    this.replaceImageId = null;
+                }.bind(this)
+            });
         },
 
         deleteGalleryImage: function(imageId) {
@@ -643,7 +691,7 @@
                 type: 'POST',
                 data: {
                     action: 'malisafi_delete_property_image',
-                    nonce: malisafiSubmission.nonce,
+                    nonce: malisafiSubmission.uploadNonce,
                     property_id: this.propertyId,
                     image_id: imageId
                 },
@@ -652,7 +700,13 @@
                         $('.gallery-item[data-id="' + imageId + '"]').remove();
                         this.updateGalleryOrder();
                     }
-                }.bind(this)
+                }.bind(this),
+                error: function(xhr, status, error) {
+                    console.error('Delete image AJAX error:', status, error, xhr);
+                    if (xhr.status === 403) {
+                        alert('Permission denied. Your session may have expired. Please refresh the page and try again.');
+                    }
+                }
             });
         },
 
@@ -669,7 +723,7 @@
                 type: 'POST',
                 data: {
                     action: 'malisafi_clear_featured_image',
-                    nonce: malisafiSubmission.nonce,
+                    nonce: malisafiSubmission.uploadNonce,
                     property_id: this.propertyId
                 },
                 success: function(response) {
@@ -678,8 +732,38 @@
                         $('#featured-preview').hide();
                         $('#featured-dropzone').show();
                     }
+                }.bind(this),
+                error: function(xhr, status, error) {
+                    console.error('Clear featured image AJAX error:', status, error, xhr);
+                    if (xhr.status === 403) {
+                        alert('Permission denied. Your session may have expired. Please refresh the page and try again.');
+                    }
                 }
             });
+        },
+
+        addGalleryImage: function(image) {
+            const $gallery = $('#image-gallery');
+            const $item = $('<div class="gallery-item">')
+                .attr('data-id', image.id)
+                .html('<img src="' + image.url + '" alt=""><button class="replace-btn" data-id="' + image.id + '">🔄</button><button class="delete-btn" data-id="' + image.id + '">×</button>');
+            
+            $gallery.append($item);
+            
+            // Bind replace
+            $item.find('.replace-btn').on('click', function() {
+                this.replaceGalleryImage($(this).data('id'));
+            }.bind(this));
+            
+            // Bind delete
+            $item.find('.delete-btn').on('click', function() {
+                if (confirm('Delete this image?')) {
+                    this.deleteGalleryImage($(this).data('id'));
+                }
+            }.bind(this));
+            
+            // Update order
+            this.updateGalleryOrder();
         },
 
         updateGalleryOrder: function() {
@@ -696,9 +780,18 @@
                     type: 'POST',
                     data: {
                         action: 'malisafi_reorder_property_images',
-                        nonce: malisafiSubmission.nonce,
+                        nonce: malisafiSubmission.uploadNonce,
                         property_id: this.propertyId,
                         order: order
+                    },
+                    success: function(response) {
+                        // Optional: handle success
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('Reorder AJAX error:', status, error, xhr);
+                        if (xhr.status === 403) {
+                            console.warn('Session may have expired during reorder');
+                        }
                     }
                 });
             }

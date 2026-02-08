@@ -360,7 +360,27 @@ class Property_Submission {
         // Set taxonomy
         wp_set_object_terms($property_id, $validated['property_type'], 'malisafi_property_type');
         
+        // Set property status based on listing type
+        $status_term = self::get_status_term_from_listing_type($validated['listing_type']);
+        if ($status_term) {
+            wp_set_object_terms($property_id, $status_term, 'malisafi_property_status');
+        }
+        
         return true;
+    }
+    
+    /**
+     * Get status term from listing type
+     */
+    private static function get_status_term_from_listing_type($listing_type) {
+        $mapping = array(
+            'sale' => 'For Sale',
+            'rent' => 'For Rent',
+            'short_term' => 'Short Term Rent',
+            'lease' => 'For Sale' // Map lease to For Sale since no specific term exists
+        );
+        
+        return isset($mapping[$listing_type]) ? $mapping[$listing_type] : '';
     }
     
     /**
@@ -780,13 +800,24 @@ class Property_Submission {
             wp_send_json_error(array('message' => __('No valid images were uploaded', 'malisafi-mls')));
         }
 
+        $replace_id = isset($_POST['replace_id']) ? intval($_POST['replace_id']) : 0;
+
         // If we have a property ID, update gallery
         if ($property_id) {
             $existing_gallery = get_post_meta($property_id, '_malisafi_gallery_ids', true);
             $existing_ids = $existing_gallery ? array_filter(array_map('intval', explode(',', $existing_gallery))) : array();
 
             $new_ids = array_map(function($img) { return $img['id']; }, $uploaded_images);
-            $updated_gallery = array_merge($existing_ids, $new_ids);
+            
+            if ($replace_id && in_array($replace_id, $existing_ids)) {
+                // Replace the specific image
+                $key = array_search($replace_id, $existing_ids);
+                $existing_ids[$key] = $new_ids[0]; // Replace with first new image
+                $updated_gallery = $existing_ids;
+            } else {
+                // Add new images
+                $updated_gallery = array_merge($existing_ids, $new_ids);
+            }
 
             update_post_meta($property_id, '_malisafi_gallery_ids', implode(',', $updated_gallery));
 

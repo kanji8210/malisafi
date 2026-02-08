@@ -426,8 +426,11 @@ $can_assign_agent = current_user_can('manage_options') || current_user_can('edit
 
                 <div class="featured-preview" id="featured-preview" style="display:none;">
                     <img src="" alt="">
-                    <button type="button" class="btn btn-secondary btn-remove-featured">
-                        <?php _e('Remove Featured Image', 'malisafi-mls'); ?>
+                    <button type="button" class="btn btn-secondary btn-replace-featured">
+                        <?php _e('Replace Featured Image', 'malisafi-mls'); ?>
+                    </button>
+                    <button type="button" class="btn btn-danger btn-remove-featured">
+                        <?php _e('Remove', 'malisafi-mls'); ?>
                     </button>
                 </div>
 
@@ -447,6 +450,7 @@ $can_assign_agent = current_user_can('manage_options') || current_user_can('edit
                         <p><?php _e('or', 'malisafi-mls'); ?></p>
                         <button type="button" class="btn btn-primary btn-browse-images"><?php _e('Browse Images', 'malisafi-mls'); ?></button>
                         <input type="file" id="image-file-input" name="images[]" accept="image/jpeg,image/png,image/webp" multiple style="display:none;">
+                        <input type="file" id="replace-image-input" name="replace_image" accept="image/jpeg,image/png,image/webp" style="display:none;">
                         <p class="upload-hint"><?php _e('Supported formats: JPG, PNG, WEBP (Max 10MB each)', 'malisafi-mls'); ?></p>
                     </div>
                 </div>

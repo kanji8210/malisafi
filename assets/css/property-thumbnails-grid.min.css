@@ -1,0 +1,1 @@
+.malisafi-thumbnails-grid{display:grid;grid-template-columns:repeat(var(--mls-thumb-columns,3),minmax(0,1fr));gap:var(--spacing-lg);width:100%}.malisafi-thumbnails-grid .property-card-modern{width:100%}@media (max-width:1024px){.malisafi-thumbnails-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}@media (max-width:640px){.malisafi-thumbnails-grid{grid-template-columns:1fr}}
