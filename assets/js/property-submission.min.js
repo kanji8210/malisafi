@@ -328,6 +328,25 @@
             $message.fadeIn();
         },
 
+        showAutoSave: function(status) {
+            const $indicator = $('.autosave-indicator');
+            $indicator.removeClass('saving saved error').addClass(status + ' show');
+
+            const messages = {
+                saving: malisafiSubmission.strings.saving || 'Saving...',
+                saved: malisafiSubmission.strings.saved || 'Saved',
+                error: malisafiSubmission.strings.error || 'Error saving'
+            };
+
+            $indicator.find('.status-text').text(messages[status] || '');
+
+            if (status === 'saved' || status === 'error') {
+                setTimeout(function() {
+                    $indicator.removeClass('show');
+                }, 2000);
+            }
+        },
+
         // Image Upload Functions - RECREATED
         initImageUpload: function() {
             const $dropzone = $('#dropzone');
