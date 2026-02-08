@@ -7,7 +7,7 @@
     'use strict';
 
     const PropertySubmission = {
-        currentStep: 5, // Start on images step for debugging
+        currentStep: 1, // Start on first step
         totalSteps: 6,
         propertyId: 0,
         formData: {},
@@ -33,11 +33,13 @@
             this.bindEvents();
             this.initImageUpload();
             this.toggleSaleLeaseDetails();
-            this.updateStep(); // Show the current step
             
             // Load draft if editing
-            if (this.propertyId) {
+            if (this.propertyId && this.propertyId !== '0' && this.propertyId !== 0) {
+                console.log('Loading draft for property ID:', this.propertyId);
                 this.loadDraft();
+            } else {
+                console.log('New property, skipping draft load');
             }
             
             this.initialized = true;
@@ -62,8 +64,6 @@
             this.$btnBrowseImages = $('.btn-browse-images');
             this.$btnBrowseFeatured = $('.btn-browse-featured');
             this.$btnRemoveFeatured = $('.btn-remove-featured');
-            
-            console.log('DEBUG: Cached elements - btnBrowseImages:', this.$btnBrowseImages.length, 'btnBrowseFeatured:', this.$btnBrowseFeatured.length);
         },
 
         bindEvents: function() {

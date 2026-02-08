@@ -41,7 +41,7 @@ $can_assign_agent = current_user_can('manage_options') || current_user_can('edit
             <div class="step-number">4</div>
             <div class="step-label"><?php _e('Features', 'malisafi-mls'); ?></div>
         </div>
-        <div class="progress-step active" data-step="5">
+        <div class="progress-step" data-step="5">
             <div class="step-number">5</div>
             <div class="step-label"><?php _e('Images', 'malisafi-mls'); ?></div>
         </div>
@@ -407,7 +407,7 @@ $can_assign_agent = current_user_can('manage_options') || current_user_can('edit
         </div>
 
         <!-- Step 5: Images -->
-        <div class="wizard-step active" id="step-5">
+        <div class="wizard-step" id="step-5">
             <h2><?php _e('Property Images', 'malisafi-mls'); ?></h2>
             <p class="step-description"><?php _e('Upload your featured image first (required), then add a gallery of additional images.', 'malisafi-mls'); ?></p>
 
