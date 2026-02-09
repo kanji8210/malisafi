@@ -351,6 +351,11 @@ class Malisafi_Property_Moderation {
                 ),
                 array(
                     'key' => '_malisafi_verified',
+                    'value' => '1',
+                    'compare' => '='
+                ),
+                array(
+                    'key' => '_malisafi_verified',
                     'compare' => 'NOT EXISTS'
                 )
             )

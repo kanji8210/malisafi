@@ -106,6 +106,7 @@ $current_tab = isset($_GET['tab']) ? sanitize_text_field($_GET['tab']) : 'pendin
                         $area = get_post_meta($property_id, '_malisafi_area', true);
                         $area = !empty($area) ? floatval($area) : 0;
                         $author = get_user_by('id', get_post_field('post_author'));
+                        $is_verified = get_post_meta($property_id, '_malisafi_verified', true);
                         
                         // Get report count safely
                         $report_count = 0;
@@ -172,14 +173,25 @@ $current_tab = isset($_GET['tab']) ? sanitize_text_field($_GET['tab']) : 'pendin
                                 </div>
                                 
                                 <div class="moderation-actions">
-                                    <button type="button" class="button button-primary verify-property" data-property-id="<?php echo $property_id; ?>">
-                                        <span class="dashicons dashicons-yes-alt"></span>
-                                        <?php _e('Verify', 'malisafi-mls'); ?>
-                                    </button>
-                                    <button type="button" class="button reject-property" data-property-id="<?php echo $property_id; ?>">
-                                        <span class="dashicons dashicons-dismiss"></span>
-                                        <?php _e('Reject', 'malisafi-mls'); ?>
-                                    </button>
+                                    <?php if ($is_verified === '1') : ?>
+                                        <button type="button" class="button button-secondary unapprove-property" data-property-id="<?php echo $property_id; ?>" style="background: #dc3232; border-color: #dc3232; color: white;">
+                                            <span class="dashicons dashicons-undo"></span>
+                                            <?php _e('Unverify', 'malisafi-mls'); ?>
+                                        </button>
+                                        <span class="verification-status verified">
+                                            <span class="dashicons dashicons-yes-alt"></span>
+                                            <?php _e('Verified', 'malisafi-mls'); ?>
+                                        </span>
+                                    <?php else : ?>
+                                        <button type="button" class="button button-primary verify-property" data-property-id="<?php echo $property_id; ?>">
+                                            <span class="dashicons dashicons-yes-alt"></span>
+                                            <?php _e('Verify', 'malisafi-mls'); ?>
+                                        </button>
+                                        <button type="button" class="button reject-property" data-property-id="<?php echo $property_id; ?>">
+                                            <span class="dashicons dashicons-dismiss"></span>
+                                            <?php _e('Reject', 'malisafi-mls'); ?>
+                                        </button>
+                                    <?php endif; ?>
                                     <?php
                                     $is_featured = get_post_meta($property_id, '_malisafi_featured', true);
                                     if ($is_featured === '1') :
@@ -531,6 +543,23 @@ $current_tab = isset($_GET['tab']) ? sanitize_text_field($_GET['tab']) : 'pendin
     display: flex;
     align-items: center;
     gap: 5px;
+}
+
+.verification-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 600;
+    margin-left: 10px;
+}
+
+.verification-status.verified {
+    background: rgba(46, 125, 50, 0.1);
+    color: #2e7d32;
+    border: 1px solid #2e7d32;
 }
 
 .property-details {
