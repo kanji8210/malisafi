@@ -55,9 +55,9 @@ class Malisafi_Property_Moderation {
             return;
         }
         
-        // Check if already verified
-        $is_verified = get_post_meta($post_id, '_malisafi_verified', true);
-        if ($is_verified) {
+        // Check if already verified - NEVER reset verified properties
+        $current_verification = get_post_meta($post_id, '_malisafi_verified', true);
+        if ($current_verification === '1' || $current_verification === 1) {
             return;
         }
         
@@ -68,8 +68,10 @@ class Malisafi_Property_Moderation {
             update_post_meta($post_id, '_malisafi_verified_date', current_time('mysql'));
             update_post_meta($post_id, '_malisafi_verified_by', get_current_user_id());
         } else {
-            // Mark as unverified for agents/owners/developers
-            update_post_meta($post_id, '_malisafi_verified', 0);
+            // Mark as unverified for agents/owners/developers (only if not already set)
+            if ($current_verification !== '0' && $current_verification !== 0) {
+                update_post_meta($post_id, '_malisafi_verified', 0);
+            }
         }
     }
     
@@ -347,11 +349,6 @@ class Malisafi_Property_Moderation {
                 array(
                     'key' => '_malisafi_verified',
                     'value' => '0',
-                    'compare' => '='
-                ),
-                array(
-                    'key' => '_malisafi_verified',
-                    'value' => '1',
                     'compare' => '='
                 ),
                 array(
