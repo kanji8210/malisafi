@@ -13,7 +13,7 @@ defined('ABSPATH') || exit;
         <div class="registration-header">
             <h2><?php _e('Create Your Malisafi Account', 'malisafi-mls'); ?></h2>
             <p class="subtitle"><?php _e('Tell us how you plan to use Malisafi.', 'malisafi-mls'); ?></p>
-        </div>
+          </div>
 
         <form id="malisafi-registration-form" class="multi-step-form" method="post">
             <?php wp_nonce_field('malisafi_registration', 'malisafi_registration_nonce'); ?>
@@ -157,10 +157,10 @@ defined('ABSPATH') || exit;
                     <div class="form-row">
                         <div class="form-group half-width">
                             <label for="license_number">
-                                <?php _e('License Number', 'malisafi-mls'); ?> <span class="required">*</span>
+                                <?php _e('License Number', 'malisafi-mls'); ?>
                             </label>
-                            <input type="text" id="license_number" name="license_number" class="agent-required"
-                                   placeholder="<?php esc_attr_e('Your professional license', 'malisafi-mls'); ?>">
+                            <input type="text" id="license_number" name="license_number"
+                                       placeholder="<?php esc_attr_e('Your professional license (optional)', 'malisafi-mls'); ?>">
                         </div>
                         
                         <div class="form-group half-width">
@@ -238,12 +238,12 @@ defined('ABSPATH') || exit;
                     
                     <div class="form-group">
                         <label for="national_id">
-                            <?php _e('National ID Number', 'malisafi-mls'); ?> <span class="required">*</span>
+                            <?php _e('National ID Number', 'malisafi-mls'); ?>
                         </label>
-                        <input type="text" id="national_id" name="national_id" class="agent-required"
-                               placeholder="<?php esc_attr_e('For verification purposes', 'malisafi-mls'); ?>"
+                        <input type="text" id="national_id" name="national_id"
+                               placeholder="<?php esc_attr_e('National ID (optional)', 'malisafi-mls'); ?>"
                                pattern="[0-9]{7,8}">
-                        <small class="form-hint"><?php _e('Required for agent verification', 'malisafi-mls'); ?></small>
+                        <small class="form-hint"><?php _e('Optional — used later for manual verification if needed.', 'malisafi-mls'); ?></small>
                     </div>
                     
                     <div class="form-group">

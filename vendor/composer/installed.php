@@ -3,7 +3,7 @@
         'name' => 'malisafi/mls-plugin',
         'pretty_version' => 'dev-main',
         'version' => 'dev-main',
-        'reference' => '26958dc61396e6de0a1bacfc195cdd730b65d147',
+        'reference' => '3c7a5a3be6d6106aa977bdb732c026ef3aa6756b',
         'type' => 'wordpress-plugin',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -49,7 +49,7 @@
         'malisafi/mls-plugin' => array(
             'pretty_version' => 'dev-main',
             'version' => 'dev-main',
-            'reference' => '26958dc61396e6de0a1bacfc195cdd730b65d147',
+            'reference' => '3c7a5a3be6d6106aa977bdb732c026ef3aa6756b',
             'type' => 'wordpress-plugin',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),

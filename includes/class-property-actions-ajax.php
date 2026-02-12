@@ -158,37 +158,88 @@ class Property_Actions_Ajax {
     public function send_inquiry() {
         // Debug logging
         error_log('Malisafi: send_inquiry called');
-        error_log('POST data: ' . print_r($_POST, true));
-        
+
         // Verify nonce
         if (!isset($_POST['nonce']) || !wp_verify_nonce($_POST['nonce'], 'malisafi_ajax_nonce')) {
-            error_log('Malisafi: Invalid nonce');
+            error_log('Malisafi: Invalid nonce in send_inquiry');
             wp_send_json_error(array('message' => 'Invalid security token.'));
         }
-        
+
         $property_id = isset($_POST['property_id']) ? intval($_POST['property_id']) : 0;
         $name = isset($_POST['inquiry_name']) ? sanitize_text_field($_POST['inquiry_name']) : '';
         $email = isset($_POST['inquiry_email']) ? sanitize_email($_POST['inquiry_email']) : '';
         $phone = isset($_POST['inquiry_phone']) ? sanitize_text_field($_POST['inquiry_phone']) : '';
         $message = isset($_POST['inquiry_message']) ? sanitize_textarea_field($_POST['inquiry_message']) : '';
-        
+
+        // Honeypot field (should be empty). Also check simple time-based trap.
+        $honeypot = isset($_POST['hp_name']) ? sanitize_text_field($_POST['hp_name']) : '';
+        $form_ts = isset($_POST['form_ts']) ? intval($_POST['form_ts']) : 0;
+        if (!empty($honeypot)) {
+            error_log('Malisafi: Honeypot triggered in send_inquiry');
+            wp_send_json_error(array('message' => 'Failed spam check.'));
+        }
+        $now = time();
+        if ($form_ts > 0 && ($now - $form_ts) < 3) {
+            error_log('Malisafi: Form submitted too quickly - possible bot.');
+            wp_send_json_error(array('message' => 'Failed spam check.'));
+        }
+
+        // Optional server-side reCAPTCHA v2/v3 verification
+        if (get_option('malisafi_inquiry_recaptcha_enabled')) {
+            $recaptcha_response = isset($_POST['g-recaptcha-response']) ? sanitize_text_field($_POST['g-recaptcha-response']) : '';
+            $recaptcha_secret = get_option('malisafi_inquiry_recaptcha_secret');
+            if (empty($recaptcha_response) || empty($recaptcha_secret)) {
+                error_log('Malisafi: reCAPTCHA required but missing response/secret');
+                wp_send_json_error(array('message' => 'Spam protection check failed.'));
+            }
+
+            $verify = wp_remote_post('https://www.google.com/recaptcha/api/siteverify', array(
+                'body' => array(
+                    'secret' => $recaptcha_secret,
+                    'response' => $recaptcha_response,
+                    'remoteip' => $_SERVER['REMOTE_ADDR'] ?? ''
+                ),
+                'timeout' => 10
+            ));
+
+            if (is_wp_error($verify)) {
+                error_log('Malisafi: reCAPTCHA verification error: ' . $verify->get_error_message());
+                wp_send_json_error(array('message' => 'Spam protection check failed.'));
+            }
+
+            $body = wp_remote_retrieve_body($verify);
+            $data = json_decode($body, true);
+            if (empty($data) || empty($data['success'])) {
+                error_log('Malisafi: reCAPTCHA failed: ' . $body);
+                wp_send_json_error(array('message' => 'Spam protection check failed.'));
+            }
+        }
+
         // Validation
         if (!$property_id || get_post_type($property_id) !== 'malisafi_property') {
             wp_send_json_error(array('message' => 'Invalid property.'));
         }
-        
+
         if (empty($name)) {
             wp_send_json_error(array('message' => 'Please provide your name.'));
         }
-        
+
         if (empty($email) || !is_email($email)) {
             wp_send_json_error(array('message' => 'Please provide a valid email address.'));
         }
-        
+
         if (empty($message)) {
             wp_send_json_error(array('message' => 'Please provide a message.'));
         }
-        
+
+        // Rate-limit: max 5 inquiries per 5 minutes per IP+property+email
+        $ip = $this->get_client_ip();
+        $rate_key = 'malisafi_inquiry_rate_' . md5($ip . '|' . $property_id . '|' . $email);
+        $rate_count = intval(get_transient($rate_key));
+        if ($rate_count >= 5) {
+            wp_send_json_error(array('message' => 'Too many inquiries. Please try again later.'));
+        }
+
         // Get property and agent info
         $property = get_post($property_id);
         $property_title = $property->post_title;
@@ -196,27 +247,28 @@ class Property_Actions_Ajax {
         $agent_id = $property->post_author;
         $agent_email = get_the_author_meta('user_email', $agent_id);
         $agent_name = get_the_author_meta('display_name', $agent_id);
-        
-        // Store inquiry in database
-        $inquiry_data = array(
-            'name' => $name,
-            'email' => $email,
-            'phone' => $phone,
-            'message' => $message,
-            'property_id' => $property_id,
-            'agent_id' => $agent_id,
-            'date' => current_time('mysql'),
-            'ip' => $_SERVER['REMOTE_ADDR']
-        );
-        
-        // Get existing inquiries
-        $inquiries = get_post_meta($property_id, '_malisafi_inquiries', true);
-        $inquiries = $inquiries ? maybe_unserialize($inquiries) : array();
-        $inquiries[] = $inquiry_data;
-        
-        update_post_meta($property_id, '_malisafi_inquiries', $inquiries);
-        
-        // Send email to agent
+
+        // Check agent's agency for fallback
+        $agency = Agency_Manager::get_agent_agency($agent_id);
+        $agency_id = null;
+        $agency_email = null;
+        if ($agency) {
+            $agency_id = $agency->id;
+            $agency_email = $agency->agency_email ?: $agency->owner_email;
+        }
+
+        // Determine recipient: prefer agent, then agency
+        $recipient_email = '';
+        if (!empty($agent_email) && is_email($agent_email)) {
+            $recipient_email = $agent_email;
+        } elseif (!empty($agency_email) && is_email($agency_email)) {
+            $recipient_email = $agency_email;
+        } else {
+            error_log('Malisafi: No recipient email found for inquiry on property ' . $property_id);
+            wp_send_json_error(array('message' => 'Unable to deliver inquiry: recipient not found.'));
+        }
+
+        // Prepare email
         $subject = 'New Property Inquiry: ' . $property_title;
         $email_message = "Hello {$agent_name},\n\n";
         $email_message .= "You have received a new inquiry about your property.\n\n";
@@ -232,16 +284,136 @@ class Property_Actions_Ajax {
         $email_message .= "Please respond to this inquiry as soon as possible.\n\n";
         $email_message .= "Best regards,\n";
         $email_message .= get_bloginfo('name') . " Team";
-        
+
         $headers = array(
             'Content-Type: text/plain; charset=UTF-8',
             'From: ' . get_bloginfo('name') . ' <' . get_option('admin_email') . '>',
             'Reply-To: ' . $email
         );
-        
-        wp_mail($agent_email, $subject, $email_message, $headers);
-        
-        wp_send_json_success(array('message' => 'Inquiry sent successfully.'));
+
+        // Attempt to send email and record result
+        $sent = wp_mail($recipient_email, $subject, $email_message, $headers);
+
+        // Insert into DB (always record inquiry even if email fails)
+        global $wpdb;
+        $table_name = $wpdb->prefix . 'mf_inquiries';
+
+        $inquiry_db = array(
+            'property_id' => $property_id,
+            'client_id' => get_current_user_id() ?: null,
+            'agent_id' => $agent_id,
+            'agency_id' => $agency_id,
+            'inquiry_type' => 'general',
+            'message' => $message,
+            'status' => $sent ? 'new' : 'email_failed',
+            'client_phone' => $phone,
+            'client_email' => $email,
+            'created_at' => current_time('mysql'),
+            'updated_at' => current_time('mysql'),
+            'client_ip' => $ip
+        );
+
+        $inserted = $wpdb->insert($table_name, $inquiry_db);
+        if (!$inserted) {
+            error_log('Malisafi: Failed to insert inquiry DB record: ' . $wpdb->last_error);
+            wp_send_json_error(array('message' => 'Failed to save inquiry. Please try again later.'));
+        }
+
+        $inquiry_id = $wpdb->insert_id;
+
+        // Trigger agency notification hook for other listeners
+        do_action('malisafi_inquiry_created', $inquiry_id, array(
+            'property_id' => $property_id,
+            'agent_id' => $agent_id,
+            'agency_id' => $agency_id,
+            'client_name' => $name,
+            'client_email' => $email,
+            'client_phone' => $phone,
+            'message' => $message,
+            'property_title' => $property_title,
+            'property_url' => $property_url
+        ));
+
+        // Record analytics interaction: inquiry
+        try {
+            $interaction_data = json_encode([
+                'client_name' => $name,
+                'client_email' => $email,
+                'client_phone' => $phone
+            ]);
+
+            $session_id = session_id() ?: (isset($_COOKIE['malisafi_session']) ? sanitize_text_field($_COOKIE['malisafi_session']) : '');
+
+            $wpdb->insert(
+                $wpdb->prefix . 'mf_property_interactions',
+                [
+                    'property_id' => $property_id,
+                    'user_id' => get_current_user_id() ?: null,
+                    'interaction_type' => 'inquiry',
+                    'interaction_data' => $interaction_data,
+                    'session_id' => $session_id
+                ],
+                ['%d', '%d', '%s', '%s', '%s']
+            );
+        } catch (\Throwable $e) {
+            error_log('Malisafi: Failed to record inquiry interaction: ' . $e->getMessage());
+        }
+
+        // Store in agent's meta for backward compatibility and agent dashboard
+        $meta_data = array(
+            'property_id' => $property_id,
+            'agent_id' => $agent_id,
+            'agency_id' => $agency_id,
+            'name' => $name,
+            'email' => $email,
+            'phone' => $phone,
+            'message' => $message,
+            'date' => current_time('mysql'),
+            'ip' => $ip,
+            'inquiry_id' => $inquiry_id,
+            'is_guest' => !get_current_user_id()
+        );
+
+        $agent_inquiries = get_user_meta($agent_id, '_malisafi_inquiries', true);
+        $agent_inquiries = $agent_inquiries ? maybe_unserialize($agent_inquiries) : array();
+        $agent_inquiries[] = $meta_data;
+        update_user_meta($agent_id, '_malisafi_inquiries', $agent_inquiries);
+
+        // Store in agency's meta if agent belongs to an agency
+        if ($agency && isset($agency->user_id)) {
+            $agency_meta_data = $meta_data;
+            $agency_meta_data['agent_name'] = $agent_name;
+            $agency_meta_data['agent_email'] = $agent_email;
+
+            $agency_inquiries = get_user_meta($agency->user_id, '_malisafi_agency_inquiries', true);
+            $agency_inquiries = $agency_inquiries ? maybe_unserialize($agency_inquiries) : array();
+            $agency_inquiries[] = $agency_meta_data;
+            update_user_meta($agency->user_id, '_malisafi_agency_inquiries', $agency_inquiries);
+        }
+
+        // Increment rate count (expire after 5 minutes)
+        set_transient($rate_key, $rate_count + 1, 5 * MINUTE_IN_SECONDS);
+
+        if ($sent) {
+            wp_send_json_success(array('message' => 'Your message has been sent successfully.'));
+        }
+
+        // Mail failed but stored
+        wp_send_json_error(array('message' => 'Message saved but failed to send email. The agent will be notified via the dashboard.'));
+    }
+
+    /**
+     * Get client IP address (respecting basic proxy headers)
+     */
+    private function get_client_ip() {
+        $ip_keys = array('HTTP_X_FORWARDED_FOR', 'HTTP_CLIENT_IP', 'REMOTE_ADDR');
+        foreach ($ip_keys as $key) {
+            if (!empty($_SERVER[$key])) {
+                $ips = explode(',', $_SERVER[$key]);
+                return trim($ips[0]);
+            }
+        }
+        return '0.0.0.0';
     }
     
     /**

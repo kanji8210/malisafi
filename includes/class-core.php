@@ -147,6 +147,10 @@ class Core {
         require_once MALISAFI_MLS_PATH . 'includes/class-email-settings.php';
         \MalisafiMLS\Email_Settings::init();
         
+        // Initialize inquiries admin
+        require_once MALISAFI_MLS_PATH . 'admin/class-inquiries-admin.php';
+        \Malisafi_Inquiries_Admin::init();
+        
         // Initialize cache manager
         Cache_Manager::init();
         

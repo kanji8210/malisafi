@@ -824,6 +824,8 @@ $formatted_price = $price > 0 ? ($currency_symbol . ' ' . number_format($price))
         <div class="modal-body">
             <form id="inquiry-form">
                 <input type="hidden" name="property_id" value="<?php echo $property_id; ?>">
+                <input type="hidden" name="hp_name" value="">
+                <input type="hidden" name="form_ts" value="<?php echo time(); ?>">
                 
                 <div class="form-group">
                     <label>Your Name</label>
@@ -847,6 +849,10 @@ $formatted_price = $price > 0 ? ($currency_symbol . ' ' . number_format($price))
                 
                 <div class="form-actions">
                     <button type="button" class="button-secondary modal-close">Cancel</button>
+                    <?php if (get_option('malisafi_inquiry_recaptcha_enabled') && get_option('malisafi_inquiry_recaptcha_site_key')): ?>
+                        <div class="g-recaptcha" data-sitekey="<?php echo esc_attr(get_option('malisafi_inquiry_recaptcha_site_key')); ?>" style="margin-bottom:8px;"></div>
+                        <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+                    <?php endif; ?>
                     <button type="submit" class="button-primary">Send Inquiry</button>
                 </div>
             </form>

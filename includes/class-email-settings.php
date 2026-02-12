@@ -23,10 +23,8 @@ class Email_Settings {
         add_action('admin_menu', array(__CLASS__, 'add_settings_page'));
         add_action('admin_init', array(__CLASS__, 'register_settings'));
         add_action('malisafi_inquiry_created', array(__CLASS__, 'send_agency_notification'), 10, 2);
-        add_action('malisafi_user_registered', array(__CLASS__, 'send_verification_email'), 10, 4);
-        add_action('init', array(__CLASS__, 'check_verification_link'));
-        add_action('wp_ajax_malisafi_verify_email', array(__CLASS__, 'verify_email'));
-        add_action('wp_ajax_nopriv_malisafi_verify_email', array(__CLASS__, 'verify_email'));
+        // Email verification hooks removed temporarily because outgoing email isn't reliable in the current environment.
+        // Verification is disabled: we will not register verification handlers or send verification emails for now.
     }
 
     /**
@@ -57,6 +55,10 @@ class Email_Settings {
         register_setting('malisafi_email_settings', 'malisafi_verification_email_template');
         register_setting('malisafi_email_settings', 'malisafi_agency_notification_subject');
         register_setting('malisafi_email_settings', 'malisafi_agency_notification_template');
+        // reCAPTCHA for inquiries
+        register_setting('malisafi_email_settings', 'malisafi_inquiry_recaptcha_enabled');
+        register_setting('malisafi_email_settings', 'malisafi_inquiry_recaptcha_site_key');
+        register_setting('malisafi_email_settings', 'malisafi_inquiry_recaptcha_secret');
     }
 
     /**
@@ -181,6 +183,39 @@ class Email_Settings {
                             <p class="description">
                                 <?php _e('Available placeholders: {agency_name}, {agent_name}, {property_title}, {client_name}, {client_email}, {client_phone}, {message}, {property_url}, {site_name}', 'malisafi-mls'); ?>
                             </p>
+                        </td>
+                    </tr>
+
+                    <!-- reCAPTCHA Settings -->
+                    <tr>
+                        <th colspan="2">
+                            <h3><?php _e('Inquiry Spam Protection', 'malisafi-mls'); ?></h3>
+                        </th>
+                    </tr>
+
+                    <tr>
+                        <th scope="row"><?php _e('Enable reCAPTCHA for inquiries', 'malisafi-mls'); ?></th>
+                        <td>
+                            <label>
+                                <input type="checkbox" name="malisafi_inquiry_recaptcha_enabled" value="1" <?php checked(get_option('malisafi_inquiry_recaptcha_enabled'), '1'); ?>>
+                                <?php _e('Require Google reCAPTCHA on inquiry forms', 'malisafi-mls'); ?>
+                            </label>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <th scope="row"><?php _e('reCAPTCHA Site Key', 'malisafi-mls'); ?></th>
+                        <td>
+                            <input type="text" name="malisafi_inquiry_recaptcha_site_key" value="<?php echo esc_attr(get_option('malisafi_inquiry_recaptcha_site_key', '')); ?>" class="regular-text">
+                            <p class="description"><?php _e('Public site key for client-side reCAPTCHA integration.', 'malisafi-mls'); ?></p>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <th scope="row"><?php _e('reCAPTCHA Secret', 'malisafi-mls'); ?></th>
+                        <td>
+                            <input type="text" name="malisafi_inquiry_recaptcha_secret" value="<?php echo esc_attr(get_option('malisafi_inquiry_recaptcha_secret', '')); ?>" class="regular-text">
+                            <p class="description"><?php _e('Secret key used for server-side verification (keep private).', 'malisafi-mls'); ?></p>
                         </td>
                     </tr>
                 </table>
@@ -431,11 +466,8 @@ You can manage this user in the WordPress admin panel.',
      * Check if user email is verified
      */
     public static function is_email_verified($user_id) {
-        if (!get_option('malisafi_email_verification_enabled')) {
-            return true; // If verification is disabled, consider all emails verified
-        }
-
-        return get_user_meta($user_id, '_malisafi_email_verified', true) === '1';
+        // Verification is disabled for now — treat all users as verified.
+        return true;
     }
 }
 

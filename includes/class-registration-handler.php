@@ -135,14 +135,12 @@ class Malisafi_Registration_Handler {
             $errors[] = __('Password must be at least 8 characters long.', 'malisafi-mls');
         }
         
-        // Validate agent-specific fields
+        // Validate agent-specific fields (make license number and national ID optional)
         if ($account_type === 'agent') {
             if (empty($agency_name)) {
                 $errors[] = __('Agency name is required for agents.', 'malisafi-mls');
             }
-            if (empty($license_number)) {
-                $errors[] = __('License number is required for agents.', 'malisafi-mls');
-            }
+            // License number is optional for now (email verification disabled)
             if (empty($years_experience)) {
                 $errors[] = __('Years of experience is required for agents.', 'malisafi-mls');
             }
@@ -161,9 +159,7 @@ class Malisafi_Registration_Handler {
             if (empty($agent_bio) || strlen($agent_bio) < 100) {
                 $errors[] = __('Professional bio is required and must be at least 100 characters.', 'malisafi-mls');
             }
-            if (empty($national_id)) {
-                $errors[] = __('National ID is required for verification.', 'malisafi-mls');
-            }
+            // National ID is optional for now
         }
         
         // Validate role
@@ -220,8 +216,8 @@ class Malisafi_Registration_Handler {
             'youtube' => $youtube
         );
         
-        // Create user using helper (with auto-login only if email verification is disabled)
-        $auto_login = !get_option('malisafi_email_verification_enabled');
+        // Create user using helper - always auto-login (email verification temporarily disabled)
+        $auto_login = true;
         $user_id = User_Creation_Helper::create_user($user_data, $meta_data, $auto_login);
         
         if (is_wp_error($user_id)) {
@@ -235,35 +231,25 @@ class Malisafi_Registration_Handler {
         
         // Log user registration
         do_action('malisafi_user_registered', $user_id, $user_role, $account_type, $user_data);
-        
-        if (get_option('malisafi_email_verification_enabled')) {
-            // Email verification is enabled - don't auto-login, send verification email
-            wp_send_json_success(array(
-                'message' => __('Registration successful! Please check your email to verify your account.', 'malisafi-mls'),
-                'redirect' => home_url('/login/?verification_sent=1'),
-                'email_verification_required' => true
-            ));
-        } else {
-            // No email verification - send welcome email and redirect
-            self::send_welcome_email($user_id, $email, $first_name, $account_type);
-            
-            // Determine redirect URL based on account type
-            $redirect_url = home_url('/my-favorites'); // Default to favorites for clients
-            
-            if ($account_type === 'agency') {
-                $redirect_url = home_url('/agency-dashboard');
-            } elseif ($account_type === 'agent' || $account_type === 'owner' || $account_type === 'developer') {
-                $redirect_url = home_url('/agent-dashboard');
-            } elseif ($account_type === 'client') {
-                $redirect_url = home_url('/my-favorites');
-            }
-            
-            wp_send_json_success(array(
-                'message' => __('Registration successful! Redirecting...', 'malisafi-mls'),
-                'redirect' => $redirect_url,
-                'user_id' => $user_id
-            ));
+        // No email verification - send welcome email and redirect
+        self::send_welcome_email($user_id, $email, $first_name, $account_type);
+
+        // Determine redirect URL based on account type
+        $redirect_url = home_url('/my-favorites'); // Default to favorites for clients
+
+        if ($account_type === 'agency') {
+            $redirect_url = home_url('/agency-dashboard');
+        } elseif ($account_type === 'agent' || $account_type === 'owner' || $account_type === 'developer') {
+            $redirect_url = home_url('/agent-dashboard');
+        } elseif ($account_type === 'client') {
+            $redirect_url = home_url('/my-favorites');
         }
+
+        wp_send_json_success(array(
+            'message' => __('Registration successful! Redirecting...', 'malisafi-mls'),
+            'redirect' => $redirect_url,
+            'user_id' => $user_id
+        ));
     }
     
 
