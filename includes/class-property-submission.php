@@ -278,16 +278,58 @@ class Property_Submission {
                 wp_send_json_error(array('message' => __('Invalid property', 'malisafi-mls')));
             }
         } else {
-            // Create new draft
-            $property_id = wp_insert_post(array(
-                'post_type' => 'malisafi_property',
-                'post_status' => 'draft',
-                'post_author' => get_current_user_id(),
-                'post_title' => __('Draft Property', 'malisafi-mls') . ' ' . date('Y-m-d H:i:s')
-            ));
-            
-            if (is_wp_error($property_id)) {
-                wp_send_json_error(array('message' => $property_id->get_error_message()));
+            // Try to reuse a recently-created auto-draft to avoid duplicates (race conditions)
+            $current_user_id = get_current_user_id();
+
+            // Check transient lock first
+            $lock_key = 'malisafi_autodraft_lock_' . $current_user_id;
+            $locked_id = get_transient($lock_key);
+            if ($locked_id) {
+                $existing_post = get_post($locked_id);
+                if ($existing_post && $existing_post->post_type === 'malisafi_property' && $existing_post->post_status === 'draft' && (int) $existing_post->post_author === $current_user_id) {
+                    $property_id = $existing_post->ID;
+                } else {
+                    delete_transient($lock_key);
+                    $locked_id = false;
+                }
+            }
+
+            if (empty($property_id)) {
+                // Look for the most recent draft created by this user within the last 10 minutes
+                $recent_posts = get_posts(array(
+                    'post_type' => 'malisafi_property',
+                    'author' => $current_user_id,
+                    'post_status' => 'draft',
+                    'posts_per_page' => 1,
+                    'orderby' => 'date',
+                    'order' => 'DESC',
+                    'date_query' => array(
+                        array('after' => '10 minutes ago')
+                    )
+                ));
+
+                if (!empty($recent_posts) && isset($recent_posts[0]->ID)) {
+                    $property_id = $recent_posts[0]->ID;
+                }
+            }
+
+            if (empty($property_id)) {
+                // Create new draft and set transient lock
+                $property_id = wp_insert_post(array(
+                    'post_type' => 'malisafi_property',
+                    'post_status' => 'draft',
+                    'post_author' => $current_user_id,
+                    'post_title' => __('Draft Property', 'malisafi-mls') . ' ' . date('Y-m-d H:i:s')
+                ));
+
+                if (is_wp_error($property_id)) {
+                    wp_send_json_error(array('message' => $property_id->get_error_message()));
+                }
+
+                // Lock for 5 minutes to avoid duplicate inserts from concurrent requests
+                set_transient($lock_key, $property_id, 5 * MINUTE_IN_SECONDS);
+                // Mark as auto-draft for easier lookup/debug
+                update_post_meta($property_id, '_malisafi_auto_draft', 1);
             }
         }
         
