@@ -214,9 +214,10 @@ class Database {
             message TEXT,
             status ENUM('new', 'read', 'replied', 'closed') DEFAULT 'new',
             client_phone VARCHAR(20),
-            client_email VARCHAR(255),
-            preferred_contact_time ENUM('morning', 'afternoon', 'evening', 'anytime'),
-            tour_requested_date DATETIME NULL,
+                client_email VARCHAR(255),
+                preferred_contact_time ENUM('morning', 'afternoon', 'evening', 'anytime'),
+                tour_requested_date DATETIME NULL,
+                client_ip VARCHAR(45),
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
             

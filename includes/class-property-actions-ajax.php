@@ -315,7 +315,14 @@ class Property_Actions_Ajax {
 
         $inserted = $wpdb->insert($table_name, $inquiry_db);
         if (!$inserted) {
-            error_log('Malisafi: Failed to insert inquiry DB record: ' . $wpdb->last_error);
+            error_log('Malisafi: Failed to insert inquiry DB record.');
+            error_log('Malisafi Debug: table=' . $table_name);
+            error_log('Malisafi Debug: last_error=' . $wpdb->last_error);
+            error_log('Malisafi Debug: last_query=' . $wpdb->last_query);
+            error_log('Malisafi Debug: insert_payload=' . wp_json_encode($inquiry_db));
+            if (defined('WP_DEBUG') && WP_DEBUG) {
+                error_log('Malisafi Debug: DB error trace: ' . print_r($wpdb, true));
+            }
             wp_send_json_error(array('message' => 'Failed to save inquiry. Please try again later.'));
         }
 
@@ -577,6 +584,14 @@ class Property_Actions_Ajax {
 
                 wp_send_json_success(array('message' => 'Your message has been sent successfully.'));
             } else {
+                error_log('Malisafi: Failed to insert inquiry DB record (secondary path).');
+                error_log('Malisafi Debug: table=' . $table_name);
+                error_log('Malisafi Debug: last_error=' . $wpdb->last_error);
+                error_log('Malisafi Debug: last_query=' . $wpdb->last_query);
+                error_log('Malisafi Debug: insert_payload=' . wp_json_encode($inquiry_data));
+                if (defined('WP_DEBUG') && WP_DEBUG) {
+                    error_log('Malisafi Debug: DB error trace: ' . print_r($wpdb, true));
+                }
                 wp_send_json_error(array('message' => 'Message sent but failed to save inquiry record.'));
             }
         } else {
