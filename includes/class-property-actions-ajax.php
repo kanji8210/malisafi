@@ -300,7 +300,7 @@ class Property_Actions_Ajax {
 
         $inquiry_db = array(
             'property_id' => $property_id,
-            'client_id' => get_current_user_id() ?: null,
+            'client_id' => get_current_user_id() ?: 0,
             'agent_id' => $agent_id,
             'agency_id' => $agency_id,
             'inquiry_type' => 'general',
@@ -512,7 +512,7 @@ class Property_Actions_Ajax {
             // Store inquiry in database table
             $inquiry_data = array(
                 'property_id' => $property_id,
-                'client_id' => get_current_user_id() ?: null, // NULL for guest users
+                    'client_id' => get_current_user_id() ?: 0, // 0 for guest users to match DB NOT NULL constraint
                 'agent_id' => $agent_id,
                 'agency_id' => $agency_id, // Store agency ID if agent belongs to one
                 'inquiry_type' => 'general',
