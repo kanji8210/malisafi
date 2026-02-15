@@ -31,6 +31,8 @@ class Property_Actions_Ajax {
         
         add_action('wp_ajax_malisafi_contact_agent', array($this, 'contact_agent'));
         add_action('wp_ajax_nopriv_malisafi_contact_agent', array($this, 'contact_agent'));
+        // Admin-only DB repair endpoint (AJAX)
+        add_action('wp_ajax_malisafi_db_repair', array($this, 'db_repair'));
         
         // Enqueue scripts
         add_action('wp_enqueue_scripts', array($this, 'enqueue_scripts'));
@@ -158,6 +160,11 @@ class Property_Actions_Ajax {
     public function send_inquiry() {
         // Debug logging
         error_log('Malisafi: send_inquiry called');
+        // Log incoming request context for debugging network errors
+        error_log('Malisafi Debug: REQUEST_URI=' . ($_SERVER['REQUEST_URI'] ?? ''));
+        error_log('Malisafi Debug: REMOTE_ADDR=' . ($_SERVER['REMOTE_ADDR'] ?? ''));
+        error_log('Malisafi Debug: HTTP_USER_AGENT=' . ($_SERVER['HTTP_USER_AGENT'] ?? ''));
+        error_log('Malisafi Debug: Raw POST=' . wp_json_encode($_POST));
 
         // Verify nonce
         if (!isset($_POST['nonce']) || !wp_verify_nonce($_POST['nonce'], 'malisafi_ajax_nonce')) {
@@ -569,7 +576,6 @@ class Property_Actions_Ajax {
                 $agent_inquiries = $agent_inquiries ? maybe_unserialize($agent_inquiries) : array();
                 $agent_inquiries[] = $meta_data;
                 update_user_meta($agent_id, '_malisafi_inquiries', $agent_inquiries);
-                
                 // Store in agency's meta if agent belongs to an agency
                 if ($agency && isset($agency->user_id)) {
                     $agency_meta_data = $meta_data;
@@ -597,6 +603,80 @@ class Property_Actions_Ajax {
         } else {
             wp_send_json_error(array('message' => 'Failed to send message. Please try again.'));
         }
+    }
+
+    /**
+     * Admin AJAX: Repair / alter core plugin tables safely.
+     * - Adds `client_ip` to mf_inquiries if missing
+     * - If table is missing or other errors occur, renames table to backup and recreates via Database::create_tables()
+     */
+    public function db_repair() {
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error(array('message' => 'Insufficient permissions.'));
+        }
+
+        // optional nonce check
+        if (!empty($_POST['nonce']) && !wp_verify_nonce($_POST['nonce'], 'malisafi_admin_db_repair')) {
+            wp_send_json_error(array('message' => 'Invalid nonce.'));
+        }
+
+        global $wpdb;
+        $table_name = $wpdb->prefix . 'mf_inquiries';
+
+        // Check if table exists
+        $table_exists = $wpdb->get_var("SHOW TABLES LIKE '" . $wpdb->esc_like( $table_name ) . "'");
+        if (!$table_exists) {
+            error_log('Malisafi DB Repair: table not found: ' . $table_name);
+            // Attempt to recreate all tables
+            try {
+                if (class_exists('\MalisafiMLS\Database')) {
+                    \MalisafiMLS\Database::create_tables();
+                    wp_send_json_success(array('message' => 'Tables recreated (table was missing).'));
+                } else {
+                    wp_send_json_error(array('message' => 'Database class not available.'));
+                }
+            } catch (\Throwable $e) {
+                wp_send_json_error(array('message' => 'Failed to recreate tables: ' . $e->getMessage()));
+            }
+        }
+
+        // Check for client_ip column
+        $col = $wpdb->get_row("SHOW COLUMNS FROM {$table_name} LIKE 'client_ip'");
+        if ($col) {
+            wp_send_json_success(array('message' => 'No action required: `client_ip` column already exists.'));
+        }
+
+        // Try to add the column
+        $alter_sql = "ALTER TABLE {$table_name} ADD COLUMN `client_ip` VARCHAR(45) NOT NULL DEFAULT '' AFTER `updated_at`";
+
+        $res = $wpdb->query($alter_sql);
+        if ($res === false) {
+            // If ALTER failed due to severe schema issues, fallback to backup+recreate
+            $last_error = $wpdb->last_error;
+            error_log('Malisafi DB Repair: ALTER failed: ' . $last_error);
+            // Rename current table to a timestamped backup
+            $backup_name = $table_name . '_backup_' . date('Ymd_His');
+            $rename_sql = "RENAME TABLE {$table_name} TO {$backup_name}";
+            $rename_res = $wpdb->query($rename_sql);
+            if ($rename_res === false) {
+                error_log('Malisafi DB Repair: Failed to rename table: ' . $wpdb->last_error);
+                wp_send_json_error(array('message' => 'Failed to alter or backup the table: ' . $wpdb->last_error));
+            }
+
+            // Recreate tables using plugin's Database class
+            try {
+                if (class_exists('\MalisafiMLS\Database')) {
+                    \MalisafiMLS\Database::create_tables();
+                    wp_send_json_success(array('message' => 'Table renamed to backup and tables recreated. Backup: ' . $backup_name));
+                } else {
+                    wp_send_json_error(array('message' => 'Database class not available to recreate tables.'));
+                }
+            } catch (\Throwable $e) {
+                wp_send_json_error(array('message' => 'Recreate failed: ' . $e->getMessage()));
+            }
+        }
+
+        wp_send_json_success(array('message' => '`client_ip` column added successfully.'));
     }
 }
 

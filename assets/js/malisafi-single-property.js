@@ -279,7 +279,23 @@ console.log('Malisafi Single Property JS file loaded');
                     }
                 },
                 error: function() {
-                    alert('Network error. Please try again.');
+                    // Log detailed XHR info for debugging
+                    try {
+                        console.error('Malisafi: Inquiry AJAX network error', arguments);
+                        var xhr = arguments[0];
+                        var textStatus = arguments[1];
+                        var errorThrown = arguments[2];
+                        console.error('Malisafi AJAX Error Details:', {
+                            status: xhr && xhr.status,
+                            statusText: xhr && xhr.statusText,
+                            responseText: xhr && xhr.responseText,
+                            textStatus: textStatus,
+                            errorThrown: errorThrown
+                        });
+                        alert('Network error. See console (DevTools) for details.');
+                    } catch (e) {
+                        alert('Network error. Please try again.');
+                    }
                 },
                 complete: function() {
                     $reportForm.find('.button-primary').prop('disabled', false).text('Submit Report');
