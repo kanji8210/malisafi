@@ -27,6 +27,30 @@ console.log('Malisafi Single Property JS file loaded');
             console.log('Gallery initialization complete');
         }, 100);
         
+        // Helper: Safely extract a user-facing message from AJAX responses
+        function getResponseMessage(response, fallback) {
+            fallback = fallback || 'An error occurred. Please try again.';
+            if (!response) {
+                return fallback;
+            }
+            if (typeof response === 'string') {
+                return response;
+            }
+            if (response.data) {
+                if (typeof response.data === 'string') {
+                    return response.data;
+                }
+                if (response.data.message) {
+                    return response.data.message;
+                }
+                try {
+                    return JSON.stringify(response.data);
+                } catch (e) {
+                    return fallback;
+                }
+            }
+            return fallback;
+        }
         // Initialize gallery
         function initGallery() {
             var $thumbnails = $('.gallery-thumbnails .thumbnail');
@@ -251,7 +275,7 @@ console.log('Malisafi Single Property JS file loaded');
                         $('body').removeClass('modal-open');
                         $reportForm[0].reset();
                     } else {
-                        alert(response.data || 'Failed to submit report. Please try again.');
+                        alert(getResponseMessage(response, 'Failed to submit report. Please try again.'));
                     }
                 },
                 error: function() {
@@ -303,7 +327,7 @@ console.log('Malisafi Single Property JS file loaded');
                         $('body').removeClass('modal-open');
                         $inquiryForm[0].reset();
                     } else {
-                        alert(response.data || 'Failed to send inquiry. Please try again.');
+                        alert(getResponseMessage(response, 'Failed to send inquiry. Please try again.'));
                     }
                 },
                 error: function() {
@@ -411,7 +435,7 @@ console.log('Malisafi Single Property JS file loaded');
                         alert('Message sent successfully!');
                         $form[0].reset();
                     } else {
-                        alert(response.data || 'Failed to send message. Please try again.');
+                        alert(getResponseMessage(response, 'Failed to send message. Please try again.'));
                     }
                 },
                 error: function() {
