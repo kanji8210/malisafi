@@ -18,9 +18,30 @@ if (!current_user_can('manage_options')) {
 // Handle form submission
 if (isset($_POST['malisafi_repair_database']) && check_admin_referer('malisafi_repair_database')) {
     require_once MALISAFI_MLS_PATH . 'includes/class-database.php';
+    // First create any missing tables
     MalisafiMLS\Database::update_schema();
-    
-    echo '<div class="notice notice-success is-dismissible"><p>' . __('Database tables have been checked and repaired successfully!', 'malisafi-mls') . '</p></div>';
+
+    // Then attempt repair of specific schema issues (missing columns)
+    $repair_results = MalisafiMLS\Database::repair_schema();
+
+    if (empty($repair_results)) {
+        echo '<div class="notice notice-success is-dismissible"><p>' . __('Database checked: no schema alterations were necessary.', 'malisafi-mls') . '</p></div>';
+    } else {
+        $ok = true;
+        foreach ($repair_results as $table => $cols) {
+            foreach ($cols as $col => $r) {
+                if (!$r['success']) {
+                    $ok = false;
+                }
+            }
+        }
+
+        if ($ok) {
+            echo '<div class="notice notice-success is-dismissible"><p>' . __('Schema repaired successfully.', 'malisafi-mls') . '</p></div>';
+        } else {
+            echo '<div class="notice notice-error is-dismissible"><p>' . __('Some schema repairs failed. Check debug log for details.', 'malisafi-mls') . '</p></div>';
+        }
+    }
 }
 
 // Generate missing reference IDs
@@ -132,14 +153,37 @@ foreach ($table_names as $table => $label) {
         
         <br>
         
-        <form method="post" onsubmit="return confirm('<?php esc_attr_e('This will create missing database tables. Are you sure?', 'malisafi-mls'); ?>');">
+        <?php
+        // Show schema issues if any
+        require_once MALISAFI_MLS_PATH . 'includes/class-database.php';
+        $schema_issues = MalisafiMLS\Database::get_schema_issues();
+        if (!empty($schema_issues)) : ?>
+            <div class="notice notice-warning"><p><?php _e('Schema issues detected. You can repair missing columns by clicking Repair.', 'malisafi-mls'); ?></p></div>
+            <table class="wp-list-table widefat fixed striped">
+                <thead>
+                    <tr><th><?php _e('Table', 'malisafi-mls'); ?></th><th><?php _e('Missing Column', 'malisafi-mls'); ?></th></tr>
+                </thead>
+                <tbody>
+                <?php foreach ($schema_issues as $table => $cols) : foreach ($cols as $c) : ?>
+                    <tr>
+                        <td><code><?php echo esc_html($table); ?></code></td>
+                        <td><code><?php echo esc_html($c['column']); ?></code></td>
+                    </tr>
+                <?php endforeach; endforeach; ?>
+                </tbody>
+            </table>
+        <?php else: ?>
+            <p class="description"><?php _e('No schema alterations detected. The plugin schema appears up-to-date.', 'malisafi-mls'); ?></p>
+        <?php endif; ?>
+
+        <form method="post" onsubmit="return confirm('<?php esc_attr_e('This will create missing database tables and attempt to repair missing columns. Are you sure?', 'malisafi-mls'); ?>');">
             <?php wp_nonce_field('malisafi_repair_database'); ?>
             <button type="submit" name="malisafi_repair_database" class="button button-primary button-large">
                 <span class="dashicons dashicons-database-add" style="margin-top: 3px;"></span>
-                <?php _e('Create/Repair Missing Tables', 'malisafi-mls'); ?>
+                <?php _e('Create/Repair Missing Tables & Schema', 'malisafi-mls'); ?>
             </button>
             <p class="description">
-                <?php _e('This will check all required tables and create any that are missing. Existing tables will not be affected.', 'malisafi-mls'); ?>
+                <?php _e('This will check all required tables and create any that are missing. It will also attempt to add missing columns where safe.', 'malisafi-mls'); ?>
             </p>
         </form>
     </div>

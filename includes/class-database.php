@@ -546,6 +546,77 @@ class Database {
             }
         }
     }
+
+    /**
+     * Return schema issues: missing columns per table with SQL fragments to apply
+     * @return array [ full_table_name => [ ['column' => 'name', 'sql' => 'ALTER FRAGMENT'], ... ] ]
+     */
+    public static function get_schema_issues() {
+        global $wpdb;
+        $issues = array();
+
+        $tables = array(
+            'mf_inquiries' => array(
+                // column => SQL fragment to add
+                'client_ip' => "ADD COLUMN `client_ip` VARCHAR(45) NOT NULL DEFAULT '' AFTER `updated_at`"
+            )
+        );
+
+        foreach ($tables as $short => $cols) {
+            $full = $wpdb->prefix . $short;
+            // skip if table doesn't exist - update_schema will create missing tables
+            if ($wpdb->get_var("SHOW TABLES LIKE '" . $wpdb->esc_like($full) . "'") !== $full) {
+                continue;
+            }
+
+            foreach ($cols as $col => $frag) {
+                $row = $wpdb->get_row("SHOW COLUMNS FROM {$full} LIKE '{$col}'");
+                if (!$row) {
+                    if (!isset($issues[$full])) {
+                        $issues[$full] = array();
+                    }
+                    $issues[$full][] = array(
+                        'column' => $col,
+                        'sql_fragment' => $frag
+                    );
+                }
+            }
+        }
+
+        return $issues;
+    }
+
+    /**
+     * Attempt to repair schema issues found by get_schema_issues().
+     * Returns array of results per table/column.
+     * @return array
+     */
+    public static function repair_schema() {
+        global $wpdb;
+        $issues = self::get_schema_issues();
+        $results = array();
+
+        foreach ($issues as $table => $cols) {
+            foreach ($cols as $col) {
+                $sql = "ALTER TABLE {$table} " . $col['sql_fragment'];
+                $res = $wpdb->query($sql);
+                if ($res === false) {
+                    $results[$table][$col['column']] = array(
+                        'success' => false,
+                        'error' => $wpdb->last_error,
+                        'query' => $wpdb->last_query
+                    );
+                } else {
+                    $results[$table][$col['column']] = array(
+                        'success' => true,
+                        'query' => $sql
+                    );
+                }
+            }
+        }
+
+        return $results;
+    }
     
     /**
      * Create all analytics tables
