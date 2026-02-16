@@ -794,6 +794,16 @@ if (isset($_GET['error'])) {
 
 .malisafi-users-page .column-role {
     width: 12%;
+    white-space: nowrap;
+}
+
+.malisafi-users-page th.column-role {
+    word-wrap: normal;
+    overflow-wrap: normal;
+    word-break: normal;
+    letter-spacing: normal;
+    text-orientation: mixed;
+    writing-mode: horizontal-tb;
 }
 
 .malisafi-users-page .column-subscription {
