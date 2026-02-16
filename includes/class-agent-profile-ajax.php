@@ -102,6 +102,9 @@ class Agent_Profile_Ajax {
         
         // Sanitize inputs
         $data = array(
+            'first_name' => isset($_POST['agent_first_name']) ? sanitize_text_field($_POST['agent_first_name']) : '',
+            'last_name' => isset($_POST['agent_last_name']) ? sanitize_text_field($_POST['agent_last_name']) : '',
+            'display_name' => isset($_POST['agent_display_name']) ? sanitize_text_field($_POST['agent_display_name']) : '',
             'agent_email' => sanitize_email($_POST['agent_email']),
             'agent_phone' => sanitize_text_field($_POST['agent_phone']),
             'agent_whatsapp' => sanitize_text_field($_POST['agent_whatsapp']),
@@ -122,6 +125,10 @@ class Agent_Profile_Ajax {
             wp_send_json_error(array('message' => __('Email and phone number are required.', 'malisafi-mls')));
         }
         
+        if (empty($data['first_name']) || empty($data['last_name']) || empty($data['display_name'])) {
+            wp_send_json_error(array('message' => __('First name, last name, and display name are required.', 'malisafi-mls')));
+        }
+        
         // Create or update agent profile post
         if ($agent_id) {
             // Update existing
@@ -130,11 +137,17 @@ class Agent_Profile_Ajax {
                 wp_send_json_error(array('message' => __('Invalid agent profile.', 'malisafi-mls')));
             }
             
-            // Verify ownership
+            // Verify ownership or admin permission
             $linked_user = get_post_meta($agent_id, '_agent_user_id', true);
-            if ($linked_user != $current_user->ID && !current_user_can('manage_options')) {
+            $is_admin = current_user_can('manage_options');
+            
+            if ($linked_user != $current_user->ID && !$is_admin) {
                 wp_send_json_error(array('message' => __('Permission denied.', 'malisafi-mls')));
             }
+            
+            // Determine which user profile to update
+            // If admin is editing, use the agent's user ID; otherwise use current user
+            $user_id_to_update = $is_admin && $linked_user ? intval($linked_user) : $current_user->ID;
         } else {
             // Create new agent profile
             $agent_id = wp_insert_post(array(
@@ -149,7 +162,28 @@ class Agent_Profile_Ajax {
             }
             
             update_post_meta($agent_id, '_agent_user_id', $current_user->ID);
+            $user_id_to_update = $current_user->ID;
         }
+        
+        // Update WordPress user profile (name fields)
+        // Use the correct user ID (agent's ID if admin is editing, or current user's ID)
+        $user_update = array(
+            'ID' => $user_id_to_update,
+            'first_name' => $data['first_name'],
+            'last_name' => $data['last_name'],
+            'display_name' => $data['display_name']
+        );
+        
+        $user_updated = wp_update_user($user_update);
+        if (is_wp_error($user_updated)) {
+            wp_send_json_error(array('message' => __('Failed to update user profile: ', 'malisafi-mls') . $user_updated->get_error_message()));
+        }
+        
+        // Also update the agent post title to match display name
+        wp_update_post(array(
+            'ID' => $agent_id,
+            'post_title' => $data['display_name']
+        ));
         
         // Update meta fields
         update_post_meta($agent_id, '_agent_photo', $data['agent_photo_id']);

@@ -658,6 +658,115 @@ if (isset($_GET['error'])) {
             </p>
         </form>
         
+        <!-- Subscription Plan Management -->
+        <?php if (class_exists('MalisafiMLS\Plan_Manager')) : ?>
+            <div class="malisafi-plan-management-section" style="margin-top: 30px; padding: 20px; background: #fff; border: 1px solid #ccd0d4; box-shadow: 0 1px 1px rgba(0,0,0,.04);">
+                <h2><?php _e('Subscription Plan Management', 'malisafi-mls'); ?></h2>
+                
+                <?php 
+                $subscription = \MalisafiMLS\Plan_Manager::get_user_subscription($user_id);
+                $plan_details = \MalisafiMLS\Plan_Manager::get_user_plan_details($user_id);
+                ?>
+                
+                <?php if ($subscription && $subscription->status === 'active') : ?>
+                    <!-- Current Plan Display -->
+                    <div class="current-plan-info" style="margin-bottom: 20px; padding: 15px; background: #f0f6fc; border-left: 4px solid #00a32a;">
+                        <h3 style="margin-top: 0;"><?php _e('Current Plan:', 'malisafi-mls'); ?> <strong><?php echo esc_html($plan_details['name'] ?? ucwords(str_replace('_', ' ', $subscription->plan_type))); ?></strong></h3>
+                        <p>
+                            <strong><?php _e('Status:', 'malisafi-mls'); ?></strong> 
+                            <span class="subscription-status status-<?php echo esc_attr($subscription->status); ?>"><?php echo esc_html(ucfirst($subscription->status)); ?></span>
+                        </p>
+                        <p><strong><?php _e('Plan Type:', 'malisafi-mls'); ?></strong> <?php echo esc_html($subscription->plan_type); ?></p>
+                        <?php if ($subscription->current_period_start) : ?>
+                            <p><strong><?php _e('Start Date:', 'malisafi-mls'); ?></strong> <?php echo date_i18n(get_option('date_format'), strtotime($subscription->current_period_start)); ?></p>
+                        <?php endif; ?>
+                        <?php if ($subscription->current_period_end) : ?>
+                            <p><strong><?php _e('End Date:', 'malisafi-mls'); ?></strong> <?php echo date_i18n(get_option('date_format'), strtotime($subscription->current_period_end)); ?></p>
+                        <?php endif; ?>
+                        <?php if ($subscription->stripe_subscription_id) : ?>
+                            <p><strong><?php _e('Stripe Subscription ID:', 'malisafi-mls'); ?></strong> <code><?php echo esc_html($subscription->stripe_subscription_id); ?></code></p>
+                        <?php endif; ?>
+                        
+                        <p style="margin-top: 15px;">
+                            <button type="button" class="button toggle-plan-form" data-user-id="<?php echo esc_attr($user_id); ?>">
+                                <?php _e('Change Plan', 'malisafi-mls'); ?>
+                            </button>
+                            <button type="button" class="button button-secondary malisafi-remove-plan-btn" data-user-id="<?php echo esc_attr($user_id); ?>" style="margin-left: 10px;">
+                                <?php _e('Cancel Subscription', 'malisafi-mls'); ?>
+                            </button>
+                        </p>
+                    </div>
+                <?php else : ?>
+                    <!-- No Active Plan -->
+                    <div class="no-plan-warning" style="margin-bottom: 20px; padding: 15px; background: #fcf3cf; border-left: 4px solid #f39c12;">
+                        <p><strong><?php _e('⚠️ This user does not have an active subscription plan.', 'malisafi-mls'); ?></strong></p>
+                        <p><?php _e('Assign a plan to grant this user access to premium features and property listing capabilities.', 'malisafi-mls'); ?></p>
+                        <p>
+                            <button type="button" class="button button-primary toggle-plan-form" data-user-id="<?php echo esc_attr($user_id); ?>">
+                                <?php _e('Assign Plan', 'malisafi-mls'); ?>
+                            </button>
+                        </p>
+                    </div>
+                <?php endif; ?>
+                
+                <!-- Plan Assignment Form (Hidden by default) -->
+                <div id="malisafi-plan-assignment-form-<?php echo esc_attr($user_id); ?>" class="plan-assignment-form" style="display: none; margin-top: 20px; padding: 15px; background: #f9f9f9; border: 1px solid #ddd;">
+                    <h3><?php _e('Assign/Update Subscription Plan', 'malisafi-mls'); ?></h3>
+                    
+                    <table class="form-table">
+                        <tbody>
+                            <tr>
+                                <th scope="row">
+                                    <label for="plan_type_<?php echo esc_attr($user_id); ?>"><?php _e('Plan Type', 'malisafi-mls'); ?></label>
+                                </th>
+                                <td>
+                                    <select name="plan_type" id="plan_type_<?php echo esc_attr($user_id); ?>" class="regular-text">
+                                        <option value=""><?php _e('Select a plan...', 'malisafi-mls'); ?></option>
+                                        <?php
+                                        $available_plans = array(
+                                            'agent_basic' => __('Agent Basic', 'malisafi-mls'),
+                                            'agent_premium' => __('Agent Premium', 'malisafi-mls'),
+                                            'owner_basic' => __('Owner Basic', 'malisafi-mls'),
+                                            'developer' => __('Developer', 'malisafi-mls')
+                                        );
+                                        foreach ($available_plans as $plan_key => $plan_label) :
+                                        ?>
+                                            <option value="<?php echo esc_attr($plan_key); ?>" <?php selected($subscription ? $subscription->plan_type : '', $plan_key); ?>>
+                                                <?php echo esc_html($plan_label); ?>
+                                            </option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                    <p class="description"><?php _e('Select the subscription plan to assign to this user.', 'malisafi-mls'); ?></p>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th scope="row">
+                                    <label for="duration_<?php echo esc_attr($user_id); ?>"><?php _e('Duration (Months)', 'malisafi-mls'); ?></label>
+                                </th>
+                                <td>
+                                    <input type="number" name="duration" id="duration_<?php echo esc_attr($user_id); ?>" class="small-text" value="12" min="1" max="120">
+                                    <p class="description"><?php _e('Number of months the subscription will be active.', 'malisafi-mls'); ?></p>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    
+                    <p>
+                        <button type="button" class="button button-primary malisafi-assign-plan-btn" data-user-id="<?php echo esc_attr($user_id); ?>">
+                            <?php _e('Assign Plan', 'malisafi-mls'); ?>
+                        </button>
+                        <button type="button" class="button toggle-plan-form" data-user-id="<?php echo esc_attr($user_id); ?>">
+                            <?php _e('Cancel', 'malisafi-mls'); ?>
+                        </button>
+                    </p>
+                </div>
+                
+                <div style="margin-top: 20px; padding: 10px; background: #f0f6fc; border-left: 4px solid #72aee6;">
+                    <p><strong><?php _e('Note:', 'malisafi-mls'); ?></strong> <?php _e('Manually assigning a plan here will create/update the subscription record in the database and adjust user limits accordingly. This does not process any payment through Stripe.', 'malisafi-mls'); ?></p>
+                </div>
+            </div>
+        <?php endif; ?>
+        
     <?php endif; ?>
     
 </div>

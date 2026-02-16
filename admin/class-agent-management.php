@@ -273,11 +273,41 @@ class Malisafi_Agent_Management {
                             <div class="row-actions">
                                 <span><a href="#" class="view-details" data-agent-id="<?php echo esc_attr($agent->ID); ?>"><?php _e('View Details', 'malisafi-mls'); ?></a></span>
                                 <?php
-                                // Lien vers le profil public de l'agent (post_type malisafi_agent)
+                                // Link to edit agent profile (admin only)
+                                $agent_profile_query = new WP_Query(array(
+                                    'post_type' => 'malisafi_agent',
+                                    'post_status' => array('publish', 'pending', 'draft'),
+                                    'meta_query' => array(
+                                        array(
+                                            'key' => '_agent_user_id',
+                                            'value' => $agent->ID,
+                                            'compare' => '='
+                                        )
+                                    ),
+                                    'posts_per_page' => 1
+                                ));
+                                
+                                if ($agent_profile_query->have_posts()) {
+                                    $agent_profile_query->the_post();
+                                    $agent_post_id = get_the_ID();
+                                    wp_reset_postdata();
+                                    
+                                    // Link to frontend profile editor for admins
+                                    $edit_profile_url = add_query_arg(array(
+                                        'section' => 'profile',
+                                        'edit_agent_id' => $agent->ID
+                                    ), home_url('/agent-dashboard/'));
+                                    echo ' | <span><a href="' . esc_url($edit_profile_url) . '">' . __('Edit Profile', 'malisafi-mls') . '</a></span>';
+                                    
+                                    // Link to public profile
+                                    $profile_url = get_permalink($agent_post_id);
+                                    echo ' | <span><a href="' . esc_url($profile_url) . '" target="_blank">' . __('View Public Profile', 'malisafi-mls') . '</a></span>';
+                                }
+                                
+                                // Lien vers le profil public de l'agent (legacy compatibility)
                                 $agent_post_id = get_user_meta($agent->ID, 'agent_post_id', true);
                                 if ($agent_post_id) {
                                     $profile_url = get_permalink($agent_post_id);
-                                    echo ' | <span><a href="' . esc_url($profile_url) . '" target="_blank">' . __('View Profile', 'malisafi-mls') . '</a></span>';
                                     echo ' | <span><a href="' . esc_url($profile_url) . '#rate-agent-modal" class="rate-direct-link" target="_blank">' . __('Rate', 'malisafi-mls') . '</a></span>';
                                 }
                                 ?>

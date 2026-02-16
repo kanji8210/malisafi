@@ -11,6 +11,11 @@
 class Malisafi_Property_Approval_Workflow {
     
     /**
+     * Track properties being processed to prevent re-entry
+     */
+    private static $processing_properties = array();
+    
+    /**
      * Initialize the approval workflow
      */
     public static function init() {
@@ -96,13 +101,23 @@ class Malisafi_Property_Approval_Workflow {
      * @param bool $update Whether this is an update or new post
      */
     public static function handle_property_status($post_id, $post, $update) {
+        // DUPLICATE PREVENTION: Check if already processing this property
+        if (isset(self::$processing_properties[$post_id])) {
+            return;
+        }
+        
+        // Mark as processing
+        self::$processing_properties[$post_id] = true;
+        
         // Skip if this is an autosave or revision
         if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) {
+            unset(self::$processing_properties[$post_id]);
             return;
         }
         
         // Skip if this is a revision
         if (wp_is_post_revision($post_id)) {
+            unset(self::$processing_properties[$post_id]);
             return;
         }
         
@@ -111,6 +126,7 @@ class Malisafi_Property_Approval_Workflow {
         
         // If admin or moderator, allow them to set any status
         if (self::can_publish_directly($current_user_id)) {
+            unset(self::$processing_properties[$post_id]);
             return;
         }
         
@@ -141,8 +157,8 @@ class Malisafi_Property_Approval_Workflow {
                     delete_transient('malisafi_original_status_' . $post_id . '_' . $current_user_id);
                 }
             } else {
-                // New property - should be pending by default
-                if ($post->post_status === 'publish' || $post->post_status === 'draft') {
+                // New property - should be pending by default (skip if already pending)
+                if ($post->post_status === 'publish' || ($post->post_status === 'draft' && !get_post_meta($post_id, '_malisafi_auto_draft', true))) {
                     remove_action('save_post_malisafi_property', array(__CLASS__, 'handle_property_status'), 10);
                     
                     wp_update_post(array(
@@ -154,6 +170,9 @@ class Malisafi_Property_Approval_Workflow {
                 }
             }
         }
+        
+        // Done processing
+        unset(self::$processing_properties[$post_id]);
     }
     
     /**

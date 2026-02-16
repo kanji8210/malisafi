@@ -315,12 +315,18 @@ class Property_Submission {
 
             if (empty($property_id)) {
                 // Create new draft and set transient lock
+                // Remove hooks temporarily to prevent issues during draft creation
+                remove_action('save_post_malisafi_property', array('Malisafi_Property_Approval_Workflow', 'handle_property_status'), 10);
+                
                 $property_id = wp_insert_post(array(
                     'post_type' => 'malisafi_property',
                     'post_status' => 'draft',
                     'post_author' => $current_user_id,
                     'post_title' => __('Draft Property', 'malisafi-mls') . ' ' . date('Y-m-d H:i:s')
                 ));
+                
+                // Re-add hooks
+                add_action('save_post_malisafi_property', array('Malisafi_Property_Approval_Workflow', 'handle_property_status'), 10, 3);
 
                 if (is_wp_error($property_id)) {
                     wp_send_json_error(array('message' => $property_id->get_error_message()));
@@ -330,6 +336,8 @@ class Property_Submission {
                 set_transient($lock_key, $property_id, 5 * MINUTE_IN_SECONDS);
                 // Mark as auto-draft for easier lookup/debug
                 update_post_meta($property_id, '_malisafi_auto_draft', 1);
+                
+                error_log('Malisafi: Created new draft property #' . $property_id . ' for user ' . $current_user_id);
             }
         }
         
@@ -610,6 +618,15 @@ class Property_Submission {
             wp_send_json_error(array('message' => __('Invalid property', 'malisafi-mls')));
         }
         
+        // DUPLICATE PREVENTION: Check submission lock
+        $submission_lock_key = 'malisafi_submit_lock_' . $property_id;
+        if (get_transient($submission_lock_key)) {
+            wp_send_json_error(array('message' => __('This property is already being submitted. Please wait.', 'malisafi-mls')));
+        }
+        
+        // Set submission lock (30 seconds)
+        set_transient($submission_lock_key, time(), 30);
+        
         // Check if all required fields are filled
         $validation = self::validate_property($property_id);
         if (is_wp_error($validation)) {
@@ -620,10 +637,22 @@ class Property_Submission {
         }
         
         // Update status to pending review
+        // Remove hooks temporarily to prevent duplication
+        remove_action('save_post_malisafi_property', array('Malisafi_Property_Approval_Workflow', 'handle_property_status'), 10);
+        
         wp_update_post(array(
             'ID' => $property_id,
             'post_status' => 'pending'
         ));
+        
+        // Re-add hooks
+        add_action('save_post_malisafi_property', array('Malisafi_Property_Approval_Workflow', 'handle_property_status'), 10, 3);
+        
+        // Clear submission lock
+        delete_transient($submission_lock_key);
+        
+        // Clear auto-draft marker
+        delete_post_meta($property_id, '_malisafi_auto_draft');
         
         // Clear cache
         if (class_exists('MalisafiMLS\Cache_Manager')) {

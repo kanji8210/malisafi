@@ -1,0 +1,251 @@
+/**
+ * Plan Status Widget Styles
+ */
+
+.malisafi-plan-status-widget {
+    background: #fff;
+    border: 1px solid var(--mls-border-light, #e0e0e0);
+    border-radius: 8px;
+    padding: 24px;
+    margin: 20px 0;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.malisafi-plan-status-widget.compact {
+    padding: 16px;
+    margin: 12px 0;
+}
+
+/* Active Plan Status */
+.plan-status-active {
+    text-align: left;
+}
+
+.plan-status-title {
+    margin: 0 0 16px 0;
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--mls-text-primary, #333);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.plan-status-title .dashicons {
+    color: var(--mls-accent, #737d5d);
+    font-size: 24px;
+    width: 24px;
+    height: 24px;
+}
+
+.plan-details {
+    margin-bottom: 20px;
+}
+
+.plan-name {
+    font-size: 18px;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.plan-badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.plan-badge.status-active {
+    background: #d4edda;
+    color: #155724;
+}
+
+.plan-badge.status-pending {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.plan-badge.status-canceled {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+.plan-badge.status-expired {
+    background: #e2e3e5;
+    color: #383d41;
+}
+
+.plan-price {
+    margin: 12px 0;
+    font-size: 16px;
+    color: var(--mls-text-secondary, #666);
+}
+
+.plan-price .amount {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--mls-accent, #737d5d);
+}
+
+.plan-price .interval {
+    font-size: 14px;
+    color: var(--mls-text-secondary, #666);
+}
+
+.plan-expiry {
+    padding: 10px 0;
+    border-top: 1px solid var(--mls-border-light, #eee);
+    border-bottom: 1px solid var(--mls-border-light, #eee);
+    margin: 12px 0;
+    font-size: 14px;
+}
+
+.plan-expiry .label {
+    color: var(--mls-text-secondary, #666);
+}
+
+.plan-expiry .date {
+    font-weight: 600;
+    color: var(--mls-text-primary, #333);
+    margin-left: 6px;
+}
+
+.plan-features {
+    margin: 16px 0;
+}
+
+.plan-features ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.plan-features li {
+    padding: 6px 0;
+    font-size: 14px;
+    color: var(--mls-text-secondary, #666);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.plan-features li .dashicons {
+    color: var(--mls-accent, #737d5d);
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+}
+
+.plan-actions {
+    margin-top: 20px;
+}
+
+.plan-actions .button {
+    min-width: 160px;
+}
+
+/* Inactive Plan Status */
+.plan-status-inactive {
+    text-align: center;
+    padding: 20px;
+}
+
+.no-plan-icon {
+    margin-bottom: 16px;
+}
+
+.no-plan-icon .dashicons {
+    font-size: 48px;
+    width: 48px;
+    height: 48px;
+    color: #ffc107;
+}
+
+.plan-status-inactive .plan-status-title {
+    color: #dc3545;
+    margin-bottom: 12px;
+    justify-content: center;
+}
+
+.plan-message {
+    font-size: 15px;
+    line-height: 1.6;
+    color: var(--mls-text-secondary, #666);
+    margin: 16px 0 24px 0;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Compact Mode */
+.malisafi-plan-status-widget.compact .plan-status-inactive {
+    padding: 0;
+    text-align: left;
+}
+
+.plan-compact-alert {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    background: #fff3cd;
+    border-left: 4px solid #ffc107;
+    border-radius: 4px;
+}
+
+.plan-compact-alert .dashicons {
+    color: #856404;
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+}
+
+.plan-compact-alert .message {
+    flex: 1;
+    font-size: 14px;
+    color: #856404;
+    font-weight: 500;
+}
+
+.plan-compact-alert .upgrade-link {
+    font-size: 14px;
+    font-weight: 600;
+    color: #856404;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.plan-compact-alert .upgrade-link:hover {
+    color: #533f03;
+    text-decoration: underline;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .malisafi-plan-status-widget {
+        padding: 16px;
+    }
+    
+    .plan-status-title {
+        font-size: 18px;
+    }
+    
+    .plan-price .amount {
+        font-size: 20px;
+    }
+    
+    .plan-compact-alert {
+        flex-wrap: wrap;
+    }
+    
+    .plan-compact-alert .upgrade-link {
+        width: 100%;
+        text-align: center;
+        padding-top: 8px;
+    }
+}

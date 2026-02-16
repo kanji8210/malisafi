@@ -7,7 +7,11 @@ if (!defined('ABSPATH')) exit;
 // Enqueue WordPress media uploader
 wp_enqueue_media();
 
-// Get agent profile post
+// Check if admin is editing another agent's profile
+$edit_agent_id = isset($_GET['edit_agent_id']) && current_user_can('manage_options') ? intval($_GET['edit_agent_id']) : null;
+$target_user_id = $edit_agent_id ? $edit_agent_id : $current_user->ID;
+
+// Get agent profile post for the target user
 $agent_id = null;
 $args = array(
     'post_type' => 'malisafi_agent',
@@ -15,7 +19,7 @@ $args = array(
     'meta_query' => array(
         array(
             'key' => '_agent_user_id',
-            'value' => $current_user->ID,
+            'value' => $target_user_id,
             'compare' => '='
         )
     ),
@@ -29,10 +33,17 @@ if ($agent_query->have_posts()) {
     wp_reset_postdata();
 }
 
+// Get user info for the target user
+$target_user = $edit_agent_id ? get_userdata($target_user_id) : $current_user;
+if (!$target_user) {
+    echo '<div class="error"><p>' . __('User not found.', 'malisafi-mls') . '</p></div>';
+    return;
+}
+
 // Get agent meta
 $agent_photo = $agent_id ? get_post_meta($agent_id, '_agent_photo', true) : '';
 $agent_bio = $agent_id ? get_post_meta($agent_id, '_agent_bio', true) : '';
-$agent_email = $agent_id ? get_post_meta($agent_id, '_agent_email', true) : $current_user->user_email;
+$agent_email = $agent_id ? get_post_meta($agent_id, '_agent_email', true) : $target_user->user_email;
 $agent_phone = $agent_id ? get_post_meta($agent_id, '_agent_phone', true) : '';
 $agent_whatsapp = $agent_id ? get_post_meta($agent_id, '_agent_whatsapp', true) : '';
 $agent_specialties = $agent_id ? get_post_meta($agent_id, '_agent_specialties', true) : '';
@@ -47,12 +58,24 @@ $agent_instagram = $agent_id ? get_post_meta($agent_id, '_agent_instagram', true
 ?>
 <div class="dashboard-profile-editor">
     <div class="dashboard-header">
-        <h1><?php _e('My Profile', 'malisafi-mls'); ?></h1>
-        <p class="subtitle"><?php _e('Manage your agent profile information', 'malisafi-mls'); ?></p>
+        <?php if ($edit_agent_id): ?>
+            <h1><?php printf(__('Edit Agent Profile: %s', 'malisafi-mls'), esc_html($target_user->display_name)); ?></h1>
+            <p class="subtitle"><?php _e('Admin editing mode - Changes will update this agent\'s profile', 'malisafi-mls'); ?></p>
+        <?php else: ?>
+            <h1><?php _e('My Profile', 'malisafi-mls'); ?></h1>
+            <p class="subtitle"><?php _e('Manage your agent profile information', 'malisafi-mls'); ?></p>
+        <?php endif; ?>
     </div>
 
     <?php if ($agent_id): ?>
         <div class="profile-preview-link">
+            <?php if ($edit_agent_id && current_user_can('manage_options')): ?>
+                <a href="<?php echo esc_url(admin_url('admin.php?page=malisafi-agent-management')); ?>" 
+                   class="button">
+                    <span class="dashicons dashicons-arrow-left-alt2"></span>
+                    <?php _e('Back to Agent Management', 'malisafi-mls'); ?>
+                </a>
+            <?php endif; ?>
             <a href="<?php echo esc_url(add_query_arg('agent_id', $agent_id, home_url('/agent-profile/'))); ?>" 
                class="button" target="_blank">
                 <span class="dashicons dashicons-visibility"></span>
@@ -119,6 +142,19 @@ $agent_instagram = $agent_id ? get_post_meta($agent_id, '_agent_instagram', true
         <div class="form-section">
             <h2><?php _e('Basic Information', 'malisafi-mls'); ?></h2>
             <div class="form-grid">
+                <div class="form-group">
+                    <label><?php _e('First Name', 'malisafi-mls'); ?> *</label>
+                    <input type="text" name="agent_first_name" value="<?php echo esc_attr($target_user->first_name); ?>" required>
+                </div>
+                <div class="form-group">
+                    <label><?php _e('Last Name', 'malisafi-mls'); ?> *</label>
+                    <input type="text" name="agent_last_name" value="<?php echo esc_attr($target_user->last_name); ?>" required>
+                </div>
+                <div class="form-group">
+                    <label><?php _e('Display Name', 'malisafi-mls'); ?> *</label>
+                    <input type="text" name="agent_display_name" value="<?php echo esc_attr($target_user->display_name); ?>" required>
+                    <p class="description"><?php _e('This is the name shown to clients', 'malisafi-mls'); ?></p>
+                </div>
                 <div class="form-group">
                     <label><?php _e('Email', 'malisafi-mls'); ?> *</label>
                     <input type="email" name="agent_email" value="<?php echo esc_attr($agent_email); ?>" required>

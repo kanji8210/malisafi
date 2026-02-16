@@ -37,6 +37,7 @@ class Core {
         require_once MALISAFI_MLS_PATH . 'includes/class-i18n.php';
         require_once MALISAFI_MLS_PATH . 'includes/class-database.php';
         require_once MALISAFI_MLS_PATH . 'includes/class-user-creation-helper.php';
+        require_once MALISAFI_MLS_PATH . 'includes/class-plan-manager.php';
         require_once MALISAFI_MLS_PATH . 'includes/class-post-types.php';
         require_once MALISAFI_MLS_PATH . 'includes/class-property-manager.php';
         require_once MALISAFI_MLS_PATH . 'includes/class-project-submission.php';

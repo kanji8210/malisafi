@@ -14,6 +14,7 @@
         autoSaveTimeout: null,
         initialized: false,
         uploadedImages: [],
+        isSubmitting: false, // DUPLICATE PREVENTION: Track submit state
 
         init: function() {
             if (this.initialized) {
@@ -965,6 +966,11 @@
         submitProperty: function() {
             const self = this;
 
+            // DUPLICATE PREVENTION: Check if already submitting
+            if (this.isSubmitting) {
+                return;
+            }
+
             if (!this.validateStep(this.currentStep)) {
                 return;
             }
@@ -976,6 +982,8 @@
                 return;
             }
 
+            // Set submitting flag
+            this.isSubmitting = true;
             this.$btnSubmit.prop('disabled', true).text(malisafiSubmission.strings.submitting);
 
             $.ajax({
@@ -989,13 +997,16 @@
                 success: function(response) {
                     if (response.success) {
                         self.showSubmitSuccess(response.data);
+                        // Keep isSubmitting true to prevent re-submission after success
                     } else {
                         self.showError(response.data.message);
+                        self.isSubmitting = false;
                         self.$btnSubmit.prop('disabled', false).text(malisafiSubmission.strings.submitProperty);
                     }
                 },
                 error: function() {
                     self.showError('An error occurred. Please try again.');
+                    self.isSubmitting = false;
                     self.$btnSubmit.prop('disabled', false).text(malisafiSubmission.strings.submitProperty);
                 }
             });
