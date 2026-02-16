@@ -76,7 +76,7 @@ class Malisafi_User_Manager {
         // Security check
         check_admin_referer('malisafi_add_user', 'malisafi_user_nonce');
         
-        if (!current_user_can('manage_malisafi_settings')) {
+        if (!current_user_can('manage_malisafi_settings') && !current_user_can('manage_options')) {
             wp_die(__('You do not have permission to add users.', 'malisafi-mls'));
         }
         
@@ -265,7 +265,7 @@ class Malisafi_User_Manager {
     public static function handle_edit_user() {
         check_admin_referer('malisafi_edit_user', 'malisafi_user_nonce');
         
-        if (!current_user_can('manage_malisafi_settings')) {
+        if (!current_user_can('manage_malisafi_settings') && !current_user_can('manage_options')) {
             wp_die(__('You do not have permission to edit users.', 'malisafi-mls'));
         }
         
@@ -340,7 +340,7 @@ class Malisafi_User_Manager {
     public static function handle_delete_user() {
         check_admin_referer('malisafi_delete_user_' . $_GET['user_id']);
         
-        if (!current_user_can('manage_malisafi_settings')) {
+        if (!current_user_can('manage_malisafi_settings') && !current_user_can('manage_options')) {
             wp_die(__('You do not have permission to delete users.', 'malisafi-mls'));
         }
         
@@ -439,7 +439,7 @@ class Malisafi_User_Manager {
         // Security check
         check_admin_referer('malisafi_verify_email_' . $_GET['user_id']);
         
-        if (!current_user_can('manage_malisafi_settings')) {
+        if (!current_user_can('manage_malisafi_settings') && !current_user_can('manage_options')) {
             wp_die(__('You do not have permission to verify emails.', 'malisafi-mls'));
         }
         
@@ -469,7 +469,7 @@ class Malisafi_User_Manager {
         // Security check
         check_admin_referer('malisafi_send_password_reset_' . $_GET['user_id']);
         
-        if (!current_user_can('manage_malisafi_settings')) {
+        if (!current_user_can('manage_malisafi_settings') && !current_user_can('manage_options')) {
             wp_die(__('You do not have permission to send password resets.', 'malisafi-mls'));
         }
         
@@ -518,7 +518,7 @@ The %s Team',
         // Security check
         check_admin_referer('malisafi_send_verification_email_' . $_GET['user_id']);
         
-        if (!current_user_can('manage_malisafi_settings')) {
+        if (!current_user_can('manage_malisafi_settings') && !current_user_can('manage_options')) {
             wp_die(__('You do not have permission to send verification emails.', 'malisafi-mls'));
         }
         

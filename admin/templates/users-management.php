@@ -82,20 +82,33 @@ if (isset($_GET['error'])) {
         ?>
         
         <!-- Users Table -->
-        <table class="wp-list-table widefat fixed striped">
+        <table class="wp-list-table widefat fixed striped malisafi-users-table">
             <thead>
                 <tr>
                     <th class="manage-column column-cb check-column">
                         <input type="checkbox" id="cb-select-all">
                     </th>
-                    <th class="manage-column column-username"><?php _e('Username', 'malisafi-mls'); ?></th>
-                    <th class="manage-column column-name"><?php _e('Name', 'malisafi-mls'); ?></th>
-                    <th class="manage-column column-email"><?php _e('Email', 'malisafi-mls'); ?></th>
-                    <th class="manage-column column-email-verified"><?php _e('Email Verified', 'malisafi-mls'); ?></th>
-                    <th class="manage-column column-role"><?php _e('Role', 'malisafi-mls'); ?></th>
-                    <th class="manage-column column-subscription"><?php _e('Subscription', 'malisafi-mls'); ?></th>
-                    <th class="manage-column column-registered"><?php _e('Registered', 'malisafi-mls'); ?></th>
-                    <th class="manage-column column-actions"><?php _e('Actions', 'malisafi-mls'); ?></th>
+                    <th class="manage-column column-user" style="width: 20%;">
+                        <?php _e('User', 'malisafi-mls'); ?>
+                    </th>
+                    <th class="manage-column column-contact" style="width: 18%;">
+                        <?php _e('Contact', 'malisafi-mls'); ?>
+                    </th>
+                    <th class="manage-column column-status" style="width: 12%;">
+                        <?php _e('Status', 'malisafi-mls'); ?>
+                    </th>
+                    <th class="manage-column column-role" style="width: 15%;">
+                        <?php _e('Role', 'malisafi-mls'); ?>
+                    </th>
+                    <th class="manage-column column-subscription" style="width: 12%;">
+                        <?php _e('Plan', 'malisafi-mls'); ?>
+                    </th>
+                    <th class="manage-column column-registered" style="width: 10%;">
+                        <?php _e('Registered', 'malisafi-mls'); ?>
+                    </th>
+                    <th class="manage-column column-actions" style="width: 13%;">
+                        <?php _e('Actions', 'malisafi-mls'); ?>
+                    </th>
                 </tr>
             </thead>
             <tbody>
@@ -105,27 +118,67 @@ if (isset($_GET['error'])) {
                             <td class="check-column">
                                 <input type="checkbox" name="users[]" value="<?php echo esc_attr($user->ID); ?>">
                             </td>
-                            <td class="column-username">
-                                <strong><?php echo esc_html($user->user_login); ?></strong>
+                            
+                            <!-- User Info (Avatar + Name + Username) -->
+                            <td class="column-user">
+                                <div class="user-info-cell">
+                                    <div class="user-avatar">
+                                        <?php echo get_avatar($user->ID, 32); ?>
+                                    </div>
+                                    <div class="user-details">
+                                        <strong class="user-name">
+                                            <a href="<?php echo admin_url('admin.php?page=malisafi-users&action=edit&user_id=' . $user->ID); ?>">
+                                                <?php 
+                                                $full_name = trim($user->first_name . ' ' . $user->last_name);
+                                                echo esc_html($full_name ? $full_name : $user->user_login); 
+                                                ?>
+                                            </a>
+                                        </strong>
+                                        <div class="user-username">@<?php echo esc_html($user->user_login); ?></div>
+                                    </div>
+                                </div>
                             </td>
-                            <td class="column-name">
-                                <?php echo esc_html($user->first_name . ' ' . $user->last_name); ?>
+                            
+                            <!-- Contact (Email + Phone) -->
+                            <td class="column-contact">
+                                <div class="contact-info">
+                                    <div class="user-email">
+                                        <span class="dashicons dashicons-email" style="font-size: 14px; width: 14px; height: 14px;"></span>
+                                        <a href="mailto:<?php echo esc_attr($user->user_email); ?>">
+                                            <?php echo esc_html($user->user_email); ?>
+                                        </a>
+                                    </div>
+                                    <?php 
+                                    $phone = get_user_meta($user->ID, 'phone', true);
+                                    if ($phone) : 
+                                    ?>
+                                        <div class="user-phone">
+                                            <span class="dashicons dashicons-phone" style="font-size: 14px; width: 14px; height: 14px;"></span>
+                                            <?php echo esc_html($phone); ?>
+                                        </div>
+                                    <?php endif; ?>
+                                </div>
                             </td>
-                            <td class="column-email">
-                                <a href="mailto:<?php echo esc_attr($user->user_email); ?>">
-                                    <?php echo esc_html($user->user_email); ?>
-                                </a>
-                            </td>
-                            <td class="column-email-verified">
+                            
+                            <!-- Status (Email Verification) -->
+                            <td class="column-status">
                                 <?php 
                                 $email_verified = get_user_meta($user->ID, '_malisafi_email_verified', true) === '1';
-                                if ($email_verified) {
-                                    echo '<span class="status-verified" style="color: #28a745;">✓ ' . __('Verified', 'malisafi-mls') . '</span>';
-                                } else {
-                                    echo '<span class="status-unverified" style="color: #dc3545;">✗ ' . __('Unverified', 'malisafi-mls') . '</span>';
-                                }
+                                if ($email_verified) : 
                                 ?>
+                                    <span class="status-badge verified">
+                                        <span class="dashicons dashicons-yes-alt"></span>
+                                        <?php _e('Verified', 'malisafi-mls'); ?>
+                                    </span>
+                                <?php else : ?>
+                                    <span class="status-badge unverified">
+                                        <span class="dashicons dashicons-warning"></span>
+                                        <?php _e('Pending', 'malisafi-mls'); ?>
+                                    </span>
+                                <?php endif; ?>
                             </td>
+                            
+                            <!-- Role -->
                             <td class="column-role">
                                 <?php 
                                 $roles = $user->roles;
@@ -134,51 +187,73 @@ if (isset($_GET['error'])) {
                                 }
                                 ?>
                             </td>
+                            
+                            <!-- Subscription Plan -->
                             <td class="column-subscription">
                                 <?php if ($user->subscription) : ?>
-                                    <span class="subscription-status status-<?php echo esc_attr($user->subscription->status); ?>">
-                                        <?php echo esc_html(ucfirst($user->subscription->status)); ?>
+                                    <span class="plan-badge plan-<?php echo esc_attr($user->subscription->status); ?>">
+                                        <?php 
+                                        // Display plan type nicely
+                                        $plan_name = ucwords(str_replace('_', ' ', $user->subscription->plan_type));
+                                        echo esc_html($plan_name);
+                                        ?>
                                     </span>
                                 <?php else : ?>
-                                    <span style="color: #8c8f94;"><?php _e('N/A', 'malisafi-mls'); ?></span>
+                                    <span class="plan-badge plan-none">
+                                        <?php _e('No Plan', 'malisafi-mls'); ?>
+                                    </span>
                                 <?php endif; ?>
                             </td>
+                            
+                            <!-- Registered Date -->
                             <td class="column-registered">
-                                <?php echo date_i18n('M j, Y', strtotime($user->user_registered)); ?>
+                                <span title="<?php echo esc_attr(date_i18n(get_option('date_format') . ' ' . get_option('time_format'), strtotime($user->user_registered))); ?>">
+                                    <?php echo date_i18n('M j, Y', strtotime($user->user_registered)); ?>
+                                </span>
                             </td>
+                            
+                            <!-- Actions -->
                             <td class="column-actions">
-                                <a href="<?php echo admin_url('admin.php?page=malisafi-users&action=edit&user_id=' . $user->ID); ?>" class="button button-small">
-                                    <?php _e('Edit', 'malisafi-mls'); ?>
-                                </a>
-                                <?php 
-                                $email_verified = get_user_meta($user->ID, '_malisafi_email_verified', true) === '1';
-                                if (!$email_verified && get_option('malisafi_email_verification_enabled')) : 
-                                ?>
-                                    <a href="<?php echo wp_nonce_url(admin_url('admin-post.php?action=malisafi_verify_email&user_id=' . $user->ID), 'malisafi_verify_email_' . $user->ID); ?>" 
-                                       class="button button-small button-primary" 
-                                       onclick="return confirm('<?php _e('Are you sure you want to manually verify this user\'s email?', 'malisafi-mls'); ?>');">
-                                        <?php _e('Verify Email', 'malisafi-mls'); ?>
-                                    </a>
-                                    <a href="<?php echo wp_nonce_url(admin_url('admin-post.php?action=malisafi_send_password_reset&user_id=' . $user->ID), 'malisafi_send_password_reset_' . $user->ID); ?>" 
+                                <div class="row-actions-wrapper">
+                                    <a href="<?php echo admin_url('admin.php?page=malisafi-users&action=edit&user_id=' . $user->ID); ?>" 
                                        class="button button-small" 
-                                       onclick="return confirm('<?php _e('Send password reset email to this user?', 'malisafi-mls'); ?>');">
-                                        <?php _e('Reset Password', 'malisafi-mls'); ?>
+                                       title="<?php _e('Edit User', 'malisafi-mls'); ?>">
+                                        <span class="dashicons dashicons-edit"></span>
                                     </a>
-                                <?php endif; ?>
-                                <?php if ($user->ID !== get_current_user_id()) : ?>
-                                    <a href="<?php echo wp_nonce_url(admin_url('admin-post.php?action=malisafi_delete_user&user_id=' . $user->ID), 'malisafi_delete_user_' . $user->ID); ?>" 
-                                       class="button button-small button-link-delete" 
-                                       onclick="return confirm('<?php _e('Are you sure you want to delete this user?', 'malisafi-mls'); ?>');">
-                                        <?php _e('Delete', 'malisafi-mls'); ?>
-                                    </a>
-                                <?php endif; ?>
+                                    
+                                    <?php 
+                                    $email_verified = get_user_meta($user->ID, '_malisafi_email_verified', true) === '1';
+                                    if (!$email_verified && get_option('malisafi_email_verification_enabled')) : 
+                                    ?>
+                                        <a href="<?php echo wp_nonce_url(admin_url('admin-post.php?action=malisafi_verify_email&user_id=' . $user->ID), 'malisafi_verify_email_' . $user->ID); ?>" 
+                                           class="button button-small button-primary" 
+                                           title="<?php _e('Verify Email', 'malisafi-mls'); ?>"
+                                           onclick="return confirm('<?php _e('Are you sure you want to manually verify this user\'s email?', 'malisafi-mls'); ?>');">
+                                            <span class="dashicons dashicons-yes"></span>
+                                        </a>
+                                    <?php endif; ?>
+                                    
+                                    <?php if ($user->ID !== get_current_user_id()) : ?>
+                                        <a href="<?php echo wp_nonce_url(admin_url('admin-post.php?action=malisafi_delete_user&user_id=' . $user->ID), 'malisafi_delete_user_' . $user->ID); ?>" 
+                                           class="button button-small button-link-delete" 
+                                           title="<?php _e('Delete User', 'malisafi-mls'); ?>"
+                                           onclick="return confirm('<?php _e('Are you sure you want to delete this user? This action cannot be undone.', 'malisafi-mls'); ?>');">
+                                            <span class="dashicons dashicons-trash"></span>
+                                        </a>
+                                    <?php endif; ?>
+                                </div>
                             </td>
                         </tr>
                     <?php endforeach; ?>
                 <?php else : ?>
                     <tr>
-                        <td colspan="9" style="text-align: center; padding: 40px;">
-                            <?php _e('No users found.', 'malisafi-mls'); ?>
+                        <td colspan="8" style="text-align: center; padding: 40px;">
+                            <div class="no-users-found">
+                                <span class="dashicons dashicons-admin-users" style="font-size: 48px; color: #c3c4c7; width: 48px; height: 48px;"></span>
+                                <p style="font-size: 16px; color: #646970; margin-top: 10px;">
+                                    <?php _e('No users found matching your criteria.', 'malisafi-mls'); ?>
+                                </p>
+                            </div>
                         </td>
                     </tr>
                 <?php endif; ?>
@@ -780,34 +855,215 @@ if (isset($_GET['error'])) {
     margin-top: 20px;
 }
 
-.malisafi-users-page .column-username {
-    width: 12%;
+/* User Info Cell with Avatar */
+.user-info-cell {
+    display: flex;
+    align-items: center;
+    gap: 10px;
 }
 
-.malisafi-users-page .column-name {
-    width: 15%;
+.user-avatar {
+    flex-shrink: 0;
 }
 
-.malisafi-users-page .column-email {
+.user-avatar img {
+    border-radius: 50%;
+    vertical-align: middle;
+}
+
+.user-details {
+    min-width: 0;
+}
+
+.user-name {
+    font-size: 14px;
+    display: block;
+    margin-bottom: 2px;
+}
+
+.user-name a {
+    text-decoration: none;
+    color: #2271b1;
+}
+
+.user-name a:hover {
+    color: #135e96;
+}
+
+.user-username {
+    font-size: 12px;
+    color: #646970;
+}
+
+/* Contact Info */
+.contact-info {
+    font-size: 13px;
+}
+
+.user-email, .user-phone {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin-bottom: 3px;
+    color: #2c3338;
+}
+
+.user-email .dashicons, .user-phone .dashicons {
+    color: #646970;
+}
+
+.user-email a {
+    text-decoration: none;
+    color: #2271b1;
+}
+
+.user-email a:hover {
+    color: #135e96;
+    text-decoration: underline;
+}
+
+/* Status Badges */
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.status-badge .dashicons {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+}
+
+.status-badge.verified {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.status-badge.verified .dashicons {
+    color: #28a745;
+}
+
+.status-badge.unverified {
+    background-color: #fff3cd;
+    color: #856404;
+    border: 1px solid #ffeaa7;
+}
+
+.status-badge.unverified .dashicons {
+    color: #ffc107;
+}
+
+/* Plan Badges */
+.plan-badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 3px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: capitalize;
+}
+
+.plan-badge.plan-active {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.plan-badge.plan-pending {
+    background-color: #fff3cd;
+    color: #856404;
+}
+
+.plan-badge.plan-expired,
+.plan-badge.plan-cancelled {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+.plan-badge.plan-none {
+    background-color: #e9ecef;
+    color: #6c757d;
+}
+
+/* Actions Column */
+.row-actions-wrapper {
+    display: flex;
+    gap: 5px;
+    flex-wrap: wrap;
+}
+
+.row-actions-wrapper .button {
+    min-width: 32px;
+    height: 32px;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.row-actions-wrapper .button .dashicons {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+}
+
+.row-actions-wrapper .button-link-delete {
+    color: #b32d2e !important;
+    border-color: #b32d2e !important;
+}
+
+.row-actions-wrapper .button-link-delete:hover {
+    color: #fff !important;
+    background-color: #b32d2e !important;
+    border-color: #b32d2e !important;
+}
+
+/* No Users Found */
+.no-users-found {
+    text-align: center;
+}
+
+/* Column Widths */
+.malisafi-users-page .column-cb {
+    width: 2.5%;
+}
+
+.malisafi-users-page .column-user {
+    width: 20%;
+}
+
+.malisafi-users-page .column-contact {
     width: 18%;
 }
 
-.malisafi-users-page .column-role {
+.malisafi-users-page .column-status {
     width: 12%;
+}
+
+.malisafi-users-page .column-role {
+    width: 15%;
     white-space: nowrap;
 }
 
 .malisafi-users-page th.column-role {
-    word-wrap: normal;
-    overflow-wrap: normal;
-    word-break: normal;
-    letter-spacing: normal;
-    text-orientation: mixed;
-    writing-mode: horizontal-tb;
+    word-wrap: normal !important;
+    overflow-wrap: normal !important;
+    word-break: normal !important;
+    letter-spacing: normal !important;
+    text-orientation: mixed !important;
+    writing-mode: horizontal-tb !important;
+    text-transform: none !important;
+    direction: ltr !important;
 }
 
 .malisafi-users-page .column-subscription {
-    width: 10%;
+    width: 12%;
 }
 
 .malisafi-users-page .column-registered {
@@ -815,31 +1071,7 @@ if (isset($_GET['error'])) {
 }
 
 .malisafi-users-page .column-actions {
-    width: 15%;
-}
-
-.malisafi-users-page .subscription-status {
-    padding: 3px 8px;
-    border-radius: 3px;
-    font-size: 11px;
-    font-weight: 600;
-    display: inline-block;
-}
-
-.malisafi-users-page .status-active {
-    background-color: #00a32a;
-    color: white;
-}
-
-.malisafi-users-page .status-pending {
-    background-color: #dba617;
-    color: white;
-}
-
-.malisafi-users-page .status-expired,
-.malisafi-users-page .status-cancelled {
-    background-color: #d63638;
-    color: white;
+    width: 13%;
 }
 
 .malisafi-user-form {
@@ -853,14 +1085,6 @@ if (isset($_GET['error'])) {
 
 .malisafi-user-form #generate-password {
     margin-left: 10px;
-}
-
-.button-link-delete {
-    color: #b32d2e !important;
-}
-
-.button-link-delete:hover {
-    color: #d63638 !important;
 }
 </style>
 

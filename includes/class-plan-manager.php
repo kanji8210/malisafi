@@ -278,7 +278,7 @@ class Plan_Manager {
      */
     public static function ajax_assign_plan() {
         // Check permissions
-        if (!current_user_can('manage_malisafi_settings')) {
+        if (!current_user_can('manage_malisafi_settings') && !current_user_can('manage_options')) {
             wp_send_json_error(array('message' => __('Insufficient permissions.', 'malisafi-mls')));
         }
         
@@ -313,7 +313,7 @@ class Plan_Manager {
      */
     public static function ajax_remove_plan() {
         // Check permissions
-        if (!current_user_can('manage_malisafi_settings')) {
+        if (!current_user_can('manage_malisafi_settings') && !current_user_can('manage_options')) {
             wp_send_json_error(array('message' => __('Insufficient permissions.', 'malisafi-mls')));
         }
         
