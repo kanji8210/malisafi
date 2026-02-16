@@ -177,7 +177,7 @@ if (isset($_GET['error'])) {
                     <?php endforeach; ?>
                 <?php else : ?>
                     <tr>
-                        <td colspan="8" style="text-align: center; padding: 40px;">
+                        <td colspan="9" style="text-align: center; padding: 40px;">
                             <?php _e('No users found.', 'malisafi-mls'); ?>
                         </td>
                     </tr>

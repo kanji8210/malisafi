@@ -257,3 +257,85 @@
     grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 }
+
+/* Subscription Info Banner */
+.subscription-info-banner {
+  background: linear-gradient(135deg, var(--mls-accent, #737d5d) 0%, var(--mls-grey-green, #8a9475) 100%);
+  color: white;
+  padding: 24px 30px;
+  border-radius: 12px;
+  margin-bottom: 30px;
+  display: flex;
+  align-items: center; gap: 20px;
+  box-shadow: 0 4px 12px rgba(115, 125, 93, 0.15);
+}
+
+.subscription-info-banner.no-subscription {
+  background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%);
+}
+
+.subscription-info-banner .banner-icon {
+  width: 56px;
+  height: 56px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.subscription-info-banner .banner-icon .dashicons {
+  font-size: 28px;
+  width: 28px;
+  height: 28px;
+  color: white;
+}
+
+.subscription-info-banner .banner-content {
+  flex: 1;
+}
+
+.subscription-info-banner .banner-content h3 {
+  margin: 0 0 8px;
+  font-size: 18px;
+  font-weight: 600;
+  color: white;
+}
+
+.subscription-info-banner .banner-content p {
+  margin: 0;
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.95);
+  line-height: 1.5;
+}
+
+.subscription-info-banner .banner-action .button {
+  background: white;
+  color: var(--mls-accent, #737d5d);
+  border: none;
+  padding: 10px 20px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.subscription-info-banner .banner-action .button:hover {
+  background: rgba(255, 255, 255, 0.9);
+  color: var(--mls-dark, #2c3e50);
+}
+
+@media (max-width: 768px) {
+  .subscription-info-banner {
+    flex-direction: column;
+    text-align: center;
+    padding: 20px;
+  }
+
+  .subscription-info-banner .banner-action {
+    width: 100%;
+  }
+
+  .subscription-info-banner .banner-action .button {
+    width: 100%;
+  }
+}

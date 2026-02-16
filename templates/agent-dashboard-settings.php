@@ -53,6 +53,15 @@ $limits = $wpdb->get_row($wpdb->prepare(
     "SELECT * FROM {$wpdb->prefix}mf_user_limits WHERE user_id = %d",
     $user_id
 ));
+
+// Count user's properties for display
+$property_count = count(get_posts([
+    'post_type' => 'malisafi_property',
+    'author' => $user_id,
+    'post_status' => ['publish', 'pending', 'draft'],
+    'posts_per_page' => -1,
+    'fields' => 'ids'
+]));
 ?>
 
 <div class="dashboard-settings">
@@ -60,6 +69,55 @@ $limits = $wpdb->get_row($wpdb->prepare(
         <h1><?php _e('Settings', 'malisafi-mls'); ?></h1>
         <p class="subtitle"><?php _e('Configure your dashboard preferences and account options', 'malisafi-mls'); ?></p>
     </div>
+
+    <!-- Subscription Info Banner -->
+    <?php if ($subscription && $subscription->status === 'active') : ?>
+        <div class="subscription-info-banner">
+            <div class="banner-icon">
+                <span class="dashicons dashicons-yes-alt"></span>
+            </div>
+            <div class="banner-content">
+                <h3><?php _e('Active Subscription', 'malisafi-mls'); ?></h3>
+                <p>
+                    <?php 
+                    $plan_names = [
+                        'agent_basic' => __('Agent Basic', 'malisafi-mls'),
+                        'agent_premium' => __('Agent Premium', 'malisafi-mls'),
+                        'owner_basic' => __('Owner Basic', 'malisafi-mls'),
+                        'developer' => __('Developer', 'malisafi-mls')
+                    ];
+                    echo sprintf(
+                        __('You are on the %s plan', 'malisafi-mls'),
+                        '<strong>' . esc_html($plan_names[$subscription->plan_type] ?? ucwords(str_replace('_', ' ', $subscription->plan_type))) . '</strong>'
+                    );
+                    if ($limits && $limits->max_properties != -1) {
+                        echo ' • ' . sprintf(__('%d of %d properties used', 'malisafi-mls'), esc_html($property_count), esc_html($limits->max_properties));
+                    }
+                    ?>
+                </p>
+            </div>
+            <div class="banner-action">
+                <a href="<?php echo esc_url(add_query_arg('section', 'subscription')); ?>" class="button button-primary">
+                    <?php _e('Manage Subscription', 'malisafi-mls'); ?>
+                </a>
+            </div>
+        </div>
+    <?php else : ?>
+        <div class="subscription-info-banner no-subscription">
+            <div class="banner-icon">
+                <span class="dashicons dashicons-info"></span>
+            </div>
+            <div class="banner-content">
+                <h3><?php _e('No Active Subscription', 'malisafi-mls'); ?></h3>
+                <p><?php _e('Subscribe to a plan to unlock full features and list properties.', 'malisafi-mls'); ?></p>
+            </div>
+            <div class="banner-action">
+                <a href="<?php echo esc_url(add_query_arg('section', 'subscription')); ?>" class="button button-primary">
+                    <?php _e('View Plans', 'malisafi-mls'); ?>
+                </a>
+            </div>
+        </div>
+    <?php endif; ?>
 
     <form id="agentSettingsForm" class="settings-form">
         <?php wp_nonce_field('malisafi_save_agent_settings', 'settings_nonce'); ?>

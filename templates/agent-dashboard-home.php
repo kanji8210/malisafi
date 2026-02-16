@@ -105,6 +105,10 @@ error_log('MALISAFI DEBUG: Dashboard stats - Total: ' . $total_properties . ', P
                 <span class="dashicons dashicons-email"></span>
                 <span><?php _e('View Leads', 'malisafi-mls'); ?></span>
             </a>
+            <a href="<?php echo esc_url(add_query_arg('section', 'subscription')); ?>" class="action-card">
+                <span class="dashicons dashicons-cart"></span>
+                <span><?php _e('My Subscription', 'malisafi-mls'); ?></span>
+            </a>
             <a href="<?php echo esc_url(add_query_arg('section', 'profile')); ?>" class="action-card">
                 <span class="dashicons dashicons-businessman"></span>
                 <span><?php _e('Edit Profile', 'malisafi-mls'); ?></span>
