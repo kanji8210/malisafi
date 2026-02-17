@@ -146,6 +146,8 @@ class Malisafi_Roles_Manager {
 
                 if ($role_name === 'malisafi_moderator' || $role_name === 'administrator') {
                     $role->add_cap('edit_others_properties', true);
+                    $role->add_cap('delete_others_properties', true);
+                    $role->add_cap('delete_properties', true);
                     $role->add_cap('publish_properties', true);
                     $role->add_cap('moderate_properties', true);
                     $role->add_cap('manage_malisafi_settings', true);

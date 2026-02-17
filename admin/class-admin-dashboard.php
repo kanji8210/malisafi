@@ -305,6 +305,15 @@ class Malisafi_Admin_Dashboard {
                 add_settings_error('malisafi-plans', 'reset', __('Plans reset to defaults.', 'malisafi-mls'), 'updated');
                 $plans = array();
             }
+            
+            if ($action === 'initialize_role_based') {
+                // Call the activator's initialize function
+                require_once MALISAFI_MLS_PATH . 'includes/class-activator.php';
+                delete_option('malisafi_mls_plans'); // Clear existing first
+                \MalisafiMLS\Activator::initialize_default_plans();
+                add_settings_error('malisafi-plans', 'initialized', __('Role-based plans initialized successfully. You can now adjust prices and limits.', 'malisafi-mls'), 'updated');
+                $plans = get_option('malisafi_mls_plans', array());
+            }
         } else {
             $plans = get_option('malisafi_mls_plans', array());
         }

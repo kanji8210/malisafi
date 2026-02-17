@@ -13,6 +13,10 @@ if (!is_array($plans)) {
     
     <div class="notice notice-info">
         <p>
+            <strong><?php _e('Quick Start:', 'malisafi-mls'); ?></strong> 
+            <?php _e('If you haven\'t set up plans yet, use the "Initialize Role-Based Plans" button below to create default plans matching your user roles. You can then adjust prices and property limits.', 'malisafi-mls'); ?>
+        </p>
+        <p>
             <strong><?php _e('Currency Selection:', 'malisafi-mls'); ?></strong> 
             <?php _e('Choose between USD ($) or KES (KSh) for each plan. The currency symbol will be displayed automatically on your pricing pages.', 'malisafi-mls'); ?>
         </p>
@@ -24,7 +28,24 @@ if (!is_array($plans)) {
 
         <div id="plans-list">
             <?php if (empty($plans)): ?>
-                <p><?php _e('No plans defined. Use the form below to add a new plan.', 'malisafi-mls'); ?></p>
+                <div class="notice notice-warning" style="padding: 20px; background: #fff; border-left: 4px solid #f39c12; margin: 20px 0;">
+                    <h3 style="margin-top: 0;"><?php _e('No Plans Defined', 'malisafi-mls'); ?></h3>
+                    <p><?php _e('Get started by initializing role-based plans. This will create pre-configured subscription plans for:', 'malisafi-mls'); ?></p>
+                    <ul style="margin-left: 20px; list-style: disc;">
+                        <li><strong><?php _e('Client (Free)', 'malisafi-mls'); ?></strong> - <?php _e('Basic browsing access', 'malisafi-mls'); ?></li>
+                        <li><strong><?php _e('Agent Basic', 'malisafi-mls'); ?></strong> - <?php _e('Up to 10 listings', 'malisafi-mls'); ?></li>
+                        <li><strong><?php _e('Agent Premium', 'malisafi-mls'); ?></strong> - <?php _e('Unlimited listings + featured', 'malisafi-mls'); ?></li>
+                        <li><strong><?php _e('Property Owner', 'malisafi-mls'); ?></strong> - <?php _e('Up to 3 personal listings', 'malisafi-mls'); ?></li>
+                        <li><strong><?php _e('Developer', 'malisafi-mls'); ?></strong> - <?php _e('Unlimited projects + API access', 'malisafi-mls'); ?></li>
+                        <li><strong><?php _e('Agency', 'malisafi-mls'); ?></strong> - <?php _e('Multi-agent management', 'malisafi-mls'); ?></li>
+                    </ul>
+                    <p>
+                        <button class="button button-primary button-large" type="submit" name="malisafi_plans_action" value="initialize_role_based" style="margin-top: 10px;">
+                            <span class="dashicons dashicons-update" style="margin-top: 3px;"></span>
+                            <?php _e('Initialize Role-Based Plans', 'malisafi-mls'); ?>
+                        </button>
+                    </p>
+                </div>
             <?php endif; ?>
 
             <?php foreach ($plans as $key => $p): ?>
@@ -67,15 +88,17 @@ if (!is_array($plans)) {
                         <input type="text" name="plans[<?php echo $uid; ?>][stripe_price_id]" value="<?php echo esc_attr(!empty($p['stripe_price_id'])?$p['stripe_price_id']:''); ?>" />
                     </p>
                     
-                    <h3 style="margin-top:20px;"><?php _e('Property Limits', 'malisafi-mls'); ?></h3>
+                    <h3 style="margin-top:20px;"><?php _e('Property Limits & Features', 'malisafi-mls'); ?></h3>
                     <p>
                         <label><?php _e('Max Properties', 'malisafi-mls'); ?>: </label>
-                        <input type="number" name="plans[<?php echo $uid; ?>][max_listings]" value="<?php echo esc_attr(!empty($p['max_listings'])?$p['max_listings']:'0'); ?>" min="0" style="width:100px;" />
-                        <small><?php _e('(0 = unlimited)', 'malisafi-mls'); ?></small>
+                        <input type="number" name="plans[<?php echo $uid; ?>][max_listings]" value="<?php echo esc_attr(isset($p['max_listings'])?$p['max_listings']:'0'); ?>" min="-1" style="width:100px;" />
+                        <small><?php _e('(-1 or 0 = unlimited)', 'malisafi-mls'); ?></small>
                     </p>
                     <p>
                         <label><?php _e('Featured Properties', 'malisafi-mls'); ?>: </label>
-                        <input type="number" name="plans[<?php echo $uid; ?>][featured_listings]" value="<?php echo esc_attr(!empty($p['featured_listings'])?$p['featured_listings']:'0'); ?>" min="0" style="width:100px;" />
+                        <input type="number" name="plans[<?php echo $uid; ?>][featured_listings]" value="<?php echo esc_attr(isset($p['featured_listings'])?$p['featured_listings']:'0'); ?>" min="0" style="width:100px;" />
+                        <small><?php _e('(per month)', 'malisafi-mls'); ?></small>
+                    </p>
                     </p>
                     <p>
                         <label><?php _e('Can Boost Properties', 'malisafi-mls'); ?>: </label>
@@ -134,7 +157,13 @@ if (!is_array($plans)) {
 
         <p>
             <button class="button button-primary" type="submit"><?php _e('Save Plans', 'malisafi-mls'); ?></button>
-            <button class="button" type="submit" name="malisafi_plans_action" value="reset_defaults" onclick="return confirm('Are you sure? This will remove custom plans and restore defaults.');"><?php _e('Reset to Defaults', 'malisafi-mls'); ?></button>
+            <button class="button button-secondary" type="submit" name="malisafi_plans_action" value="initialize_role_based" onclick="return confirm('<?php _e('This will replace all current plans with role-based defaults. Continue?', 'malisafi-mls'); ?>');" style="margin-left: 10px;">
+                <span class="dashicons dashicons-update" style="margin-top: 3px;"></span>
+                <?php _e('Initialize Role-Based Plans', 'malisafi-mls'); ?>
+            </button>
+            <button class="button" type="submit" name="malisafi_plans_action" value="reset_defaults" onclick="return confirm('<?php _e('Are you sure? This will remove custom plans and restore old defaults.', 'malisafi-mls'); ?>');" style="margin-left: 10px;">
+                <?php _e('Reset to Old Defaults', 'malisafi-mls'); ?>
+            </button>
         </p>
     </form>
 </div>

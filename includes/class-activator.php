@@ -50,6 +50,9 @@ class Activator {
         require_once MALISAFI_MLS_PATH . 'includes/class-page-manager.php';
         Page_Manager::create_all_pages();
         
+        // Initialize default subscription plans
+        self::initialize_default_plans();
+        
         // Set default options
         self::set_default_options();
         
@@ -107,6 +110,138 @@ class Activator {
                 ));
             }
         }
+    }
+    
+    /**
+     * Initialize default subscription plans based on roles
+     */
+    public static function initialize_default_plans() {
+        // Check if plans already exist
+        $existing_plans = get_option('malisafi_mls_plans', false);
+        if ($existing_plans && is_array($existing_plans) && !empty($existing_plans)) {
+            // Plans already exist, don't overwrite
+            return;
+        }
+        
+        // Get default currency
+        $default_currency = get_option('malisafi_mls_currency', 'USD');
+        
+        // Define role-based plans with adjustable settings
+        $default_plans = array(
+            'client' => array(
+                'name' => __('Client (Free)', 'malisafi-mls'),
+                'price' => 0.00,
+                'currency' => $default_currency,
+                'interval' => 'month',
+                'max_listings' => 0,
+                'featured_listings' => 0,
+                'can_boost' => 0,
+                'analytics_access' => 0,
+                'features' => array(
+                    __('Browse properties', 'malisafi-mls'),
+                    __('Save favorites', 'malisafi-mls'),
+                    __('Contact agents', 'malisafi-mls'),
+                ),
+                'stripe_price_id' => ''
+            ),
+            'agent_basic' => array(
+                'name' => __('Agent Basic', 'malisafi-mls'),
+                'price' => 29.99,
+                'currency' => $default_currency,
+                'interval' => 'month',
+                'max_listings' => 10,
+                'featured_listings' => 0,
+                'can_boost' => 0,
+                'analytics_access' => 1,
+                'features' => array(
+                    __('Up to 10 property listings', 'malisafi-mls'),
+                    __('Basic analytics', 'malisafi-mls'),
+                    __('Email support', 'malisafi-mls'),
+                    __('Agent profile page', 'malisafi-mls'),
+                ),
+                'stripe_price_id' => ''
+            ),
+            'agent_premium' => array(
+                'name' => __('Agent Premium', 'malisafi-mls'),
+                'price' => 99.99,
+                'currency' => $default_currency,
+                'interval' => 'month',
+                'max_listings' => -1, // -1 = unlimited
+                'featured_listings' => 5,
+                'can_boost' => 1,
+                'analytics_access' => 1,
+                'features' => array(
+                    __('Unlimited property listings', 'malisafi-mls'),
+                    __('5 featured listings per month', 'malisafi-mls'),
+                    __('Boost properties', 'malisafi-mls'),
+                    __('Advanced analytics', 'malisafi-mls'),
+                    __('Priority support', 'malisafi-mls'),
+                    __('Agent profile page', 'malisafi-mls'),
+                ),
+                'stripe_price_id' => ''
+            ),
+            'owner_basic' => array(
+                'name' => __('Property Owner', 'malisafi-mls'),
+                'price' => 19.99,
+                'currency' => $default_currency,
+                'interval' => 'month',
+                'max_listings' => 3,
+                'featured_listings' => 0,
+                'can_boost' => 0,
+                'analytics_access' => 1,
+                'features' => array(
+                    __('Up to 3 property listings', 'malisafi-mls'),
+                    __('Basic analytics', 'malisafi-mls'),
+                    __('Email support', 'malisafi-mls'),
+                    __('Direct property management', 'malisafi-mls'),
+                ),
+                'stripe_price_id' => ''
+            ),
+            'developer' => array(
+                'name' => __('Developer', 'malisafi-mls'),
+                'price' => 199.99,
+                'currency' => $default_currency,
+                'interval' => 'month',
+                'max_listings' => -1, // -1 = unlimited
+                'featured_listings' => 10,
+                'can_boost' => 1,
+                'analytics_access' => 1,
+                'features' => array(
+                    __('Unlimited projects and properties', 'malisafi-mls'),
+                    __('10 featured listings per month', 'malisafi-mls'),
+                    __('Bulk import/export', 'malisafi-mls'),
+                    __('Advanced analytics and reporting', 'malisafi-mls'),
+                    __('Dedicated support', 'malisafi-mls'),
+                    __('API access', 'malisafi-mls'),
+                    __('Custom branding options', 'malisafi-mls'),
+                ),
+                'stripe_price_id' => ''
+            ),
+            'agency' => array(
+                'name' => __('Real Estate Agency', 'malisafi-mls'),
+                'price' => 299.99,
+                'currency' => $default_currency,
+                'interval' => 'month',
+                'max_listings' => -1, // -1 = unlimited
+                'featured_listings' => 20,
+                'can_boost' => 1,
+                'analytics_access' => 1,
+                'features' => array(
+                    __('Unlimited properties', 'malisafi-mls'),
+                    __('20 featured listings per month', 'malisafi-mls'),
+                    __('Manage multiple agents', 'malisafi-mls'),
+                    __('Agency profile page', 'malisafi-mls'),
+                    __('Bulk operations', 'malisafi-mls'),
+                    __('Advanced analytics', 'malisafi-mls'),
+                    __('Priority support', 'malisafi-mls'),
+                    __('Custom branding', 'malisafi-mls'),
+                ),
+                'stripe_price_id' => ''
+            ),
+        );
+        
+        // Save the default plans
+        update_option('malisafi_mls_plans', $default_plans);
     }
     
     /**

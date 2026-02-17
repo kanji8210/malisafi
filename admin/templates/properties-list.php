@@ -181,12 +181,35 @@ if (isset($_GET['error'])) {
                                 <?php echo get_the_date('M j, Y'); ?>
                             </td>
                             <td class="column-actions">
-                                <a href="<?php echo admin_url('admin.php?page=malisafi-properties&action=edit&property_id=' . $property_id); ?>" class="button button-small">
-                                    <?php _e('Edit', 'malisafi-mls'); ?>
-                                </a>
-                                <a href="<?php the_permalink(); ?>" class="button button-small" target="_blank">
-                                    <?php _e('View', 'malisafi-mls'); ?>
-                                </a>
+                                <div class="row-actions-wrapper">
+                                    <a href="<?php echo admin_url('admin.php?page=malisafi-properties&action=edit&property_id=' . $property_id); ?>" 
+                                       class="button button-small" 
+                                       title="<?php _e('Edit Property', 'malisafi-mls'); ?>">
+                                        <span class="dashicons dashicons-edit"></span>
+                                    </a>
+                                    <a href="<?php the_permalink(); ?>" 
+                                       class="button button-small" 
+                                       target="_blank" 
+                                       title="<?php _e('View Property', 'malisafi-mls'); ?>">
+                                        <span class="dashicons dashicons-visibility"></span>
+                                    </a>
+                                    <?php 
+                                    $can_delete = current_user_can('delete_post', $property_id) || 
+                                                  current_user_can('delete_others_properties') || 
+                                                  current_user_can('manage_options');
+                                    if ($can_delete) : 
+                                    ?>
+                                        <a href="<?php echo wp_nonce_url(
+                                            admin_url('admin-post.php?action=malisafi_delete_property&property_id=' . $property_id . '&redirect=' . urlencode(admin_url('admin.php?page=malisafi-properties&message=property_deleted'))),
+                                            'malisafi_delete_property_' . $property_id
+                                        ); ?>" 
+                                           class="button button-small button-link-delete" 
+                                           title="<?php _e('Move to Trash', 'malisafi-mls'); ?>"
+                                           onclick="return confirm('<?php _e('Are you sure you want to move this property to trash?', 'malisafi-mls'); ?>');">
+                                            <span class="dashicons dashicons-trash"></span>
+                                        </a>
+                                    <?php endif; ?>
+                                </div>
                             </td>
                         </tr>
                     <?php endwhile; wp_reset_postdata(); ?>
@@ -439,6 +462,55 @@ if (isset($_GET['error'])) {
 }
 .malisafi-properties-page .required {
     color: #d63638;
+}
+
+/* Action buttons styling */
+.row-actions-wrapper {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.row-actions-wrapper .button {
+    min-width: 30px;
+    height: 30px;
+    padding: 0 8px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+}
+
+.row-actions-wrapper .button .dashicons {
+    width: 16px;
+    height: 16px;
+    font-size: 16px;
+    line-height: 1;
+}
+
+.row-actions-wrapper .button-small {
+    border-color: #c3c4c7;
+    background: #f6f7f7;
+    color: #2271b1;
+}
+
+.row-actions-wrapper .button-small:hover {
+    background: #2271b1;
+    border-color: #2271b1;
+    color: white;
+}
+
+.row-actions-wrapper .button-link-delete {
+    border-color: #d63638;
+    background: #fff;
+    color: #d63638;
+}
+
+.row-actions-wrapper .button-link-delete:hover {
+    background: #d63638;
+    border-color: #d63638;
+    color: white;
 }
 </style>
 
