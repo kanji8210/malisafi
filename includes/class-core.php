@@ -43,6 +43,7 @@ class Core {
         require_once MALISAFI_MLS_PATH . 'includes/class-project-submission.php';
         require_once MALISAFI_MLS_PATH . 'includes/class-role-manager.php';
         require_once MALISAFI_MLS_PATH . 'includes/class-stripe.php';
+        require_once MALISAFI_MLS_PATH . 'includes/class-subscription-manager.php';
         require_once MALISAFI_MLS_PATH . 'includes/class-featured-properties.php';
         require_once MALISAFI_MLS_PATH . 'includes/class-shortcodes.php';
         require_once MALISAFI_MLS_PATH . 'includes/class-cache-manager.php';

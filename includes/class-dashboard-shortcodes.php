@@ -30,6 +30,7 @@ class Dashboard_Shortcodes {
 		add_shortcode('malisafi_agent_properties', [__CLASS__, 'agent_properties']);
 		add_shortcode('malisafi_agent_add_property', [__CLASS__, 'agent_add_property']);
 		add_shortcode('malisafi_agent_leads', [__CLASS__, 'agent_leads']);
+		add_shortcode('malisafi_agent_inquiries', [__CLASS__, 'agent_inquiries']);
 		add_shortcode('malisafi_agent_profile_view', [__CLASS__, 'agent_profile_public']);
 
 		add_shortcode('malisafi_owner_dashboard', [__CLASS__, 'owner_dashboard']);
@@ -445,6 +446,164 @@ class Dashboard_Shortcodes {
 
 		ob_start();
 		include MALISAFI_MLS_PATH . 'templates/agent-dashboard-leads.php';
+		return ob_get_clean();
+	}
+
+	/**
+	 * Agent Inquiries shortcode
+	 * Shows inquiries received by the logged-in agent
+	 */
+	public static function agent_inquiries($atts) {
+		$login_check = self::require_login();
+		if ($login_check) {
+			return $login_check;
+		}
+
+		$current_user = wp_get_current_user();
+		$is_agent = in_array('malisafi_agent_basic', $current_user->roles) || 
+		            in_array('malisafi_agent_premium', $current_user->roles);
+		
+		if (!$is_agent && !current_user_can('administrator')) {
+			return '<div class="malisafi-access-denied"><p>' . __('Access restricted to agents only.', 'malisafi-mls') . '</p></div>';
+		}
+
+		// Enqueue dashboard styles
+		wp_enqueue_style('malisafi-dashboards', MALISAFI_MLS_URL . 'assets/css/dashboards.css', array(), MALISAFI_MLS_VERSION);
+
+		global $wpdb;
+		$table_name = $wpdb->prefix . 'mf_inquiries';
+		$user_id = get_current_user_id();
+
+		// Get inquiries for this specific agent
+		$rows = $wpdb->get_results($wpdb->prepare(
+			"SELECT i.*, p.post_title as property_title
+			 FROM {$table_name} i
+			 LEFT JOIN {$wpdb->posts} p ON i.property_id = p.ID
+			 WHERE i.agent_id = %d
+			 ORDER BY i.inquiry_id DESC LIMIT 50",
+			$user_id
+		), ARRAY_A);
+
+		ob_start();
+		?>
+		<div class="malisafi-agent-inquiries">
+			<h1><?php _e('My Inquiries', 'malisafi-mls'); ?></h1>
+			<p><?php _e('Property inquiries you have received from potential clients.', 'malisafi-mls'); ?></p>
+
+			<?php if (empty($rows)) : ?>
+				<div class="malisafi-no-results">
+					<p><?php _e('No inquiries found. Inquiries from clients interested in your properties will appear here.', 'malisafi-mls'); ?></p>
+				</div>
+			<?php else : ?>
+				<div class="inquiries-summary">
+					<?php
+					$unread_count = count(array_filter($rows, function($r) { return $r['status'] === 'new'; }));
+					$total_count = count($rows);
+					?>
+					<p><strong><?php echo esc_html($unread_count); ?></strong> <?php _e('unread', 'malisafi-mls'); ?> | 
+					   <strong><?php echo esc_html($total_count); ?></strong> <?php _e('total inquiries', 'malisafi-mls'); ?></p>
+				</div>
+
+				<ul class="agent-inquiries-list">
+					<?php foreach ($rows as $row) : ?>
+						<?php $property_id = isset($row['property_id']) ? (int) $row['property_id'] : 0; ?>
+						<li class="inquiry-item status-<?php echo esc_attr($row['status']); ?>">
+							<div class="inquiry-header">
+								<?php if ($property_id && !empty($row['property_title'])) : ?>
+									<a href="<?php echo esc_url(get_permalink($property_id)); ?>" class="property-link">
+										<?php echo esc_html($row['property_title']); ?>
+									</a>
+								<?php else : ?>
+									<span><?php _e('Property Inquiry', 'malisafi-mls'); ?></span>
+								<?php endif; ?>
+								<span class="inquiry-status badge-<?php echo esc_attr($row['status']); ?>">
+									<?php echo esc_html(ucfirst($row['status'])); ?>
+								</span>
+							</div>
+
+							<div class="inquiry-meta">
+								<?php if (!empty($row['created_at'])) : ?>
+									<small class="inquiry-date">
+										<strong><?php _e('Received:', 'malisafi-mls'); ?></strong> 
+										<?php echo esc_html(date('M j, Y \a\t g:i A', strtotime($row['created_at']))); ?>
+									</small>
+								<?php endif; ?>
+								<?php if (!empty($row['inquiry_type'])) : ?>
+									<small class="inquiry-type">
+										<strong><?php _e('Type:', 'malisafi-mls'); ?></strong> 
+										<?php echo esc_html(ucfirst(str_replace('_', ' ', $row['inquiry_type']))); ?>
+									</small>
+								<?php endif; ?>
+							</div>
+
+							<?php if (!empty($row['message'])) : ?>
+								<div class="inquiry-message">
+									<strong><?php _e('Message:', 'malisafi-mls'); ?></strong>
+									<p><?php echo esc_html($row['message']); ?></p>
+								</div>
+							<?php endif; ?>
+
+							<div class="inquiry-contact">
+								<strong><?php _e('Client Contact:', 'malisafi-mls'); ?></strong>
+								<?php if (!empty($row['client_name'])) : ?>
+									<span class="client-name"><?php echo esc_html($row['client_name']); ?></span>
+								<?php endif; ?>
+								<?php if (!empty($row['client_email'])) : ?>
+									<span class="client-email">
+										<a href="mailto:<?php echo esc_attr($row['client_email']); ?>">
+											<?php echo esc_html($row['client_email']); ?>
+										</a>
+									</span>
+								<?php endif; ?>
+								<?php if (!empty($row['client_phone'])) : ?>
+									<span class="client-phone">
+										<a href="tel:<?php echo esc_attr($row['client_phone']); ?>">
+											<?php echo esc_html($row['client_phone']); ?>
+										</a>
+									</span>
+								<?php endif; ?>
+							</div>
+
+							<?php if (!empty($row['preferred_contact_time'])) : ?>
+								<div class="inquiry-preferences">
+									<small>
+										<strong><?php _e('Best time to contact:', 'malisafi-mls'); ?></strong> 
+										<?php echo esc_html(ucfirst(str_replace('_', ' ', $row['preferred_contact_time']))); ?>
+									</small>
+								</div>
+							<?php endif; ?>
+
+							<?php if (!empty($row['tour_requested_date'])) : ?>
+								<div class="inquiry-tour">
+									<small>
+										<strong><?php _e('Requested tour date:', 'malisafi-mls'); ?></strong> 
+										<?php echo esc_html(date('M j, Y \a\t g:i A', strtotime($row['tour_requested_date']))); ?>
+									</small>
+								</div>
+							<?php endif; ?>
+
+							<?php if ($row['email_sent']) : ?>
+								<div class="inquiry-email-status">
+									<small class="email-sent">
+										✓ <?php _e('Email notification sent', 'malisafi-mls'); ?>
+										<?php if (!empty($row['email_recipient'])) : ?>
+											<?php _e('to', 'malisafi-mls'); ?> <?php echo esc_html($row['email_recipient']); ?>
+										<?php endif; ?>
+									</small>
+								</div>
+							<?php elseif ($row['status'] === 'email_failed') : ?>
+								<div class="inquiry-email-status">
+									<small class="email-failed">
+										⚠ <?php _e('Email notification failed', 'malisafi-mls'); ?>
+									</small>
+								</div>
+							<?php endif; ?>
+						</li>
+					<?php endforeach; ?>
+				</ul>
+			<?php endif; ?>
+		</div>
+		<?php
 		return ob_get_clean();
 	}
 

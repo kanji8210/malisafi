@@ -63,6 +63,16 @@ class Malisafi_Admin_Dashboard {
             array(__CLASS__, 'render_moderation_queue')
         );
         
+        // Inquiries Management
+        add_submenu_page(
+            'malisafi-dashboard',
+            __('Property Inquiries', 'malisafi-mls'),
+            __('Inquiries', 'malisafi-mls'),
+            'manage_malisafi_settings',
+            'malisafi-inquiries',
+            array(__CLASS__, 'render_inquiries')
+        );
+        
         // User Management
         add_submenu_page(
             'malisafi-dashboard',
@@ -73,24 +83,24 @@ class Malisafi_Admin_Dashboard {
             array(__CLASS__, 'render_users_management')
         );
         
-        // Subscriptions & Billing
+        // Unified Plans & Subscriptions Management
         add_submenu_page(
             'malisafi-dashboard',
-            __('Subscriptions', 'malisafi-mls'),
-            __('Subscriptions', 'malisafi-mls'),
+            __('Plans & Subscriptions', 'malisafi-mls'),
+            __('Plans & Subscriptions', 'malisafi-mls'),
             'manage_malisafi_settings',
-            'malisafi-subscriptions',
-            array(__CLASS__, 'render_subscriptions')
+            'malisafi-plans-subscriptions',
+            array(__CLASS__, 'render_unified_subscriptions')
         );
-
-        // Plans management (CRUD for subscription plans)
+        
+        // Advanced Subscription Manager
         add_submenu_page(
             'malisafi-dashboard',
-            __('Plans', 'malisafi-mls'),
-            __('Plans', 'malisafi-mls'),
+            __('Subscription Manager', 'malisafi-mls'),
+            __('Subscription Manager', 'malisafi-mls'),
             'manage_malisafi_settings',
-            'malisafi-plans',
-            array(__CLASS__, 'render_plans')
+            'malisafi-subscription-manager',
+            array(__CLASS__, 'render_subscription_manager')
         );
         
         // Property Types & Statuses Management
@@ -168,6 +178,11 @@ class Malisafi_Admin_Dashboard {
      * Render main dashboard
      */
     public static function render_dashboard() {
+        // Capability check
+        if (!current_user_can('manage_malisafi_settings')) {
+            wp_die(__('You do not have permission to access this page.', 'malisafi-mls'));
+        }
+        
         $template = MALISAFI_MLS_PATH . 'admin/templates/dashboard-main.php';
         if (file_exists($template)) {
             include $template;
@@ -194,6 +209,11 @@ class Malisafi_Admin_Dashboard {
      * Render moderation queue
      */
     public static function render_moderation_queue() {
+        // Capability check
+        if (!current_user_can('moderate_properties')) {
+            wp_die(__('You do not have permission to moderate properties.', 'malisafi-mls'));
+        }
+        
         $template = MALISAFI_MLS_PATH . 'admin/templates/moderation-queue.php';
         if (file_exists($template)) {
             include $template;
@@ -204,9 +224,32 @@ class Malisafi_Admin_Dashboard {
     }
     
     /**
+     * Render inquiries management
+     */
+    public static function render_inquiries() {
+        // Capability check
+        if (!current_user_can('manage_malisafi_settings') && !current_user_can('manage_options')) {
+            wp_die(__('You do not have permission to manage inquiries.', 'malisafi-mls'));
+        }
+        
+        // Use the existing inquiries admin class
+        if (class_exists('Malisafi_Inquiries_Admin')) {
+            \Malisafi_Inquiries_Admin::render_page();
+        } else {
+            echo '<div class="wrap"><h1>' . __('Property Inquiries', 'malisafi-mls') . '</h1>';
+            echo '<p>' . __('Inquiries management is not available.', 'malisafi-mls') . '</p></div>';
+        }
+    }
+    
+    /**
      * Render users management
      */
     public static function render_users_management() {
+        // Capability check
+        if (!current_user_can('manage_malisafi_settings')) {
+            wp_die(__('You do not have permission to manage users.', 'malisafi-mls'));
+        }
+        
         $template = MALISAFI_MLS_PATH . 'admin/templates/users-management.php';
         if (file_exists($template)) {
             include $template;
@@ -215,125 +258,55 @@ class Malisafi_Admin_Dashboard {
             echo '<p>' . __('User management template coming soon.', 'malisafi-mls') . '</p></div>';
         }
     }
-    
-    /**
-     * Render subscriptions
-     */
-    public static function render_subscriptions() {
-        $template = MALISAFI_MLS_PATH . 'admin/templates/subscriptions.php';
-        if (file_exists($template)) {
-            include $template;
-        } else {
-            echo '<div class="wrap"><h1>' . __('Subscriptions & Billing', 'malisafi-mls') . '</h1>';
-            echo '<p>' . __('Subscriptions template coming soon.', 'malisafi-mls') . '</p></div>';
-        }
-    }
+
 
     /**
-     * Render plans management page and handle saves.
+     * Render unified plans & subscriptions management page
      */
-    public static function render_plans() {
+    public static function render_unified_subscriptions() {
         // Capability check
         if (!current_user_can('manage_malisafi_settings')) {
-            wp_die(__('You do not have permission to manage plans.', 'malisafi-mls'));
+            wp_die(__('You do not have permission to manage plans and subscriptions.', 'malisafi-mls'));
         }
-
-        // Handle POST save
-        if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['malisafi_plans_action'])) {
-            if (!isset($_POST['_malisafi_plans_nonce']) || !wp_verify_nonce($_POST['_malisafi_plans_nonce'], 'malisafi_plans_save')) {
-                wp_die(__('Invalid request.', 'malisafi-mls'));
-            }
-
-            $action = sanitize_text_field($_POST['malisafi_plans_action']);
-            $plans = get_option('malisafi_mls_plans', array());
-            if (!is_array($plans)) {
-                $plans = array();
-            }
-
-            if ($action === 'save_all' && isset($_POST['plans']) && is_array($_POST['plans'])) {
-                $new = array();
-                foreach ($_POST['plans'] as $key => $p) {
-                    $k = sanitize_key($key);
-                    $name = sanitize_text_field($p['name']);
-                    $price = floatval($p['price']);
-                    $currency = sanitize_text_field($p['currency']);
-                    $interval = sanitize_text_field($p['interval']);
-                    $stripe = sanitize_text_field($p['stripe_price_id']);
-                    $max_listings = isset($p['max_listings']) ? intval($p['max_listings']) : 0;
-                    $featured_listings = isset($p['featured_listings']) ? intval($p['featured_listings']) : 0;
-                    $can_boost = isset($p['can_boost']) ? 1 : 0;
-                    $analytics_access = isset($p['analytics_access']) ? 1 : 0;
-                    $features = array();
-                    if (!empty($p['features'])) {
-                        if (is_array($p['features'])) {
-                            foreach ($p['features'] as $f) {
-                                $features[] = sanitize_text_field($f);
-                            }
-                        } else {
-                            // Accept comma-separated string as a convenience from the UI
-                            $tmp = explode(',', (string) $p['features']);
-                            foreach ($tmp as $f) {
-                                $f = trim($f);
-                                if ($f !== '') {
-                                    $features[] = sanitize_text_field($f);
-                                }
-                            }
-                        }
-                    }
-
-                    $new[$k] = array(
-                        'name' => $name,
-                        'price' => $price,
-                        'currency' => $currency,
-                        'interval' => $interval,
-                        'features' => $features,
-                        'stripe_price_id' => $stripe,
-                        'max_listings' => $max_listings,
-                        'featured_listings' => $featured_listings,
-                        'can_boost' => $can_boost,
-                        'analytics_access' => $analytics_access,
-                    );
-                }
-
-                update_option('malisafi_mls_plans', $new);
-                $plans = $new;
-                add_settings_error('malisafi-plans', 'saved', __('Plans saved.', 'malisafi-mls'), 'updated');
-            }
-
-            if ($action === 'reset_defaults') {
-                delete_option('malisafi_mls_plans');
-                add_settings_error('malisafi-plans', 'reset', __('Plans reset to defaults.', 'malisafi-mls'), 'updated');
-                $plans = array();
-            }
-            
-            if ($action === 'initialize_role_based') {
-                // Call the activator's initialize function
-                require_once MALISAFI_MLS_PATH . 'includes/class-activator.php';
-                delete_option('malisafi_mls_plans'); // Clear existing first
-                \MalisafiMLS\Activator::initialize_default_plans();
-                add_settings_error('malisafi-plans', 'initialized', __('Role-based plans initialized successfully. You can now adjust prices and limits.', 'malisafi-mls'), 'updated');
-                $plans = get_option('malisafi_mls_plans', array());
-            }
-        } else {
-            $plans = get_option('malisafi_mls_plans', array());
-        }
-
-        // Allow admin notices to be displayed
-        settings_errors('malisafi-plans');
-
-        $template = MALISAFI_MLS_PATH . 'admin/templates/plans.php';
+        
+        $template = MALISAFI_MLS_PATH . 'admin/templates/unified-subscriptions.php';
         if (file_exists($template)) {
             include $template;
         } else {
-            echo '<div class="wrap"><h1>' . __('Plans Management', 'malisafi-mls') . '</h1>';
-            echo '<p>' . __('Plans management template missing.', 'malisafi-mls') . '</p></div>';
+            echo '<div class="wrap"><h1>' . __('Plans & Subscriptions', 'malisafi-mls') . '</h1>';
+            echo '<p>' . __('Unified management template not found.', 'malisafi-mls') . '</p></div>';
         }
     }
+
+    /**
+     * Render advanced subscription manager
+     */
+    public static function render_subscription_manager() {
+        // Capability check
+        if (!current_user_can('manage_malisafi_settings')) {
+            wp_die(__('You do not have permission to manage subscriptions.', 'malisafi-mls'));
+        }
+        
+        $template = MALISAFI_MLS_PATH . 'admin/templates/subscription-manager.php';
+        if (file_exists($template)) {
+            include $template;
+        } else {
+            echo '<div class="wrap"><h1>' . __('Advanced Subscription Manager', 'malisafi-mls') . '</h1>';
+            echo '<p>' . __('Subscription manager template not found.', 'malisafi-mls') . '</p></div>';
+        }
+    }
+
+
     
     /**
      * Render analytics
      */
     public static function render_analytics() {
+        // Capability check
+        if (!current_user_can('manage_malisafi_settings')) {
+            wp_die(__('You do not have permission to access analytics.', 'malisafi-mls'));
+        }
+        
         $template = MALISAFI_MLS_PATH . 'admin/templates/analytics.php';
         if (file_exists($template)) {
             include $template;
@@ -347,6 +320,11 @@ class Malisafi_Admin_Dashboard {
      * Render developers page
      */
     public static function render_developers() {
+        // Capability check
+        if (!current_user_can('manage_malisafi_settings')) {
+            wp_die(__('You do not have permission to access developer projects.', 'malisafi-mls'));
+        }
+        
         $template = MALISAFI_MLS_PATH . 'admin/templates/developers.php';
         if (file_exists($template)) {
             include $template;
@@ -360,6 +338,11 @@ class Malisafi_Admin_Dashboard {
      * Render settings page
      */
     public static function render_settings() {
+        // Capability check
+        if (!current_user_can('manage_malisafi_settings')) {
+            wp_die(__('You do not have permission to manage settings.', 'malisafi-mls'));
+        }
+        
         $template = MALISAFI_MLS_PATH . 'admin/templates/settings.php';
         if (file_exists($template)) {
             include $template;
@@ -373,6 +356,11 @@ class Malisafi_Admin_Dashboard {
      * Render pages management page
      */
     public static function render_pages_management() {
+        // Capability check
+        if (!current_user_can('manage_malisafi_settings')) {
+            wp_die(__('You do not have permission to manage pages.', 'malisafi-mls'));
+        }
+        
         $template = MALISAFI_MLS_PATH . 'admin/templates/pages-management.php';
         if (file_exists($template)) {
             include $template;
@@ -386,6 +374,11 @@ class Malisafi_Admin_Dashboard {
      * Render database tools page
      */
     public static function render_database_tools() {
+        // Capability check
+        if (!current_user_can('manage_options')) {
+            wp_die(__('You do not have permission to access database tools.', 'malisafi-mls'));
+        }
+        
         $template = MALISAFI_MLS_PATH . 'admin/templates/database-tools.php';
         if (file_exists($template)) {
             include $template;

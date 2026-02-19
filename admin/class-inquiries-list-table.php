@@ -58,6 +58,12 @@ class Malisafi_Inquiries_List_Table extends WP_List_Table {
         $per_page = 25;
         $current_page = $this->get_pagenum();
 
+        // Set up columns
+        $columns = $this->get_columns();
+        $hidden = array();
+        $sortable = $this->get_sortable_columns();
+        $this->_column_headers = array($columns, $hidden, $sortable);
+
         $where = "";
         $vars = [];
 
@@ -90,7 +96,7 @@ class Malisafi_Inquiries_List_Table extends WP_List_Table {
         // Count
         if ($where === '') {
             $total = intval($wpdb->get_var("SELECT COUNT(*) FROM $table"));
-            $items = $wpdb->get_results($wpdb->prepare("SELECT * FROM $table ORDER BY created_at DESC LIMIT %d OFFSET %d", $per_page, ($current_page -1) * $per_page));
+            $items = $wpdb->get_results("SELECT * FROM $table ORDER BY created_at DESC LIMIT $per_page OFFSET " . (($current_page - 1) * $per_page));
         } else {
             $sql_count = "SELECT COUNT(*) FROM $table" . $where;
             $total = intval($wpdb->get_var($wpdb->prepare($sql_count, $vars)));
@@ -183,5 +189,9 @@ class Malisafi_Inquiries_List_Table extends WP_List_Table {
             'mark_read' => __('Mark Read', 'malisafi-mls'),
             'delete'    => __('Delete', 'malisafi-mls')
         ];
+    }
+
+    public function no_items() {
+        _e('No inquiries found.', 'malisafi-mls');
     }
 }

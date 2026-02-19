@@ -557,6 +557,20 @@ class Page_Manager {
     }
     
     /**
+     * Get page ID by key
+     *
+     * @param string $key Page key
+     * @return int|false Page ID or false if not found
+     */
+    public static function get_page_id($key) {
+        $page_id = get_option('malisafi_page_' . $key);
+        if ($page_id && get_post($page_id)) {
+            return (int) $page_id;
+        }
+        return false;
+    }
+    
+    /**
      * Delete all plugin pages
      */
     public static function delete_all_pages() {

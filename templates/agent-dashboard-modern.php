@@ -111,6 +111,9 @@ $logout_url = wp_logout_url(home_url());
             case 'leads':
                 include __DIR__ . '/agent-dashboard-leads.php';
                 break;
+            case 'inquiries':
+                include __DIR__ . '/agent-dashboard-inquiries.php';
+                break;
             case 'profile':
                 include __DIR__ . '/agent-dashboard-profile.php';
                 break;

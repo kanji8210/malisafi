@@ -43,8 +43,6 @@ class Property_Actions_Ajax {
      */
     public function enqueue_scripts() {
         if (is_singular('malisafi_property')) {
-            error_log('Malisafi: Enqueuing single property scripts for post type: ' . get_post_type());
-            
             wp_enqueue_style(
                 'malisafi-single-property',
                 MALISAFI_MLS_URL . 'assets/css/single-property.css',
@@ -80,8 +78,6 @@ class Property_Actions_Ajax {
                 'login_url' => $login_url,
                 'register_client_url' => $register_client_url
             ));
-        } else {
-            error_log('Malisafi: NOT enqueuing single property scripts. Current post type: ' . get_post_type() . ', is_singular check: ' . (is_singular('malisafi_property') ? 'true' : 'false'));
         }
     }
     
@@ -158,14 +154,6 @@ class Property_Actions_Ajax {
      * Handle property inquiry
      */
     public function send_inquiry() {
-        // Debug logging
-        error_log('Malisafi: send_inquiry called');
-        // Log incoming request context for debugging network errors
-        error_log('Malisafi Debug: REQUEST_URI=' . ($_SERVER['REQUEST_URI'] ?? ''));
-        error_log('Malisafi Debug: REMOTE_ADDR=' . ($_SERVER['REMOTE_ADDR'] ?? ''));
-        error_log('Malisafi Debug: HTTP_USER_AGENT=' . ($_SERVER['HTTP_USER_AGENT'] ?? ''));
-        error_log('Malisafi Debug: Raw POST=' . wp_json_encode($_POST));
-
         // Verify nonce
         if (!isset($_POST['nonce']) || !wp_verify_nonce($_POST['nonce'], 'malisafi_ajax_nonce')) {
             error_log('Malisafi: Invalid nonce in send_inquiry');
@@ -336,12 +324,12 @@ class Property_Actions_Ajax {
 
         $inserted = $wpdb->insert($table_name, $inquiry_db);
         if (!$inserted) {
-            error_log('Malisafi: Failed to insert inquiry DB record.');
-            error_log('Malisafi Debug: table=' . $table_name);
-            error_log('Malisafi Debug: last_error=' . $wpdb->last_error);
-            error_log('Malisafi Debug: last_query=' . $wpdb->last_query);
-            error_log('Malisafi Debug: insert_payload=' . wp_json_encode($inquiry_db));
             if (defined('WP_DEBUG') && WP_DEBUG) {
+                error_log('Malisafi: Failed to insert inquiry DB record.');
+                error_log('Malisafi Debug: table=' . $table_name);
+                error_log('Malisafi Debug: last_error=' . $wpdb->last_error);
+                error_log('Malisafi Debug: last_query=' . $wpdb->last_query);
+                error_log('Malisafi Debug: insert_payload=' . wp_json_encode($inquiry_db));
                 error_log('Malisafi Debug: DB error trace: ' . print_r($wpdb, true));
             }
             wp_send_json_error(array('message' => 'Failed to save inquiry. Please try again later.'));

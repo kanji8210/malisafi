@@ -533,28 +533,11 @@ $can_assign_agent = current_user_can('manage_options') || current_user_can('edit
         <p class="field-hint draft-hint"><?php _e('Save a draft to continue later. Your progress is also auto-saved as you go.', 'malisafi-mls'); ?></p>
     </form>
 
-    <!-- DEBUG: JavaScript Loading Test -->
+    <!-- Initialize Property Submission Wizard -->
     <script>
-        console.log('DEBUG: Property submission template JavaScript test');
-        console.log('DEBUG: malisafiSubmission object:', typeof malisafiSubmission !== 'undefined' ? malisafiSubmission : 'NOT FOUND');
-        console.log('DEBUG: jQuery available:', typeof jQuery !== 'undefined' ? 'YES' : 'NO');
-        console.log('DEBUG: Form element exists:', document.getElementById('property-submission-form') ? 'YES' : 'NO');
-        
         // Initialize the property submission wizard
         if (typeof PropertySubmission !== 'undefined') {
-            console.log('DEBUG: Initializing PropertySubmission...');
             PropertySubmission.init();
-        } else {
-            console.log('DEBUG: PropertySubmission object not found!');
         }
-        
-        // Test if our buttons exist
-        setTimeout(function() {
-            console.log('DEBUG: Checking for image upload buttons...');
-            console.log('Browse images button:', document.querySelector('.btn-browse-images') ? 'FOUND' : 'NOT FOUND');
-            console.log('Featured browse button:', document.querySelector('.btn-browse-featured') ? 'FOUND' : 'NOT FOUND');
-            console.log('Dropzone:', document.getElementById('dropzone') ? 'FOUND' : 'NOT FOUND');
-            console.log('Featured dropzone:', document.getElementById('featured-dropzone') ? 'FOUND' : 'NOT FOUND');
-        }, 1000);
     </script>
 </div>

@@ -12,12 +12,15 @@ if (!defined('ABSPATH')) {
 class Malisafi_Inquiries_Admin {
 
     public static function init() {
-        add_action('admin_menu', array(__CLASS__, 'add_menu'));
+        // Menu is now added by Malisafi_Admin_Dashboard class
+        // add_action('admin_menu', array(__CLASS__, 'add_menu'));
         add_action('admin_post_malisafi_inquiry_action', array(__CLASS__, 'handle_action'));
         add_action('wp_ajax_malisafi_inquiry_action', array(__CLASS__, 'ajax_handle_action'));
     }
 
     public static function add_menu() {
+        // Deprecated: Menu now added in Malisafi_Admin_Dashboard::add_admin_menus()
+        // Kept for backward compatibility
         add_submenu_page(
             'malisafi-dashboard',
             __('Inquiries', 'malisafi-mls'),
@@ -121,10 +124,7 @@ class Malisafi_Inquiries_Admin {
             </style>
 
             <script>
-            (function(){
-                var table = document.getElementById('malisafi-inquiries-table');
-                if (!table) return;
-
+            jQuery(document).ready(function($){
                 function ajaxAction(inquiryId, actionName, nonce, onSuccess, onError){
                     var data = new FormData();
                     data.append('action', 'malisafi_inquiry_action');
@@ -149,54 +149,56 @@ class Malisafi_Inquiries_Admin {
                     });
                 }
 
-                table.addEventListener('click', function(e){
-                    var t = e.target;
-                    if (t.closest('.malisafi-view-inquiry')){
-                        e.preventDefault();
-                        var id = t.getAttribute('data-id');
-                        var full = document.getElementById('malisafi-inquiry-full-' + id);
-                        if (full){
-                            document.getElementById('malisafi-inquiry-modal-body').innerHTML = full.innerHTML;
-                            document.getElementById('malisafi-inquiry-modal').style.display = 'block';
-                        }
-                    }
-
-                    if (t.closest('.malisafi-action-mark-read')){
-                        e.preventDefault();
-                        var id = t.getAttribute('data-id');
-                        var nonce = t.getAttribute('data-nonce');
-                        ajaxAction(id, 'mark_read', nonce, function(){
-                            var row = t.closest('tr');
-                            if (row){
-                                var statusCell = row.querySelector('td.column-status');
-                                if (statusCell) statusCell.textContent = 'read';
-                            }
-                        }, function(err){
-                            alert('Error: ' + err);
-                        });
-                    }
-
-                    if (t.closest('.malisafi-action-delete')){
-                        e.preventDefault();
-                        if (!confirm('Are you sure?')) return;
-                        var id = t.getAttribute('data-id');
-                        var nonce = t.getAttribute('data-nonce');
-                        ajaxAction(id, 'delete', nonce, function(){
-                            var row = t.closest('tr');
-                            if (row) row.parentNode.removeChild(row);
-                        }, function(err){
-                            alert('Error: ' + err);
-                        });
-                    }
-
-                    if (t.closest('.malisafi-inquiry-modal-close')){
-                        e.preventDefault();
-                        document.getElementById('malisafi-inquiry-modal').style.display = 'none';
+                $(document).on('click', '.malisafi-view-inquiry', function(e){
+                    e.preventDefault();
+                    var id = $(this).data('id');
+                    var full = $('#malisafi-inquiry-full-' + id);
+                    if (full.length){
+                        $('#malisafi-inquiry-body').html(full.html());
+                        $('#malisafi-inquiry-modal').show();
                     }
                 });
-            })();
+
+                $(document).on('click', '.malisafi-action-mark-read', function(e){
+
+                    e.preventDefault();
+                    var id = $(this).data('id');
+                    var nonce = $(this).data('nonce');
+                    ajaxAction(id, 'mark_read', nonce, function(){
+                        var row = $('[data-id="' + id + '"]').closest('tr');
+                        if (row.length){
+                            var statusCell = row.find('td.column-status');
+                            if (statusCell.length) {
+                                statusCell.html('<span style="display:inline-block;padding:3px 8px;background:#72aee6;color:#fff;border-radius:3px;font-size:11px;font-weight:600;">Read</span>');
+                            }
+                        }
+                    }, function(err){
+                        alert('Error: ' + err);
+                    });
+                });
+
+                $(document).on('click', '.malisafi-action-delete', function(e){
+                    e.preventDefault();
+                    if (!confirm('Are you sure?')) return;
+                    var id = $(this).data('id');
+                    var nonce = $(this).data('nonce');
+                    ajaxAction(id, 'delete', nonce, function(){
+                        var row = $('[data-id="' + id + '"]').closest('tr');
+                        if (row.length) row.remove();
+                    }, function(err){
+                        alert('Error: ' + err);
+                    });
+                });
+
+                $(document).on('click', '#malisafi-inquiry-close, .malisafi-inquiry-modal-close', function(e){
+                    e.preventDefault();
+                    $('#malisafi-inquiry-modal').hide();
+                });
+            });
             </script>
         </div>
+        <?php
+    }
 
     public static function ajax_handle_action(){
         if (! current_user_can('manage_options')){
@@ -222,21 +224,21 @@ class Malisafi_Inquiries_Admin {
             $updated = $wpdb->update($table, array('status' => 'read'), array('inquiry_id' => $inquiry_id), array('%s'), array('%d'));
             if ($updated !== false){
                 wp_send_json_success(array('updated' => $updated));
+            } else {
+                wp_send_json_error('db_failed');
             }
-            wp_send_json_error('db_failed');
         }
 
         if ($inquiry_action === 'delete'){
             $deleted = $wpdb->delete($table, array('inquiry_id' => $inquiry_id), array('%d'));
             if ($deleted !== false){
                 wp_send_json_success(array('deleted' => $deleted));
+            } else {
+                wp_send_json_error('db_failed');
             }
-            wp_send_json_error('db_failed');
         }
 
         wp_send_json_error('unknown_action');
-    }
-        <?php
     }
 
     public static function handle_action() {

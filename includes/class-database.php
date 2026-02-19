@@ -24,6 +24,8 @@ class Database {
         
         // Core User Roles and Subscriptions
         self::create_subscriptions_table($charset_collate);
+        self::create_subscription_history_table($charset_collate);
+        self::create_subscription_archive_table($charset_collate);
         self::create_user_limits_table($charset_collate);
         
         // Properties Master Table
@@ -76,6 +78,54 @@ class Database {
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
             KEY user_id (user_id)
+        ) $charset_collate;";
+        
+        dbDelta($sql);
+    }
+    
+    /**
+     * Create subscription history table
+     */
+    private static function create_subscription_history_table($charset_collate) {
+        global $wpdb;
+        
+        $table_name = $wpdb->prefix . 'mf_subscription_history';
+        
+        $sql = "CREATE TABLE IF NOT EXISTS $table_name (
+            id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+            subscription_id BIGINT UNSIGNED NOT NULL,
+            action VARCHAR(50) NOT NULL,
+            metadata TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            KEY subscription_id (subscription_id),
+            KEY action (action),
+            KEY created_at (created_at)
+        ) $charset_collate;";
+        
+        dbDelta($sql);
+    }
+    
+    /**
+     * Create subscription archive table
+     */
+    private static function create_subscription_archive_table($charset_collate) {
+        global $wpdb;
+        
+        $table_name = $wpdb->prefix . 'mf_subscription_archive';
+        
+        $sql = "CREATE TABLE IF NOT EXISTS $table_name (
+            id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+            original_id BIGINT UNSIGNED NOT NULL,
+            user_id BIGINT UNSIGNED NOT NULL,
+            plan_type VARCHAR(50) NOT NULL,
+            status VARCHAR(20) NOT NULL,
+            stripe_subscription_id VARCHAR(255),
+            current_period_start DATETIME,
+            current_period_end DATETIME,
+            created_at DATETIME,
+            archived_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            KEY user_id (user_id),
+            KEY archived_at (archived_at)
         ) $charset_collate;";
         
         dbDelta($sql);
@@ -563,7 +613,10 @@ class Database {
         $tables = array(
             'mf_inquiries' => array(
                 // column => SQL fragment to add
-                'client_ip' => "ADD COLUMN `client_ip` VARCHAR(45) NOT NULL DEFAULT '' AFTER `updated_at`"
+                'client_ip' => "ADD COLUMN `client_ip` VARCHAR(45) NOT NULL DEFAULT '' AFTER `updated_at`",
+                'email_sent' => "ADD COLUMN `email_sent` BOOLEAN DEFAULT TRUE COMMENT 'Whether notification email was sent successfully' AFTER `status`",
+                'email_recipient' => "ADD COLUMN `email_recipient` VARCHAR(255) NULL COMMENT 'Agent/agency email that received notification' AFTER `email_sent`",
+                'client_name' => "ADD COLUMN `client_name` VARCHAR(255) NULL AFTER `email_recipient`"
             )
         );
 
