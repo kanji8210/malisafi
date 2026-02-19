@@ -41,11 +41,11 @@ class Malisafi_Inquiries_Admin {
             $table = $wpdb->prefix . 'mf_inquiries';
             if ($action === 'mark_read' && $ids) {
                 foreach ($ids as $id) {
-                    $wpdb->update($table, array('status' => 'read', 'updated_at' => current_time('mysql')), array('id' => $id));
+                    $wpdb->update($table, array('status' => 'read', 'updated_at' => current_time('mysql')), array('inquiry_id' => $id));
                 }
             } elseif ($action === 'delete' && $ids) {
                 foreach ($ids as $id) {
-                    $wpdb->delete($table, array('id' => $id));
+                    $wpdb->delete($table, array('inquiry_id' => $id));
                 }
             }
         }
@@ -55,20 +55,53 @@ class Malisafi_Inquiries_Admin {
         <div class="wrap">
             <h1><?php _e('Property Inquiries', 'malisafi-mls'); ?></h1>
 
-            <form method="get">
-                <input type="hidden" name="page" value="malisafi-inquiries" />
-                <?php $list_table->search_box(__('Search'), 'inquiry'); ?>
+            <div style="display:flex;gap:20px;align-items:flex-end;margin-bottom:15px;">
+                <form method="get" style="display:flex;gap:10px;align-items:flex-end;flex:1;">
+                    <input type="hidden" name="page" value="malisafi-inquiries" />
+                    
+                    <div>
+                        <?php $list_table->search_box(__('Search'), 'inquiry'); ?>
+                    </div>
 
-                <label for="status" style="margin-left:10px;"><?php _e('Status:', 'malisafi-mls'); ?></label>
-                <select id="status" name="status">
-                    <option value=""><?php _e('All', 'malisafi-mls'); ?></option>
-                    <option value="new" <?php selected($_REQUEST['status'] ?? '', 'new'); ?>><?php _e('New', 'malisafi-mls'); ?></option>
-                    <option value="read" <?php selected($_REQUEST['status'] ?? '', 'read'); ?>><?php _e('Read', 'malisafi-mls'); ?></option>
-                    <option value="replied" <?php selected($_REQUEST['status'] ?? '', 'replied'); ?>><?php _e('Replied', 'malisafi-mls'); ?></option>
-                    <option value="closed" <?php selected($_REQUEST['status'] ?? '', 'closed'); ?>><?php _e('Closed', 'malisafi-mls'); ?></option>
-                </select>
-                <?php submit_button(__('Filter'), 'secondary', '', false); ?>
-            </form>
+                    <div>
+                        <label for="status" style="display:block;margin-bottom:3px;"><?php _e('Read Status:', 'malisafi-mls'); ?></label>
+                        <select id="status" name="status" style="height:32px;">
+                            <option value=""><?php _e('All', 'malisafi-mls'); ?></option>
+                            <option value="new" <?php selected($_REQUEST['status'] ?? '', 'new'); ?>><?php _e('🔵 New (Unread)', 'malisafi-mls'); ?></option>
+                            <option value="read" <?php selected($_REQUEST['status'] ?? '', 'read'); ?>><?php _e('👁️ Read', 'malisafi-mls'); ?></option>
+                            <option value="replied" <?php selected($_REQUEST['status'] ?? '', 'replied'); ?>><?php _e('✅ Replied', 'malisafi-mls'); ?></option>
+                            <option value="closed" <?php selected($_REQUEST['status'] ?? '', 'closed'); ?>><?php _e('🔒 Closed', 'malisafi-mls'); ?></option>
+                            <option value="email_failed" <?php selected($_REQUEST['status'] ?? '', 'email_failed'); ?>><?php _e('⚠️ Email Failed', 'malisafi-mls'); ?></option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label for="email_filter" style="display:block;margin-bottom:3px;"><?php _e('Email Notification:', 'malisafi-mls'); ?></label>
+                        <select id="email_filter" name="email_filter" style="height:32px;">
+                            <option value=""><?php _e('All', 'malisafi-mls'); ?></option>
+                            <option value="sent" <?php selected($_REQUEST['email_filter'] ?? '', 'sent'); ?>><?php _e('✅ Sent', 'malisafi-mls'); ?></option>
+                            <option value="failed" <?php selected($_REQUEST['email_filter'] ?? '', 'failed'); ?>><?php _e('❌ Failed', 'malisafi-mls'); ?></option>
+                        </select>
+                    </div>
+                    
+                    <?php submit_button(__('Filter'), 'secondary', '', false, ['style' => 'margin:0;']); ?>
+                </form>
+                
+                <?php
+                global $wpdb;
+                $total_inquiries = $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->prefix}mf_inquiries");
+                $unread_count = $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->prefix}mf_inquiries WHERE status = 'new'");
+                $email_failed = $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->prefix}mf_inquiries WHERE email_sent = 0");
+                ?>
+                <div style="background:#fff;border:1px solid #c3c4c7;padding:10px 15px;border-radius:4px;">
+                    <strong><?php _e('Summary:', 'malisafi-mls'); ?></strong><br>
+                    <span style="color:#2271b1;font-weight:600;"><?php echo number_format($unread_count); ?></span> <?php _e('unread', 'malisafi-mls'); ?> | 
+                    <span style="color:#646970;"><?php echo number_format($total_inquiries); ?></span> <?php _e('total', 'malisafi-mls'); ?>
+                    <?php if ($email_failed > 0): ?>
+                        <br><span style="color:#d63638;font-weight:600;">⚠️ <?php echo number_format($email_failed); ?></span> <?php _e('email notifications failed', 'malisafi-mls'); ?>
+                    <?php endif; ?>
+                </div>
+            </div>
 
             <form method="post">
                 <?php wp_nonce_field('bulk-inquiries'); ?>
@@ -186,7 +219,7 @@ class Malisafi_Inquiries_Admin {
         }
 
         if ($inquiry_action === 'mark_read'){
-            $updated = $wpdb->update($table, array('status' => 'read'), array('id' => $inquiry_id), array('%s'), array('%d'));
+            $updated = $wpdb->update($table, array('status' => 'read'), array('inquiry_id' => $inquiry_id), array('%s'), array('%d'));
             if ($updated !== false){
                 wp_send_json_success(array('updated' => $updated));
             }
@@ -194,7 +227,7 @@ class Malisafi_Inquiries_Admin {
         }
 
         if ($inquiry_action === 'delete'){
-            $deleted = $wpdb->delete($table, array('id' => $inquiry_id), array('%d'));
+            $deleted = $wpdb->delete($table, array('inquiry_id' => $inquiry_id), array('%d'));
             if ($deleted !== false){
                 wp_send_json_success(array('deleted' => $deleted));
             }
@@ -220,9 +253,9 @@ class Malisafi_Inquiries_Admin {
         global $wpdb;
         $table = $wpdb->prefix . 'mf_inquiries';
         if ($action === 'mark_read' && $id) {
-            $wpdb->update($table, array('status' => 'read', 'updated_at' => current_time('mysql')), array('id' => $id));
+            $wpdb->update($table, array('status' => 'read', 'updated_at' => current_time('mysql')), array('inquiry_id' => $id));
         } elseif ($action === 'delete' && $id) {
-            $wpdb->delete($table, array('id' => $id));
+            $wpdb->delete($table, array('inquiry_id' => $id));
         }
 
         wp_redirect(admin_url('admin.php?page=malisafi-inquiries'));

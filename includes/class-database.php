@@ -210,14 +210,18 @@ class Database {
             property_id BIGINT UNSIGNED NOT NULL,
             client_id BIGINT UNSIGNED NOT NULL,
             agent_id BIGINT UNSIGNED NOT NULL,
+            agency_id BIGINT UNSIGNED DEFAULT 0,
             inquiry_type ENUM('general', 'tour_request', 'price_negotiation') DEFAULT 'general',
             message TEXT,
-            status ENUM('new', 'read', 'replied', 'closed') DEFAULT 'new',
+            status ENUM('new', 'read', 'replied', 'closed', 'email_failed') DEFAULT 'new',
+            email_sent BOOLEAN DEFAULT TRUE COMMENT 'Whether notification email was sent successfully',
+            email_recipient VARCHAR(255) COMMENT 'Agent/agency email that received notification',
             client_phone VARCHAR(20),
-                client_email VARCHAR(255),
-                preferred_contact_time ENUM('morning', 'afternoon', 'evening', 'anytime'),
-                tour_requested_date DATETIME NULL,
-                client_ip VARCHAR(45),
+            client_name VARCHAR(255),
+            client_email VARCHAR(255),
+            preferred_contact_time ENUM('morning', 'afternoon', 'evening', 'anytime'),
+            tour_requested_date DATETIME NULL,
+            client_ip VARCHAR(45),
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
             
@@ -225,7 +229,8 @@ class Database {
             KEY client_id (client_id),
             KEY agent_id (agent_id),
             KEY idx_agent_inquiries (agent_id, status),
-            KEY idx_property_inquiries (property_id)
+            KEY idx_property_inquiries (property_id),
+            KEY idx_email_status (email_sent)
         ) $charset_collate;";
         
         dbDelta($sql);
