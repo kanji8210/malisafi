@@ -35,6 +35,7 @@ class Malisafi_Shortcodes {
         add_shortcode('malisafi_add_property', array(__CLASS__, 'add_property_page')); // Add property with permission checks
         add_shortcode('malisafi_user_menu', array(__CLASS__, 'user_menu')); // User menu with logout
         add_shortcode('malisafi_user_status', array(__CLASS__, 'user_status')); // Header status with role + logout
+        add_shortcode('malisafi_test_inquiry', array(__CLASS__, 'test_inquiry_page')); // Test inquiry system (admin only)
     }
     
     /**
@@ -920,6 +921,23 @@ class Malisafi_Shortcodes {
             <?php
         }
 
+        return ob_get_clean();
+    }
+    
+    /**
+     * Test Inquiry System (Admin Only)
+     * 
+     * @return string
+     */
+    public static function test_inquiry_page() {
+        // Security check - admin only
+        if (!current_user_can('manage_options')) {
+            return '<div class="malisafi-notice error"><p>Access denied. Administrator privileges required.</p></div>';
+        }
+        
+        // Load the test file content
+        ob_start();
+        include MALISAFI_MLS_PATH . 'test-inquiry.php';
         return ob_get_clean();
     }
 }

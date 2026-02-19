@@ -24,6 +24,9 @@ class Plan_Manager {
         // AJAX handlers
         add_action('wp_ajax_malisafi_assign_plan', array(__CLASS__, 'ajax_assign_plan'));
         add_action('wp_ajax_malisafi_remove_plan', array(__CLASS__, 'ajax_remove_plan'));
+        add_action('wp_ajax_malisafi_delete_subscription', array(__CLASS__, 'ajax_delete_subscription'));
+        add_action('wp_ajax_malisafi_extend_subscription', array(__CLASS__, 'ajax_extend_subscription'));
+        add_action('wp_ajax_malisafi_update_subscription_dates', array(__CLASS__, 'ajax_update_subscription_dates'));
         add_action('wp_ajax_malisafi_check_user_plan', array(__CLASS__, 'ajax_check_user_plan'));
         
         // Shortcode for plan status
@@ -220,6 +223,135 @@ class Plan_Manager {
     }
     
     /**
+     * Permanently delete user subscription (Admin only)
+     * 
+     * @param int $user_id User ID
+     * @return bool|WP_Error
+     */
+    public static function delete_subscription($user_id) {
+        global $wpdb;
+        $table = $wpdb->prefix . 'mf_subscriptions';
+        
+        $subscription = self::get_user_subscription($user_id);
+        if (!$subscription) {
+            return new \WP_Error('no_subscription', __('User has no subscription to delete.', 'malisafi-mls'));
+        }
+        
+        // Delete from database
+        $result = $wpdb->delete(
+            $table,
+            array('id' => $subscription->id),
+            array('%d')
+        );
+        
+        if ($result === false) {
+            return new \WP_Error('db_error', __('Failed to delete subscription.', 'malisafi-mls'));
+        }
+        
+        // Optionally remove user limits
+        $limits_table = $wpdb->prefix . 'mf_user_limits';
+        $wpdb->delete($limits_table, array('user_id' => $user_id), array('%d'));
+        
+        // Log action
+        do_action('malisafi_subscription_deleted', $user_id, $subscription->plan_type);
+        
+        return true;
+    }
+    
+    /**
+     * Extend user subscription by adding months to end date
+     * 
+     * @param int $user_id User ID
+     * @param int $months Number of months to extend
+     * @return bool|WP_Error
+     */
+    public static function extend_subscription($user_id, $months = 1) {
+        global $wpdb;
+        $table = $wpdb->prefix . 'mf_subscriptions';
+        
+        $subscription = self::get_user_subscription($user_id);
+        if (!$subscription) {
+            return new \WP_Error('no_subscription', __('User has no subscription to extend.', 'malisafi-mls'));
+        }
+        
+        // Calculate new end date
+        $current_end = $subscription->current_period_end;
+        $new_end = date('Y-m-d H:i:s', strtotime($current_end . " +{$months} months"));
+        
+        $result = $wpdb->update(
+            $table,
+            array(
+                'current_period_end' => $new_end,
+                'updated_at' => current_time('mysql')
+            ),
+            array('id' => $subscription->id),
+            array('%s', '%s'),
+            array('%d')
+        );
+        
+        if ($result === false) {
+            return new \WP_Error('db_error', __('Failed to extend subscription.', 'malisafi-mls'));
+        }
+        
+        // Log action
+        do_action('malisafi_subscription_extended', $user_id, $months, $new_end);
+        
+        return true;
+    }
+    
+    /**
+     * Update subscription dates manually (Admin only)
+     * 
+     * @param int $user_id User ID
+     * @param string $start_date Start date (Y-m-d H:i:s)
+     * @param string $end_date End date (Y-m-d H:i:s)
+     * @return bool|WP_Error
+     */
+    public static function update_subscription_dates($user_id, $start_date = null, $end_date = null) {
+        global $wpdb;
+        $table = $wpdb->prefix . 'mf_subscriptions';
+        
+        $subscription = self::get_user_subscription($user_id);
+        if (!$subscription) {
+            return new \WP_Error('no_subscription', __('User has no subscription to update.', 'malisafi-mls'));
+        }
+        
+        $update_data = array('updated_at' => current_time('mysql'));
+        $format = array('%s');
+        
+        if ($start_date) {
+            $update_data['current_period_start'] = $start_date;
+            $format[] = '%s';
+        }
+        
+        if ($end_date) {
+            $update_data['current_period_end'] = $end_date;
+            $format[] = '%s';
+        }
+        
+        if (count($update_data) === 1) {
+            return new \WP_Error('no_dates', __('No dates provided to update.', 'malisafi-mls'));
+        }
+        
+        $result = $wpdb->update(
+            $table,
+            $update_data,
+            array('id' => $subscription->id),
+            $format,
+            array('%d')
+        );
+        
+        if ($result === false) {
+            return new \WP_Error('db_error', __('Failed to update subscription dates.', 'malisafi-mls'));
+        }
+        
+        // Log action
+        do_action('malisafi_subscription_dates_updated', $user_id, $start_date, $end_date);
+        
+        return true;
+    }
+    
+    /**
      * Update user limits based on plan
      * 
      * @param int $user_id User ID
@@ -335,6 +467,110 @@ class Plan_Manager {
         }
         
         wp_send_json_success(array('message' => __('Plan removed successfully!', 'malisafi-mls')));
+    }
+    
+    /**
+     * AJAX: Delete subscription permanently (Admin only)
+     */
+    public static function ajax_delete_subscription() {
+        // Check permissions
+        if (!current_user_can('manage_malisafi_settings') && !current_user_can('manage_options')) {
+            wp_send_json_error(array('message' => __('Insufficient permissions.', 'malisafi-mls')));
+        }
+        
+        // Verify nonce
+        if (!isset($_POST['nonce']) || !wp_verify_nonce($_POST['nonce'], 'malisafi_admin_plan_nonce')) {
+            wp_send_json_error(array('message' => __('Invalid security token.', 'malisafi-mls')));
+        }
+        
+        $user_id = isset($_POST['user_id']) ? intval($_POST['user_id']) : 0;
+        
+        if (!$user_id) {
+            wp_send_json_error(array('message' => __('Missing user ID.', 'malisafi-mls')));
+        }
+        
+        $result = self::delete_subscription($user_id);
+        
+        if (is_wp_error($result)) {
+            wp_send_json_error(array('message' => $result->get_error_message()));
+        }
+        
+        wp_send_json_success(array('message' => __('Subscription deleted permanently!', 'malisafi-mls')));
+    }
+    
+    /**
+     * AJAX: Extend subscription (Admin only)
+     */
+    public static function ajax_extend_subscription() {
+        // Check permissions
+        if (!current_user_can('manage_malisafi_settings') && !current_user_can('manage_options')) {
+            wp_send_json_error(array('message' => __('Insufficient permissions.', 'malisafi-mls')));
+        }
+        
+        // Verify nonce
+        if (!isset($_POST['nonce']) || !wp_verify_nonce($_POST['nonce'], 'malisafi_admin_plan_nonce')) {
+            wp_send_json_error(array('message' => __('Invalid security token.', 'malisafi-mls')));
+        }
+        
+        $user_id = isset($_POST['user_id']) ? intval($_POST['user_id']) : 0;
+        $months = isset($_POST['months']) ? intval($_POST['months']) : 1;
+        
+        if (!$user_id) {
+            wp_send_json_error(array('message' => __('Missing user ID.', 'malisafi-mls')));
+        }
+        
+        $result = self::extend_subscription($user_id, $months);
+        
+        if (is_wp_error($result)) {
+            wp_send_json_error(array('message' => $result->get_error_message()));
+        }
+        
+        // Get updated subscription
+        $subscription = self::get_user_subscription($user_id);
+        
+        wp_send_json_success(array(
+            'message' => sprintf(__('Subscription extended by %d month(s)!', 'malisafi-mls'), $months),
+            'new_end_date' => date_i18n(get_option('date_format'), strtotime($subscription->current_period_end))
+        ));
+    }
+    
+    /**
+     * AJAX: Update subscription dates (Admin only)
+     */
+    public static function ajax_update_subscription_dates() {
+        // Check permissions
+        if (!current_user_can('manage_malisafi_settings') && !current_user_can('manage_options')) {
+            wp_send_json_error(array('message' => __('Insufficient permissions.', 'malisafi-mls')));
+        }
+        
+        // Verify nonce
+        if (!isset($_POST['nonce']) || !wp_verify_nonce($_POST['nonce'], 'malisafi_admin_plan_nonce')) {
+            wp_send_json_error(array('message' => __('Invalid security token.', 'malisafi-mls')));
+        }
+        
+        $user_id = isset($_POST['user_id']) ? intval($_POST['user_id']) : 0;
+        $start_date = isset($_POST['start_date']) ? sanitize_text_field($_POST['start_date']) : null;
+        $end_date = isset($_POST['end_date']) ? sanitize_text_field($_POST['end_date']) : null;
+        
+        if (!$user_id) {
+            wp_send_json_error(array('message' => __('Missing user ID.', 'malisafi-mls')));
+        }
+        
+        // Convert dates to MySQL format if provided
+        if ($start_date) {
+            $start_date = date('Y-m-d H:i:s', strtotime($start_date));
+        }
+        if ($end_date) {
+            $end_date = date('Y-m-d H:i:s', strtotime($end_date));
+        }
+        
+        $result = self::update_subscription_dates($user_id, $start_date, $end_date);
+        
+        if (is_wp_error($result)) {
+            wp_send_json_error(array('message' => $result->get_error_message()));
+        }
+        
+        wp_send_json_success(array('message' => __('Subscription dates updated successfully!', 'malisafi-mls')));
     }
     
     /**

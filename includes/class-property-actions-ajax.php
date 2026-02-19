@@ -300,6 +300,17 @@ class Property_Actions_Ajax {
 
         // Attempt to send email and record result
         $sent = wp_mail($recipient_email, $subject, $email_message, $headers);
+        
+        // Log the email attempt
+        self::log_email_attempt(array(
+            'to' => $recipient_email,
+            'subject' => $subject,
+            'status' => $sent ? 'sent' : 'failed',
+            'property_id' => $property_id,
+            'client_email' => $email,
+            'timestamp' => current_time('mysql'),
+            'type' => 'inquiry_notification'
+        ));
 
         // Insert into DB (always record inquiry even if email fails)
         global $wpdb;
@@ -677,6 +688,46 @@ class Property_Actions_Ajax {
         }
 
         wp_send_json_success(array('message' => '`client_ip` column added successfully.'));
+    }
+
+    /**
+     * Log email attempts to wp_options for debugging
+     * Stores last 100 email attempts with timestamp, recipient, status
+     * 
+     * @param array $log_data Email attempt data
+     */
+    public static function log_email_attempt($log_data) {
+        // Get existing log
+        $log = get_option('malisafi_inquiry_email_log', array());
+        
+        // Add timestamp if not present
+        if (!isset($log_data['timestamp'])) {
+            $log_data['timestamp'] = current_time('mysql');
+        }
+        
+        // Add to beginning of array
+        array_unshift($log, $log_data);
+        
+        // Keep only last 100 entries
+        if (count($log) > 100) {
+            $log = array_slice($log, 0, 100);
+        }
+        
+        // Save back to options
+        update_option('malisafi_inquiry_email_log', $log, false);
+        
+        // Also log to error_log for server logs
+        $status_text = isset($log_data['status']) ? $log_data['status'] : 'unknown';
+        $to = isset($log_data['to']) ? $log_data['to'] : 'unknown';
+        $subject = isset($log_data['subject']) ? $log_data['subject'] : 'no subject';
+        
+        error_log(sprintf(
+            'Malisafi Email: %s | To: %s | Subject: %s | Property: %d',
+            strtoupper($status_text),
+            $to,
+            $subject,
+            isset($log_data['property_id']) ? $log_data['property_id'] : 0
+        ));
     }
 }
 

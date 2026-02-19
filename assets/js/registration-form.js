@@ -20,6 +20,29 @@
                 this.updateProgressBar();
                 // Initial validation only for current step
                 this.validateForm();
+                
+                // Mobile debug: Log button state periodically
+                if (window.innerWidth <= 768) {
+                    console.log('Mobile device detected - button monitoring active');
+                    this.monitorButtonState();
+                }
+            },
+            
+            // Monitor submit button state on mobile
+            monitorButtonState: function() {
+                setInterval(() => {
+                    const $submitBtn = $('.btn-submit');
+                    if ($submitBtn.is(':visible')) {
+                        const isDisabled = $submitBtn.prop('disabled');
+                        const isValid = this.validateForm();
+                        
+                        // Fix stuck disabled state
+                        if (isDisabled && isValid && this.currentStep === 3) {
+                            console.log('Fixing stuck disabled button on mobile');
+                            $submitBtn.prop('disabled', false);
+                        }
+                    }
+                }, 2000); // Check every 2 seconds
             },
             
             initializeAccountTypeCards: function() {
@@ -280,27 +303,37 @@
 
             bindEvents: function() {
                 // Step navigation
-                $('.btn-next').on('click', (e) => {
+                $('.btn-next').on('click touchend', (e) => {
                     e.preventDefault();
                     if (this.validateCurrentStep()) {
                         this.goToStep(this.currentStep + 1);
                     }
                 });
                 
-                $('.btn-prev').on('click', (e) => {
+                $('.btn-prev').on('click touchend', (e) => {
                     e.preventDefault();
                     this.goToStep(this.currentStep - 1);
                 });
                 
                 // Account type card selection
-                $('.account-card').on('click', this.handleAccountCardClick.bind(this));
+                $('.account-card').on('click touchend', this.handleAccountCardClick.bind(this));
                 $('input[name="account_type"]').on('change', this.handleAccountTypeChange.bind(this));
 
-                // Form submission
+                // Form submission - handle both click and touchend for mobile
                 $('#malisafi-registration-form').on('submit', this.handleSubmit.bind(this));
+                $('.btn-submit').on('click touchend', (e) => {
+                    e.preventDefault();
+                    if (!$(e.currentTarget).prop('disabled')) {
+                        $('#malisafi-registration-form').trigger('submit');
+                    }
+                });
 
-                // Password toggle
-                $('.toggle-password').on('click', this.togglePassword);
+                // Password toggle - handle both click and touch
+                $('.toggle-password').on('click touchend', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    RegistrationForm.togglePassword.call(this);
+                });
 
                 // Password strength and requirements (only if password field exists)
                 if ($('#password').length > 0) {
@@ -815,6 +848,8 @@
 
             handleSubmit: function(e) {
                 e.preventDefault();
+                
+                console.log('Submit triggered - mobile debug');
 
                 // Get account type to check if agent validation is needed
                 const accountType = $('input[name="account_type"]:checked').val();
@@ -827,6 +862,7 @@
                         this.showError('Please select at least one specialization.');
                         // Mark error without scrolling to prevent page jump
                         $('.checkbox-group-inline').addClass('error');
+                        console.log('Validation failed: No specializations selected');
                         return;
                     }
                     
@@ -836,6 +872,7 @@
                     if (bioLength < 100) {
                         this.showError(`Professional Bio must be at least 100 characters. Current: ${bioLength}/100 characters.`);
                         $('#agent_bio').addClass('error');
+                        console.log('Validation failed: Bio too short');
                         return;
                     }
                 }
@@ -843,6 +880,7 @@
                 // Final validation
                 if (!this.validateForm()) {
                     this.showError('Please fill in all required fields correctly.');
+                    console.log('Validation failed: Form incomplete');
                     return;
                 }
 
@@ -852,8 +890,11 @@
                 
                 if (password !== passwordConfirm) {
                     this.showError('Passwords do not match.');
+                    console.log('Validation failed: Password mismatch');
                     return;
                 }
+                
+                console.log('All validations passed, submitting...');
 
                 // Disable submit button
                 $('.btn-submit').prop('disabled', true).html('<span class="spinner"></span> Creating account...');

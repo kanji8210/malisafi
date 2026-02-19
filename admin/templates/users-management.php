@@ -766,8 +766,19 @@ if (isset($_GET['error'])) {
                             <button type="button" class="button toggle-plan-form" data-user-id="<?php echo esc_attr($user_id); ?>">
                                 <?php _e('Change Plan', 'malisafi-mls'); ?>
                             </button>
-                            <button type="button" class="button button-secondary malisafi-remove-plan-btn" data-user-id="<?php echo esc_attr($user_id); ?>" style="margin-left: 10px;">
+                            <button type="button" class="button button-secondary toggle-extend-form" data-user-id="<?php echo esc_attr($user_id); ?>" style="margin-left: 10px;">
+                                <?php _e('Extend Subscription', 'malisafi-mls'); ?>
+                            </button>
+                            <button type="button" class="button button-secondary toggle-dates-form" data-user-id="<?php echo esc_attr($user_id); ?>" style="margin-left: 10px;">
+                                <?php _e('Edit Dates', 'malisafi-mls'); ?>
+                            </button>
+                        </p>
+                        <p style="margin-top: 10px;">
+                            <button type="button" class="button button-secondary malisafi-remove-plan-btn" data-user-id="<?php echo esc_attr($user_id); ?>">
                                 <?php _e('Cancel Subscription', 'malisafi-mls'); ?>
+                            </button>
+                            <button type="button" class="button button-link-delete malisafi-delete-subscription-btn" data-user-id="<?php echo esc_attr($user_id); ?>" style="margin-left: 10px; color: #b32d2e;">
+                                <?php _e('Delete Permanently', 'malisafi-mls'); ?>
                             </button>
                         </p>
                     </div>
@@ -831,6 +842,82 @@ if (isset($_GET['error'])) {
                             <?php _e('Assign Plan', 'malisafi-mls'); ?>
                         </button>
                         <button type="button" class="button toggle-plan-form" data-user-id="<?php echo esc_attr($user_id); ?>">
+                            <?php _e('Cancel', 'malisafi-mls'); ?>
+                        </button>
+                    </p>
+                </div>
+                
+                <!-- Extend Subscription Form (Hidden by default) -->
+                <div id="malisafi-extend-subscription-form-<?php echo esc_attr($user_id); ?>" class="extend-subscription-form" style="display: none; margin-top: 20px; padding: 15px; background: #fff9e6; border: 1px solid #f9e79f;">
+                    <h3><?php _e('Extend Subscription', 'malisafi-mls'); ?></h3>
+                    <p><?php _e('Add additional months to the current subscription end date.', 'malisafi-mls'); ?></p>
+                    
+                    <table class="form-table">
+                        <tbody>
+                            <tr>
+                                <th scope="row">
+                                    <label for="extend_months_<?php echo esc_attr($user_id); ?>"><?php _e('Extend By (Months)', 'malisafi-mls'); ?></label>
+                                </th>
+                                <td>
+                                    <input type="number" name="extend_months" id="extend_months_<?php echo esc_attr($user_id); ?>" class="small-text" value="1" min="1" max="60">
+                                    <p class="description">
+                                        <?php 
+                                        if ($subscription && $subscription->current_period_end) {
+                                            $current_end = date_i18n(get_option('date_format'), strtotime($subscription->current_period_end));
+                                            printf(__('Current end date: %s', 'malisafi-mls'), '<strong>' . $current_end . '</strong>');
+                                        }
+                                        ?>
+                                    </p>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    
+                    <p>
+                        <button type="button" class="button button-primary malisafi-extend-subscription-btn" data-user-id="<?php echo esc_attr($user_id); ?>">
+                            <?php _e('Extend Subscription', 'malisafi-mls'); ?>
+                        </button>
+                        <button type="button" class="button toggle-extend-form" data-user-id="<?php echo esc_attr($user_id); ?>">
+                            <?php _e('Cancel', 'malisafi-mls'); ?>
+                        </button>
+                    </p>
+                </div>
+                
+                <!-- Edit Dates Form (Hidden by default) -->
+                <div id="malisafi-edit-dates-form-<?php echo esc_attr($user_id); ?>" class="edit-dates-form" style="display: none; margin-top: 20px; padding: 15px; background: #fff9e6; border: 1px solid #f9e79f;">
+                    <h3><?php _e('Edit Subscription Dates', 'malisafi-mls'); ?></h3>
+                    <p><?php _e('Manually adjust the subscription start and end dates.', 'malisafi-mls'); ?></p>
+                    
+                    <table class="form-table">
+                        <tbody>
+                            <tr>
+                                <th scope="row">
+                                    <label for="edit_start_date_<?php echo esc_attr($user_id); ?>"><?php _e('Start Date', 'malisafi-mls'); ?></label>
+                                </th>
+                                <td>
+                                    <input type="date" name="edit_start_date" id="edit_start_date_<?php echo esc_attr($user_id); ?>" class="regular-text" 
+                                        value="<?php echo $subscription && $subscription->current_period_start ? date('Y-m-d', strtotime($subscription->current_period_start)) : ''; ?>">
+                                    <p class="description"><?php _e('Leave empty to keep current start date.', 'malisafi-mls'); ?></p>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th scope="row">
+                                    <label for="edit_end_date_<?php echo esc_attr($user_id); ?>"><?php _e('End Date', 'malisafi-mls'); ?></label>
+                                </th>
+                                <td>
+                                    <input type="date" name="edit_end_date" id="edit_end_date_<?php echo esc_attr($user_id); ?>" class="regular-text" 
+                                        value="<?php echo $subscription && $subscription->current_period_end ? date('Y-m-d', strtotime($subscription->current_period_end)) : ''; ?>">
+                                    <p class="description"><?php _e('Leave empty to keep current end date.', 'malisafi-mls'); ?></p>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    
+                    <p>
+                        <button type="button" class="button button-primary malisafi-update-dates-btn" data-user-id="<?php echo esc_attr($user_id); ?>">
+                            <?php _e('Update Dates', 'malisafi-mls'); ?>
+                        </button>
+                        <button type="button" class="button toggle-dates-form" data-user-id="<?php echo esc_attr($user_id); ?>">
                             <?php _e('Cancel', 'malisafi-mls'); ?>
                         </button>
                     </p>
