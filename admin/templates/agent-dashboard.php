@@ -8,6 +8,75 @@
 if (!defined('ABSPATH')) {
     exit;
 }
+
+$chat_page_url = function_exists('\MalisafiMLS\Page_Manager::get_page_url')
+    ? \MalisafiMLS\Page_Manager::get_page_url('internal_chat')
+    : '';
+
+if (empty($chat_page_url) || $chat_page_url === home_url()) {
+    $chat_page_url = home_url('/internal-chat/');
+}
+
+$admin_chat_user_id = 0;
+$moderator_chat_user_id = 0;
+
+$moderators = get_users(array(
+    'role' => 'malisafi_moderator',
+    'number' => 1,
+    'orderby' => 'ID',
+    'order' => 'ASC',
+    'fields' => array('ID'),
+));
+if (!empty($moderators) && !empty($moderators[0]->ID)) {
+    $moderator_chat_user_id = intval($moderators[0]->ID);
+}
+
+$admins = get_users(array(
+    'role' => 'administrator',
+    'number' => 1,
+    'orderby' => 'ID',
+    'order' => 'ASC',
+    'fields' => array('ID'),
+));
+if (!empty($admins) && !empty($admins[0]->ID)) {
+    $admin_chat_user_id = intval($admins[0]->ID);
+}
+
+$chat_unread_count_for_user = static function($current_user_id, $target_user_id) {
+    if (empty($current_user_id) || empty($target_user_id)) {
+        return 0;
+    }
+
+    global $wpdb;
+
+    $threads_table = $wpdb->prefix . 'mf_chat_threads';
+    $participants_table = $wpdb->prefix . 'mf_chat_participants';
+    $notifications_table = $wpdb->prefix . 'mf_chat_notifications';
+
+    if ($wpdb->get_var("SHOW TABLES LIKE '{$threads_table}'") !== $threads_table
+        || $wpdb->get_var("SHOW TABLES LIKE '{$participants_table}'") !== $participants_table
+        || $wpdb->get_var("SHOW TABLES LIKE '{$notifications_table}'") !== $notifications_table) {
+        return 0;
+    }
+
+    $count = $wpdb->get_var($wpdb->prepare(
+        "SELECT COUNT(n.id)
+         FROM {$notifications_table} n
+         INNER JOIN {$threads_table} t ON t.id = n.thread_id AND t.thread_type = 'direct'
+         INNER JOIN {$participants_table} p_me ON p_me.thread_id = t.id AND p_me.user_id = %d
+         INNER JOIN {$participants_table} p_other ON p_other.thread_id = t.id AND p_other.user_id = %d
+         WHERE n.user_id = %d AND n.is_read = 0",
+        $current_user_id,
+        $target_user_id,
+        $current_user_id
+    ));
+
+    return intval($count);
+};
+
+$current_chat_user_id = get_current_user_id();
+$moderator_chat_unread = $chat_unread_count_for_user($current_chat_user_id, $moderator_chat_user_id);
+$admin_chat_unread = $chat_unread_count_for_user($current_chat_user_id, $admin_chat_user_id);
 ?>
 
 <div class="wrap malisafi-agent-dashboard">
@@ -211,6 +280,26 @@ if (!defined('ABSPATH')) {
                     <span class="count" style="background: #d63638; color: #fff; border-radius: 10px; padding: 2px 8px; margin-left: 8px; font-size: 12px;"><?php echo $pending_properties; ?></span>
                 <?php endif; ?>
             </a>
+
+            <?php if ($moderator_chat_user_id > 0) : ?>
+                <a href="<?php echo esc_url(add_query_arg('chat_with', $moderator_chat_user_id, $chat_page_url)); ?>" class="quick-action-btn">
+                    <span class="dashicons dashicons-format-chat"></span>
+                    <?php _e('Chat with Moderator', 'malisafi-mls'); ?>
+                    <?php if ($moderator_chat_unread > 0): ?>
+                        <span class="count" style="background: #d63638; color: #fff; border-radius: 10px; padding: 2px 8px; margin-left: 8px; font-size: 12px;"><?php echo intval($moderator_chat_unread); ?></span>
+                    <?php endif; ?>
+                </a>
+            <?php endif; ?>
+
+            <?php if ($admin_chat_user_id > 0) : ?>
+                <a href="<?php echo esc_url(add_query_arg('chat_with', $admin_chat_user_id, $chat_page_url)); ?>" class="quick-action-btn">
+                    <span class="dashicons dashicons-admin-users"></span>
+                    <?php _e('Chat with Admin', 'malisafi-mls'); ?>
+                    <?php if ($admin_chat_unread > 0): ?>
+                        <span class="count" style="background: #d63638; color: #fff; border-radius: 10px; padding: 2px 8px; margin-left: 8px; font-size: 12px;"><?php echo intval($admin_chat_unread); ?></span>
+                    <?php endif; ?>
+                </a>
+            <?php endif; ?>
         </div>
     </div>
     

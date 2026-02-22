@@ -11,6 +11,15 @@ namespace MalisafiMLS;
  * Database class
  */
 class Database {
+
+    /**
+     * Ensure WordPress database upgrade functions (dbDelta) are loaded.
+     */
+    private static function ensure_upgrade_functions_loaded() {
+        if (!function_exists('dbDelta')) {
+            require_once ABSPATH . 'wp-admin/includes/upgrade.php';
+        }
+    }
     
     /**
      * Create all custom database tables
@@ -20,7 +29,7 @@ class Database {
         
         $charset_collate = $wpdb->get_charset_collate();
         
-        require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
+        self::ensure_upgrade_functions_loaded();
         
         // Core User Roles and Subscriptions
         self::create_subscriptions_table($charset_collate);
@@ -37,6 +46,12 @@ class Database {
         
         // Inquiries and Client Interactions
         self::create_inquiries_table($charset_collate);
+
+        // Internal Chat and Notifications
+        self::create_chat_threads_table($charset_collate);
+        self::create_chat_participants_table($charset_collate);
+        self::create_chat_messages_table($charset_collate);
+        self::create_chat_notifications_table($charset_collate);
         
         // Saved Searches and Favorites
         self::create_saved_searches_table($charset_collate);
@@ -285,6 +300,103 @@ class Database {
         
         dbDelta($sql);
     }
+
+    /**
+     * Create internal chat threads table
+     */
+    private static function create_chat_threads_table($charset_collate) {
+        global $wpdb;
+
+        $table_name = $wpdb->prefix . 'mf_chat_threads';
+
+        $sql = "CREATE TABLE IF NOT EXISTS $table_name (
+            id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+            thread_type ENUM('direct', 'group') DEFAULT 'direct',
+            created_by BIGINT UNSIGNED NOT NULL,
+            assigned_to BIGINT UNSIGNED DEFAULT NULL,
+            last_message_id BIGINT UNSIGNED DEFAULT NULL,
+            last_message_at DATETIME DEFAULT NULL,
+            status ENUM('active', 'archived') DEFAULT 'active',
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            KEY idx_thread_type (thread_type),
+            KEY idx_assigned_to (assigned_to),
+            KEY idx_status (status),
+            KEY idx_last_message_at (last_message_at)
+        ) $charset_collate;";
+
+        dbDelta($sql);
+    }
+
+    /**
+     * Create internal chat participants table
+     */
+    private static function create_chat_participants_table($charset_collate) {
+        global $wpdb;
+
+        $table_name = $wpdb->prefix . 'mf_chat_participants';
+
+        $sql = "CREATE TABLE IF NOT EXISTS $table_name (
+            id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+            thread_id BIGINT UNSIGNED NOT NULL,
+            user_id BIGINT UNSIGNED NOT NULL,
+            role_slug VARCHAR(50) DEFAULT NULL,
+            last_read_message_id BIGINT UNSIGNED DEFAULT NULL,
+            last_read_at DATETIME DEFAULT NULL,
+            is_muted BOOLEAN DEFAULT FALSE,
+            joined_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            KEY idx_thread_id (thread_id),
+            KEY idx_user_id (user_id),
+            UNIQUE KEY uniq_thread_user (thread_id, user_id)
+        ) $charset_collate;";
+
+        dbDelta($sql);
+    }
+
+    /**
+     * Create internal chat messages table
+     */
+    private static function create_chat_messages_table($charset_collate) {
+        global $wpdb;
+
+        $table_name = $wpdb->prefix . 'mf_chat_messages';
+
+        $sql = "CREATE TABLE IF NOT EXISTS $table_name (
+            id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+            thread_id BIGINT UNSIGNED NOT NULL,
+            sender_id BIGINT UNSIGNED NOT NULL,
+            message TEXT NOT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            KEY idx_thread_created (thread_id, created_at),
+            KEY idx_sender_id (sender_id)
+        ) $charset_collate;";
+
+        dbDelta($sql);
+    }
+
+    /**
+     * Create internal chat notifications table
+     */
+    private static function create_chat_notifications_table($charset_collate) {
+        global $wpdb;
+
+        $table_name = $wpdb->prefix . 'mf_chat_notifications';
+
+        $sql = "CREATE TABLE IF NOT EXISTS $table_name (
+            id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+            user_id BIGINT UNSIGNED NOT NULL,
+            thread_id BIGINT UNSIGNED NOT NULL,
+            message_id BIGINT UNSIGNED NOT NULL,
+            is_read BOOLEAN DEFAULT FALSE,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            read_at DATETIME DEFAULT NULL,
+            KEY idx_user_read (user_id, is_read),
+            KEY idx_thread_id (thread_id),
+            KEY idx_message_id (message_id)
+        ) $charset_collate;";
+
+        dbDelta($sql);
+    }
     
     /**
      * Create saved searches table
@@ -428,6 +540,10 @@ class Database {
         error_log('MALISAFI MLS: Dropping all database tables - this action cannot be undone');
         
         $tables = array(
+            'mf_chat_notifications',
+            'mf_chat_messages',
+            'mf_chat_participants',
+            'mf_chat_threads',
             'mf_agent_reports',
             'mf_agent_ratings',
             'mf_analytics',
@@ -469,6 +585,10 @@ class Database {
             'property_amenities' => $wpdb->prefix . 'mf_property_amenities',
             'property_media' => $wpdb->prefix . 'mf_property_media',
             'inquiries' => $wpdb->prefix . 'mf_inquiries',
+            'chat_threads' => $wpdb->prefix . 'mf_chat_threads',
+            'chat_participants' => $wpdb->prefix . 'mf_chat_participants',
+            'chat_messages' => $wpdb->prefix . 'mf_chat_messages',
+            'chat_notifications' => $wpdb->prefix . 'mf_chat_notifications',
             'saved_searches' => $wpdb->prefix . 'mf_saved_searches',
             'favorites' => $wpdb->prefix . 'mf_favorites',
             'moderation_queue' => $wpdb->prefix . 'mf_moderation_queue',
@@ -558,6 +678,7 @@ class Database {
      */
     public static function update_schema() {
         global $wpdb;
+        self::ensure_upgrade_functions_loaded();
         $charset_collate = $wpdb->get_charset_collate();
         
         // Check and create property_reports table if missing
@@ -573,6 +694,10 @@ class Database {
             'mf_property_amenities' => 'create_property_amenities_table',
             'mf_property_media' => 'create_property_media_table',
             'mf_inquiries' => 'create_inquiries_table',
+            'mf_chat_threads' => 'create_chat_threads_table',
+            'mf_chat_participants' => 'create_chat_participants_table',
+            'mf_chat_messages' => 'create_chat_messages_table',
+            'mf_chat_notifications' => 'create_chat_notifications_table',
             'mf_saved_searches' => 'create_saved_searches_table',
             'mf_favorites' => 'create_favorites_table',
             'mf_moderation_queue' => 'create_moderation_queue_table',
@@ -617,6 +742,9 @@ class Database {
                 'email_sent' => "ADD COLUMN `email_sent` BOOLEAN DEFAULT TRUE COMMENT 'Whether notification email was sent successfully' AFTER `status`",
                 'email_recipient' => "ADD COLUMN `email_recipient` VARCHAR(255) NULL COMMENT 'Agent/agency email that received notification' AFTER `email_sent`",
                 'client_name' => "ADD COLUMN `client_name` VARCHAR(255) NULL AFTER `email_recipient`"
+            ),
+            'mf_chat_threads' => array(
+                'assigned_to' => "ADD COLUMN `assigned_to` BIGINT UNSIGNED NULL AFTER `created_by`"
             )
         );
 

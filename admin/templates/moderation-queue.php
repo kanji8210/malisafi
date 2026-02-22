@@ -1,4 +1,8 @@
 <?php
+// Enqueue chat modal CSS for improved styling
+wp_enqueue_style('malisafi-chat-modal', MALISAFI_MLS_URL . 'assets/css/chat-modal.css', array('malisafi-mls-variables'), MALISAFI_MLS_VERSION);
+?>
+<?php
 /**
  * Moderation Queue Template
  *
@@ -36,6 +40,40 @@ if (!class_exists('Malisafi_Property_Moderation')) {
 
 // Get current tab
 $current_tab = isset($_GET['tab']) ? sanitize_text_field($_GET['tab']) : 'pending';
+
+$chat_unread_count_for_user = static function($current_user_id, $target_user_id) {
+    if (empty($current_user_id) || empty($target_user_id)) {
+        return 0;
+    }
+
+    global $wpdb;
+
+    $threads_table = $wpdb->prefix . 'mf_chat_threads';
+    $participants_table = $wpdb->prefix . 'mf_chat_participants';
+    $notifications_table = $wpdb->prefix . 'mf_chat_notifications';
+
+    if ($wpdb->get_var("SHOW TABLES LIKE '{$threads_table}'") !== $threads_table
+        || $wpdb->get_var("SHOW TABLES LIKE '{$participants_table}'") !== $participants_table
+        || $wpdb->get_var("SHOW TABLES LIKE '{$notifications_table}'") !== $notifications_table) {
+        return 0;
+    }
+
+    $count = $wpdb->get_var($wpdb->prepare(
+        "SELECT COUNT(n.id)
+         FROM {$notifications_table} n
+         INNER JOIN {$threads_table} t ON t.id = n.thread_id AND t.thread_type = 'direct'
+         INNER JOIN {$participants_table} p_me ON p_me.thread_id = t.id AND p_me.user_id = %d
+         INNER JOIN {$participants_table} p_other ON p_other.thread_id = t.id AND p_other.user_id = %d
+         WHERE n.user_id = %d AND n.is_read = 0",
+        $current_user_id,
+        $target_user_id,
+        $current_user_id
+    ));
+
+    return intval($count);
+};
+
+$current_chat_user_id = get_current_user_id();
 ?>
 
 <div class="wrap malisafi-moderation-page">
@@ -105,7 +143,29 @@ $current_tab = isset($_GET['tab']) ? sanitize_text_field($_GET['tab']) : 'pendin
                         $bathrooms = get_post_meta($property_id, '_malisafi_bathrooms', true);
                         $area = get_post_meta($property_id, '_malisafi_area', true);
                         $area = !empty($area) ? floatval($area) : 0;
-                        $author = get_user_by('id', get_post_field('post_author'));
+                        $author_id = (int) get_post_field('post_author', $property_id);
+
+                        $chat_recipient_user_id = absint(get_post_meta($property_id, '_agent_user_id', true));
+
+                        if ($chat_recipient_user_id <= 0) {
+                            $property_agent_post_id = absint(get_post_meta($property_id, '_malisafi_agent_id', true));
+                            if ($property_agent_post_id <= 0) {
+                                $property_agent_post_id = absint(get_post_meta($property_id, '_property_agent_id', true));
+                            }
+
+                            if ($property_agent_post_id > 0) {
+                                $chat_recipient_user_id = absint(get_post_meta($property_agent_post_id, '_agent_user_id', true));
+                                if ($chat_recipient_user_id <= 0) {
+                                    $chat_recipient_user_id = absint(get_post_meta($property_agent_post_id, '_malisafi_linked_user', true));
+                                }
+                            }
+                        }
+
+                        if ($chat_recipient_user_id <= 0 && $author_id > 0) {
+                            $chat_recipient_user_id = $author_id;
+                        }
+
+                        $author = $chat_recipient_user_id > 0 ? get_user_by('id', $chat_recipient_user_id) : false;
                         
                         // Get report count safely
                         $report_count = 0;
@@ -198,6 +258,101 @@ $current_tab = isset($_GET['tab']) ? sanitize_text_field($_GET['tab']) : 'pendin
                                         <span class="dashicons dashicons-edit"></span>
                                         <?php _e('Edit', 'malisafi-mls'); ?>
                                     </a>
+                                    <?php if ($author && !empty($author->ID)) : ?>
+                                        <?php
+                                        $chat_page_url = function_exists('\MalisafiMLS\Page_Manager::get_page_url')
+                                            ? \MalisafiMLS\Page_Manager::get_page_url('internal_chat')
+                                            : '';
+
+                                        if (empty($chat_page_url) || $chat_page_url === home_url()) {
+                                            $chat_page_url = home_url('/internal-chat/');
+                                        }
+
+                                        $chat_with_author_url = add_query_arg('chat_with', intval($chat_recipient_user_id), $chat_page_url);
+                                        $text_agent_unread = $chat_unread_count_for_user($current_chat_user_id, intval($chat_recipient_user_id));
+                                        ?>
+                                        <a href="<?php echo esc_url($chat_with_author_url); ?>" class="button malisafi-open-chat-popup" data-chat-with="<?php echo intval($chat_recipient_user_id); ?>" data-chat-prefill="<?php echo esc_attr(sprintf(__('Property #%1$d: %2$s - ', 'malisafi-mls'), intval($property_id), get_the_title($property_id))); ?>">
+                                            <span class="dashicons dashicons-email"></span>
+                                            <?php _e('Text Agent', 'malisafi-mls'); ?>
+                                            <?php if ($text_agent_unread > 0): ?>
+                                                <span class="count" style="background: #d63638; color: #fff; border-radius: 10px; padding: 2px 8px; margin-left: 8px; font-size: 12px;"><?php echo intval($text_agent_unread); ?></span>
+                                            <?php endif; ?>
+                                        </a>
+                                        <div class="malisafi-chat-modal" style="display:none;">
+                                            <div class="malisafi-chat-modal-content">
+                                                <span class="malisafi-chat-modal-close">&times;</span>
+                                                <div class="malisafi-chat-modal-body">
+                                                    <!-- Chat will be loaded here -->
+                                                </div>
+                                            </div>
+                                        </div>
+                                    <script>
+                                    jQuery(document).ready(function($) {
+                                        $('.malisafi-open-chat-popup').on('click', function(e) {
+                                            e.preventDefault();
+                                            var agentId = $(this).data('chat-with');
+                                            var prefill = $(this).data('chat-prefill');
+                                            var modal = $(this).closest('.property-moderation-card').find('.malisafi-chat-modal');
+                                            modal.show();
+                                            // Load chat interface via AJAX
+                                            $.post(ajaxurl, {
+                                                action: 'malisafi_chat_bootstrap',
+                                                nonce: malisafiChat.nonce
+                                            }, function(response) {
+                                                if (response.success) {
+                                                    // Open thread with agent
+                                                    $.post(ajaxurl, {
+                                                        action: 'malisafi_chat_open_thread',
+                                                        nonce: malisafiChat.nonce,
+                                                        target_user_id: agentId
+                                                    }, function(threadResp) {
+                                                        if (threadResp.success) {
+                                                            var messages = threadResp.data.messages || [];
+                                                            var html = '<div class="malisafi-chat-thread">';
+                                                            html += '<div class="malisafi-chat-messages">';
+                                                            messages.forEach(function(msg) {
+                                                                html += '<div class="malisafi-chat-message' + (msg.isOwn ? ' own' : '') + '"><strong>' + msg.senderName + ':</strong> ' + msg.message + '<br><small>' + msg.createdAtHuman + '</small></div>';
+                                                            });
+                                                            html += '</div>';
+                                                            html += '<textarea class="malisafi-chat-input" placeholder="'+malisafiChat.i18n.typeMessage+'">'+prefill+'</textarea>';
+                                                            html += '<button class="malisafi-chat-send-btn">'+malisafiChat.i18n.send+'</button>';
+                                                            html += '</div>';
+                                                            modal.find('.malisafi-chat-modal-body').html(html);
+                                                            // Send message handler
+                                                            modal.find('.malisafi-chat-send-btn').off('click').on('click', function() {
+                                                                var msg = modal.find('.malisafi-chat-input').val();
+                                                                $.post(ajaxurl, {
+                                                                    action: 'malisafi_chat_send_message',
+                                                                    nonce: malisafiChat.nonce,
+                                                                    thread_id: threadResp.data.threadId,
+                                                                    message: msg
+                                                                }, function(sendResp) {
+                                                                    if (sendResp.success && sendResp.data.message) {
+                                                                        var newMsg = sendResp.data.message;
+                                                                        var msgHtml = '<div class="malisafi-chat-message own"><strong>' + newMsg.senderName + ':</strong> ' + newMsg.message + '<br><small>' + newMsg.createdAtHuman + '</small></div>';
+                                                                        modal.find('.malisafi-chat-messages').append(msgHtml);
+                                                                        modal.find('.malisafi-chat-input').val('');
+                                                                    } else {
+                                                                        alert(malisafiChat.i18n.sendFailed);
+                                                                    }
+                                                                });
+                                                            });
+                                                        } else {
+                                                            modal.find('.malisafi-chat-modal-body').html('<p>'+malisafiChat.i18n.unableOpen+'</p>');
+                                                        }
+                                                    });
+                                                } else {
+                                                    modal.find('.malisafi-chat-modal-body').html('<p>'+malisafiChat.i18n.loadFailed+'</p>');
+                                                }
+                                            });
+                                        });
+                                        // Close modal handler
+                                        $('.malisafi-chat-modal-close').on('click', function() {
+                                            $(this).closest('.malisafi-chat-modal').hide();
+                                        });
+                                    });
+                                    </script>
+                                    <?php endif; ?>
                                     <a href="<?php the_permalink(); ?>" class="button" target="_blank">
                                         <span class="dashicons dashicons-visibility"></span>
                                         <?php _e('View', 'malisafi-mls'); ?>

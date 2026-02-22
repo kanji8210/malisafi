@@ -1,0 +1,300 @@
+/*--------------------------------------------------------------------------
+  Internal Chat Styles
+  Compatible with WordPress admin
+--------------------------------------------------------------------------*/
+
+:root {
+  --malisafi-primary: var(--wp-admin-theme-color, #007cba);
+  --malisafi-primary-darker: var(--wp-admin-theme-color-darker-10, #006ba1);
+  --malisafi-text: #1e1e1e;
+  --malisafi-text-light: #757575;
+  --malisafi-border: #e0e0e0;
+  --malisafi-bg: #ffffff;
+  --malisafi-bg-sidebar: #f8f9fa;
+  --malisafi-message-sent: #e3f2fd;
+  --malisafi-message-received: #f1f1f1;
+  --malisafi-shadow: 0 5px 15px rgba(0,0,0,0.2);
+  --malisafi-z-index: 99999;
+}
+
+/* Main container */
+.malisafi-internal-chat {
+  display: flex;
+  background: var(--malisafi-bg);
+  border: 1px solid var(--malisafi-border);
+  border-radius: 8px;
+  overflow: hidden;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+/* Floating widget */
+.malisafi-internal-chat.is-floating-widget {
+  position: fixed;
+  bottom: 20px;
+  right: 20px; /* dynamically adjusted by JS */
+  width: 380px;
+  height: 600px;
+  max-width: 100%;
+  max-height: calc(100vh - 40px);
+  box-shadow: var(--malisafi-shadow);
+  z-index: var(--malisafi-z-index);
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+.malisafi-internal-chat.is-floating-widget.is-collapsed {
+  transform: scale(0);
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Toggle button */
+.malisafi-chat-toggle {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: var(--malisafi-primary);
+  color: #fff;
+  border: none;
+  border-radius: 50px;
+  padding: 12px 20px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: var(--malisafi-shadow);
+  z-index: var(--malisafi-z-index);
+  font-size: 16px;
+  transition: background 0.2s;
+}
+
+.malisafi-chat-toggle:hover {
+  background: var(--malisafi-primary-darker);
+}
+
+.malisafi-chat-unread-badge {
+  background: #ff4444;
+  color: #fff;
+  border-radius: 20px;
+  padding: 2px 8px;
+  font-size: 12px;
+  font-weight: bold;
+  margin-left: 4px;
+}
+
+/* Sidebar */
+.malisafi-chat-sidebar {
+  width: 30%;
+  background: var(--malisafi-bg-sidebar);
+  border-right: 1px solid var(--malisafi-border);
+  display: flex;
+  flex-direction: column;
+}
+
+.malisafi-chat-header {
+  padding: 15px;
+  border-bottom: 1px solid var(--malisafi-border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.malisafi-chat-header h3 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.malisafi-chat-section {
+  padding: 15px;
+  flex: 1;
+  overflow-y: auto;
+}
+
+.malisafi-chat-section h4 {
+  margin: 0 0 10px 0;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--malisafi-text-light);
+}
+
+.malisafi-chat-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.malisafi-chat-list li {
+  padding: 10px;
+  margin-bottom: 5px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.malisafi-chat-list li:hover,
+.malisafi-chat-list li[aria-selected="true"] {
+  background: rgba(0,0,0,0.05);
+}
+
+.malisafi-chat-empty {
+  color: var(--malisafi-text-light);
+  font-style: italic;
+  text-align: center;
+  padding: 20px;
+}
+
+/* Main chat area */
+.malisafi-chat-main {
+  width: 70%;
+  display: flex;
+  flex-direction: column;
+  background: var(--malisafi-bg);
+}
+
+.malisafi-chat-main-header-wrap {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px;
+  border-bottom: 1px solid var(--malisafi-border);
+  background: var(--malisafi-bg-sidebar);
+}
+
+.malisafi-chat-main-header {
+  font-weight: 600;
+  flex: 1;
+}
+
+.malisafi-chat-close {
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: var(--malisafi-text-light);
+  padding: 0 5px;
+}
+
+.malisafi-chat-close:hover {
+  color: var(--malisafi-text);
+}
+
+.malisafi-chat-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Message bubbles */
+.message {
+  max-width: 70%;
+  padding: 8px 12px;
+  border-radius: 18px;
+  word-wrap: break-word;
+  position: relative;
+}
+
+.message-sent {
+  align-self: flex-end;
+  background: var(--malisafi-message-sent);
+  border-bottom-right-radius: 4px;
+}
+
+.message-received {
+  align-self: flex-start;
+  background: var(--malisafi-message-received);
+  border-bottom-left-radius: 4px;
+}
+
+.message .sender {
+  font-size: 12px;
+  font-weight: 600;
+  margin-bottom: 2px;
+}
+
+.message .timestamp {
+  font-size: 10px;
+  color: var(--malisafi-text-light);
+  text-align: right;
+  margin-top: 2px;
+}
+
+/* Typing indicator */
+.typing-indicator {
+  font-size: 12px;
+  color: var(--malisafi-text-light);
+  padding: 5px 15px;
+  font-style: italic;
+}
+
+/* Status area */
+.malisafi-chat-status {
+  padding: 5px 15px;
+  font-size: 12px;
+  color: var(--malisafi-text-light);
+  min-height: 20px;
+}
+
+/* Chat form */
+.malisafi-chat-form {
+  display: flex;
+  padding: 15px;
+  border-top: 1px solid var(--malisafi-border);
+  background: var(--malisafi-bg-sidebar);
+}
+
+.malisafi-chat-form textarea {
+  flex: 1;
+  padding: 8px 12px;
+  border: 1px solid var(--malisafi-border);
+  border-radius: 20px;
+  resize: none;
+  font-family: inherit;
+  font-size: 14px;
+  margin-right: 10px;
+}
+
+.malisafi-chat-form button {
+  background: var(--malisafi-primary);
+  color: #fff;
+  border: none;
+  border-radius: 20px;
+  padding: 8px 20px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background 0.2s;
+}
+
+.malisafi-chat-form button:hover:not(:disabled) {
+  background: var(--malisafi-primary-darker);
+}
+
+.malisafi-chat-form button:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .malisafi-internal-chat.is-floating-widget {
+    width: 100%;
+    height: 100%;
+    bottom: 0;
+    right: 0;
+    max-height: 100vh;
+    border-radius: 0;
+  }
+
+  .malisafi-chat-sidebar {
+    width: 100%;
+    position: absolute;
+    z-index: 2;
+    background: var(--malisafi-bg);
+  }
+
+  .malisafi-chat-main {
+    width: 100%;
+  }
+}

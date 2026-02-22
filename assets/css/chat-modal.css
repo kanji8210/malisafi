@@ -1,0 +1,90 @@
+/* Malisafi Chat Modal Styles - uses design system variables */
+.malisafi-chat-modal {
+  position: fixed;
+  z-index: 9999;
+  left: 0;
+  top: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0,0,0,0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.malisafi-chat-modal-content {
+  background: var(--mls-light-grey);
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+  width: 420px;
+  max-width: 95vw;
+  padding: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+.malisafi-chat-modal-close {
+  font-size: 2rem;
+  color: var(--mls-dark);
+  cursor: pointer;
+  padding: 12px 18px;
+  align-self: flex-end;
+  background: none;
+  border: none;
+}
+.malisafi-chat-modal-body {
+  padding: 18px 24px 12px 24px;
+  background: var(--mls-light-grey);
+  min-height: 220px;
+  max-height: 340px;
+  overflow-y: auto;
+}
+.malisafi-chat-thread {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.malisafi-chat-messages {
+  max-height: 180px;
+  overflow-y: auto;
+  margin-bottom: 8px;
+}
+.malisafi-chat-message {
+  background: var(--mls-grey-green);
+  color: var(--mls-text-primary);
+  border-radius: 8px;
+  padding: 8px 12px;
+  margin-bottom: 6px;
+  font-size: 1rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+.malisafi-chat-message.own {
+  background: var(--mls-accent);
+  color: var(--mls-text-primary);
+  align-self: flex-end;
+}
+.malisafi-chat-input {
+  width: 100%;
+  min-height: 48px;
+  border: 1px solid var(--mls-border-light);
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 1rem;
+  margin-bottom: 8px;
+  background: var(--mls-light-grey);
+  color: var(--mls-text-primary);
+  resize: vertical;
+}
+.malisafi-chat-send-btn {
+  background: var(--mls-accent);
+  color: var(--mls-text-primary);
+  border: none;
+  border-radius: 8px;
+  padding: 10px 18px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.malisafi-chat-send-btn:hover {
+  background: var(--mls-dark);
+  color: var(--mls-light-grey);
+}

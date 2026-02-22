@@ -69,6 +69,11 @@ class Admin {
         // Feature settings
         register_setting('malisafi_mls_features', 'malisafi_mls_enable_front_end_submission');
         register_setting('malisafi_mls_features', 'malisafi_mls_google_maps_api_key');
+        register_setting(
+            'malisafi_mls_features',
+            'malisafi_mls_map_public_offset_meters',
+            array($this, 'sanitize_map_public_offset_meters')
+        );
         register_setting('malisafi_mls_features', 'malisafi_mls_enable_favorite_properties');
         register_setting('malisafi_mls_features', 'malisafi_mls_enable_property_comparison');
         register_setting('malisafi_mls_features', 'malisafi_mls_enable_agent_profiles');
@@ -200,5 +205,27 @@ class Admin {
         }
 
         return 'manage_malisafi_pages';
+    }
+
+    /**
+     * Sanitize public map offset meters option.
+     *
+     * @param mixed $value Raw option value.
+     * @return int
+     */
+    public function sanitize_map_public_offset_meters($value) {
+        $raw_value = is_scalar($value) ? (int) $value : 0;
+        $sanitized = min(800, max(0, $raw_value));
+
+        if ($raw_value !== $sanitized && function_exists('add_settings_error')) {
+            add_settings_error(
+                'malisafi_mls_map_public_offset_meters',
+                'malisafi_mls_map_public_offset_meters_clamped',
+                __('Public Map Offset was adjusted to stay within 0 to 800 meters.', 'malisafi-mls'),
+                'warning'
+            );
+        }
+
+        return $sanitized;
     }
 }

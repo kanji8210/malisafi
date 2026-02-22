@@ -1,0 +1,100 @@
+PRIVACY NOTICE
+
+Effective Date: [YYYY-MM-DD]
+Last Updated: [YYYY-MM-DD]
+Organization: [Your Company Name]
+Contact: [privacy email] | [phone] | [postal address]
+
+This Privacy Notice explains how we collect, use, share, and protect personal data when you use our platform and services.
+
+1) WHO WE ARE
+We operate a real estate listing platform that allows users, agents, owners, and developers to publish and discover property listings.
+
+2) DATA WE COLLECT
+We may collect:
+- Account data: name, email, phone, username, role.
+- Listing data: property details, location details, photos, videos, and listing content.
+- Transaction data: subscription and billing references (we do not store full card details).
+- Support and communication data: inquiries, reports, messages, and feedback.
+- Technical data: IP address, browser/device details, cookies, and usage logs.
+
+3) HOW WE COLLECT DATA
+- Directly from you (forms, account registration, listing submission).
+- Automatically (cookies, analytics tools, security logs).
+- From service providers (such as payment processors and infrastructure providers).
+
+4) WHY WE USE YOUR DATA
+We use personal data to:
+- Create and manage user accounts.
+- Publish and manage property listings.
+- Process subscriptions and payments.
+- Provide customer support and send service communications.
+- Improve platform performance and user experience.
+- Prevent fraud, abuse, and unauthorized activity.
+- Meet legal and regulatory obligations.
+
+5) LEGAL BASES (WHERE REQUIRED)
+Depending on local law, we rely on one or more of:
+- Consent
+- Contract performance
+- Legal obligation
+- Legitimate interests
+
+6) COOKIES AND TRACKING
+We use cookies and similar technologies for:
+- Essential functionality
+- Analytics and performance
+- Security and abuse prevention
+You can manage cookies through your browser settings and (where available) cookie controls.
+
+7) LOCATION AND MAP PRIVACY
+- Listing location data may be used for map display.
+- For privacy and safety, public map markers may be offset from exact coordinates.
+- Authorized admins may see exact coordinates where required for operations.
+
+8) HOW LONG WE KEEP DATA
+We retain data only as long as needed for the purposes described above, including legal, accounting, and security requirements. Retention periods may vary by data type.
+
+9) WHEN WE SHARE DATA
+We may share data with:
+- Hosting/infrastructure providers
+- Payment processors
+- Analytics and security providers
+- Legal/regulatory authorities where required by law
+We require processors to handle data securely and only for agreed purposes.
+
+10) INTERNATIONAL TRANSFERS
+If data is transferred outside your country, we apply appropriate safeguards as required by applicable law.
+
+11) YOUR RIGHTS
+Depending on applicable law, you may have rights to:
+- Access your personal data
+- Correct inaccurate data
+- Request deletion
+- Restrict or object to certain processing
+- Request data portability
+- Withdraw consent (where processing is based on consent)
+- Lodge a complaint with a data protection authority
+
+To make a request, contact us at: [privacy email]
+We may need to verify your identity before processing your request.
+
+12) DATA SECURITY
+We apply technical and organizational safeguards, including access controls, secure transmission practices, and monitoring to protect personal data.
+
+13) CHILDREN’S PRIVACY
+Our services are not intended for children under [age threshold under local law]. We do not knowingly collect personal data from children without legal authorization.
+
+14) CHANGES TO THIS NOTICE
+We may update this Privacy Notice from time to time. Updated versions will be posted with a revised "Last Updated" date.
+
+15) CONTACT US
+For privacy questions or requests:
+Email: [privacy email]
+Phone: [phone]
+Address: [postal address]
+
+Optional jurisdiction language (customize):
+- This notice is intended to support compliance with applicable data protection laws, including laws in Kenya and other jurisdictions where our users are located.
+
+END OF NOTICE

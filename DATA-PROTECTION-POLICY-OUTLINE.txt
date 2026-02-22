@@ -1,0 +1,205 @@
+DATA PROTECTION POLICY OUTLINE
+
+Document Owner: [Company/Organization Name]
+Version: 1.0
+Effective Date: [YYYY-MM-DD]
+Last Review Date: [YYYY-MM-DD]
+Next Review Date: [YYYY-MM-DD]
+
+==================================================
+1) PURPOSE
+==================================================
+- Explain why this policy exists.
+- Confirm commitment to protecting personal data of users, clients, agents, and staff.
+- State compliance intent with applicable privacy/data protection laws.
+
+==================================================
+2) SCOPE
+==================================================
+- Applies to: employees, contractors, vendors, partners, and systems.
+- Applies to: websites, apps, plugins, databases, cloud services, and paper records.
+- Applies to personal data processed during business operations.
+
+==================================================
+3) DEFINITIONS
+==================================================
+- Personal Data: Any information relating to an identified or identifiable person.
+- Sensitive Data: Data requiring higher protection (e.g., ID info, precise location, financial data).
+- Processing: Collection, use, storage, sharing, deletion, etc.
+- Data Subject: Individual whose data is being processed.
+- Data Controller / Processor: Roles and responsibilities in processing.
+
+==================================================
+4) DATA PROTECTION PRINCIPLES
+==================================================
+- Lawfulness, fairness, and transparency.
+- Purpose limitation (collect for specific, legitimate purposes only).
+- Data minimization (only what is necessary).
+- Accuracy (keep data updated and correct).
+- Storage limitation (retain only as long as needed).
+- Integrity and confidentiality (security controls in place).
+- Accountability (document and prove compliance).
+
+==================================================
+5) LEGAL BASIS FOR PROCESSING
+==================================================
+- Consent.
+- Contract performance.
+- Legal obligation.
+- Legitimate interests.
+- Public task / vital interests (if applicable).
+- Note: Keep a processing activity register with legal basis per activity.
+
+==================================================
+6) PERSONAL DATA WE COLLECT
+==================================================
+- Identity data: name, username, account ID.
+- Contact data: email, phone, address.
+- Property/listing data: listing details, county/subcounty/neighbourhood, media uploads.
+- Technical data: IP address, device/browser details, logs, cookies.
+- Transactional data: subscription/payment references (avoid storing raw card data).
+- Support data: inquiries, reports, customer support communications.
+
+==================================================
+7) HOW WE COLLECT DATA
+==================================================
+- Directly from users via forms, account registration, and submissions.
+- Automatically via logs, cookies, analytics, and security tools.
+- From third parties (payment gateways, identity verification, integrations).
+
+==================================================
+8) PURPOSES OF PROCESSING
+==================================================
+- Account creation and authentication.
+- Property listing management and publication.
+- Subscription and billing operations.
+- Customer support and communication.
+- Fraud detection, moderation, and platform safety.
+- Service improvement, analytics, and legal compliance.
+
+==================================================
+9) DATA SUBJECT RIGHTS
+==================================================
+- Right to access personal data.
+- Right to rectification (correction).
+- Right to erasure (where applicable).
+- Right to restrict processing.
+- Right to object to processing.
+- Right to data portability.
+- Right to withdraw consent.
+- Right to lodge a complaint with the relevant regulator.
+
+Process:
+- Contact channel: [privacy email/contact form].
+- Verification required before fulfilling requests.
+- Response SLA: [e.g., within 30 days].
+
+==================================================
+10) CONSENT MANAGEMENT
+==================================================
+- How consent is obtained (clear, specific, informed).
+- How consent is recorded.
+- How users can withdraw consent.
+- Cookie consent management approach.
+
+==================================================
+11) DATA SHARING & DISCLOSURE
+==================================================
+- Internal access on need-to-know basis.
+- Third-party processors (hosting, payment, email, analytics).
+- Legal/regulatory disclosures when required by law.
+- Contractual safeguards with processors (DPA clauses).
+
+==================================================
+12) INTERNATIONAL DATA TRANSFERS
+==================================================
+- State whether data leaves local jurisdiction.
+- Safeguards for cross-border transfers (contracts, adequacy mechanisms).
+
+==================================================
+13) DATA SECURITY CONTROLS
+==================================================
+- Access control and role-based permissions.
+- Encryption in transit and at rest (where feasible).
+- Secure coding and vulnerability management.
+- Logging, monitoring, and incident detection.
+- Backups, disaster recovery, and availability controls.
+- Staff confidentiality and security training.
+
+==================================================
+14) LOCATION DATA & MAP PRIVACY (IF APPLICABLE)
+==================================================
+- Explain treatment of location data (exact vs obfuscated).
+- State public map offset policy (e.g., marker offset for non-admin users).
+- Clarify who can view exact coordinates.
+
+==================================================
+15) DATA RETENTION & DELETION
+==================================================
+- Define retention periods by data category.
+- Deletion and anonymization schedule/process.
+- Legal hold exceptions.
+
+Example retention matrix:
+- Account data: [X years after closure]
+- Billing records: [X years for compliance]
+- Access/security logs: [X days/months]
+- Support tickets: [X years]
+
+==================================================
+16) INCIDENT RESPONSE & BREACH NOTIFICATION
+==================================================
+- How incidents are identified and escalated.
+- Internal incident response steps and ownership.
+- Notification timelines to regulator and affected individuals.
+- Post-incident corrective actions.
+
+==================================================
+17) GOVERNANCE & RESPONSIBILITIES
+==================================================
+- Data Protection Officer / Privacy Lead: [name/role/contact].
+- Security team responsibilities.
+- Product/engineering responsibilities.
+- HR and operations responsibilities.
+- Third-party management responsibilities.
+
+==================================================
+18) TRAINING & AWARENESS
+==================================================
+- Privacy onboarding for all staff.
+- Annual refresher training.
+- Role-based advanced training for high-risk access roles.
+
+==================================================
+19) AUDIT, MONITORING & REVIEW
+==================================================
+- Periodic policy compliance checks.
+- DPIA/risk assessments for new high-risk processing.
+- Annual policy review and updates.
+
+==================================================
+20) ENFORCEMENT
+==================================================
+- Consequences for non-compliance.
+- Exception handling and approval process.
+
+==================================================
+21) CONTACT INFORMATION
+==================================================
+Privacy Contact: [email]
+Postal Address: [address]
+Phone: [phone]
+
+==================================================
+22) APPROVAL
+==================================================
+Approved By: [Name/Role]
+Approval Date: [YYYY-MM-DD]
+Signature: ______________________
+
+
+Implementation Notes (Optional)
+- Keep this outline aligned with your published Privacy Notice.
+- Ensure contracts with all processors include data protection clauses.
+- Maintain records of processing activities and request logs.
+- Validate local legal requirements with counsel before final publication.

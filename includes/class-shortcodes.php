@@ -36,6 +36,7 @@ class Malisafi_Shortcodes {
         add_shortcode('malisafi_user_menu', array(__CLASS__, 'user_menu')); // User menu with logout
         add_shortcode('malisafi_user_status', array(__CLASS__, 'user_status')); // Header status with role + logout
         add_shortcode('malisafi_test_inquiry', array(__CLASS__, 'test_inquiry_page')); // Test inquiry system (admin only)
+        add_shortcode('malisafi_internal_chat', array(__CLASS__, 'internal_chat')); // Admin/moderator/agent internal chat
     }
     
     /**
@@ -557,6 +558,7 @@ class Malisafi_Shortcodes {
      * - height: Map height in pixels (default: 600)
      * - zoom: Initial zoom level (default: 12)
      * - cluster: Enable marker clustering (default: yes)
+    * - public_offset_meters: Public marker privacy offset in meters (default: plugin setting, 100)
      *
      * @param array $atts Shortcode attributes
      * @return string
@@ -569,8 +571,11 @@ class Malisafi_Shortcodes {
             'count' => 100, // Default to 100 properties to avoid performance issues
             'height' => 600,
             'zoom' => 12,
-            'cluster' => 'yes'
+            'cluster' => 'yes',
+            'public_offset_meters' => min(800, max(0, absint(get_option('malisafi_mls_map_public_offset_meters', 100))))
         ), $atts);
+
+        $atts['public_offset_meters'] = min(800, max(0, absint($atts['public_offset_meters'])));
         
         ob_start();
         
@@ -618,6 +623,20 @@ class Malisafi_Shortcodes {
         include MALISAFI_MLS_PATH . 'templates/city-list.php';
         
         return ob_get_clean();
+    }
+
+    /**
+     * Internal chat shortcode
+     * Shortcode: [malisafi_internal_chat]
+     *
+     * @return string
+     */
+    public static function internal_chat() {
+        if (!class_exists('MalisafiMLS\\Internal_Chat')) {
+            return '<p>' . esc_html__('Chat is currently unavailable.', 'malisafi-mls') . '</p>';
+        }
+
+        return \MalisafiMLS\Internal_Chat::render_shortcode();
     }
     
     /**

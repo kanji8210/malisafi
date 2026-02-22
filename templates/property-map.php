@@ -59,6 +59,8 @@ $properties_query = new WP_Query($query_args);
 $properties = array();
 $total_properties = $properties_query->post_count;
 $properties_with_coords = 0;
+$public_offset_meters = isset($atts['public_offset_meters']) ? absint($atts['public_offset_meters']) : absint(get_option('malisafi_mls_map_public_offset_meters', 100));
+$public_offset_meters = min(800, max(0, $public_offset_meters));
 
 if ($properties_query->have_posts()) {
     foreach ($properties_query->posts as $property_id) {
@@ -130,15 +132,15 @@ if ($properties_query->have_posts()) {
         // Only add properties with valid coordinates
         if (!empty($latitude) && !empty($longitude)) {
             // Privacy/Security: Offset coordinates for non-admin users
-            // Admins see exact location, public sees offset by 200-400m
+            // Admins see exact location, public sees offset by 100m
             if (!current_user_can('manage_options')) {
                 // Generate consistent offset based on property ID (same property = same offset)
                 $seed = intval($property_id);
                 mt_srand($seed);
                 
-                // Random offset between 200-400 meters
-                // 1 degree latitude ≈ 111km, so 300m ≈ 0.0027 degrees
-                $offset_distance = (mt_rand(200, 400) / 1000) / 111; // Convert meters to degrees
+                // Configurable offset in meters (default: 100)
+                // 1 degree latitude ≈ 111km, so 100m ≈ 0.0009 degrees
+                $offset_distance = ($public_offset_meters / 1000) / 111; // Convert meters to degrees
                 $offset_angle = mt_rand(0, 360); // Random direction
                 
                 // Apply offset
@@ -258,7 +260,7 @@ $map_height = (int)$atts['height'];
             <div class="admin-notice" style="background: #fff3cd; border-left: 4px solid #ffc107; padding: 12px; margin-bottom: 15px;">
                 <p style="margin: 0; font-size: 13px;">
                     <strong>🔒 Admin View:</strong> You are seeing the <strong>exact GPS coordinates</strong> for all properties. 
-                    Public users will see locations offset by 200-400 meters for privacy and security.
+                    Public users will see locations offset by <?php echo esc_html($public_offset_meters); ?> meters for privacy and security.
                 </p>
             </div>
         <?php endif; ?>

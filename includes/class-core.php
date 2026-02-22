@@ -52,6 +52,7 @@ class Core {
         require_once MALISAFI_MLS_PATH . 'includes/class-property-actions-ajax.php';
         require_once MALISAFI_MLS_PATH . 'includes/class-agent-actions-ajax.php';
             require_once MALISAFI_MLS_PATH . 'includes/class-agent-profile-ajax.php';
+        require_once MALISAFI_MLS_PATH . 'includes/class-internal-chat.php';
         require_once MALISAFI_MLS_PATH . 'includes/class-login-customizer.php';
         require_once MALISAFI_MLS_PATH . 'includes/class-page-manager.php';
         require_once MALISAFI_MLS_PATH . 'includes/class-registration-handler.php';
@@ -144,6 +145,9 @@ class Core {
         
         // Initialize agent actions AJAX (ratings, reports)
         Agent_Actions_Ajax::get_instance();
+
+        // Initialize internal staff chat
+        Internal_Chat::get_instance();
         
         // Initialize email settings and notifications
         require_once MALISAFI_MLS_PATH . 'includes/class-email-settings.php';

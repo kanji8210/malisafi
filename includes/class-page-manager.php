@@ -147,6 +147,13 @@ class Page_Manager {
             'description' => 'Public agent profile viewer',
             'parent' => 0
         ),
+        'internal_chat' => array(
+            'title' => 'Internal Chat',
+            'slug' => 'internal-chat',
+            'shortcode' => '[malisafi_internal_chat]',
+            'description' => 'Internal chat for admins, moderators and agents',
+            'parent' => 0
+        ),
         
         // Owner Dashboard Pages
         'owner_dashboard' => array(

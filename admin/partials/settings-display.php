@@ -165,6 +165,16 @@ if (!defined('WPINC')) {
                         <p class="description"><?php _e('Required for map functionality. Get your API key from Google Cloud Console.', 'malisafi-mls'); ?></p>
                     </td>
                 </tr>
+
+                <tr>
+                    <th scope="row">
+                        <label for="malisafi_mls_map_public_offset_meters"><?php _e('Public Map Offset (meters)', 'malisafi-mls'); ?></label>
+                    </th>
+                    <td>
+                        <input type="number" id="malisafi_mls_map_public_offset_meters" name="malisafi_mls_map_public_offset_meters" value="<?php echo esc_attr(get_option('malisafi_mls_map_public_offset_meters', 100)); ?>" min="0" max="800" step="1" class="small-text">
+                        <p class="description"><?php _e('Distance used to offset map markers for public users. Allowed range: 0 to 800 meters.', 'malisafi-mls'); ?></p>
+                    </td>
+                </tr>
                 
                 <tr>
                     <th scope="row"><?php _e('Favorite Properties', 'malisafi-mls'); ?></th>
