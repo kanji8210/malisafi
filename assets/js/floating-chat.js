@@ -1,3 +1,164 @@
+  // Error box
+  if ($('.malisafi-public-chat-error').length === 0) {
+    $('.malisafi-public-chat-modal .malisafi-public-chat-input-area').append('<div class="malisafi-public-chat-error" style="color:#d63638;font-size:14px;margin-top:4px;display:none;"></div>');
+  }
+
+  // Error handling helpers
+  function showChatError(msg) {
+    var errorBox = $('.malisafi-public-chat-error');
+    var input = $('.malisafi-public-chat-input');
+    var sendBtn = $('.malisafi-public-chat-send');
+    errorBox.text(msg).show();
+    input.css('border','1px solid #d63638');
+    sendBtn.prop('disabled', true);
+    setTimeout(function() {
+      errorBox.fadeOut(200);
+      input.css('border','1px solid var(--mls-border-light)');
+      sendBtn.prop('disabled', false);
+    }, 3500);
+  }
+
+  // Send message logic
+  $('.malisafi-public-chat-send').on('click', function() {
+    var input = $('.malisafi-public-chat-input');
+    var msg = input.val().trim();
+    if (!msg) {
+      showChatError('Message cannot be empty.');
+      return;
+    }
+    // Add to sampleMessages for demo
+    sampleMessages.push({name: 'You', text: msg, time: new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})});
+    renderPublicChatMessages(sampleMessages);
+    input.val('');
+    $('.malisafi-public-chat-send').prop('disabled', false);
+    $('.malisafi-public-chat-input').css('border','1px solid var(--mls-border-light)');
+  });
+
+  // Enter key sends message
+  $('.malisafi-public-chat-input').on('keydown', function(e) {
+    if (e.key === 'Enter') {
+      if ($('body').length && $('.malisafi-floating-chat-btn').length === 0) {
+        $('body').append('<div class="malisafi-floating-chat-btn" title="Chat with Us"><span class="dashicons dashicons-format-chat"></span><span style="margin-left:8px; font-size:1.1rem;">Chat with Us</span></div>');
+    $('.malisafi-public-chat-error').hide();
+    $(this).css('border','1px solid var(--mls-border-light)');
+    $('.malisafi-public-chat-send').prop('disabled', false);
+  });
+// --- Public Chat UI ---
+$(document).ready(function() {
+  // ...existing code...
+
+  // Public chat AJAX logic
+  var publicChatMessages = [];
+
+  function renderPublicChatMessages(messages) {
+    var msgArea = $('.malisafi-public-chat-messages');
+    msgArea.empty();
+    messages.forEach(function(msg) {
+      msgArea.append(
+        '<div class="malisafi-public-chat-msg" style="margin-bottom:12px;">' +
+          '<div style="font-weight:600;color:var(--mls-dark);">' + msg.name + '</div>' +
+          '<div style="margin:4px 0 0 0;color:var(--mls-text-primary);">' + msg.text + '</div>' +
+          '<div style="font-size:12px;color:var(--mls-grey-green);margin-top:2px;">' + msg.time + '</div>' +
+        '</div>'
+      );
+    });
+    msgArea.scrollTop(msgArea[0].scrollHeight);
+  }
+
+  // Fetch messages from backend
+  function fetchPublicChatMessages() {
+    $.post(malisafiChat.ajaxurl, {
+      action: 'malisafi_public_chat_fetch',
+      nonce: malisafiChat.nonce
+    }, function(resp) {
+      if (resp.success && Array.isArray(resp.data.messages)) {
+        publicChatMessages = resp.data.messages;
+        renderPublicChatMessages(publicChatMessages);
+      }
+    });
+  }
+
+  // Initial fetch
+  fetchPublicChatMessages();
+
+  // Poll every 10s
+  setInterval(fetchPublicChatMessages, 10000);
+
+  // Send message logic
+  $('.malisafi-public-chat-send').on('click', function() {
+    var input = $('.malisafi-public-chat-input');
+    var msg = input.val().trim();
+    if (!msg) {
+      showChatError('Message cannot be empty.');
+      return;
+    }
+    $('.malisafi-public-chat-send').prop('disabled', true);
+    $.post(malisafiChat.ajaxurl, {
+      action: 'malisafi_public_chat_send',
+      nonce: malisafiChat.nonce,
+      message: msg
+    }, function(resp) {
+      $('.malisafi-public-chat-send').prop('disabled', false);
+      if (resp.success) {
+        input.val('');
+        fetchPublicChatMessages();
+        $('.malisafi-public-chat-input').css('border','1px solid var(--mls-border-light)');
+      } else {
+        showChatError(resp.data && resp.data.message ? resp.data.message : 'Unable to send message.');
+      }
+    }).fail(function() {
+      $('.malisafi-public-chat-send').prop('disabled', false);
+      showChatError('Unable to send message.');
+    });
+  });
+
+  // ...existing code...
+});
+// --- Public Chat UI ---
+// Ensure chat button is placed everywhere, even on AJAX-loaded pages
+(function ensureChatButton() {
+  function injectChatButton() {
+    console.log('[Malisafi Chat Debug] injectChatButton called');
+    if ($('body').length && $('.malisafi-public-chat-float').length === 0) {
+      console.log('[Malisafi Chat Debug] Appending floating chat button');
+      $('body').append('<div class="malisafi-public-chat-float">💬</div>');
+    }
+    if ($('body').length && $('.malisafi-public-chat-modal').length === 0) {
+      console.log('[Malisafi Chat Debug] Appending public chat modal');
+      $('body').append(
+        '<div class="malisafi-public-chat-modal" style="display:none;position:fixed;bottom:80px;right:32px;z-index:10000;background:var(--mls-light-grey);border-radius:16px;box-shadow:0 4px 24px rgba(0,0,0,0.18);width:360px;max-width:98vw;max-height:80vh;overflow:hidden;flex-direction:column;">' +
+          '<div class="malisafi-public-chat-header" style="background:var(--mls-dark);color:#fff;padding:16px 20px;font-weight:600;font-size:18px;">Public Chat</div>' +
+          '<div class="malisafi-public-chat-messages" style="flex:1;overflow-y:auto;padding:16px 20px;background:var(--mls-light-grey);"></div>' +
+          '<div class="malisafi-public-chat-input-area" style="padding:12px 20px;background:var(--mls-light-grey);display:flex;gap:8px;align-items:center;">' +
+            '<input type="text" class="malisafi-public-chat-input" placeholder="Type your message..." style="flex:1;padding:8px 12px;border-radius:8px;border:1px solid var(--mls-border-light);background:#fff;font-size:15px;" />' +
+            '<button class="malisafi-public-chat-send" style="background:var(--mls-dark);color:#fff;border:none;padding:8px 16px;border-radius:8px;font-weight:600;">Send</button>' +
+          '</div>' +
+        '</div>'
+      );
+    }
+  }
+  injectChatButton();
+    console.log('[Malisafi Chat Debug] injectChatButton executed');
+  // Re-inject on DOM changes (for SPA/AJAX sites)
+  var observer = new MutationObserver(function() { injectChatButton(); });
+    console.log('[Malisafi Chat Debug] MutationObserver attached');
+  observer.observe(document.documentElement, {childList:true,subtree:true});
+
+  // Show modal on button click (fix selector)
+  $(document).on('click', '.malisafi-floating-chat-btn', function() {
+      console.log('[Malisafi Chat Debug] Floating chat button clicked');
+    $('.malisafi-public-chat-modal').fadeIn(180);
+  });
+
+  // Hide modal on outside click
+  $(document).on('mousedown', function(e) {
+      console.log('[Malisafi Chat Debug] mousedown event for modal');
+    var modal = $('.malisafi-public-chat-modal');
+    if (modal.is(':visible') && !modal.is(e.target) && modal.has(e.target).length === 0 && !$('.malisafi-floating-chat-btn').is(e.target)) {
+      modal.fadeOut(120);
+    }
+  });
+})();
 jQuery(document).ready(function($) {
   // Floating chat button
   var chatBtn = $('<div class="malisafi-floating-chat-btn" title="Chat with Us"><span class="dashicons dashicons-format-chat"></span><span style="margin-left:8px; font-size:1.1rem;">Chat with Us</span></div>');
@@ -206,7 +367,7 @@ jQuery(document).ready(function($) {
             '<input type="tel" id="malisafi-busy-phone" name="phone" placeholder="Your Phone" style="width:100%;margin-bottom:8px;padding:6px 8px;border-radius:6px;border:1px solid var(--mls-border-light);" />' +
             '<label for="malisafi-busy-message">Message*</label>' +
             '<textarea id="malisafi-busy-message" name="message" placeholder="Your Message" required style="width:100%;margin-bottom:8px;padding:6px 8px;border-radius:6px;border:1px solid var(--mls-border-light);"></textarea>' +
-            '<button type="submit" class="button" style="background:var(--mls-dark)!important;color:#fff!important;border:none;padding:8px 16px;border-radius:6px;min-width:90px;align-self:flex-end;">Send</button>' +
+            '<button type="submit" class="button malisafi-chat-busy-send" style="background:var(--mls-dark);color:#fff;border:none;padding:8px 16px;border-radius:6px;min-width:90px;align-self:flex-end;">Send</button>' +
             '<div class="malisafi-chat-busy-error" style="color:#d63638;margin-top:6px;display:none;"></div>' +
           '</form>'
         );

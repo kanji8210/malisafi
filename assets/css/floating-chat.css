@@ -1,3 +1,105 @@
+/* Floating chat button always bottom right */
+.malisafi-public-chat-float {
+  position: fixed;
+  bottom: 32px;
+  right: 32px;
+  z-index: 9999;
+  background: var(--mls-dark);
+  color: #fff;
+  border-radius: 50%;
+  width: 56px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+  cursor: pointer;
+  font-size: 28px;
+  border: 2px solid var(--mls-accent);
+}
+/* --- Public Chat UI --- */
+.malisafi-public-chat-modal {
+  background: var(--mls-light-grey);
+  border-radius: 16px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.18);
+  width: 360px;
+  max-width: 98vw;
+  max-height: 80vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+.malisafi-public-chat-header {
+  background: var(--mls-dark);
+  color: #fff;
+  padding: 16px 20px;
+  font-weight: 600;
+  font-size: 18px;
+}
+.malisafi-public-chat-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px 20px;
+  background: var(--mls-light-grey);
+}
+.malisafi-public-chat-input-area {
+  padding: 12px 20px;
+  background: var(--mls-light-grey);
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.malisafi-public-chat-input {
+  flex: 1;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--mls-border-light);
+  background: #fff;
+  font-size: 15px;
+  transition: border-color 0.2s;
+}
+.malisafi-public-chat-send {
+  background: var(--mls-dark);
+  color: #fff;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-weight: 600;
+  transition: background 0.2s;
+}
+.malisafi-public-chat-send:disabled {
+  background: var(--mls-grey-green);
+  color: #fff;
+  opacity: 0.7;
+}
+.malisafi-public-chat-error {
+  color: #d63638;
+  font-size: 14px;
+  margin-top: 4px;
+  display: none;
+}
+.malisafi-public-chat-msg {
+  margin-bottom: 12px;
+}
+.malisafi-public-chat-msg .sender {
+  font-weight: 600;
+  color: var(--mls-dark);
+}
+.malisafi-public-chat-msg .text {
+  margin: 4px 0 0 0;
+  color: var(--mls-text-primary);
+}
+.malisafi-public-chat-msg .time {
+  font-size: 12px;
+  color: var(--mls-grey-green);
+  margin-top: 2px;
+}
+/* Ensure busy form Send button is always dark blue */
+.malisafi-chat-busy-send {
+  background: var(--mls-dark) !important;
+  color: #fff !important;
+  border: none !important;
+}
 /* Floating Chat Button Styles - Malisafi Design System */
 
 .malisafi-floating-chat-btn {
