@@ -66,14 +66,43 @@ class Internal_Chat {
             return;
         }
 
-        $is_shortcode_chat_page = $this->is_shortcode_chat_page();
-        $is_floating_widget = !$is_shortcode_chat_page && $this->should_render_floating_widget();
+        // Always enqueue floating chat assets for frontend
+        wp_enqueue_style('malisafi-chat-modal', MALISAFI_MLS_URL . 'assets/css/chat-modal.css', array('malisafi-mls-variables'), MALISAFI_MLS_VERSION);
+        wp_enqueue_style('malisafi-floating-chat', MALISAFI_MLS_URL . 'assets/css/floating-chat.css', array('malisafi-mls-variables'), MALISAFI_MLS_VERSION);
+        wp_enqueue_script('malisafi-floating-chat', MALISAFI_MLS_URL . 'assets/js/floating-chat.js', array('jquery'), MALISAFI_MLS_VERSION, true);
 
-        if (!$is_shortcode_chat_page && !$is_floating_widget) {
-            return;
+        // Find admin and moderator user IDs for chat
+        $admin_id = 0;
+        $moderator_id = 0;
+        $admins = get_users(array('role' => 'administrator', 'number' => 1, 'orderby' => 'ID', 'order' => 'ASC', 'fields' => array('ID')));
+        if (!empty($admins) && !empty($admins[0]->ID)) {
+            $admin_id = intval($admins[0]->ID);
+        }
+        $moderators = get_users(array('role__in' => array('malisafi_moderator', 'moderator'), 'number' => 1, 'orderby' => 'ID', 'order' => 'ASC', 'fields' => array('ID')));
+        if (!empty($moderators) && !empty($moderators[0]->ID)) {
+            $moderator_id = intval($moderators[0]->ID);
         }
 
-        $this->enqueue_chat_assets($is_floating_widget);
+        wp_localize_script('malisafi-floating-chat', 'malisafiChat', array(
+            'ajaxurl' => admin_url('admin-ajax.php'),
+            'nonce' => wp_create_nonce('malisafi_chat_nonce'),
+            'adminId' => $admin_id,
+            'moderatorId' => $moderator_id,
+            'i18n' => array(
+                'typeMessage' => __('Type a message...', 'malisafi-mls'),
+                'send' => __('Send', 'malisafi-mls'),
+                'unableOpen' => __('Unable to open chat right now.', 'malisafi-mls'),
+                'loadFailed' => __('Unable to load chat data right now.', 'malisafi-mls'),
+                'sendFailed' => __('Unable to send message right now.', 'malisafi-mls'),
+            ),
+        ));
+
+        // Existing chat assets for shortcode/floating widget
+        $is_shortcode_chat_page = $this->is_shortcode_chat_page();
+        $is_floating_widget = !$is_shortcode_chat_page && $this->should_render_floating_widget();
+        if ($is_shortcode_chat_page || $is_floating_widget) {
+            $this->enqueue_chat_assets($is_floating_widget);
+        }
     }
 
     public function enqueue_admin_assets() {
@@ -343,6 +372,14 @@ class Internal_Chat {
         $thread_id = isset($_POST['thread_id']) ? absint($_POST['thread_id']) : 0;
         $message = isset($_POST['message']) ? sanitize_textarea_field(wp_unslash($_POST['message'])) : '';
 
+        // If thread_id is missing, try to create a direct thread if target_user_id is provided
+        if ($thread_id <= 0) {
+            $target_user_id = isset($_POST['target_user_id']) ? absint($_POST['target_user_id']) : 0;
+            if ($target_user_id > 0 && $this->can_users_chat($user_id, $target_user_id)) {
+                $thread_id = $this->find_or_create_direct_thread($user_id, $target_user_id);
+            }
+        }
+
         if ($thread_id <= 0 || !$this->is_thread_participant($thread_id, $user_id)) {
             wp_send_json_error(array('message' => __('Invalid conversation.', 'malisafi-mls')));
         }
@@ -431,6 +468,14 @@ class Internal_Chat {
         ));
 
         $items = array();
+        // Add 'Select role' as the first element
+        $items[] = array(
+            'id' => 0,
+            'name' => __('Select role', 'malisafi-mls'),
+            'role' => '',
+            'email' => '',
+        );
+
         foreach ($users as $user) {
             $items[] = array(
                 'id' => (int) $user->ID,

@@ -1,39 +1,39 @@
 /* Malisafi Chat Modal Styles - uses design system variables */
 .malisafi-chat-modal {
   position: fixed;
-  z-index: 9999;
-  left: 0;
-  top: 0;
-  width: 100vw;
-  height: 100vh;
-  background: rgba(0,0,0,0.25);
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  z-index: 99999;
+  bottom: 96px;
+  right: 32px;
+  width: 380px;
+  max-width: 95vw;
+  background: none;
+  display: none;
+  flex-direction: column;
+  align-items: flex-end;
 }
 .malisafi-chat-modal-content {
-  background: var(--mls-light-grey);
-  border-radius: 12px;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.18);
-  width: 420px;
-  max-width: 95vw;
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.22);
+  width: 100%;
   padding: 0;
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  border: 2px solid var(--mls-accent);
 }
 .malisafi-chat-modal-close {
-  font-size: 2rem;
+  font-size: 1.6rem;
   color: var(--mls-dark);
   cursor: pointer;
-  padding: 12px 18px;
+  padding: 8px 14px;
   align-self: flex-end;
   background: none;
   border: none;
 }
 .malisafi-chat-modal-body {
-  padding: 18px 24px 12px 24px;
-  background: var(--mls-light-grey);
+  padding: 18px 20px 14px 20px;
+  background: #fff;
   min-height: 220px;
   max-height: 340px;
   overflow-y: auto;
@@ -41,47 +41,59 @@
 .malisafi-chat-thread {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 10px;
 }
 .malisafi-chat-messages {
   max-height: 180px;
   overflow-y: auto;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
+  padding: 6px 0;
+  background: var(--mls-light-grey);
+  border-radius: 8px;
+  border: 1px solid var(--mls-accent);
 }
 .malisafi-chat-message {
   background: var(--mls-grey-green);
-  color: var(--mls-text-primary);
+  color: var(--mls-dark);
   border-radius: 8px;
   padding: 8px 12px;
   margin-bottom: 6px;
   font-size: 1rem;
   box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  max-width: 75%;
+  word-break: break-word;
+  border-left: 4px solid var(--mls-accent);
 }
 .malisafi-chat-message.own {
-  background: var(--mls-accent);
-  color: var(--mls-text-primary);
+  background: var(--mls-dark);
+  color: #fff;
   align-self: flex-end;
+  margin-left: auto;
+  border-left: 4px solid var(--mls-accent);
 }
 .malisafi-chat-input {
   width: 100%;
-  min-height: 48px;
+  min-height: 44px;
   border: 1px solid var(--mls-border-light);
   border-radius: 8px;
-  padding: 8px 12px;
+  padding: 10px 12px;
   font-size: 1rem;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
   background: var(--mls-light-grey);
-  color: var(--mls-text-primary);
+  color: var(--mls-dark);
   resize: vertical;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
 }
 .malisafi-chat-send-btn {
   background: var(--mls-accent);
-  color: var(--mls-text-primary);
+  color: var(--mls-light-grey);
   border: none;
   border-radius: 8px;
-  padding: 10px 18px;
-  font-size: 1rem;
+  padding: 10px 22px;
+  font-size: 1.08rem;
   cursor: pointer;
+  font-weight: 700;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
   transition: background 0.2s;
 }
 .malisafi-chat-send-btn:hover {

@@ -1,0 +1,29 @@
+/* Floating Chat Button Styles - Malisafi Design System */
+
+.malisafi-floating-chat-btn {
+  position: fixed;
+  bottom: 32px;
+  right: 32px;
+  z-index: 99999;
+  background: #fff;
+  color: var(--mls-dark);
+  border-radius: 28px;
+  min-width: 56px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.22);
+  cursor: pointer;
+  font-size: 1.4rem;
+  padding: 0 22px 0 14px;
+  gap: 12px;
+  font-weight: 700;
+  border: 2px solid var(--mls-border-light);
+  transition: background 0.2s, box-shadow 0.2s;
+}
+.malisafi-floating-chat-btn:hover {
+  background: var(--mls-light-grey);
+  color: var(--mls-accent);
+  box-shadow: 0 12px 40px rgba(0,0,0,0.28);
+}
