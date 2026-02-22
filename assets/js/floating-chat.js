@@ -197,7 +197,7 @@ jQuery(document).ready(function($) {
       function showBusyForm() {
         modal.find('.malisafi-chat-thread-area').html(
           '<div style="margin-bottom:12px;color:var(--mls-accent);font-weight:600;">All agents are busy. Please leave your details and we will contact you later.</div>' +
-          '<form class="malisafi-chat-busy-form">' +
+          '<form class="malisafi-chat-busy-form" style="display:flex;flex-direction:column;">' +
             '<label for="malisafi-busy-name">Name*</label>' +
             '<input type="text" id="malisafi-busy-name" name="name" placeholder="Your Name" required style="width:100%;margin-bottom:8px;padding:6px 8px;border-radius:6px;border:1px solid var(--mls-border-light);" />' +
             '<label for="malisafi-busy-email">Email*</label>' +
@@ -206,7 +206,7 @@ jQuery(document).ready(function($) {
             '<input type="tel" id="malisafi-busy-phone" name="phone" placeholder="Your Phone" style="width:100%;margin-bottom:8px;padding:6px 8px;border-radius:6px;border:1px solid var(--mls-border-light);" />' +
             '<label for="malisafi-busy-message">Message*</label>' +
             '<textarea id="malisafi-busy-message" name="message" placeholder="Your Message" required style="width:100%;margin-bottom:8px;padding:6px 8px;border-radius:6px;border:1px solid var(--mls-border-light);"></textarea>' +
-            '<button type="submit" class="button" style="background:var(--mls-accent);color:#fff;border:none;padding:8px 16px;border-radius:6px;">Send</button>' +
+            '<button type="submit" class="button" style="background:var(--mls-dark)!important;color:#fff!important;border:none;padding:8px 16px;border-radius:6px;min-width:90px;align-self:flex-end;">Send</button>' +
             '<div class="malisafi-chat-busy-error" style="color:#d63638;margin-top:6px;display:none;"></div>' +
           '</form>'
         );
