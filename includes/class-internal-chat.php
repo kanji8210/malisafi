@@ -41,6 +41,7 @@ class Internal_Chat {
         add_action('wp_ajax_malisafi_chat_send_message', array($this, 'ajax_send_message'));
         add_action('wp_ajax_malisafi_chat_mark_read', array($this, 'ajax_mark_read'));
         add_action('wp_ajax_malisafi_chat_fetch_notifications', array($this, 'ajax_fetch_notifications'));
+        add_action('wp_ajax_malisafi_chat_store_contact', array($this, 'ajax_store_contact'));
 
         add_action('wp_enqueue_scripts', array($this, 'enqueue_assets'));
         add_action('admin_enqueue_scripts', array($this, 'enqueue_admin_assets'));
@@ -50,6 +51,27 @@ class Internal_Chat {
         add_action('admin_menu', array($this, 'register_admin_menu'));
         add_action('admin_post_malisafi_chat_assign', array($this, 'handle_admin_assign'));
         add_action('admin_post_malisafi_chat_admin_reply', array($this, 'handle_admin_reply'));
+    }
+
+    public function ajax_store_contact() {
+        // Accept from unlogged users
+        $name = isset($_POST['name']) ? sanitize_text_field($_POST['name']) : '';
+        $email = isset($_POST['email']) ? sanitize_email($_POST['email']) : '';
+        $phone = isset($_POST['phone']) ? sanitize_text_field($_POST['phone']) : '';
+        $message = isset($_POST['message']) ? sanitize_textarea_field($_POST['message']) : '';
+        if (empty($name) || empty($email) || empty($message)) {
+            wp_send_json_error(array('message' => __('Please fill all required fields.', 'malisafi-mls')));
+        }
+        global $wpdb;
+        $table = $wpdb->prefix . 'mf_chat_contacts';
+        $wpdb->insert($table, array(
+            'name' => $name,
+            'email' => $email,
+            'phone' => $phone,
+            'message' => $message,
+            'created_at' => current_time('mysql'),
+        ), array('%s', '%s', '%s', '%s', '%s'));
+        wp_send_json_success(array('message' => __('Contact saved.', 'malisafi-mls')));
     }
 
     public function ensure_chat_schema() {

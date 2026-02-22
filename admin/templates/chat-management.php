@@ -58,11 +58,13 @@ if (!defined('ABSPATH')) {
 
                     <label for="assigned_to"><strong><?php esc_html_e('Assign conversation', 'malisafi-mls'); ?></strong></label>
                     <select id="assigned_to" name="assigned_to">
-                        <option value="0"><?php esc_html_e('Unassigned', 'malisafi-mls'); ?></option>
+                        <option value="0" disabled selected><?php esc_html_e('Select role', 'malisafi-mls'); ?></option>
                         <?php foreach ($assignees as $assignee) : ?>
-                            <option value="<?php echo (int) $assignee['id']; ?>" <?php selected((int) $selected_thread['assignedTo'], (int) $assignee['id']); ?>>
-                                <?php echo esc_html($assignee['name'] . ' (' . $assignee['role'] . ')'); ?>
-                            </option>
+                            <?php if ($assignee['id'] != 0) : ?>
+                                <option value="<?php echo (int) $assignee['id']; ?>">
+                                    <?php echo esc_html($assignee['name'] . ' (' . $assignee['role'] . ')'); ?>
+                                </option>
+                            <?php endif; ?>
                         <?php endforeach; ?>
                     </select>
                     <button type="submit" class="button button-secondary"><?php esc_html_e('Assign', 'malisafi-mls'); ?></button>

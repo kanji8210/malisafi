@@ -119,6 +119,16 @@ jQuery(document).ready(function($) {
               modal.find('.malisafi-chat-messages').append(msgHtml);
               modal.find('.malisafi-chat-input').val('');
               errorBox.hide();
+              // Switch to live chat mode if admin is online
+              if (recipientId === malisafiChat.adminId) {
+                modal.find('.malisafi-chat-modal-body').addClass('malisafi-live-mode');
+                // Show live indicator
+                if (modal.find('.malisafi-chat-live-indicator').length === 0) {
+                  modal.find('.malisafi-chat-modal-body').prepend('<div class="malisafi-chat-live-indicator" style="color:var(--mls-accent);margin-bottom:8px;font-weight:600;">Live chat: Admin is online</div>');
+                }
+                // Optionally, start polling for new messages
+                startLivePolling(threadId);
+              }
             } else {
               errorBox.text(malisafiChat.i18n.sendFailed).show();
             }
@@ -126,12 +136,40 @@ jQuery(document).ready(function($) {
             errorBox.text('Unable to send message. Please try again.').show();
           });
         }
+
+        // Live polling for new messages if admin is online
+        var livePollingInterval = null;
+        function startLivePolling(threadId) {
+          if (livePollingInterval) clearInterval(livePollingInterval);
+          var lastMessageId = modal.find('.malisafi-chat-message').last().data('id') || 0;
+          livePollingInterval = setInterval(function() {
+            $.post(malisafiChat.ajaxurl, {
+              action: 'malisafi_chat_fetch_messages',
+              nonce: malisafiChat.nonce,
+              thread_id: threadId,
+              last_message_id: lastMessageId
+            }, function(resp) {
+              if (resp.success && resp.data.messages && resp.data.messages.length > 0) {
+                resp.data.messages.forEach(function(msg) {
+                  var msgHtml = '<div class="malisafi-chat-message" data-id="' + msg.id + '"><strong>' + msg.senderName + ':</strong> ' + msg.message + '<br><small>' + msg.createdAtHuman + '</small></div>';
+                  modal.find('.malisafi-chat-messages').append(msgHtml);
+                  lastMessageId = msg.id;
+                });
+              }
+            });
+          }, 5000); // Poll every 5 seconds
+        }
       };
       // Bootstrap chat and open thread
+      var bootstrapTimeout = setTimeout(function() {
+        // If no response in 10s, show busy form
+        showBusyForm();
+      }, 10000);
       $.post(malisafiChat.ajaxurl, {
         action: 'malisafi_chat_bootstrap',
         nonce: malisafiChat.nonce
       }, function(resp) {
+        clearTimeout(bootstrapTimeout);
         var userName = '';
         if (resp.success && resp.data && resp.data.currentUser && resp.data.currentUser.name) {
           userName = resp.data.currentUser.name;
@@ -141,18 +179,61 @@ jQuery(document).ready(function($) {
           nonce: malisafiChat.nonce,
           target_user_id: recipientId
         }, function(threadResp) {
+          clearTimeout(bootstrapTimeout);
           if (threadResp.success) {
             renderChatUI(threadResp.data.messages, threadResp.data.threadId, userName);
           } else {
-            // Render UI with no messages, no threadId
             renderChatUI([], null, userName);
           }
         }).fail(function() {
+          clearTimeout(bootstrapTimeout);
           renderChatUI([], null, userName);
         });
       }).fail(function() {
-        renderChatUI([], null, '');
+        clearTimeout(bootstrapTimeout);
+        showBusyForm();
       });
+
+      function showBusyForm() {
+        modal.find('.malisafi-chat-thread-area').html(
+          '<div style="margin-bottom:12px;color:var(--mls-accent);font-weight:600;">All agents are busy. Please leave your details and we will contact you later.</div>' +
+          '<form class="malisafi-chat-busy-form">' +
+            '<label for="malisafi-busy-name">Name*</label>' +
+            '<input type="text" id="malisafi-busy-name" name="name" placeholder="Your Name" required style="width:100%;margin-bottom:8px;padding:6px 8px;border-radius:6px;border:1px solid var(--mls-border-light);" />' +
+            '<label for="malisafi-busy-email">Email*</label>' +
+            '<input type="email" id="malisafi-busy-email" name="email" placeholder="Your Email" required style="width:100%;margin-bottom:8px;padding:6px 8px;border-radius:6px;border:1px solid var(--mls-border-light);" />' +
+            '<label for="malisafi-busy-phone">Phone</label>' +
+            '<input type="tel" id="malisafi-busy-phone" name="phone" placeholder="Your Phone" style="width:100%;margin-bottom:8px;padding:6px 8px;border-radius:6px;border:1px solid var(--mls-border-light);" />' +
+            '<label for="malisafi-busy-message">Message*</label>' +
+            '<textarea id="malisafi-busy-message" name="message" placeholder="Your Message" required style="width:100%;margin-bottom:8px;padding:6px 8px;border-radius:6px;border:1px solid var(--mls-border-light);"></textarea>' +
+            '<button type="submit" class="button" style="background:var(--mls-accent);color:#fff;border:none;padding:8px 16px;border-radius:6px;">Send</button>' +
+            '<div class="malisafi-chat-busy-error" style="color:#d63638;margin-top:6px;display:none;"></div>' +
+          '</form>'
+        );
+        modal.find('.malisafi-chat-busy-form').on('submit', function(e) {
+          e.preventDefault();
+          var form = $(this);
+          var errorBox = form.find('.malisafi-chat-busy-error');
+          errorBox.hide();
+          var data = {
+            action: 'malisafi_chat_store_contact',
+            nonce: malisafiChat.nonce,
+            name: form.find('input[name="name"]').val(),
+            email: form.find('input[name="email"]').val(),
+            phone: form.find('input[name="phone"]').val(),
+            message: form.find('textarea[name="message"]').val()
+          };
+          $.post(malisafiChat.ajaxurl, data, function(resp) {
+            if (resp.success) {
+              form.replaceWith('<div style="color:var(--mls-accent);font-weight:600;">Thank you! We will contact you soon.</div>');
+            } else {
+              errorBox.text('Unable to send message. Please try again.').show();
+            }
+          }).fail(function() {
+            errorBox.text('Unable to send message. Please try again.').show();
+          });
+        });
+      }
     }
   });
   // Trigger change to load default admin chat
