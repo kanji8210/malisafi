@@ -78,7 +78,17 @@ if (!defined('ABSPATH')) {
                             <div class="chat-message-item">
                                 <div class="chat-message-meta">
                                     <strong><?php echo esc_html($message['senderName']); ?></strong>
-                                    <span><?php echo esc_html($message['createdAtHuman']); ?></span>
+                                    <span><?php
+                                        $ts = '';
+                                        if (!empty($message['createdAtHuman'])) {
+                                            $ts = $message['createdAtHuman'];
+                                        } elseif (!empty($message['created_at_human'])) {
+                                            $ts = $message['created_at_human'];
+                                        } elseif (!empty($message['created_at'])) {
+                                            $ts = date_i18n(get_option('date_format') . ' ' . get_option('time_format'), strtotime($message['created_at']));
+                                        }
+                                        echo esc_html($ts);
+                                    ?></span>
                                 </div>
                                 <div class="chat-message-text"><?php echo esc_html($message['message']); ?></div>
                             </div>

@@ -725,6 +725,108 @@ class Database {
                 }
             }
         }
+
+        // Ensure public token/contact columns exist and migrate existing option mappings
+        self::ensure_public_token_columns_and_migrate();
+    }
+
+    /**
+     * Ensure `public_token` and `public_contact` columns exist on mf_chat_threads and migrate
+     * any existing option-based mappings (malisafi_chat_public_token_*, malisafi_chat_thread_contact_*)
+     */
+    public static function ensure_public_token_columns_and_migrate() {
+        global $wpdb;
+        $threads_table = $wpdb->prefix . 'mf_chat_threads';
+
+        // Check if table exists
+        if ($wpdb->get_var("SHOW TABLES LIKE '" . $wpdb->esc_like($threads_table) . "'") !== $threads_table) {
+            return;
+        }
+
+        // Add columns if missing
+        $cols = array(
+            'public_token' => "ALTER TABLE {$threads_table} ADD COLUMN `public_token` VARCHAR(128) DEFAULT NULL",
+            'public_contact' => "ALTER TABLE {$threads_table} ADD COLUMN `public_contact` TEXT DEFAULT NULL",
+        );
+
+        foreach ($cols as $col => $sql) {
+            $row = $wpdb->get_row("SHOW COLUMNS FROM {$threads_table} LIKE '{$col}'");
+            if (!$row) {
+                $wpdb->query($sql);
+            }
+        }
+
+        // Ensure unique index on public_token for quick lookups
+        $index_exists = $wpdb->get_row("SHOW INDEX FROM {$threads_table} WHERE Key_name = 'idx_public_token'");
+        if (!$index_exists) {
+            // Use prefix length for index to be safe on utf8mb4
+            $wpdb->query("ALTER TABLE {$threads_table} ADD UNIQUE INDEX idx_public_token (public_token(64))");
+        }
+
+        // Migrate options -> table for any existing token options
+        $options_table = $wpdb->options;
+        // Find option rows with malisafi_chat_public_token_%
+        $rows = $wpdb->get_results($wpdb->prepare("SELECT option_name, option_value FROM {$options_table} WHERE option_name LIKE %s", 'malisafi_chat_public_token_%'));
+        if (!empty($rows)) {
+            foreach ($rows as $r) {
+                $opt_name = $r->option_name;
+                $val = maybe_unserialize($r->option_value);
+                if (!is_array($val) || empty($val['thread_id'])) {
+                    continue;
+                }
+                $thread_id = (int) $val['thread_id'];
+                $token = isset($val['token']) ? $val['token'] : '';
+                $contact = isset($val['contact']) ? $val['contact'] : array();
+
+                if (!empty($token)) {
+                    $wpdb->update($threads_table, array('public_token' => $token, 'public_contact' => wp_json_encode($contact)), array('id' => $thread_id), array('%s','%s'), array('%d'));
+                }
+
+                // Remove the option after migrating
+                delete_option($opt_name);
+            }
+        }
+
+        // Also migrate any reverse mappings malisafi_chat_thread_contact_{id}
+        $rows2 = $wpdb->get_results($wpdb->prepare("SELECT option_name, option_value FROM {$options_table} WHERE option_name LIKE %s", 'malisafi_chat_thread_contact_%'));
+        if (!empty($rows2)) {
+            foreach ($rows2 as $r) {
+                $opt_name = $r->option_name;
+                $val = maybe_unserialize($r->option_value);
+                // extract thread id from option name
+                if (preg_match('/malisafi_chat_thread_contact_(\d+)/', $opt_name, $m)) {
+                    $thread_id = (int) $m[1];
+                    $contact = is_array($val) && isset($val['contact']) ? $val['contact'] : (is_array($val) ? $val : array());
+                    $wpdb->update($threads_table, array('public_contact' => wp_json_encode($contact)), array('id' => $thread_id), array('%s'), array('%d'));
+                }
+                delete_option($opt_name);
+            }
+        }
+    }
+
+    /**
+     * Return migration status for public token/contact migration
+     * @return array
+     */
+    public static function get_migration_status() {
+        global $wpdb;
+        $threads_table = $wpdb->prefix . 'mf_chat_threads';
+        $options_table = $wpdb->options;
+
+        $status = array(
+            'threads_with_token' => 0,
+            'options_public_token' => 0,
+            'options_thread_contact' => 0,
+        );
+
+        if ($wpdb->get_var("SHOW TABLES LIKE '" . $wpdb->esc_like($threads_table) . "'") === $threads_table) {
+            $status['threads_with_token'] = (int) $wpdb->get_var("SELECT COUNT(*) FROM {$threads_table} WHERE public_token IS NOT NULL AND public_token <> ''");
+        }
+
+        $status['options_public_token'] = (int) $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM {$options_table} WHERE option_name LIKE %s", 'malisafi_chat_public_token_%'));
+        $status['options_thread_contact'] = (int) $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM {$options_table} WHERE option_name LIKE %s", 'malisafi_chat_thread_contact_%'));
+
+        return $status;
     }
 
     /**

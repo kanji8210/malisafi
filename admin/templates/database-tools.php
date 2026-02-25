@@ -157,6 +157,8 @@ foreach ($table_names as $table => $label) {
         // Show schema issues if any
         require_once MALISAFI_MLS_PATH . 'includes/class-database.php';
         $schema_issues = MalisafiMLS\Database::get_schema_issues();
+        // Migration status for public token/contact
+        $migration_status = MalisafiMLS\Database::get_migration_status();
         if (!empty($schema_issues)) : ?>
             <div class="notice notice-warning"><p><?php _e('Schema issues detected. You can repair missing columns by clicking Repair.', 'malisafi-mls'); ?></p></div>
             <table class="wp-list-table widefat fixed striped">
@@ -175,6 +177,11 @@ foreach ($table_names as $table => $label) {
         <?php else: ?>
             <p class="description"><?php _e('No schema alterations detected. The plugin schema appears up-to-date.', 'malisafi-mls'); ?></p>
         <?php endif; ?>
+
+        <h3><?php _e('Public Token Migration Status', 'malisafi-mls'); ?></h3>
+        <p><?php printf(__('Threads with DB token: %d', 'malisafi-mls'), isset($migration_status['threads_with_token']) ? $migration_status['threads_with_token'] : 0); ?></p>
+        <p><?php printf(__('Legacy option entries (malisafi_chat_public_token_*): %d', 'malisafi-mls'), isset($migration_status['options_public_token']) ? $migration_status['options_public_token'] : 0); ?></p>
+        <p><?php printf(__('Legacy option entries (malisafi_chat_thread_contact_*): %d', 'malisafi-mls'), isset($migration_status['options_thread_contact']) ? $migration_status['options_thread_contact'] : 0); ?></p>
 
         <form method="post" onsubmit="return confirm('<?php esc_attr_e('This will create missing database tables and attempt to repair missing columns. Are you sure?', 'malisafi-mls'); ?>');">
             <?php wp_nonce_field('malisafi_repair_database'); ?>
