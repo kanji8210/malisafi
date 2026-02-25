@@ -13,7 +13,7 @@
                 </button>
             </div>
             <div id="malisafi-public-widget-panel" class="malisafi-widget-panel" style="display:none;">
-                <div id="malisafi-public-widget-messages" class="malisafi-widget-messages" role="log" aria-live="polite">Connecting...</div>
+                <div id="malisafi-public-widget-messages" class="malisafi-widget-messages" role="log" aria-live="polite">${cfg.i18n.welcome || ''}</div>
                 <div id="malisafi-typing-indicator" class="malisafi-typing-indicator" style="display:none;"><span></span><span></span><span></span></div>
                 <form id="malisafi-public-widget-form" class="malisafi-widget-form" autocomplete="off">
                     <div class="malisafi-input-row" style="display:none;">
@@ -99,11 +99,11 @@
                         if (startBtn) startBtn.style.display = 'none';
                         showWelcomeIfNeeded();
                     } else {
-                        // Do not auto-start; show Start button
-                        if (startBtn) startBtn.style.display = 'inline-block';
+                        // No session: show contact form immediately and hide inputs until started
                         if (messageEl) messageEl.disabled = true;
                         if (sendBtn) sendBtn.style.display = 'none';
                         if (inputRow) inputRow.style.display = 'none';
+                        try { showContactForm(); } catch(e) {}
                     }
                 }
                 // reset unread
@@ -125,6 +125,8 @@
             container.innerHTML = '\n                <input type="text" id="malisafi-contact-name" placeholder="Name" />\n                <input type="email" id="malisafi-contact-email" placeholder="Email (optional)" />\n                <input type="tel" id="malisafi-contact-phone" placeholder="Phone (optional)" />\n                <div style="display:flex;gap:8px;margin-top:8px;"><button id="malisafi-contact-submit" class="malisafi-start">Start chat</button><button id="malisafi-contact-cancel" class="malisafi-start" style="background:#eee;color:#333;border:1px solid #ddd">Cancel</button></div>';
             var startRow = document.querySelector('.malisafi-start-row');
             if (startRow) startRow.parentNode.insertBefore(container, startRow);
+            // Hide the original start button to avoid duplicate start controls
+            try { if (startBtn) startBtn.style.display = 'none'; } catch(e) {}
             var submit = document.getElementById('malisafi-contact-submit');
             var cancel = document.getElementById('malisafi-contact-cancel');
             submit.addEventListener('click', function(){
