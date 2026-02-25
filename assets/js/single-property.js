@@ -3,6 +3,31 @@
  * Handles favorites, reporting, contact display, and gallery
  */
 
+(function(){
+    // Silence console output unless debugging enabled for Malisafi.
+    var debugEnabled = false;
+    try {
+        if (typeof malisafi_ajax !== 'undefined' && malisafi_ajax && malisafi_ajax.debug) {
+            debugEnabled = true;
+        } else if (typeof malisafiPublicChat !== 'undefined' && malisafiPublicChat && malisafiPublicChat.debug) {
+            debugEnabled = true;
+        } else if (window.malisafiDebug) {
+            debugEnabled = true;
+        }
+    } catch (e) {}
+    if (!debugEnabled) {
+        try {
+            console.log = function(){};
+            console.debug = function(){};
+            console.info = function(){};
+            console.warn = function(){};
+            console.error = function(){};
+        } catch (e) {}
+    } else {
+        window.malisafiDebug = true;
+    }
+})();
+
 (function($) {
     'use strict';
     

@@ -277,6 +277,8 @@ class Internal_Chat {
             MALISAFI_MLS_VERSION,
             true
         );
+        // If not explicitly enabled, silence console output in production
+        wp_add_inline_script('malisafi-public-chat-widget', "(function(){if(!window.malisafiDebug){try{console.log=function(){},console.debug=function(){},console.info=function(){},console.warn=function(){},console.error=function(){}}catch(e){} }})();");
         wp_localize_script('malisafi-public-chat-widget', 'malisafiPublicChat', array(
             'ajaxurl' => admin_url('admin-ajax.php'),
             'restBase' => esc_url_raw(rest_url('malisafi/v1/public-chat/')),
@@ -340,6 +342,9 @@ class Internal_Chat {
             MALISAFI_MLS_VERSION,
             true
         );
+
+        // Silence console output for internal chat scripts unless debugging enabled
+        wp_add_inline_script('malisafi-internal-chat', "(function(){if(!window.malisafiDebug){try{console.log=function(){},console.debug=function(){},console.info=function(){},console.warn=function(){},console.error=function(){}}catch(e){} }})();");
 
         wp_localize_script('malisafi-internal-chat', 'malisafiChat', array(
             'ajaxurl' => admin_url('admin-ajax.php'),

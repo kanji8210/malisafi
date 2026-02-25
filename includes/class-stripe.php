@@ -319,7 +319,9 @@ composer install</pre>
             
             return $customer->id;
         } catch (Exception $e) {
-            error_log('Stripe customer creation error: ' . $e->getMessage());
+            if (defined('WP_DEBUG') && WP_DEBUG) {
+                error_log('Stripe customer creation error: ' . $e->getMessage());
+            }
             return false;
         }
     }
@@ -388,37 +390,51 @@ composer install</pre>
                 'session_id' => $session->id
             ));
         } catch (\Stripe\Exception\CardException $e) {
-            error_log('Stripe Card Error: ' . $e->getMessage());
+            if (defined('WP_DEBUG') && WP_DEBUG) {
+                error_log('Stripe Card Error: ' . $e->getMessage());
+            }
             wp_send_json_error(array(
                 'message' => __('Your card was declined. Please check your card details or use a different payment method.', 'malisafi-mls')
             ));
         } catch (\Stripe\Exception\RateLimitException $e) {
-            error_log('Stripe Rate Limit: ' . $e->getMessage());
+            if (defined('WP_DEBUG') && WP_DEBUG) {
+                error_log('Stripe Rate Limit: ' . $e->getMessage());
+            }
             wp_send_json_error(array(
                 'message' => __('Too many payment requests. Please wait a moment and try again.', 'malisafi-mls')
             ));
         } catch (\Stripe\Exception\InvalidRequestException $e) {
-            error_log('Stripe Invalid Request: ' . $e->getMessage());
+            if (defined('WP_DEBUG') && WP_DEBUG) {
+                error_log('Stripe Invalid Request: ' . $e->getMessage());
+            }
             wp_send_json_error(array(
                 'message' => __('Invalid payment request. Please contact support if this persists.', 'malisafi-mls')
             ));
         } catch (\Stripe\Exception\AuthenticationException $e) {
-            error_log('Stripe Authentication Error: ' . $e->getMessage());
+            if (defined('WP_DEBUG') && WP_DEBUG) {
+                error_log('Stripe Authentication Error: ' . $e->getMessage());
+            }
             wp_send_json_error(array(
                 'message' => __('Payment service authentication failed. Please contact support.', 'malisafi-mls')
             ));
         } catch (\Stripe\Exception\ApiConnectionException $e) {
-            error_log('Stripe Connection Error: ' . $e->getMessage());
+            if (defined('WP_DEBUG') && WP_DEBUG) {
+                error_log('Stripe Connection Error: ' . $e->getMessage());
+            }
             wp_send_json_error(array(
                 'message' => __('Unable to connect to payment service. Please check your internet connection and try again.', 'malisafi-mls')
             ));
         } catch (\Stripe\Exception\ApiErrorException $e) {
-            error_log('Stripe API Error: ' . $e->getMessage());
+            if (defined('WP_DEBUG') && WP_DEBUG) {
+                error_log('Stripe API Error: ' . $e->getMessage());
+            }
             wp_send_json_error(array(
                 'message' => __('Payment service error. Please try again or contact support.', 'malisafi-mls')
             ));
-        } catch (\Exception $e) {
-            error_log('Stripe Checkout Error: ' . $e->getMessage());
+        } catch (Exception $e) {
+            if (defined('WP_DEBUG') && WP_DEBUG) {
+                error_log('Stripe Error: ' . $e->getMessage());
+            }
             wp_send_json_error(array(
                 'message' => __('Unable to process payment. Please try again.', 'malisafi-mls')
             ));
@@ -452,12 +468,16 @@ composer install</pre>
                 'url' => $session->url
             ));
         } catch (\Stripe\Exception\InvalidRequestException $e) {
-            error_log('Stripe Portal Error: ' . $e->getMessage());
+            if (defined('WP_DEBUG') && WP_DEBUG) {
+                error_log('Stripe Portal Error: ' . $e->getMessage());
+            }
             wp_send_json_error(array(
                 'message' => __('Unable to access customer portal. Please ensure you have an active subscription.', 'malisafi-mls')
             ));
         } catch (\Exception $e) {
-            error_log('Stripe Portal Error: ' . $e->getMessage());
+            if (defined('WP_DEBUG') && WP_DEBUG) {
+                error_log('Stripe Portal Error: ' . $e->getMessage());
+            }
             wp_send_json_error(array(
                 'message' => __('Unable to access customer portal. Please try again later.', 'malisafi-mls')
             ));
@@ -489,12 +509,16 @@ composer install</pre>
             
             wp_send_json_success(array('message' => __('Subscription cancelled successfully.', 'malisafi-mls')));
         } catch (\Stripe\Exception\InvalidRequestException $e) {
-            error_log('Stripe Cancellation Error: ' . $e->getMessage());
+            if (defined('WP_DEBUG') && WP_DEBUG) {
+                error_log('Stripe Cancellation Error: ' . $e->getMessage());
+            }
             wp_send_json_error(array(
                 'message' => __('Unable to cancel subscription. It may have already been cancelled.', 'malisafi-mls')
             ));
         } catch (\Exception $e) {
-            error_log('Stripe Cancellation Error: ' . $e->getMessage());
+            if (defined('WP_DEBUG') && WP_DEBUG) {
+                error_log('Stripe Cancellation Error: ' . $e->getMessage());
+            }
             wp_send_json_error(array(
                 'message' => __('Unable to cancel subscription. Please try again or contact support.', 'malisafi-mls')
             ));
@@ -773,7 +797,9 @@ composer install</pre>
                 $stripe_sub = \Stripe\Subscription::retrieve($subscription->stripe_subscription_id);
                 self::update_subscription_status($subscription->user_id, $stripe_sub->status);
             } catch (Exception $e) {
-                error_log('Failed to check subscription: ' . $e->getMessage());
+                if (defined('WP_DEBUG') && WP_DEBUG) {
+                    error_log('Failed to check subscription: ' . $e->getMessage());
+                }
             }
         }
     }

@@ -169,7 +169,9 @@ if (isset($_POST['do_sync']) && wp_verify_nonce($_POST['_wpnonce'], 'malisafi_sy
     $sync_log .= "✅ SYNCHRONISATION TERMINÉE!\n";
     $sync_log .= "=" . str_repeat("=", 50) . "\n";
     
-    error_log($sync_log);
+    if (defined('WP_DEBUG') && WP_DEBUG) {
+        error_log($sync_log);
+    }
     $sync_done = true;
 }
 

@@ -97,30 +97,44 @@ if (!Analytics_Migration::tables_exist()) {
 // Get date range from query params
 $days = isset($_GET['days']) ? intval($_GET['days']) : 30;
 
-error_log('════════════════════════════════════════════');
-error_log('📊 [Analytics Overview] Page Loaded');
-error_log('📅 [Days Filter]: ' . $days);
-error_log('════════════════════════════════════════════');
+if (defined('WP_DEBUG') && WP_DEBUG) {
+    error_log('════════════════════════════════════════════');
+    error_log('📊 [Analytics Overview] Page Loaded');
+    error_log('📅 [Days Filter]: ' . $days);
+    error_log('════════════════════════════════════════════');
+}
 
 // Get overview stats
 $stats = Analytics_Core::get_overview_stats($days);
-error_log('📊 [Overview Stats Retrieved]: ' . print_r($stats, true));
+if (defined('WP_DEBUG') && WP_DEBUG) {
+    error_log('📊 [Overview Stats Retrieved]: ' . print_r($stats, true));
+}
 
 $properties_by_role = Analytics_Core::get_properties_by_role($days);
-error_log('👥 [Properties by Role Count]: ' . count($properties_by_role));
+if (defined('WP_DEBUG') && WP_DEBUG) {
+    error_log('👥 [Properties by Role Count]: ' . count($properties_by_role));
+}
 
 $login_frequency = Analytics_Core::get_login_frequency($days);
-error_log('🔐 [Login Frequency Count]: ' . count($login_frequency));
+if (defined('WP_DEBUG') && WP_DEBUG) {
+    error_log('🔐 [Login Frequency Count]: ' . count($login_frequency));
+}
 
 $submission_funnel = Analytics_Core::get_submission_funnel($days);
-error_log('📝 [Submission Funnel Count]: ' . count($submission_funnel));
+if (defined('WP_DEBUG') && WP_DEBUG) {
+    error_log('📝 [Submission Funnel Count]: ' . count($submission_funnel));
+}
 
 $activity_trends = Analytics_Core::get_activity_trends($days);
-error_log('📈 [Activity Trends Count]: ' . count($activity_trends));
+if (defined('WP_DEBUG') && WP_DEBUG) {
+    error_log('📈 [Activity Trends Count]: ' . count($activity_trends));
+}
 
 $top_properties = Analytics_Properties::get_top_properties('views', 5);
-error_log('🏆 [Top Properties Count]: ' . count($top_properties));
-error_log('════════════════════════════════════════════');
+if (defined('WP_DEBUG') && WP_DEBUG) {
+    error_log('🏆 [Top Properties Count]: ' . count($top_properties));
+    error_log('════════════════════════════════════════════');
+}
 ?>
 
 <div class="wrap malisafi-analytics-wrapper">

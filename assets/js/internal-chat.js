@@ -1,35 +1,32 @@
-/**
- * Enqueue chat assets on admin pages.
+/*
+ * Internal Chat frontend script
+ * Uses localized `malisafiChat` object (provided by PHP)
  */
-function malisafi_enqueue_chat_assets() {
-    $screen = get_current_screen();
-    // Enqueue on all admin pages
-    wp_enqueue_style('malisafi-chat-css', plugin_dir_url(__FILE__) . 'assets/css/malisafi-chat.css', array(), '1.0.0');
-    wp_enqueue_script('malisafi-chat-js', plugin_dir_url(__FILE__) . 'assets/js/malisafi-chat.js', array('jquery'), '1.0.0', true);
+(function($){
+    'use strict';
 
-    // Prepare i18n strings
-    $i18n = array(
-        'noThreads'          => __('No conversations yet.', 'malisafi-mls'),
-        'selectConversation' => __('Select a conversation', 'malisafi-mls'),
-        'loadFailed'         => __('Unable to load chat data right now.', 'malisafi-mls'),
-        'unableOpen'         => __('Unable to open chat right now.', 'malisafi-mls'),
-        'sendFailed'         => __('Unable to send message right now.', 'malisafi-mls'),
-        'refreshRetry'       => __('Please refresh and try again.', 'malisafi-mls'),
-    );
+    $(document).ready(function(){
+        if (typeof malisafiChat === 'undefined') {
+            return;
+        }
 
-    // Determine if floating widget is enabled (you may set this via plugin settings)
-    $is_floating_widget = true; // or get_option('malisafi_chat_floating', true);
+        var cfg = malisafiChat || {};
 
-    // Initial target user ID (e.g., from URL or elsewhere)
-    $initial_target = isset($_GET['chat_with']) ? intval($_GET['chat_with']) : 0;
+        // Provide a safe, no-op initializer so other scripts can call it
+        window.malisafiInternalChatInit = window.malisafiInternalChatInit || function(){
+            // Minimal safe init: no DOM mutations by default
+            return { ready: true };
+        };
 
-    wp_localize_script('malisafi-chat-js', 'malisafiChat', array(
-        'ajaxurl'             => admin_url('admin-ajax.php'),
-        'nonce'               => wp_create_nonce('malisafi_chat_nonce'),
-        'i18n'                => $i18n,
-        'pollInterval'        => 10000, // 10 seconds
-        'isFloatingWidget'    => $is_floating_widget,
-        'initialTargetUserId' => $initial_target,
-    ));
-}
-add_action('admin_enqueue_scripts', 'malisafi_enqueue_chat_assets');
+        // If the floating widget is enabled, ensure polling functions exist (no-op until server handlers are added)
+        if (cfg.isFloatingWidget) {
+            window.malisafiInternalChat = window.malisafiInternalChat || {
+                pollInterval: cfg.pollInterval || 10000,
+                lastPoll: 0,
+                startPolling: function(){},
+                stopPolling: function(){}
+            };
+        }
+    });
+
+})(jQuery);

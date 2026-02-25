@@ -37,7 +37,9 @@ function malisafi_check_database_update() {
             add_action('admin_notices', 'malisafi_database_updated_notice');
         } catch (Exception $e) {
             // Log error but don't break the plugin
-            error_log('MalisafiMLS Database Update Error: ' . $e->getMessage());
+            if (defined('WP_DEBUG') && WP_DEBUG) {
+                error_log('MalisafiMLS Database Update Error: ' . $e->getMessage());
+            }
         }
     }
 }

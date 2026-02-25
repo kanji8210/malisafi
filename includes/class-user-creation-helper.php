@@ -227,11 +227,15 @@ class User_Creation_Helper {
             update_user_meta($user_id, 'agent_post_id', $agent_post_id);
             
             // Log success for debugging
-            error_log(sprintf('[Malisafi] Agent profile created successfully. User ID: %d, Agent Post ID: %d', $user_id, $agent_post_id));
+            if (defined('WP_DEBUG') && WP_DEBUG) {
+                error_log(sprintf('[Malisafi] Agent profile created successfully. User ID: %d, Agent Post ID: %d', $user_id, $agent_post_id));
+            }
         } else {
             // Log error for debugging
             $error_message = is_wp_error($agent_post_id) ? $agent_post_id->get_error_message() : 'Unknown error creating agent post';
-            error_log(sprintf('[Malisafi] Failed to create agent profile. User ID: %d, Error: %s', $user_id, $error_message));
+            if (defined('WP_DEBUG') && WP_DEBUG) {
+                error_log(sprintf('[Malisafi] Failed to create agent profile. User ID: %d, Error: %s', $user_id, $error_message));
+            }
         }
         
         // Notify admin about new agent registration

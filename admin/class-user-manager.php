@@ -455,7 +455,9 @@ class Malisafi_User_Manager {
         delete_user_meta($user_id, '_malisafi_email_verification_token');
         
         // Log the action
-        error_log('Malisafi: Email manually verified for user ' . $user->user_login . ' by admin ' . wp_get_current_user()->user_login);
+        if (defined('WP_DEBUG') && WP_DEBUG) {
+            error_log('Malisafi: Email manually verified for user ' . $user->user_login . ' by admin ' . wp_get_current_user()->user_login);
+        }
         
         // Redirect back with success message
         wp_redirect(add_query_arg('message', 'email_verified', admin_url('admin.php?page=malisafi-users')));

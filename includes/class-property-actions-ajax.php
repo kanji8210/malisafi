@@ -72,6 +72,7 @@ class Property_Actions_Ajax {
             
             wp_localize_script('malisafi-single-property', 'malisafi_ajax', array(
                 'ajax_url' => admin_url('admin-ajax.php'),
+                'debug' => (defined('WP_DEBUG') && WP_DEBUG),
                 'nonce' => wp_create_nonce('malisafi_ajax_nonce'),
                 'report_nonce' => wp_create_nonce('malisafi_report_property'),
                 'user_logged_in' => is_user_logged_in(),
@@ -156,7 +157,9 @@ class Property_Actions_Ajax {
     public function send_inquiry() {
         // Verify nonce
         if (!isset($_POST['nonce']) || !wp_verify_nonce($_POST['nonce'], 'malisafi_ajax_nonce')) {
-            error_log('Malisafi: Invalid nonce in send_inquiry');
+            if (defined('WP_DEBUG') && WP_DEBUG) {
+                error_log('Malisafi: Invalid nonce in send_inquiry');
+            }
             wp_send_json_error(array('message' => 'Invalid security token.'));
         }
 
@@ -170,12 +173,16 @@ class Property_Actions_Ajax {
         $honeypot = isset($_POST['hp_name']) ? sanitize_text_field($_POST['hp_name']) : '';
         $form_ts = isset($_POST['form_ts']) ? intval($_POST['form_ts']) : 0;
         if (!empty($honeypot)) {
-            error_log('Malisafi: Honeypot triggered in send_inquiry');
+            if (defined('WP_DEBUG') && WP_DEBUG) {
+                error_log('Malisafi: Honeypot triggered in send_inquiry');
+            }
             wp_send_json_error(array('message' => 'Failed spam check.'));
         }
         $now = time();
         if ($form_ts > 0 && ($now - $form_ts) < 3) {
-            error_log('Malisafi: Form submitted too quickly - possible bot.');
+            if (defined('WP_DEBUG') && WP_DEBUG) {
+                error_log('Malisafi: Form submitted too quickly - possible bot.');
+            }
             wp_send_json_error(array('message' => 'Failed spam check.'));
         }
 
@@ -184,7 +191,9 @@ class Property_Actions_Ajax {
             $recaptcha_response = isset($_POST['g-recaptcha-response']) ? sanitize_text_field($_POST['g-recaptcha-response']) : '';
             $recaptcha_secret = get_option('malisafi_inquiry_recaptcha_secret');
             if (empty($recaptcha_response) || empty($recaptcha_secret)) {
-                error_log('Malisafi: reCAPTCHA required but missing response/secret');
+                if (defined('WP_DEBUG') && WP_DEBUG) {
+                    error_log('Malisafi: reCAPTCHA required but missing response/secret');
+                }
                 wp_send_json_error(array('message' => 'Spam protection check failed.'));
             }
 
@@ -198,14 +207,18 @@ class Property_Actions_Ajax {
             ));
 
             if (is_wp_error($verify)) {
-                error_log('Malisafi: reCAPTCHA verification error: ' . $verify->get_error_message());
+                if (defined('WP_DEBUG') && WP_DEBUG) {
+                    error_log('Malisafi: reCAPTCHA verification error: ' . $verify->get_error_message());
+                }
                 wp_send_json_error(array('message' => 'Spam protection check failed.'));
             }
 
             $body = wp_remote_retrieve_body($verify);
             $data = json_decode($body, true);
             if (empty($data) || empty($data['success'])) {
-                error_log('Malisafi: reCAPTCHA failed: ' . $body);
+                if (defined('WP_DEBUG') && WP_DEBUG) {
+                    error_log('Malisafi: reCAPTCHA failed: ' . $body);
+                }
                 wp_send_json_error(array('message' => 'Spam protection check failed.'));
             }
         }
@@ -259,7 +272,9 @@ class Property_Actions_Ajax {
         } elseif (!empty($agency_email) && is_email($agency_email)) {
             $recipient_email = $agency_email;
         } else {
-            error_log('Malisafi: No recipient email found for inquiry on property ' . $property_id);
+            if (defined('WP_DEBUG') && WP_DEBUG) {
+                error_log('Malisafi: No recipient email found for inquiry on property ' . $property_id);
+            }
             wp_send_json_error(array('message' => 'Unable to deliver inquiry: recipient not found.'));
         }
 
@@ -325,12 +340,14 @@ class Property_Actions_Ajax {
         $inserted = $wpdb->insert($table_name, $inquiry_db);
         if (!$inserted) {
             if (defined('WP_DEBUG') && WP_DEBUG) {
-                error_log('Malisafi: Failed to insert inquiry DB record.');
-                error_log('Malisafi Debug: table=' . $table_name);
-                error_log('Malisafi Debug: last_error=' . $wpdb->last_error);
-                error_log('Malisafi Debug: last_query=' . $wpdb->last_query);
-                error_log('Malisafi Debug: insert_payload=' . wp_json_encode($inquiry_db));
-                error_log('Malisafi Debug: DB error trace: ' . print_r($wpdb, true));
+                if (defined('WP_DEBUG') && WP_DEBUG) {
+                    error_log('Malisafi: Failed to insert inquiry DB record.');
+                    error_log('Malisafi Debug: table=' . $table_name);
+                    error_log('Malisafi Debug: last_error=' . $wpdb->last_error);
+                    error_log('Malisafi Debug: last_query=' . $wpdb->last_query);
+                    error_log('Malisafi Debug: insert_payload=' . wp_json_encode($inquiry_db));
+                    error_log('Malisafi Debug: DB error trace: ' . print_r($wpdb, true));
+                }
             }
             wp_send_json_error(array('message' => 'Failed to save inquiry. Please try again later.'));
         }
@@ -372,7 +389,9 @@ class Property_Actions_Ajax {
                 ['%d', '%d', '%s', '%s', '%s']
             );
         } catch (\Throwable $e) {
-            error_log('Malisafi: Failed to record inquiry interaction: ' . $e->getMessage());
+            if (defined('WP_DEBUG') && WP_DEBUG) {
+                error_log('Malisafi: Failed to record inquiry interaction: ' . $e->getMessage());
+            }
         }
 
         // Store in agent's meta for backward compatibility and agent dashboard
@@ -592,12 +611,12 @@ class Property_Actions_Ajax {
 
                 wp_send_json_success(array('message' => 'Your message has been sent successfully.'));
             } else {
-                error_log('Malisafi: Failed to insert inquiry DB record (secondary path).');
-                error_log('Malisafi Debug: table=' . $table_name);
-                error_log('Malisafi Debug: last_error=' . $wpdb->last_error);
-                error_log('Malisafi Debug: last_query=' . $wpdb->last_query);
-                error_log('Malisafi Debug: insert_payload=' . wp_json_encode($inquiry_data));
                 if (defined('WP_DEBUG') && WP_DEBUG) {
+                    error_log('Malisafi: Failed to insert inquiry DB record (secondary path).');
+                    error_log('Malisafi Debug: table=' . $table_name);
+                    error_log('Malisafi Debug: last_error=' . $wpdb->last_error);
+                    error_log('Malisafi Debug: last_query=' . $wpdb->last_query);
+                    error_log('Malisafi Debug: insert_payload=' . wp_json_encode($inquiry_data));
                     error_log('Malisafi Debug: DB error trace: ' . print_r($wpdb, true));
                 }
                 wp_send_json_error(array('message' => 'Message sent but failed to save inquiry record.'));
@@ -628,7 +647,9 @@ class Property_Actions_Ajax {
         // Check if table exists
         $table_exists = $wpdb->get_var("SHOW TABLES LIKE '" . $wpdb->esc_like( $table_name ) . "'");
         if (!$table_exists) {
-            error_log('Malisafi DB Repair: table not found: ' . $table_name);
+            if (defined('WP_DEBUG') && WP_DEBUG) {
+                error_log('Malisafi DB Repair: table not found: ' . $table_name);
+            }
             // Attempt to recreate all tables
             try {
                 if (class_exists('\MalisafiMLS\Database')) {
@@ -655,13 +676,17 @@ class Property_Actions_Ajax {
         if ($res === false) {
             // If ALTER failed due to severe schema issues, fallback to backup+recreate
             $last_error = $wpdb->last_error;
-            error_log('Malisafi DB Repair: ALTER failed: ' . $last_error);
+            if (defined('WP_DEBUG') && WP_DEBUG) {
+                error_log('Malisafi DB Repair: ALTER failed: ' . $last_error);
+            }
             // Rename current table to a timestamped backup
             $backup_name = $table_name . '_backup_' . date('Ymd_His');
             $rename_sql = "RENAME TABLE {$table_name} TO {$backup_name}";
             $rename_res = $wpdb->query($rename_sql);
             if ($rename_res === false) {
-                error_log('Malisafi DB Repair: Failed to rename table: ' . $wpdb->last_error);
+                if (defined('WP_DEBUG') && WP_DEBUG) {
+                    error_log('Malisafi DB Repair: Failed to rename table: ' . $wpdb->last_error);
+                }
                 wp_send_json_error(array('message' => 'Failed to alter or backup the table: ' . $wpdb->last_error));
             }
 
@@ -712,13 +737,15 @@ class Property_Actions_Ajax {
         $to = isset($log_data['to']) ? $log_data['to'] : 'unknown';
         $subject = isset($log_data['subject']) ? $log_data['subject'] : 'no subject';
         
-        error_log(sprintf(
-            'Malisafi Email: %s | To: %s | Subject: %s | Property: %d',
-            strtoupper($status_text),
-            $to,
-            $subject,
-            isset($log_data['property_id']) ? $log_data['property_id'] : 0
-        ));
+        if (defined('WP_DEBUG') && WP_DEBUG) {
+            error_log(sprintf(
+                'Malisafi Email: %s | To: %s | Subject: %s | Property: %d',
+                strtoupper($status_text),
+                $to,
+                $subject,
+                isset($log_data['property_id']) ? $log_data['property_id'] : 0
+            ));
+        }
     }
 }
 

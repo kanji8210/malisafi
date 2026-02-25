@@ -14,7 +14,9 @@ class Property_Submission {
      * Initialize
      */
     public static function init() {
-        error_log('Property_Submission::init() called');
+        if (defined('WP_DEBUG') && WP_DEBUG) {
+            error_log('Property_Submission::init() called');
+        }
         
         // AJAX handlers
         add_action('wp_ajax_malisafi_save_property_step', array(__CLASS__, 'ajax_save_property_step'));
@@ -40,7 +42,9 @@ class Property_Submission {
         // Enqueue scripts and styles
         add_action('wp_enqueue_scripts', array(__CLASS__, 'enqueue_assets'));
         
-        error_log('Property_Submission::init() completed');
+        if (defined('WP_DEBUG') && WP_DEBUG) {
+            error_log('Property_Submission::init() completed');
+        }
     }
     
     /**
@@ -67,7 +71,9 @@ class Property_Submission {
                           has_shortcode(get_post()->post_content, 'malisafi_property_submit') ||
                           has_shortcode(get_post()->post_content, 'malisafi_agent_add_property')) ||
             (isset($_GET['malisafi_action']) && $_GET['malisafi_action'] === 'submit_property')) {
-            error_log('Enqueuing property submission assets');
+            if (defined('WP_DEBUG') && WP_DEBUG) {
+                error_log('Enqueuing property submission assets');
+            }
             
             wp_enqueue_media();
             wp_enqueue_script('jquery-ui-sortable');
@@ -261,10 +267,12 @@ class Property_Submission {
         }
         
         // Debug logging
-        error_log('Malisafi Property Save Debug:');
-        error_log('Property ID: ' . $property_id);
-        error_log('Step: ' . $step);
-        error_log('Data: ' . print_r($data, true));
+        if (defined('WP_DEBUG') && WP_DEBUG) {
+            error_log('Malisafi Property Save Debug:');
+            error_log('Property ID: ' . $property_id);
+            error_log('Step: ' . $step);
+            error_log('Data: ' . print_r($data, true));
+        }
         
         // Validate data using Validator
         require_once MALISAFI_MLS_PATH . 'includes/class-validator.php';
@@ -337,7 +345,9 @@ class Property_Submission {
                 // Mark as auto-draft for easier lookup/debug
                 update_post_meta($property_id, '_malisafi_auto_draft', 1);
                 
-                error_log('Malisafi: Created new draft property #' . $property_id . ' for user ' . $current_user_id);
+                if (defined('WP_DEBUG') && WP_DEBUG) {
+                    error_log('Malisafi: Created new draft property #' . $property_id . ' for user ' . $current_user_id);
+                }
             }
         }
         

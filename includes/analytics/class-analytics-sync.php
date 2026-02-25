@@ -183,7 +183,9 @@ class Analytics_Sync {
         $log .= "=" . str_repeat("=", 50) . "\n";
         
         // Log to error_log for debugging
-        error_log($log);
+        if (defined('WP_DEBUG') && WP_DEBUG) {
+            error_log($log);
+        }
         
         // Send success response
         wp_send_json_success(array(

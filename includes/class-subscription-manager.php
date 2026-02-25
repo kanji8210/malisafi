@@ -327,7 +327,9 @@ class Malisafi_Subscription_Manager {
                 $stripe_sub = \Stripe\Subscription::retrieve($subscription->stripe_subscription_id);
                 $stripe_sub->cancel();
             } catch (Exception $e) {
-                error_log('Stripe cancellation error: ' . $e->getMessage());
+                if (defined('WP_DEBUG') && WP_DEBUG) {
+                    error_log('Stripe cancellation error: ' . $e->getMessage());
+                }
             }
         }
         

@@ -537,7 +537,9 @@ class Database {
         global $wpdb;
         
         // Log this critical operation
-        error_log('MALISAFI MLS: Dropping all database tables - this action cannot be undone');
+        if (defined('WP_DEBUG') && WP_DEBUG) {
+            error_log('MALISAFI MLS: Dropping all database tables - this action cannot be undone');
+        }
         
         $tables = array(
             'mf_chat_notifications',
@@ -565,7 +567,9 @@ class Database {
             $result = $wpdb->query($wpdb->prepare("DROP TABLE IF EXISTS %i", $full_table_name));
             
             if ($result === false) {
-                error_log("MALISAFI MLS: Failed to drop table {$full_table_name}");
+                if (defined('WP_DEBUG') && WP_DEBUG) {
+                    error_log("MALISAFI MLS: Failed to drop table {$full_table_name}");
+                }
             }
         }
         

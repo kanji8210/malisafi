@@ -149,7 +149,9 @@ class Analytics_Core {
     public static function get_top_contributors($role = 'all', $limit = 10) {
         global $wpdb;
         
-        error_log('🔍 [Top Contributors] Role: ' . $role . ', Limit: ' . $limit);
+        if (defined('WP_DEBUG') && WP_DEBUG) {
+            error_log('🔍 [Top Contributors] Role: ' . $role . ', Limit: ' . $limit);
+        }
         
         $sql = "
             SELECT 
@@ -183,12 +185,16 @@ class Analytics_Core {
         ";
         
         $query = $wpdb->prepare($sql, $limit);
-        error_log('🔍 [Top Contributors Query]: ' . $query);
-        
+        if (defined('WP_DEBUG') && WP_DEBUG) {
+            error_log('🔍 [Top Contributors Query]: ' . $query);
+        }
+
         $results = $wpdb->get_results($query);
-        error_log('✅ [Top Contributors Result Count]: ' . count($results));
-        if ($wpdb->last_error) {
-            error_log('❌ [Top Contributors Error]: ' . $wpdb->last_error);
+        if (defined('WP_DEBUG') && WP_DEBUG) {
+            error_log('✅ [Top Contributors Result Count]: ' . count($results));
+            if ($wpdb->last_error) {
+                error_log('❌ [Top Contributors Error]: ' . $wpdb->last_error);
+            }
         }
         
         return $results;
@@ -226,8 +232,10 @@ class Analytics_Core {
         $stats = [];
         
         // DEBUG: Log table check
-        error_log('🔍 [Analytics Overview] Checking stats for last ' . $days . ' days');
-        error_log('🔍 [Analytics Overview] Table prefix: ' . $wpdb->prefix);
+        if (defined('WP_DEBUG') && WP_DEBUG) {
+            error_log('🔍 [Analytics Overview] Checking stats for last ' . $days . ' days');
+            error_log('🔍 [Analytics Overview] Table prefix: ' . $wpdb->prefix);
+        }
         
         // Total active users - with fallback to actual Malisafi users count
         $active_users_query = $wpdb->prepare("
@@ -235,7 +243,9 @@ class Analytics_Core {
             FROM {$wpdb->prefix}mf_user_activity
             WHERE created_at >= DATE_SUB(NOW(), INTERVAL %d DAY)
         ", $days);
-        error_log('🔍 [Active Users Query]: ' . $active_users_query);
+        if (defined('WP_DEBUG') && WP_DEBUG) {
+            error_log('🔍 [Active Users Query]: ' . $active_users_query);
+        }
         $stats['active_users'] = $wpdb->get_var($active_users_query);
         
         // FALLBACK: If no tracked activity, show all Malisafi users instead
@@ -243,12 +253,16 @@ class Analytics_Core {
             $malisafi_roles = array('malisafi_client', 'malisafi_agent_basic', 'malisafi_agent_premium', 'malisafi_owner', 'malisafi_developer', 'malisafi_moderator');
             $user_query = new \WP_User_Query(array('role__in' => $malisafi_roles, 'fields' => 'ID'));
             $stats['active_users'] = $user_query->get_total();
-            error_log('⚠️ [Fallback] Using total Malisafi users: ' . $stats['active_users']);
+            if (defined('WP_DEBUG') && WP_DEBUG) {
+                error_log('⚠️ [Fallback] Using total Malisafi users: ' . $stats['active_users']);
+            }
         }
         
-        error_log('✅ [Active Users Result]: ' . ($stats['active_users'] ?? 'NULL'));
-        if ($wpdb->last_error) {
-            error_log('❌ [Active Users Error]: ' . $wpdb->last_error);
+        if (defined('WP_DEBUG') && WP_DEBUG) {
+            error_log('✅ [Active Users Result]: ' . ($stats['active_users'] ?? 'NULL'));
+            if ($wpdb->last_error) {
+                error_log('❌ [Active Users Error]: ' . $wpdb->last_error);
+            }
         }
         
         // Total properties added - with fallback to WordPress posts
@@ -257,19 +271,25 @@ class Analytics_Core {
             FROM {$wpdb->prefix}mf_properties
             WHERE created_at >= DATE_SUB(NOW(), INTERVAL %d DAY)
         ", $days);
-        error_log('🔍 [Properties Added Query]: ' . $properties_query);
+        if (defined('WP_DEBUG') && WP_DEBUG) {
+            error_log('🔍 [Properties Added Query]: ' . $properties_query);
+        }
         $stats['properties_added'] = $wpdb->get_var($properties_query);
         
         // FALLBACK: If analytics table empty, count from WordPress posts
         if (empty($stats['properties_added']) || $stats['properties_added'] == 0) {
             $wp_count = wp_count_posts('malisafi_property');
             $stats['properties_added'] = ($wp_count->publish ?? 0) + ($wp_count->pending ?? 0);
-            error_log('⚠️ [Fallback] Using WordPress post count: ' . $stats['properties_added']);
+            if (defined('WP_DEBUG') && WP_DEBUG) {
+                error_log('⚠️ [Fallback] Using WordPress post count: ' . $stats['properties_added']);
+            }
         }
         
-        error_log('✅ [Properties Added Result]: ' . ($stats['properties_added'] ?? 'NULL'));
-        if ($wpdb->last_error) {
-            error_log('❌ [Properties Added Error]: ' . $wpdb->last_error);
+        if (defined('WP_DEBUG') && WP_DEBUG) {
+            error_log('✅ [Properties Added Result]: ' . ($stats['properties_added'] ?? 'NULL'));
+            if ($wpdb->last_error) {
+                error_log('❌ [Properties Added Error]: ' . $wpdb->last_error);
+            }
         }
         
         // Total property views - with simulated fallback
@@ -278,18 +298,24 @@ class Analytics_Core {
             FROM {$wpdb->prefix}mf_property_views
             WHERE created_at >= DATE_SUB(NOW(), INTERVAL %d DAY)
         ", $days);
-        error_log('🔍 [Total Views Query]: ' . $views_query);
+        if (defined('WP_DEBUG') && WP_DEBUG) {
+            error_log('🔍 [Total Views Query]: ' . $views_query);
+        }
         $stats['total_views'] = $wpdb->get_var($views_query);
         
         // FALLBACK: If no tracked views, show message instead of 0
         if (empty($stats['total_views']) || $stats['total_views'] == 0) {
             $stats['total_views'] = 0; // Keep as 0 but add note in UI
-            error_log('⚠️ [Fallback] No views tracked yet - analytics table empty');
+            if (defined('WP_DEBUG') && WP_DEBUG) {
+                error_log('⚠️ [Fallback] No views tracked yet - analytics table empty');
+            }
         }
         
-        error_log('✅ [Total Views Result]: ' . ($stats['total_views'] ?? 'NULL'));
-        if ($wpdb->last_error) {
-            error_log('❌ [Total Views Error]: ' . $wpdb->last_error);
+        if (defined('WP_DEBUG') && WP_DEBUG) {
+            error_log('✅ [Total Views Result]: ' . ($stats['total_views'] ?? 'NULL'));
+            if ($wpdb->last_error) {
+                error_log('❌ [Total Views Error]: ' . $wpdb->last_error);
+            }
         }
         
         // Total inquiries - with fallback note
@@ -299,18 +325,24 @@ class Analytics_Core {
             WHERE interaction_type = 'inquiry'
             AND created_at >= DATE_SUB(NOW(), INTERVAL %d DAY)
         ", $days);
-        error_log('🔍 [Total Inquiries Query]: ' . $inquiries_query);
+        if (defined('WP_DEBUG') && WP_DEBUG) {
+            error_log('🔍 [Total Inquiries Query]: ' . $inquiries_query);
+        }
         $stats['total_inquiries'] = $wpdb->get_var($inquiries_query);
         
         // Note: Inquiries are tracked in real-time, 0 means no inquiries received yet
         if (empty($stats['total_inquiries'])) {
             $stats['total_inquiries'] = 0;
-            error_log('⚠️ [Note] No inquiries tracked yet - analytics start from activation');
+            if (defined('WP_DEBUG') && WP_DEBUG) {
+                error_log('⚠️ [Note] No inquiries tracked yet - analytics start from activation');
+            }
         }
         
-        error_log('✅ [Total Inquiries Result]: ' . ($stats['total_inquiries'] ?? 'NULL'));
-        if ($wpdb->last_error) {
-            error_log('❌ [Total Inquiries Error]: ' . $wpdb->last_error);
+        if (defined('WP_DEBUG') && WP_DEBUG) {
+            error_log('✅ [Total Inquiries Result]: ' . ($stats['total_inquiries'] ?? 'NULL'));
+            if ($wpdb->last_error) {
+                error_log('❌ [Total Inquiries Error]: ' . $wpdb->last_error);
+            }
         }
         
         // Avg properties per user
@@ -323,11 +355,15 @@ class Analytics_Core {
                 GROUP BY author_id
             ) as subquery
         ", $days);
-        error_log('🔍 [Avg Properties Query]: ' . $avg_properties_query);
+        if (defined('WP_DEBUG') && WP_DEBUG) {
+            error_log('🔍 [Avg Properties Query]: ' . $avg_properties_query);
+        }
         $stats['avg_properties_per_user'] = $wpdb->get_var($avg_properties_query);
-        error_log('✅ [Avg Properties Result]: ' . ($stats['avg_properties_per_user'] ?? 'NULL'));
-        if ($wpdb->last_error) {
-            error_log('❌ [Avg Properties Error]: ' . $wpdb->last_error);
+        if (defined('WP_DEBUG') && WP_DEBUG) {
+            error_log('✅ [Avg Properties Result]: ' . ($stats['avg_properties_per_user'] ?? 'NULL'));
+            if ($wpdb->last_error) {
+                error_log('❌ [Avg Properties Error]: ' . $wpdb->last_error);
+            }
         }
         
         // Funnel completion rate
@@ -338,18 +374,24 @@ class Analytics_Core {
             FROM {$wpdb->prefix}mf_submission_funnel
             WHERE created_at >= DATE_SUB(NOW(), INTERVAL %d DAY)
         ", $days);
-        error_log('🔍 [Funnel Stats Query]: ' . $funnel_query);
+        if (defined('WP_DEBUG') && WP_DEBUG) {
+            error_log('🔍 [Funnel Stats Query]: ' . $funnel_query);
+        }
         $funnel_stats = $wpdb->get_row($funnel_query);
-        error_log('✅ [Funnel Stats Result]: ' . print_r($funnel_stats, true));
-        if ($wpdb->last_error) {
-            error_log('❌ [Funnel Stats Error]: ' . $wpdb->last_error);
+        if (defined('WP_DEBUG') && WP_DEBUG) {
+            error_log('✅ [Funnel Stats Result]: ' . print_r($funnel_stats, true));
+            if ($wpdb->last_error) {
+                error_log('❌ [Funnel Stats Error]: ' . $wpdb->last_error);
+            }
         }
         
         $stats['funnel_completion_rate'] = $funnel_stats && $funnel_stats->total_sessions > 0
             ? round(($funnel_stats->completed_sessions / $funnel_stats->total_sessions) * 100, 2)
             : 0;
         
-        error_log('📊 [Final Stats]: ' . print_r($stats, true));
+        if (defined('WP_DEBUG') && WP_DEBUG) {
+            error_log('📊 [Final Stats]: ' . print_r($stats, true));
+        }
         
         return $stats;
     }

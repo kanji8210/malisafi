@@ -392,23 +392,33 @@ class Featured_Properties {
             
         } catch (\Stripe\Exception\ApiConnectionException $e) {
             // Network error - timeout, DNS failure, etc.
-            error_log('Stripe API Connection Error: ' . $e->getMessage());
+            if (defined('WP_DEBUG') && WP_DEBUG) {
+                error_log('Stripe API Connection Error: ' . $e->getMessage());
+            }
             return new \WP_Error('stripe_connection', __('Connection to payment gateway failed. Please try again.', 'malisafi-mls'));
         } catch (\Stripe\Exception\RateLimitException $e) {
             // Too many requests
-            error_log('Stripe Rate Limit Error: ' . $e->getMessage());
+            if (defined('WP_DEBUG') && WP_DEBUG) {
+                error_log('Stripe Rate Limit Error: ' . $e->getMessage());
+            }
             return new \WP_Error('stripe_rate_limit', __('Too many requests. Please wait a moment and try again.', 'malisafi-mls'));
         } catch (\Stripe\Exception\InvalidRequestException $e) {
             // Invalid parameters
-            error_log('Stripe Invalid Request: ' . $e->getMessage());
+            if (defined('WP_DEBUG') && WP_DEBUG) {
+                error_log('Stripe Invalid Request: ' . $e->getMessage());
+            }
             return new \WP_Error('stripe_invalid', __('Payment request invalid. Please contact support.', 'malisafi-mls'));
         } catch (\Stripe\Exception\AuthenticationException $e) {
             // Authentication failed
-            error_log('Stripe Authentication Error: ' . $e->getMessage());
+            if (defined('WP_DEBUG') && WP_DEBUG) {
+                error_log('Stripe Authentication Error: ' . $e->getMessage());
+            }
             return new \WP_Error('stripe_auth', __('Payment gateway authentication failed. Please contact administrator.', 'malisafi-mls'));
         } catch (\Exception $e) {
             // Generic error
-            error_log('Stripe Error: ' . $e->getMessage());
+            if (defined('WP_DEBUG') && WP_DEBUG) {
+                error_log('Stripe Error: ' . $e->getMessage());
+            }
             return new \WP_Error('stripe_error', $e->getMessage());
         } finally {
             // Always restore time limit
