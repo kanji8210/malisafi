@@ -84,6 +84,7 @@ class Malisafi_Roles_Manager {
     public static function add_custom_capabilities() {
         $roles = array(
             'administrator',
+            'editor',
             'malisafi_moderator',
             'malisafi_agency',
             'malisafi_agent_basic', 
@@ -153,6 +154,24 @@ class Malisafi_Roles_Manager {
                     $role->add_cap('manage_malisafi_settings', true);
                     $role->add_cap('manage_featured_properties', true); // Allow moderators to manage featured
                     $role->add_cap('edit_others_projects', true);
+                    $role->add_cap('publish_projects', true);
+                    $role->add_cap('moderate_projects', true);
+                }
+
+                // Allow WP Editors to manage properties (create, edit, publish)
+                if ($role_name === 'editor') {
+                    $role->add_cap('edit_others_properties', true);
+                    $role->add_cap('delete_others_properties', true);
+                    $role->add_cap('delete_properties', true);
+                    $role->add_cap('publish_properties', true);
+                    $role->add_cap('moderate_properties', true);
+                }
+                
+                // Allow WP Editors to manage projects (create, edit, publish)
+                if ($role_name === 'editor') {
+                    $role->add_cap('edit_others_projects', true);
+                    $role->add_cap('delete_others_projects', true);
+                    $role->add_cap('delete_projects', true);
                     $role->add_cap('publish_projects', true);
                     $role->add_cap('moderate_projects', true);
                 }
