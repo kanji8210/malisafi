@@ -78,7 +78,7 @@ class Malisafi_Location_Sync {
         submit_button(__('Import / Sync Locations', 'malisafi-mls'), 'primary', 'malisafi_import_locations');
         echo '</form>';
 
-        echo '<p>' . sprintf(__('If the bundled JSON is not present the import will not run. File expected at: %s', 'malisafi-mls'), MALISAFI_MLS_PATH . 'data/kenya-subcounties.json') . '</p>';
+        echo '<p>' . sprintf(__('This tool attempts to use the bundled JSON (%1$s). If missing it will try to fetch remote JSON from %2$s.', 'malisafi-mls'), MALISAFI_MLS_PATH . 'data/kenya-subcounties.json', 'https://maliprime.com/wp-content/plugins/malisafi/data/kenya-subcounties.json') . '</p>';
         echo '</div>';
     }
 
@@ -89,17 +89,28 @@ class Malisafi_Location_Sync {
      */
     public static function sync_from_json() {
         $json_path = MALISAFI_MLS_PATH . 'data/kenya-subcounties.json';
+        $remote_url = 'https://maliprime.com/wp-content/plugins/malisafi/data/kenya-subcounties.json';
         $result = array(
             'counties_added' => 0,
             'subcounties_added' => 0,
             'subcounties_parent_updated' => 0,
         );
-
-        if (!file_exists($json_path)) {
-            return $result;
+        $raw = '';
+        if (file_exists($json_path)) {
+            $raw = file_get_contents($json_path);
+        } else {
+            // Try remote URL
+            if (function_exists('wp_remote_get')) {
+                $resp = wp_remote_get($remote_url, array('timeout' => 10));
+                if (!is_wp_error($resp) && isset($resp['response']) && intval($resp['response']['code']) === 200) {
+                    $raw = wp_remote_retrieve_body($resp);
+                }
+            } else {
+                // fallback to file_get_contents on remote
+                $raw = @file_get_contents($remote_url);
+            }
         }
 
-        $raw = file_get_contents($json_path);
         $data = json_decode($raw, true);
         if (!is_array($data)) {
             return $result;

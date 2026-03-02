@@ -806,12 +806,26 @@ class Post_Types {
         $latitude = get_post_meta($post->ID, '_malisafi_latitude', true);
         $longitude = get_post_meta($post->ID, '_malisafi_longitude', true);
 
-        // Load bundled subcounties JSON if available for client-side population
+        // Load bundled subcounties JSON or fetch remote fallback for client-side population
         $json_path = defined('MALISAFI_MLS_PATH') ? MALISAFI_MLS_PATH . 'data/kenya-subcounties.json' : '';
+        $remote_url = 'https://maliprime.com/wp-content/plugins/malisafi/data/kenya-subcounties.json';
         $subcounties_json = array();
+        $raw_json = '';
         if ($json_path && file_exists($json_path)) {
-            $raw = file_get_contents($json_path);
-            $decoded = json_decode($raw, true);
+            $raw_json = file_get_contents($json_path);
+        } else {
+            if (function_exists('wp_remote_get')) {
+                $resp = wp_remote_get($remote_url, array('timeout' => 6));
+                if (!is_wp_error($resp) && intval(wp_remote_retrieve_response_code($resp)) === 200) {
+                    $raw_json = wp_remote_retrieve_body($resp);
+                }
+            } else {
+                $raw_json = @file_get_contents($remote_url);
+            }
+        }
+
+        if ($raw_json) {
+            $decoded = json_decode($raw_json, true);
             if (is_array($decoded)) {
                 foreach ($decoded as $k => $v) {
                     // Normalize to list of names
