@@ -59,6 +59,7 @@ class Core {
         require_once MALISAFI_MLS_PATH . 'includes/class-property-approval-workflow.php';
         require_once MALISAFI_MLS_PATH . 'admin/class-admin.php';
         require_once MALISAFI_MLS_PATH . 'admin/class-admin-dashboard.php';
+        require_once MALISAFI_MLS_PATH . 'admin/class-location-sync.php';
         require_once MALISAFI_MLS_PATH . 'admin/class-dashboard-widgets.php';
         require_once MALISAFI_MLS_PATH . 'admin/class-user-manager.php';
         require_once MALISAFI_MLS_PATH . 'admin/class-property-submit.php';
@@ -99,6 +100,10 @@ class Core {
         
         // Initialize admin dashboard
         \Malisafi_Admin_Dashboard::init();
+        // Initialize locations import/sync tool (global namespace)
+        if (class_exists('\Malisafi_Location_Sync')) {
+            \Malisafi_Location_Sync::init();
+        }
         
         // Initialize agent dashboard
         \Malisafi_Agent_Dashboard::init();

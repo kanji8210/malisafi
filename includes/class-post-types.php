@@ -796,14 +796,33 @@ class Post_Types {
      */
     public function render_location_meta_box($post) {
         wp_nonce_field('malisafi_property_location', 'malisafi_property_location_nonce');
-        
         $address = get_post_meta($post->ID, '_malisafi_address', true);
         $city = get_post_meta($post->ID, '_malisafi_city', true);
-        $state = get_post_meta($post->ID, '_malisafi_state', true);
+        $subcounty = get_post_meta($post->ID, '_malisafi_subcounty', true);
+        $county = get_post_meta($post->ID, '_malisafi_county', true);
+        $neighbourhood = get_post_meta($post->ID, '_malisafi_neighbourhood', true);
         $zip = get_post_meta($post->ID, '_malisafi_zip', true);
         $country = get_post_meta($post->ID, '_malisafi_country', true);
         $latitude = get_post_meta($post->ID, '_malisafi_latitude', true);
         $longitude = get_post_meta($post->ID, '_malisafi_longitude', true);
+
+        // Load bundled subcounties JSON if available for client-side population
+        $json_path = defined('MALISAFI_MLS_PATH') ? MALISAFI_MLS_PATH . 'data/kenya-subcounties.json' : '';
+        $subcounties_json = array();
+        if ($json_path && file_exists($json_path)) {
+            $raw = file_get_contents($json_path);
+            $decoded = json_decode($raw, true);
+            if (is_array($decoded)) {
+                foreach ($decoded as $k => $v) {
+                    // Normalize to list of names
+                    $subcounties_json[$k] = array_map(function($item){
+                        if (is_array($item) && isset($item['name'])) return $item['name'];
+                        if (is_string($item)) return $item;
+                        return '';
+                    }, $v);
+                }
+            }
+        }
         ?>
         <div class="notice notice-info inline" style="margin: 10px 0; padding: 10px;">
             <p><strong><span class="dashicons dashicons-info" style="color: #2271b1;"></span> <?php esc_html_e('Privacy Notice:', 'malisafi-mls'); ?></strong></p>
@@ -814,14 +833,71 @@ class Post_Types {
             <input type="text" id="malisafi_address" name="malisafi_address" value="<?php echo esc_attr($address); ?>" class="widefat" placeholder="<?php esc_attr_e('e.g., 123 Main Street', 'malisafi-mls'); ?>">
             <small class="description"><?php esc_html_e('This address will remain private and is only for your records.', 'malisafi-mls'); ?></small>
         </p>
+
         <p>
-            <label for="malisafi_city"><?php esc_html_e('City:', 'malisafi-mls'); ?></label>
+            <label for="malisafi_county"><strong><?php esc_html_e('County:', 'malisafi-mls'); ?></strong></label>
+            <select id="malisafi_county" name="malisafi_county" class="widefat">
+                <option value=""><?php esc_html_e('Select County...', 'malisafi-mls'); ?></option>
+                <?php
+                // Prefer taxonomy top-level terms if available
+                $county_terms = get_terms(array('taxonomy' => 'malisafi_property_location', 'hide_empty' => false, 'parent' => 0));
+                $county_names = array();
+                if (!is_wp_error($county_terms) && !empty($county_terms)) {
+                    foreach ($county_terms as $ct) {
+                        $county_names[] = $ct->name;
+                    }
+                }
+
+                // If taxonomy empty, fall back to bundled list if available
+                if (empty($county_names) && function_exists('malisafi_get_kenya_counties')) {
+                    $county_names = malisafi_get_kenya_counties();
+                }
+
+                foreach ($county_names as $cname) {
+                    echo '<option value="' . esc_attr($cname) . '" ' . selected($county, $cname, false) . '>' . esc_html($cname) . '</option>';
+                }
+                ?>
+            </select>
+        </p>
+
+        <p>
+            <label for="malisafi_subcounty"><strong><?php esc_html_e('Subcounty:', 'malisafi-mls'); ?></strong></label>
+            <select id="malisafi_subcounty" name="malisafi_subcounty" class="widefat">
+                <option value=""><?php esc_html_e('Select Subcounty...', 'malisafi-mls'); ?></option>
+                <?php
+                // Populate subcounties for selected county
+                $initial_subs = array();
+                if ($county) {
+                    if (function_exists('malisafi_get_subcounties_by_county')) {
+                        $initial_subs = malisafi_get_subcounties_by_county($county);
+                    }
+                    if (empty($initial_subs) && isset($subcounties_json[$county])) {
+                        $initial_subs = $subcounties_json[$county];
+                    }
+                }
+                if (!empty($initial_subs)) {
+                    foreach ($initial_subs as $sname) {
+                        echo '<option value="' . esc_attr($sname) . '" ' . selected($subcounty, $sname, false) . '>' . esc_html($sname) . '</option>';
+                    }
+                }
+                ?>
+                <option value="__other__"><?php esc_html_e('Other (enter manually)', 'malisafi-mls'); ?></option>
+            </select>
+            <input type="text" id="malisafi_subcounty_manual" name="malisafi_subcounty_manual" value="" class="widefat" placeholder="<?php esc_attr_e('Enter subcounty name if not listed', 'malisafi-mls'); ?>" style="display:none; margin-top:8px;">
+        </p>
+
+        <p>
+            <label for="malisafi_city"><?php esc_html_e('Town / City (enter to create for reuse):', 'malisafi-mls'); ?></label>
             <input type="text" id="malisafi_city" name="malisafi_city" value="<?php echo esc_attr($city); ?>" class="widefat">
+            <small class="description"><?php esc_html_e('If the town does not exist it will be created under the chosen subcounty so other users can select it next time.', 'malisafi-mls'); ?></small>
         </p>
+
         <p>
-            <label for="malisafi_state"><?php esc_html_e('State/Province:', 'malisafi-mls'); ?></label>
-            <input type="text" id="malisafi_state" name="malisafi_state" value="<?php echo esc_attr($state); ?>" class="widefat">
+            <label for="malisafi_neighbourhood"><?php esc_html_e('Area / Neighbourhood (optional):', 'malisafi-mls'); ?></label>
+            <input type="text" id="malisafi_neighbourhood" name="malisafi_neighbourhood" value="<?php echo esc_attr($neighbourhood); ?>" class="widefat">
+            <small class="description"><?php esc_html_e('Enter the estate, suburb or neighbourhood. This is kept as free text and shown on listings.', 'malisafi-mls'); ?></small>
         </p>
+
         <p>
             <label for="malisafi_zip"><?php esc_html_e('ZIP/Postal Code:', 'malisafi-mls'); ?></label>
             <input type="text" id="malisafi_zip" name="malisafi_zip" value="<?php echo esc_attr($zip); ?>" class="widefat">
@@ -839,6 +915,41 @@ class Post_Types {
             <label for="malisafi_longitude"><?php esc_html_e('Longitude:', 'malisafi-mls'); ?></label>
             <input type="text" id="malisafi_longitude" name="malisafi_longitude" value="<?php echo esc_attr($longitude); ?>" class="widefat">
         </p>
+        <script>
+        jQuery(document).ready(function($){
+            var subcounties = <?php echo json_encode($subcounties_json); ?> || {};
+
+            function populateSubcounties(county) {
+                var $sel = $('#malisafi_subcounty');
+                var current = '<?php echo esc_js($subcounty); ?>';
+                $sel.find('option').not('[value=""],[value="__other__"]').remove();
+                if (county && subcounties[county]) {
+                    subcounties[county].forEach(function(s){
+                        var opt = $('<option/>').attr('value', s).text(s);
+                        $sel.prepend(opt);
+                    });
+                }
+                $sel.val(current || '');
+            }
+
+            $('#malisafi_county').on('change', function(){
+                var county = $(this).val();
+                populateSubcounties(county);
+                $('#malisafi_subcounty_manual').hide().val('');
+            });
+
+            $('#malisafi_subcounty').on('change', function(){
+                if ($(this).val() === '__other__') {
+                    $('#malisafi_subcounty_manual').show();
+                } else {
+                    $('#malisafi_subcounty_manual').hide().val('');
+                }
+            });
+
+            // Initialize on load
+            populateSubcounties($('#malisafi_county').val());
+        });
+        </script>
         <?php
     }
     
@@ -1109,11 +1220,110 @@ class Post_Types {
                     break;
                     
                 case 'malisafi_property_location':
-                    $location_fields = array('address', 'city', 'state', 'zip', 'country', 'latitude', 'longitude');
+                    // Basic fields
+                    $location_fields = array('address', 'zip', 'country', 'latitude', 'longitude');
                     foreach ($location_fields as $field) {
                         if (isset($_POST['malisafi_' . $field])) {
                             update_post_meta($post_id, '_malisafi_' . $field, sanitize_text_field($_POST['malisafi_' . $field]));
                         }
+                    }
+
+                    // Neighbourhood (free text)
+                    if (isset($_POST['malisafi_neighbourhood'])) {
+                        update_post_meta($post_id, '_malisafi_neighbourhood', sanitize_text_field($_POST['malisafi_neighbourhood']));
+                    }
+
+                    // Town/City (will be created as a term under the chosen subcounty for reuse)
+                    $city_name = isset($_POST['malisafi_city']) ? sanitize_text_field($_POST['malisafi_city']) : '';
+
+                    // County and subcounty handling
+                    $county_name = isset($_POST['malisafi_county']) ? sanitize_text_field($_POST['malisafi_county']) : '';
+                    $subcounty_selected = isset($_POST['malisafi_subcounty']) ? sanitize_text_field($_POST['malisafi_subcounty']) : '';
+                    $subcounty_manual = isset($_POST['malisafi_subcounty_manual']) ? sanitize_text_field($_POST['malisafi_subcounty_manual']) : '';
+                    $subcounty_name = '';
+
+                    if ($subcounty_selected === '__other__' && $subcounty_manual !== '') {
+                        $subcounty_name = $subcounty_manual;
+                    } elseif ($subcounty_selected !== '' && $subcounty_selected !== '__other__') {
+                        $subcounty_name = $subcounty_selected;
+                    }
+
+                    // Save meta values regardless
+                    if ($county_name !== '') {
+                        update_post_meta($post_id, '_malisafi_county', $county_name);
+                    }
+                    if ($subcounty_name !== '') {
+                        update_post_meta($post_id, '_malisafi_subcounty', $subcounty_name);
+                    }
+                    if ($city_name !== '') {
+                        update_post_meta($post_id, '_malisafi_city', $city_name);
+                    }
+
+                    // Ensure taxonomy terms exist and are parented correctly
+                    $deepest_term_id = 0;
+                    if ($county_name !== '') {
+                        $county_term = get_term_by('name', $county_name, 'malisafi_property_location');
+                        if (!$county_term || is_wp_error($county_term)) {
+                            $ins = wp_insert_term($county_name, 'malisafi_property_location');
+                            if (!is_wp_error($ins) && isset($ins['term_id'])) {
+                                $county_id = (int) $ins['term_id'];
+                            } else {
+                                $county_term = get_term_by('name', $county_name, 'malisafi_property_location');
+                                $county_id = $county_term ? (int) $county_term->term_id : 0;
+                            }
+                        } else {
+                            $county_id = (int) $county_term->term_id;
+                        }
+
+                        // Subcounty
+                        if ($subcounty_name !== '') {
+                            $sub_term = get_term_by('name', $subcounty_name, 'malisafi_property_location');
+                            if ($sub_term && !is_wp_error($sub_term)) {
+                                // Update parent if necessary
+                                if ($county_id && (int) $sub_term->parent !== $county_id) {
+                                    wp_update_term($sub_term->term_id, 'malisafi_property_location', array('parent' => $county_id));
+                                }
+                                $sub_id = (int) $sub_term->term_id;
+                            } else {
+                                $ins2 = wp_insert_term($subcounty_name, 'malisafi_property_location', array('parent' => $county_id));
+                                $sub_id = (!is_wp_error($ins2) && isset($ins2['term_id'])) ? (int) $ins2['term_id'] : 0;
+                            }
+                        } else {
+                            $sub_id = 0;
+                        }
+
+                        // Town/City as child under subcounty (if provided), otherwise as child of county
+                        if ($city_name !== '') {
+                            $parent_for_city = $sub_id ? $sub_id : $county_id;
+                            $city_term = get_term_by('name', $city_name, 'malisafi_property_location');
+                            if ($city_term && !is_wp_error($city_term)) {
+                                if ($parent_for_city && (int) $city_term->parent !== $parent_for_city) {
+                                    wp_update_term($city_term->term_id, 'malisafi_property_location', array('parent' => $parent_for_city));
+                                }
+                                $city_id = (int) $city_term->term_id;
+                            } else {
+                                $ins3 = wp_insert_term($city_name, 'malisafi_property_location', array('parent' => $parent_for_city));
+                                $city_id = (!is_wp_error($ins3) && isset($ins3['term_id'])) ? (int) $ins3['term_id'] : 0;
+                            }
+                            if ($city_id) {
+                                $deepest_term_id = $city_id;
+                            }
+                        }
+
+                        // If no city, prefer subcounty as deepest
+                        if (!$deepest_term_id && !empty($sub_id)) {
+                            $deepest_term_id = $sub_id;
+                        }
+
+                        // Fallback to county only
+                        if (!$deepest_term_id && !empty($county_id)) {
+                            $deepest_term_id = $county_id;
+                        }
+                    }
+
+                    // Assign taxonomy terms (deepest available)
+                    if ($deepest_term_id) {
+                        wp_set_post_terms($post_id, array($deepest_term_id), 'malisafi_property_location', false);
                     }
                     break;
                     
