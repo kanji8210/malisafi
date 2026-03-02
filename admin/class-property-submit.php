@@ -264,8 +264,19 @@ class Malisafi_Property_Submit {
         if (empty($data['county'])) {
             $errors[] = __('County is required.', 'malisafi-mls');
         }
-        
-        if (empty($data['subcounty'])) {
+
+        // Detect land property types and relax some building-specific required fields for land
+        $is_land = false;
+        if (!empty($data['property_type'])) {
+            $ptype_term = get_term(intval($data['property_type']), 'malisafi_property_type');
+            if ($ptype_term && !is_wp_error($ptype_term)) {
+                if (strcasecmp($ptype_term->name, 'land') === 0 || strcasecmp($ptype_term->slug, 'land') === 0) {
+                    $is_land = true;
+                }
+            }
+        }
+
+        if (empty($data['subcounty']) && !$is_land) {
             $errors[] = __('Subcounty is required.', 'malisafi-mls');
         }
         

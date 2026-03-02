@@ -54,6 +54,11 @@
             this.cacheElements();
             this.bindEvents();
             this.toggleSaleLeaseDetails();
+
+            // Adjust wizard UI if the draft's property type is land
+            this.adjustForLandUI();
+            // Adjust UI for land properties (hide details/features steps)
+            this.adjustForLandUI();
             
             // Load draft if editing
             if (this.propertyId && this.propertyId !== '0' && this.propertyId !== 0) {
@@ -114,6 +119,11 @@
                 self.toggleSaleLeaseDetails();
             });
 
+            // Property type change - adjust wizard for land
+            this.$form.on('change', '#property_type', function() {
+                self.adjustForLandUI();
+            });
+
             // County -> Subcounty
             this.$form.on('change', '#property_county', function() {
                 self.fetchSubcounties($(this).val(), '');
@@ -142,6 +152,10 @@
 
             if (this.currentStep < this.totalSteps) {
                 this.currentStep++;
+                // Skip hidden steps (land-specific skips)
+                while ($('#step-' + this.currentStep).is(':hidden') && this.currentStep < this.totalSteps) {
+                    this.currentStep++;
+                }
                 this.updateStep();
                 this.saveStep();
             }
@@ -150,6 +164,10 @@
         prevStep: function() {
             if (this.currentStep > 1) {
                 this.currentStep--;
+                // Skip hidden steps backwards
+                while (this.currentStep > 1 && $('#step-' + this.currentStep).is(':hidden')) {
+                    this.currentStep--;
+                }
                 this.updateStep();
             }
         },
@@ -163,6 +181,9 @@
             this.$progressSteps.removeClass('active completed');
             this.$progressSteps.each(function(index) {
                 const stepNum = index + 1;
+                // Hide progress markers for steps that are hidden in the wizard
+                const $step = $('#step-' + stepNum);
+                $(this).toggle(!$step.is(':hidden'));
                 if (stepNum < PropertySubmission.currentStep) {
                     $(this).addClass('completed');
                 } else if (stepNum === PropertySubmission.currentStep) {
@@ -186,6 +207,10 @@
 
         validateStep: function(step) {
             const $currentStep = $('#step-' + step);
+            // If the step is hidden (skipped for land), it's considered valid
+            if ($currentStep.is(':hidden')) {
+                return true;
+            }
             const $required = $currentStep.find('[required]');
             let isValid = true;
 
@@ -200,7 +225,7 @@
             });
 
             if (step === 5 && malisafiSubmission.uploadsEnabled === true) {
-                if (!this.$featuredId.val()) {
+                if (!$('#featured_image_id').val()) {
                     isValid = false;
                     $('#featured-dropzone').addClass('error');
                     this.showError('Featured image is required before you continue.');
@@ -988,6 +1013,41 @@
             $('.sale-lease-details').toggle(show);
         },
 
+        isLandSelected: function() {
+            const val = (this.$form.find('#property_type').val() || '').toString().toLowerCase();
+            return val === 'land';
+        },
+
+        adjustForLandUI: function() {
+            // Hide/Show steps that are not relevant for land (Details and Features)
+            const isLand = this.isLandSelected();
+            if (isLand) {
+                $('#step-2, #step-4').hide().attr('data-land-skip', '1');
+            } else {
+                $('#step-2, #step-4').show().removeAttr('data-land-skip');
+            }
+
+            // Adjust progress markers visibility
+            this.$progressSteps.each(function(index) {
+                const stepNum = index + 1;
+                const $step = $('#step-' + stepNum);
+                $(this).toggle(!$step.is(':hidden'));
+            });
+
+            // If current step is hidden, move to next visible step
+            if ($('#step-' + this.currentStep).is(':hidden')) {
+                let next = this.currentStep;
+                while ($('#step-' + next).is(':hidden') && next < this.totalSteps) {
+                    next++;
+                }
+                if (!$('#step-' + next).is(':hidden')) {
+                    this.currentStep = next;
+                }
+            }
+
+            this.updateStep();
+        },
+
         submitProperty: function() {
             const self = this;
 
@@ -1000,11 +1060,11 @@
                 return;
             }
 
-            if (malisafiSubmission.uploadsEnabled !== true) {
-                // Skip image requirement when uploads are disabled
-            } else if (!this.$featuredId.val()) {
-                this.showError('Please upload a featured image');
-                return;
+            if (malisafiSubmission.uploadsEnabled === true) {
+                if (!$('#featured_image_id').val()) {
+                    this.showError('Please upload a featured image');
+                    return;
+                }
             }
 
             // Set submitting flag

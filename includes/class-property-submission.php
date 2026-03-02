@@ -447,6 +447,29 @@ class Property_Submission {
      * Save property details
      */
     private static function save_details($property_id, $data, $validator) {
+        // If property type is Land, skip building-specific validation and clear details
+        $is_land = false;
+        $ptype_terms = wp_get_object_terms($property_id, 'malisafi_property_type', array('fields' => 'all'));
+        if (!is_wp_error($ptype_terms) && !empty($ptype_terms)) {
+            foreach ($ptype_terms as $t) {
+                if (strcasecmp($t->name, 'land') === 0 || strcasecmp($t->slug, 'land') === 0) {
+                    $is_land = true;
+                    break;
+                }
+            }
+        }
+
+        if ($is_land) {
+            // Clear building-specific meta and return
+            update_post_meta($property_id, '_malisafi_bedrooms', 0);
+            update_post_meta($property_id, '_malisafi_bathrooms', 0);
+            update_post_meta($property_id, '_malisafi_size', 0);
+            update_post_meta($property_id, '_malisafi_size_unit', 'sqm');
+            update_post_meta($property_id, '_malisafi_year_built', 0);
+            update_post_meta($property_id, '_malisafi_condition', '');
+            return true;
+        }
+
         // Validate
         $validator->integer($data['bedrooms'] ?? 0, 'bedrooms', 0, 50, false);
         $validator->integer($data['bathrooms'] ?? 0, 'bathrooms', 0, 50, false);
@@ -560,18 +583,36 @@ class Property_Submission {
      * Save features and amenities
      */
     private static function save_features($property_id, $data, $validator) {
+        // If property type is Land, clear features/amenities and return
+        $is_land = false;
+        $ptype_terms = wp_get_object_terms($property_id, 'malisafi_property_type', array('fields' => 'all'));
+        if (!is_wp_error($ptype_terms) && !empty($ptype_terms)) {
+            foreach ($ptype_terms as $t) {
+                if (strcasecmp($t->name, 'land') === 0 || strcasecmp($t->slug, 'land') === 0) {
+                    $is_land = true;
+                    break;
+                }
+            }
+        }
+
+        if ($is_land) {
+            update_post_meta($property_id, '_malisafi_features', array());
+            update_post_meta($property_id, '_malisafi_amenities', array());
+            return true;
+        }
+
         // Features are checkboxes, no validation needed
         $features = isset($data['features']) && is_array($data['features']) ? $data['features'] : array();
         $amenities = isset($data['amenities']) && is_array($data['amenities']) ? $data['amenities'] : array();
-        
+
         // Sanitize
         $features = array_map('sanitize_text_field', $features);
         $amenities = array_map('sanitize_text_field', $amenities);
-        
+
         // Save
         update_post_meta($property_id, '_malisafi_features', $features);
         update_post_meta($property_id, '_malisafi_amenities', $amenities);
-        
+
         return true;
     }
     
@@ -726,7 +767,19 @@ class Property_Submission {
         }
 
         $subcounty = get_post_meta($property_id, '_malisafi_subcounty', true);
-        if (empty($subcounty)) {
+        // If property type is Land, we relax subcounty requirement and other building-specific checks
+        $is_land = false;
+        $ptype_terms = wp_get_object_terms($property_id, 'malisafi_property_type', array('fields' => 'all'));
+        if (!is_wp_error($ptype_terms) && !empty($ptype_terms)) {
+            foreach ($ptype_terms as $t) {
+                if (strcasecmp($t->name, 'land') === 0 || strcasecmp($t->slug, 'land') === 0) {
+                    $is_land = true;
+                    break;
+                }
+            }
+        }
+
+        if (empty($subcounty) && !$is_land) {
             $errors['subcounty'] = __('Subcounty is required', 'malisafi-mls');
         }
         
