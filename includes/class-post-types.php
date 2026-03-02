@@ -797,9 +797,9 @@ class Post_Types {
     public function render_location_meta_box($post) {
         wp_nonce_field('malisafi_property_location', 'malisafi_property_location_nonce');
         $address = get_post_meta($post->ID, '_malisafi_address', true);
-        $city = get_post_meta($post->ID, '_malisafi_city', true);
-        $subcounty = get_post_meta($post->ID, '_malisafi_subcounty', true);
-        $county = get_post_meta($post->ID, '_malisafi_county', true);
+        $meta_city = get_post_meta($post->ID, '_malisafi_city', true);
+        $meta_subcounty = get_post_meta($post->ID, '_malisafi_subcounty', true);
+        $meta_county = get_post_meta($post->ID, '_malisafi_county', true);
         $neighbourhood = get_post_meta($post->ID, '_malisafi_neighbourhood', true);
         $zip = get_post_meta($post->ID, '_malisafi_zip', true);
         $country = get_post_meta($post->ID, '_malisafi_country', true);
@@ -823,6 +823,41 @@ class Post_Types {
                 }
             }
         }
+
+        // Determine selected county/subcounty/city from assigned taxonomy if possible
+        $selected_county = '';
+        $selected_subcounty = '';
+        $selected_city = '';
+        $assigned_terms = wp_get_post_terms($post->ID, 'malisafi_property_location');
+        if (!is_wp_error($assigned_terms) && !empty($assigned_terms)) {
+            // Use the first assigned term (we set only one) and walk up
+            $term = $assigned_terms[0];
+            $chain = array();
+            while ($term && !is_wp_error($term)) {
+                $chain[] = $term->name;
+                if ($term->parent) {
+                    $term = get_term($term->parent, 'malisafi_property_location');
+                } else {
+                    break;
+                }
+            }
+            $depth = count($chain);
+            if ($depth === 1) {
+                $selected_county = $chain[0];
+            } elseif ($depth === 2) {
+                $selected_county = $chain[1];
+                $selected_city = $chain[0];
+            } elseif ($depth >= 3) {
+                $selected_county = $chain[$depth - 1];
+                $selected_subcounty = $chain[$depth - 2];
+                $selected_city = $chain[0];
+            }
+        }
+
+        // Fallback to stored meta values if taxonomy not assigned
+        $city = $selected_city ? $selected_city : $meta_city;
+        $subcounty = $selected_subcounty ? $selected_subcounty : $meta_subcounty;
+        $county = $selected_county ? $selected_county : $meta_county;
         ?>
         <div class="notice notice-info inline" style="margin: 10px 0; padding: 10px;">
             <p><strong><span class="dashicons dashicons-info" style="color: #2271b1;"></span> <?php esc_html_e('Privacy Notice:', 'malisafi-mls'); ?></strong></p>
