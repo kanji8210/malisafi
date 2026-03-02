@@ -56,13 +56,27 @@ class Malisafi_Location_Sync {
         $message = '';
         if (!empty($_POST['malisafi_import_locations']) && check_admin_referer('malisafi_import_locations_action', 'malisafi_import_locations_nonce')) {
             $result = self::sync_from_json();
-            $message = sprintf(
-                /* translators: 1=counties 2=subcounties 3=updated */
-                __('Imported: %1$d counties, %2$d subcounties (%3$d parents updated).', 'malisafi-mls'),
-                intval($result['counties_added']),
-                intval($result['subcounties_added']),
-                intval($result['subcounties_parent_updated'])
-            );
+            // Build message indicating source and counts
+            if (isset($result['source']) && $result['source'] === 'remote') {
+                $source_msg = __('Remote JSON fetched successfully.', 'malisafi-mls');
+            } elseif (isset($result['source']) && $result['source'] === 'local') {
+                $source_msg = __('Used bundled JSON file.', 'malisafi-mls');
+            } else {
+                $source_msg = __('No valid JSON source found; no import performed.', 'malisafi-mls');
+            }
+
+            if (!empty($result['counties_added']) || !empty($result['subcounties_added']) || !empty($result['subcounties_parent_updated'])) {
+                $counts = sprintf(
+                    /* translators: 1=counties 2=subcounties 3=updated */
+                    __('Imported: %1$d counties, %2$d subcounties (%3$d parents updated).', 'malisafi-mls'),
+                    intval($result['counties_added']),
+                    intval($result['subcounties_added']),
+                    intval($result['subcounties_parent_updated'])
+                );
+                $message = $source_msg . ' ' . $counts;
+            } else {
+                $message = $source_msg;
+            }
         }
 
         echo '<div class="wrap">';
