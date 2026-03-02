@@ -722,6 +722,14 @@ class Post_Types {
         $year_built = get_post_meta($post->ID, '_malisafi_year_built', true);
         $garage = get_post_meta($post->ID, '_malisafi_garage', true);
         $property_id = get_post_meta($post->ID, '_malisafi_property_id', true);
+        // Build property type term map for exact name/slug checks in JS
+        $ptype_map = array();
+        $ptype_terms = get_terms(array('taxonomy' => 'malisafi_property_type', 'hide_empty' => false));
+        if (!is_wp_error($ptype_terms) && !empty($ptype_terms)) {
+            foreach ($ptype_terms as $t) {
+                $ptype_map[$t->term_id] = array('name' => $t->name, 'slug' => $t->slug);
+            }
+        }
         ?>
         <div class="malisafi-meta-fields">
             <p>
@@ -753,6 +761,104 @@ class Post_Types {
                 <input type="number" id="malisafi_garage" name="malisafi_garage" value="<?php echo esc_attr($garage); ?>" min="0">
             </p>
         </div>
+        <script>
+        jQuery(document).ready(function($){
+            // Exact keywords that identify land property types (case-insensitive)
+            var landKeywords = ['land','plot','vacant','agricultural'];
+
+            // Map of term_id -> {name,slug} provided by PHP
+            var ptypeMap = <?php echo json_encode($ptype_map); ?> || {};
+
+            function isLandTerm(info) {
+                var name = '';
+                var slug = '';
+                if (typeof info === 'object') {
+                    name = (info.name || '').toString().toLowerCase();
+                    slug = (info.slug || '').toString().toLowerCase();
+                } else if (typeof info === 'string') {
+                    name = info.toLowerCase();
+                }
+                for (var i=0;i<landKeywords.length;i++){
+                    var kw = landKeywords[i];
+                    if (name === kw || slug === kw) return true;
+                }
+                return false;
+            }
+
+            function evaluateLandSelection() {
+                var land = false;
+
+                // Check taxonomy checkboxes (hierarchical taxonomy box)
+                $('#taxonomy-malisafi_property_type input[type=checkbox]:checked').each(function(){
+                    var val = $(this).val();
+                    var info = null;
+                    if (val && ptypeMap[val]) {
+                        info = ptypeMap[val];
+                    } else {
+                        // fallback to label text
+                        var id = $(this).attr('id');
+                        var label = $('label[for="'+id+'"]');
+                        if (label.length) info = label.text();
+                    }
+                    if (info && isLandTerm(info)) { land = true; return false; }
+                });
+
+                // Also check select or other UIs if present
+                if (!land) {
+                    $('select[name="tax_input[malisafi_property_type]"], #malisafi_property_type').each(function(){
+                        var val = $(this).val();
+                        if (!val) return;
+                        if (typeof val === 'string') {
+                            // value might be term id or slug
+                            if (ptypeMap[val]) {
+                                if (isLandTerm(ptypeMap[val])) { land = true; return false; }
+                            } else {
+                                if (isLandTerm(val)) { land = true; return false; }
+                            }
+                        } else if ($.isArray(val)) {
+                            for (var i=0;i<val.length;i++){
+                                var v = val[i];
+                                if (ptypeMap[v]) {
+                                    if (isLandTerm(ptypeMap[v])) { land = true; break; }
+                                } else {
+                                    if (isLandTerm(v)) { land = true; break; }
+                                }
+                            }
+                        }
+                    });
+                }
+
+                // Show/hide building-related fields and other meta boxes
+                var buildingFields = ['#malisafi_bedrooms', '#malisafi_bathrooms', '#malisafi_year_built', '#malisafi_garage'];
+                buildingFields.forEach(function(sel){
+                    var $p = $(sel).closest('p');
+                    if (land) { $p.hide(); } else { $p.show(); }
+                });
+
+                // Also hide pricing and gallery meta boxes for land
+                if (land) {
+                    $('#malisafi_property_pricing').closest('.postbox').hide();
+                    $('#malisafi_property_gallery').closest('.postbox').hide();
+                } else {
+                    $('#malisafi_property_pricing').closest('.postbox').show();
+                    $('#malisafi_property_gallery').closest('.postbox').show();
+                }
+            }
+
+            // Initial evaluation
+            evaluateLandSelection();
+
+            // Re-evaluate when taxonomy checkboxes change
+            $(document).on('change', '#taxonomy-malisafi_property_type input[type=checkbox]', function(){
+                evaluateLandSelection();
+            });
+
+            // Also listen for possible select changes
+            $(document).on('change', 'select[name="tax_input[malisafi_property_type]"], #malisafi_property_type', function(){
+                evaluateLandSelection();
+            });
+        });
+        </script>
         <?php
     }
     
