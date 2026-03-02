@@ -183,6 +183,42 @@ class Malisafi_Location_Sync {
             }
         }
 
+        // Ensure specific subcounties requested by admin exist under Machakos
+        $ensure_county = 'Machakos';
+        $ensure_subs = array('Mavoko', 'Kangundu');
+        $county_term = get_term_by('name', $ensure_county, 'malisafi_property_location');
+        if (!$county_term || is_wp_error($county_term)) {
+            $ins = wp_insert_term($ensure_county, 'malisafi_property_location');
+            if (!is_wp_error($ins) && isset($ins['term_id'])) {
+                $county_id = (int) $ins['term_id'];
+                $result['counties_added']++;
+            } else {
+                $county_term = get_term_by('name', $ensure_county, 'malisafi_property_location');
+                $county_id = $county_term ? (int) $county_term->term_id : 0;
+            }
+        } else {
+            $county_id = (int) $county_term->term_id;
+        }
+
+        if (!empty($county_id)) {
+            foreach ($ensure_subs as $ens) {
+                $exists = get_term_by('name', $ens, 'malisafi_property_location');
+                if ($exists && !is_wp_error($exists)) {
+                    // ensure parent
+                    if ((int) $exists->parent !== $county_id) {
+                        wp_update_term($exists->term_id, 'malisafi_property_location', array('parent' => $county_id));
+                        $result['subcounties_parent_updated']++;
+                    }
+                    continue;
+                }
+
+                $ins = wp_insert_term($ens, 'malisafi_property_location', array('parent' => $county_id));
+                if (!is_wp_error($ins) && isset($ins['term_id'])) {
+                    $result['subcounties_added']++;
+                }
+            }
+        }
+
         return $result;
     }
 }
