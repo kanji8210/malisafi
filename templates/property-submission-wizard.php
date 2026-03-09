@@ -399,11 +399,11 @@ $can_assign_agent = current_user_can('manage_options') || current_user_can('edit
 
         <!-- Step 5: Images -->
         <div class="wizard-step" id="step-5">
-            <h2><?php _e('Property Images', 'malisafi-mls'); ?></h2>
-            <p class="step-description"><?php _e('Upload your featured image first (required), then add a gallery of additional images.', 'malisafi-mls'); ?></p>
+            <h2><span class="icon">🖼️</span> <?php _e('Property Media', 'malisafi-mls'); ?></h2>
+            <p class="step-description"><?php _e('Upload a stunning high-resolution featured image followed by your gallery photos.', 'malisafi-mls'); ?></p>
 
-            <div class="image-section">
-                <h3><?php _e('Featured Image', 'malisafi-mls'); ?></h3>
+            <div class="image-section featured-section">
+                <h3><span class="icon">⭐</span> <?php _e('Featured Image (Mandatory)', 'malisafi-mls'); ?></h3>
                 <p class="field-hint">
                     <?php _e('Recommended: landscape photo at least 1600x900 for the best cover quality.', 'malisafi-mls'); ?>
                 </p>
@@ -437,8 +437,8 @@ $can_assign_agent = current_user_can('manage_options') || current_user_can('edit
                 <input type="hidden" id="featured_image_id" name="featured_image_id" value="">
             </div>
 
-            <div class="image-section">
-                <h3><?php _e('Gallery Images', 'malisafi-mls'); ?></h3>
+            <div class="image-section gallery-section">
+                <h3><span class="icon">🖼️</span> <?php _e('Property Gallery', 'malisafi-mls'); ?></h3>
                 <p class="field-hint">
                     <?php _e('Add up to 15 additional images. Landscape images at least 1200x800 are recommended.', 'malisafi-mls'); ?>
                 </p>

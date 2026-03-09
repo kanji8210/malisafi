@@ -188,6 +188,7 @@ class Malisafi_Property_Submit {
             'area' => isset($data['area']) && $data['area'] !== null ? sanitize_text_field($data['area']) : '',
             'gps' => isset($data['property_gps']) && $data['property_gps'] !== null ? sanitize_text_field($data['property_gps']) : '',
             'postal_code' => isset($data['postal_code']) && $data['postal_code'] !== null ? sanitize_text_field($data['postal_code']) : '',
+            'property_location' => isset($data['property_location']) ? intval($data['property_location']) : 0,
             
             // Features & Amenities
             'features' => isset($data['features']) && is_array($data['features']) ? array_filter(array_map('sanitize_text_field', $data['features'])) : array(),
@@ -195,6 +196,8 @@ class Malisafi_Property_Submit {
             
             // Taxonomies
             'property_type' => isset($data['property_type']) ? intval($data['property_type']) : 0,
+            'property_status' => isset($data['property_status']) ? intval($data['property_status']) : 0,
+            'property_features' => isset($data['property_features']) && is_array($data['property_features']) ? array_filter(array_map('intval', $data['property_features'])) : array(),
             
             // Agent info
             'agent_name' => $can_assign_agent
@@ -228,6 +231,7 @@ class Malisafi_Property_Submit {
             'green_certification' => isset($data['green_certification']) && $data['green_certification'] !== null ? sanitize_text_field($data['green_certification']) : '',
             
             // Additional
+            'excerpt' => isset($data['property_excerpt']) && $data['property_excerpt'] !== null ? sanitize_textarea_field($data['property_excerpt']) : '',
             'reference_id' => isset($data['reference_id']) && $data['reference_id'] !== null ? sanitize_text_field($data['reference_id']) : '',
             'featured' => isset($data['featured']) ? 1 : 0,
         );

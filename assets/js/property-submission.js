@@ -592,7 +592,10 @@
             formData.append('property_id', this.propertyId || 0);
             formData.append('images[]', file);
             
-            // Show progress
+            // Show shimmer in gallery
+            const $shimmer = $('<div class="gallery-item shimmer"></div>');
+            this.$gallery.append($shimmer);
+            
             this.showUploadProgress('Uploading ' + file.name + '...');
             
             $.ajax({
@@ -602,12 +605,13 @@
                 processData: false,
                 contentType: false,
                 success: function(response) {
+                    $shimmer.remove();
                     this.hideUploadProgress();
                     if (response.success && response.data.images) {
                         response.data.images.forEach(function(image) {
                             this.addGalleryImage(image);
                         }.bind(this));
-                        this.showUploadSuccess('Image uploaded successfully');
+                        this.showUploadSuccess('Images added to gallery');
                     } else {
                         this.showUploadError(response.data.message || 'Upload failed');
                     }
@@ -651,6 +655,7 @@
             formData.append('image', file);
             
             this.showUploadProgress('Uploading featured image...');
+            $('#featured-dropzone').addClass('uploading');
             
             $.ajax({
                 url: malisafiSubmission.ajaxurl,
@@ -660,6 +665,7 @@
                 contentType: false,
                 success: function(response) {
                     this.hideUploadProgress();
+                    $('#featured-dropzone').removeClass('uploading');
                     if (response.success && response.data.image) {
                         this.setFeaturedImage(response.data.image);
                         this.showUploadSuccess('Featured image uploaded successfully');
@@ -961,7 +967,6 @@
             const $previewImages = $('#preview-images');
             $previewImages.empty();
 
-            if (this.uploadedImages.length > 0) {
                 this.$gallery.find('.gallery-item img').each(function() {
                     $previewImages.append(
                         $('<img>').attr('src', $(this).attr('src'))
@@ -1179,9 +1184,6 @@
                     return;
                 }
                 self.addGalleryImage(image);
-                if (index === 0) {
-                    $gallery.find('.gallery-item').first().append('<span class="main-badge">Gallery Cover</span>');
-                }
             });
 
             this.updateGalleryOrder();

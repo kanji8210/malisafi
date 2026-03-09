@@ -636,12 +636,8 @@ class Property_Submission {
             }
 
             $gallery_ids = array_filter($gallery_ids);
+            // Save images ids
             update_post_meta($property_id, '_malisafi_gallery_ids', implode(',', $gallery_ids));
-            
-            // Set first image as featured
-            if (!empty($gallery_ids) && !has_post_thumbnail($property_id)) {
-                set_post_thumbnail($property_id, $gallery_ids[0]);
-            }
         }
         
         return true;
@@ -954,11 +950,6 @@ class Property_Submission {
             }
 
             update_post_meta($property_id, '_malisafi_gallery_ids', implode(',', $updated_gallery));
-
-            // Set first image as featured if none exists
-            if (empty($existing_ids) && !has_post_thumbnail($property_id)) {
-                set_post_thumbnail($property_id, $new_ids[0]);
-            }
         }
 
         wp_send_json_success(array(
@@ -1066,11 +1057,6 @@ class Property_Submission {
 
         // Save new order
         update_post_meta($property_id, '_malisafi_gallery_ids', implode(',', $order));
-
-        // Update featured image if needed
-        if (!empty($order) && !has_post_thumbnail($property_id)) {
-            set_post_thumbnail($property_id, $order[0]);
-        }
 
         wp_send_json_success(array('message' => __('Order updated', 'malisafi-mls')));
     }
