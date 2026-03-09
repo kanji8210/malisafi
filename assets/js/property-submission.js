@@ -967,6 +967,7 @@
             const $previewImages = $('#preview-images');
             $previewImages.empty();
 
+            if (this.$gallery.find('.gallery-item').length > 0) {
                 this.$gallery.find('.gallery-item img').each(function() {
                     $previewImages.append(
                         $('<img>').attr('src', $(this).attr('src'))
@@ -1024,12 +1025,22 @@
         },
 
         adjustForLandUI: function() {
-            // Hide/Show steps that are not relevant for land (Details and Features)
             const isLand = this.isLandSelected();
+            
+            // Step 2 (Details) should be visible for Land (to set Size), 
+            // but specific house-centric fields should be hidden.
+            const $step2 = $('#step-2');
+            const $houseFields = $step2.find('#bedrooms, #bathrooms, #year_built, #condition, #floor_plan_urls').closest('.form-row, .form-row-group');
+            
             if (isLand) {
-                $('#step-2, #step-4').hide().attr('data-land-skip', '1');
+                $houseFields.hide();
+                // Step 4 (Features) is usually house-centric, but keep it if there are land features?
+                // For now, keep the existing logic of hiding Step 4 for Land.
+                $('#step-4').hide().attr('data-land-skip', '1');
+                $step2.show().removeAttr('data-land-skip');
             } else {
-                $('#step-2, #step-4').show().removeAttr('data-land-skip');
+                $houseFields.show();
+                $('#step-4').show().removeAttr('data-land-skip');
             }
 
             // Adjust progress markers visibility
