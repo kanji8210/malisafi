@@ -191,7 +191,7 @@ class Dashboard_Shortcodes {
 			true
 		);
 
-		wp_localize_script('malisafi-property-submission', 'malisafiSubmission', array(
+		$config = array(
 			'ajaxurl' => admin_url('admin-ajax.php'),
 			'nonce' => wp_create_nonce('malisafi_property_submission'),
 			'uploadNonce' => wp_create_nonce('malisafi_upload_images'),
@@ -209,7 +209,10 @@ class Dashboard_Shortcodes {
 				'submitting' => __('Submitting...', 'malisafi-mls'),
 				'success' => __('Property submitted successfully!', 'malisafi-mls'),
 			)
-		));
+		);
+
+		$script = "var malisafiSubmission = malisafiSubmission || " . json_encode($config) . ";";
+		wp_add_inline_script('malisafi-property-submission', $script, 'before');
 
 		return \MalisafiMLS\Property_Submission::render_submission_form($atts);
 	}
