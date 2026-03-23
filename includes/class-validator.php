@@ -37,6 +37,16 @@ class Validator {
     }
     
     /**
+     * Add a validation error manually
+     *
+     * @param string $field_name Field name
+     * @param string $message Error message
+     */
+    public function add_error($field_name, $message) {
+        $this->errors[$field_name] = $message;
+    }
+    
+    /**
      * Validate email address
      *
      * @param string $email Email to validate

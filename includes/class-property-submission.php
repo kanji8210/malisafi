@@ -99,6 +99,7 @@ class Property_Submission {
                 'uploadNonce' => wp_create_nonce('malisafi_upload_images'),
                 'refNonce' => wp_create_nonce('malisafi_generate_ref_id'),
                 'uploadsEnabled' => true,
+                'fieldRegistry' => self::get_field_registry(),
                 'strings' => array(
                     'saving' => __('Saving...', 'malisafi-mls'),
                     'saved' => __('Saved', 'malisafi-mls'),
@@ -243,7 +244,323 @@ class Property_Submission {
         
         return true;
     }
-    
+
+    /**
+     * Get the centralized registry of all property fields
+     * 
+     * @return array
+     */
+    public static function get_field_registry() {
+        return array(
+            'basic' => array(
+                'title' => array(
+                    'name' => 'title',
+                    'type' => 'text',
+                    'required' => true,
+                    'min_length' => 5,
+                    'is_core' => true
+                ),
+                'description' => array(
+                    'name' => 'description',
+                    'type' => 'textarea',
+                    'required' => false,
+                    'is_core' => true
+                ),
+                'reference_id' => array(
+                    'name' => 'reference_id',
+                    'type' => 'text',
+                    'meta_key' => '_malisafi_reference_id',
+                    'readonly' => true
+                ),
+                'price' => array(
+                    'name' => 'price',
+                    'type' => 'number',
+                    'meta_key' => '_malisafi_price',
+                    'required' => true
+                ),
+                'currency' => array(
+                    'name' => 'currency',
+                    'type' => 'select',
+                    'meta_key' => '_malisafi_currency',
+                    'required' => true
+                ),
+                'property_type' => array(
+                    'name' => 'property_type',
+                    'type' => 'select',
+                    'taxonomy' => 'property_type',
+                    'required' => true
+                ),
+                'listing_type' => array(
+                    'name' => 'listing_type',
+                    'type' => 'select',
+                    'meta_key' => '_malisafi_listing_type',
+                    'required' => true
+                )
+            ),
+            'details' => array(
+                'bedrooms' => array(
+                    'name' => 'bedrooms',
+                    'type' => 'number',
+                    'meta_key' => '_malisafi_bedrooms',
+                    'show_for' => array('house', 'apartment')
+                ),
+                'bathrooms' => array(
+                    'name' => 'bathrooms',
+                    'type' => 'number',
+                    'meta_key' => '_malisafi_bathrooms',
+                    'show_for' => array('house', 'apartment')
+                ),
+                'floor_number' => array(
+                    'name' => 'floor_number',
+                    'type' => 'number',
+                    'meta_key' => '_malisafi_floor_number',
+                    'show_for' => array('apartment', 'commercial')
+                ),
+                'total_floors' => array(
+                    'name' => 'total_floors',
+                    'type' => 'number',
+                    'meta_key' => '_malisafi_total_floors',
+                    'show_for' => array('apartment', 'commercial')
+                ),
+                'office_spaces' => array(
+                    'name' => 'office_spaces',
+                    'type' => 'number',
+                    'meta_key' => '_malisafi_office_spaces',
+                    'show_for' => array('commercial')
+                ),
+                'parking_spaces' => array(
+                    'name' => 'parking_spaces',
+                    'type' => 'number',
+                    'meta_key' => '_malisafi_parking_spaces',
+                    'show_for' => array('commercial')
+                ),
+                'loading_bays' => array(
+                    'name' => 'loading_bays',
+                    'type' => 'number',
+                    'meta_key' => '_malisafi_loading_bays',
+                    'show_for' => array('industrial')
+                ),
+                'power_capacity_kva' => array(
+                    'name' => 'power_capacity_kva',
+                    'type' => 'number',
+                    'meta_key' => '_malisafi_power_capacity_kva',
+                    'show_for' => array('industrial')
+                ),
+                'ceiling_height_m' => array(
+                    'name' => 'ceiling_height_m',
+                    'type' => 'number',
+                    'meta_key' => '_malisafi_ceiling_height_m',
+                    'show_for' => array('industrial')
+                ),
+                'size' => array(
+                    'name' => 'size',
+                    'type' => 'number',
+                    'meta_key' => '_malisafi_size',
+                    'required' => true
+                ),
+                'size_unit' => array(
+                    'name' => 'size_unit',
+                    'type' => 'select',
+                    'meta_key' => '_malisafi_size_unit',
+                    'required' => true
+                ),
+                'year_built' => array(
+                    'name' => 'year_built',
+                    'type' => 'number',
+                    'meta_key' => '_malisafi_year_built',
+                    'show_for' => array('house', 'apartment', 'commercial', 'industrial')
+                ),
+                'condition' => array(
+                    'name' => 'condition',
+                    'type' => 'select',
+                    'meta_key' => '_malisafi_condition',
+                    'show_for' => array('house', 'apartment', 'commercial', 'industrial')
+                ),
+                'land_use' => array(
+                    'name' => 'land_use',
+                    'type' => 'select',
+                    'meta_key' => '_malisafi_land_use',
+                    'show_for' => array('land')
+                ),
+                'road_access' => array(
+                    'name' => 'road_access',
+                    'type' => 'select',
+                    'meta_key' => '_malisafi_road_access',
+                    'show_for' => array('land')
+                ),
+                'land_utilities' => array(
+                    'name' => 'land_utilities',
+                    'type' => 'checkbox_group',
+                    'meta_key' => '_malisafi_land_utilities',
+                    'show_for' => array('land')
+                ),
+                'agent_name' => array(
+                    'name' => 'agent_name',
+                    'type' => 'text',
+                    'meta_key' => '_malisafi_agent_name'
+                ),
+                'agent_email' => array(
+                    'name' => 'agent_email',
+                    'type' => 'email',
+                    'meta_key' => '_malisafi_agent_email'
+                ),
+                'agent_phone' => array(
+                    'name' => 'agent_phone',
+                    'type' => 'text',
+                    'meta_key' => '_malisafi_agent_phone'
+                ),
+                'floor_plan_urls' => array(
+                    'name' => 'floor_plan_urls',
+                    'type' => 'textarea',
+                    'meta_key' => '_malisafi_floor_plan_urls',
+                    'show_for_listing' => array('sale', 'lease')
+                ),
+                'expected_roi' => array(
+                    'name' => 'expected_roi',
+                    'type' => 'number',
+                    'meta_key' => '_malisafi_expected_roi',
+                    'show_for_listing' => array('sale', 'lease')
+                ),
+                'rental_yield' => array(
+                    'name' => 'rental_yield',
+                    'type' => 'number',
+                    'meta_key' => '_malisafi_rental_yield',
+                    'show_for_listing' => array('sale', 'lease')
+                ),
+                'annual_rent_income' => array(
+                    'name' => 'annual_rent_income',
+                    'type' => 'number',
+                    'meta_key' => '_malisafi_annual_rent_income',
+                    'show_for_listing' => array('sale', 'lease')
+                ),
+                'ownership_type' => array(
+                    'name' => 'ownership_type',
+                    'type' => 'select',
+                    'meta_key' => '_malisafi_ownership_type',
+                    'show_for_listing' => array('sale', 'lease')
+                ),
+                'title_deed_status' => array(
+                    'name' => 'title_deed_status',
+                    'type' => 'select',
+                    'meta_key' => '_malisafi_title_deed_status',
+                    'show_for_listing' => array('sale', 'lease')
+                ),
+                'developer_guarantee' => array(
+                    'name' => 'developer_guarantee',
+                    'type' => 'textarea',
+                    'meta_key' => '_malisafi_developer_guarantee',
+                    'show_for_listing' => array('sale', 'lease')
+                ),
+                'financing_options' => array(
+                    'name' => 'financing_options',
+                    'type' => 'checkbox_group',
+                    'meta_key' => '_malisafi_financing_options',
+                    'show_for_listing' => array('sale', 'lease')
+                ),
+                'financing_min_deposit' => array(
+                    'name' => 'financing_min_deposit',
+                    'type' => 'number',
+                    'meta_key' => '_malisafi_financing_min_deposit',
+                    'show_for_listing' => array('sale', 'lease')
+                ),
+                'financing_tenor_months' => array(
+                    'name' => 'financing_tenor_months',
+                    'type' => 'number',
+                    'meta_key' => '_malisafi_financing_tenor_months',
+                    'show_for_listing' => array('sale', 'lease')
+                ),
+                'financing_interest_rate' => array(
+                    'name' => 'financing_interest_rate',
+                    'type' => 'number',
+                    'meta_key' => '_malisafi_financing_interest_rate',
+                    'show_for_listing' => array('sale', 'lease')
+                ),
+                'diaspora_financing_details' => array(
+                    'name' => 'diaspora_financing_details',
+                    'type' => 'text',
+                    'meta_key' => '_malisafi_diaspora_financing_details',
+                    'show_for_listing' => array('sale', 'lease')
+                ),
+                'sustainability' => array(
+                    'name' => 'sustainability',
+                    'type' => 'checkbox_group',
+                    'meta_key' => '_malisafi_sustainability',
+                    'show_for_listing' => array('sale', 'lease')
+                ),
+                'green_certification' => array(
+                    'name' => 'green_certification',
+                    'type' => 'text',
+                    'meta_key' => '_malisafi_green_certification',
+                    'show_for_listing' => array('sale', 'lease')
+                )
+            ),
+            'location' => array(
+                'address' => array(
+                    'name' => 'address',
+                    'type' => 'text',
+                    'meta_key' => '_malisafi_address'
+                ),
+                'county' => array(
+                    'name' => 'county',
+                    'type' => 'select',
+                    'meta_key' => '_malisafi_county',
+                    'required' => true
+                ),
+                'subcounty' => array(
+                    'name' => 'subcounty',
+                    'type' => 'select',
+                    'meta_key' => '_malisafi_subcounty',
+                    'required' => true
+                ),
+                'city' => array(
+                    'name' => 'city',
+                    'type' => 'text',
+                    'meta_key' => '_malisafi_city'
+                ),
+                'area' => array(
+                    'name' => 'area',
+                    'type' => 'text',
+                    'meta_key' => '_malisafi_area'
+                ),
+                'gps' => array(
+                    'name' => 'gps',
+                    'type' => 'text',
+                    'meta_key' => '_malisafi_gps'
+                ),
+                'google_maps_url' => array(
+                    'name' => 'google_maps_url',
+                    'type' => 'url',
+                    'meta_key' => '_malisafi_google_maps_url'
+                )
+            ),
+            'features' => array(
+                'features' => array(
+                    'name' => 'features',
+                    'type' => 'checkbox_group',
+                    'meta_key' => '_malisafi_features'
+                ),
+                'amenities' => array(
+                    'name' => 'amenities',
+                    'type' => 'checkbox_group',
+                    'meta_key' => '_malisafi_amenities'
+                )
+            ),
+            'images' => array(
+                'featured_image_id' => array(
+                    'name' => 'featured_image_id',
+                    'type' => 'hidden',
+                    'meta_key' => '_thumbnail_id',
+                    'required' => true
+                ),
+                'gallery_ids' => array(
+                    'name' => 'gallery_ids',
+                    'type' => 'hidden',
+                    'meta_key' => '_malisafi_gallery_ids'
+                )
+            )
+        );
+    }
+
     /**
      * AJAX: Save property step (auto-save)
      */
@@ -368,67 +685,132 @@ class Property_Submission {
     }
     
     /**
-     * Save step data
+     * Persist fields based on registry configuration
      */
-    private static function save_step_data($property_id, $step, $data, $validator) {
-        switch ($step) {
-            case 'basic':
-                return self::save_basic_info($property_id, $data, $validator);
-            case 'details':
-                return self::save_details($property_id, $data, $validator);
-            case 'location':
-                return self::save_location($property_id, $data, $validator);
-            case 'features':
-                return self::save_features($property_id, $data, $validator);
-            case 'images':
-                return self::save_images($property_id, $data);
-            default:
-                return new \WP_Error('invalid_step', __('Invalid step', 'malisafi-mls'));
+    private static function persist_fields($property_id, $step, $data, $validator) {
+        $registry = self::get_field_registry();
+        if (!isset($registry[$step])) {
+            return new \WP_Error('invalid_step', __('Invalid step', 'malisafi-mls'));
         }
-    }
-    
-    /**
-     * Save basic information
-     */
-    private static function save_basic_info($property_id, $data, $validator) {
-        // Validate
-        $validator->text($data['title'] ?? '', 'title', 5, 200, true);
-        $validator->text($data['description'] ?? '', 'description', 20, 5000, false);
-        $validator->price($data['price'] ?? '', 'price', true);
-        $validator->in_array($data['currency'] ?? 'KES', array('KES', 'USD', 'EUR', 'GBP'), 'currency', true);
-        $validator->in_array($data['property_type'] ?? '', array('house', 'apartment', 'land', 'commercial', 'industrial'), 'property_type', true);
-        $validator->in_array($data['listing_type'] ?? '', array('sale', 'rent', 'lease', 'short_term'), 'listing_type', true);
-        
+
+        $fields = $registry[$step];
+        $post_data = array('ID' => $property_id);
+        $update_post = false;
+
+        // Get property type and listing type for conditional logic
+        $property_types = wp_get_object_terms($property_id, 'malisafi_property_type', array('fields' => 'slugs'));
+        $property_type = !empty($property_types) && !is_wp_error($property_types) ? $property_types[0] : '';
+        $listing_type = get_post_meta($property_id, '_malisafi_listing_type', true);
+
+        // If basic step is being saved, get immediate values from $data
+        if ($step === 'basic') {
+            if (isset($data['property_type'])) {
+                $property_type = is_array($data['property_type']) ? $data['property_type'][0] : $data['property_type'];
+            }
+            if (isset($data['listing_type'])) {
+                $listing_type = sanitize_text_field($data['listing_type']);
+            }
+        }
+
+        foreach ($fields as $key => $config) {
+            $value = isset($data[$key]) ? $data[$key] : null;
+
+            if (isset($config['readonly']) && $config['readonly']) continue;
+
+            // Check if field is applicable for this property type
+            if (isset($config['show_for']) && !empty($property_type)) {
+                $show_for = is_array($config['show_for']) ? $config['show_for'] : explode(',', $config['show_for']);
+                if (!in_array($property_type, $show_for)) {
+                    // Clear the field if it's not applicable
+                    if (isset($config['meta_key'])) update_post_meta($property_id, $config['meta_key'], '');
+                    continue;
+                }
+            }
+
+            // Check if field is applicable for this listing type (sale/lease)
+            if (isset($config['show_for_listing']) && !empty($listing_type)) {
+                $show_for_listing = is_array($config['show_for_listing']) ? $config['show_for_listing'] : explode(',', $config['show_for_listing']);
+                if (!in_array($listing_type, $show_for_listing)) {
+                    // Clear the field if it's not applicable
+                    if (isset($config['meta_key'])) update_post_meta($property_id, $config['meta_key'], '');
+                    continue;
+                }
+            }
+
+            // Handle validation based on config
+            $required = isset($config['required']) ? $config['required'] : false;
+            $type = isset($config['type']) ? $config['type'] : 'text';
+
+            switch ($type) {
+                case 'email':
+                    $validator->email($value ?? '', $key, $required);
+                    break;
+                case 'url':
+                    $validator->url($value ?? '', $key, $required);
+                    break;
+                case 'number':
+                    $validator->number($value ?? 0, $key, 0, null, $required);
+                    break;
+                case 'integer':
+                    $validator->integer($value ?? 0, $key, 0, null, $required);
+                    break;
+                case 'checkbox_group':
+                    if ($required && empty($value)) {
+                        $validator->add_error($key, sprintf(__('%s is required', 'malisafi-mls'), ucfirst($key)));
+                    }
+                    break;
+                default:
+                    $min = isset($config['min_length']) ? $config['min_length'] : ($required ? 1 : 0);
+                    $validator->text($value ?? '', $key, $min, 5000, $required);
+                    break;
+            }
+
+            if ($validator->fails() && $required) continue;
+
+            $validated = $validator->validated();
+            $sanitized_value = isset($validated[$key]) ? $validated[$key] : $value;
+
+            // Persist based on config
+            if (isset($config['is_core']) && $config['is_core']) {
+                if ($key === 'title') {
+                    $post_data['post_title'] = sanitize_text_field($sanitized_value);
+                    $update_post = true;
+                } elseif ($key === 'description') {
+                    $post_data['post_content'] = wp_kses_post($sanitized_value);
+                    $update_post = true;
+                }
+            } elseif (isset($config['taxonomy'])) {
+                $terms = is_array($sanitized_value) ? array_map('sanitize_text_field', $sanitized_value) : sanitize_text_field($sanitized_value);
+                wp_set_object_terms($property_id, 'malisafi_' . $config['taxonomy'], $terms);
+            } elseif (isset($config['meta_key'])) {
+                if (is_array($sanitized_value)) {
+                    $sanitized_value = array_map('sanitize_text_field', $sanitized_value);
+                } else {
+                    $sanitized_value = sanitize_text_field($sanitized_value);
+                }
+                update_post_meta($property_id, $config['meta_key'], $sanitized_value);
+
+                // Auto-set status term if listing type changes
+                if ($key === 'listing_type') {
+                    $status_term = self::get_status_term_from_listing_type($sanitized_value);
+                    if ($status_term) {
+                        wp_set_object_terms($property_id, $status_term, 'malisafi_property_status');
+                    }
+                }
+            }
+        }
+
         if ($validator->fails()) {
             return new \WP_Error('validation_failed', __('Validation failed', 'malisafi-mls'), $validator->get_errors());
         }
-        
-        $validated = $validator->validated();
-        
-        // Update post
-        wp_update_post(array(
-            'ID' => $property_id,
-            'post_title' => $validated['title'],
-            'post_content' => $validated['description'] ?? ''
-        ));
-        
-        // Update meta
-        update_post_meta($property_id, '_malisafi_price', $validated['price']);
-        update_post_meta($property_id, '_malisafi_currency', $validated['currency']);
-        update_post_meta($property_id, '_malisafi_listing_type', $validated['listing_type']);
-        
-        // Set taxonomy
-        wp_set_object_terms($property_id, $validated['property_type'], 'malisafi_property_type');
-        
-        // Set property status based on listing type
-        $status_term = self::get_status_term_from_listing_type($validated['listing_type']);
-        if ($status_term) {
-            wp_set_object_terms($property_id, $status_term, 'malisafi_property_status');
+
+        if ($update_post) {
+            wp_update_post($post_data);
         }
-        
+
         return true;
     }
-    
+
     /**
      * Get status term from listing type
      */
@@ -437,183 +819,22 @@ class Property_Submission {
             'sale' => 'For Sale',
             'rent' => 'For Rent',
             'short_term' => 'Short Term Rent',
-            'lease' => 'For Sale' // Map lease to For Sale since no specific term exists
+            'lease' => 'For Sale'
         );
         
         return isset($mapping[$listing_type]) ? $mapping[$listing_type] : '';
     }
-    
+
     /**
-     * Save property details
+     * Save step data
      */
-    private static function save_details($property_id, $data, $validator) {
-        // If property type is Land, skip building-specific validation and clear details
-        $is_land = false;
-        $ptype_terms = wp_get_object_terms($property_id, 'malisafi_property_type', array('fields' => 'all'));
-        if (!is_wp_error($ptype_terms) && !empty($ptype_terms)) {
-            foreach ($ptype_terms as $t) {
-                if (strcasecmp($t->name, 'land') === 0 || strcasecmp($t->slug, 'land') === 0) {
-                    $is_land = true;
-                    break;
-                }
-            }
-        }
-
-        if ($is_land) {
-            // Clear building-specific meta and return
-            update_post_meta($property_id, '_malisafi_bedrooms', 0);
-            update_post_meta($property_id, '_malisafi_bathrooms', 0);
-            update_post_meta($property_id, '_malisafi_size', 0);
-            update_post_meta($property_id, '_malisafi_size_unit', 'sqm');
-            update_post_meta($property_id, '_malisafi_year_built', 0);
-            update_post_meta($property_id, '_malisafi_condition', '');
-            return true;
-        }
-
-        // Validate
-        $validator->integer($data['bedrooms'] ?? 0, 'bedrooms', 0, 50, false);
-        $validator->integer($data['bathrooms'] ?? 0, 'bathrooms', 0, 50, false);
-        $validator->number($data['size'] ?? 0, 'size', 0, 100000, false);
-        $validator->in_array($data['size_unit'] ?? 'sqm', array('sqm', 'sqft', 'acres', 'hectares'), 'size_unit', false);
-        $validator->integer($data['year_built'] ?? 0, 'year_built', 1800, date('Y') + 5, false);
-        $validator->in_array($data['condition'] ?? '', array('new', 'excellent', 'good', 'fair', 'renovation'), 'condition', false);
-
-        $listing_type = get_post_meta($property_id, '_malisafi_listing_type', true);
-        $is_sale_or_lease = in_array($listing_type, array('sale', 'lease'), true);
-
-        if ($is_sale_or_lease) {
-            $validator->text($data['floor_plan_urls'] ?? '', 'floor_plan_urls', 0, 2000, false);
-            $validator->number($data['expected_roi'] ?? 0, 'expected_roi', 0, 100, false);
-            $validator->number($data['rental_yield'] ?? 0, 'rental_yield', 0, 100, false);
-            $validator->number($data['annual_rent_income'] ?? 0, 'annual_rent_income', 0, null, false);
-            $validator->in_array($data['ownership_type'] ?? '', array('freehold', 'leasehold', 'company_shares', 'sectional_title'), 'ownership_type', false);
-            $validator->in_array($data['title_deed_status'] ?? '', array('ready', 'processing', 'not_available'), 'title_deed_status', false);
-            $validator->number($data['financing_min_deposit'] ?? 0, 'financing_min_deposit', 0, 100, false);
-            $validator->integer($data['financing_tenor_months'] ?? 0, 'financing_tenor_months', 0, 600, false);
-            $validator->number($data['financing_interest_rate'] ?? 0, 'financing_interest_rate', 0, 100, false);
-            $validator->text($data['diaspora_financing_details'] ?? '', 'diaspora_financing_details', 0, 255, false);
-            $validator->text($data['developer_guarantee'] ?? '', 'developer_guarantee', 0, 1000, false);
-            $validator->text($data['green_certification'] ?? '', 'green_certification', 0, 255, false);
+    private static function save_step_data($property_id, $step, $data, $validator) {
+        if ($step === 'images') {
+            return self::save_images($property_id, $data);
         }
         
-        if ($validator->fails()) {
-            return new \WP_Error('validation_failed', __('Validation failed', 'malisafi-mls'), $validator->get_errors());
-        }
-        
-        $validated = $validator->validated();
-        
-        // Save meta
-        foreach ($validated as $key => $value) {
-            update_post_meta($property_id, '_malisafi_' . $key, $value);
-        }
-
-        // Save array-based fields (sale/lease only)
-        if ($is_sale_or_lease) {
-            $financing_options = array();
-            if (isset($data['financing_options']) && is_array($data['financing_options'])) {
-                $financing_options = array_map('sanitize_text_field', $data['financing_options']);
-            }
-            update_post_meta($property_id, '_malisafi_financing_options', $financing_options);
-
-            $sustainability = array();
-            if (isset($data['sustainability']) && is_array($data['sustainability'])) {
-                $sustainability = array_map('sanitize_text_field', $data['sustainability']);
-            }
-            update_post_meta($property_id, '_malisafi_sustainability', $sustainability);
-        } else {
-            update_post_meta($property_id, '_malisafi_floor_plan_urls', '');
-            update_post_meta($property_id, '_malisafi_expected_roi', 0);
-            update_post_meta($property_id, '_malisafi_rental_yield', 0);
-            update_post_meta($property_id, '_malisafi_annual_rent_income', 0);
-            update_post_meta($property_id, '_malisafi_ownership_type', '');
-            update_post_meta($property_id, '_malisafi_title_deed_status', '');
-            update_post_meta($property_id, '_malisafi_financing_options', array());
-            update_post_meta($property_id, '_malisafi_financing_min_deposit', 0);
-            update_post_meta($property_id, '_malisafi_financing_tenor_months', 0);
-            update_post_meta($property_id, '_malisafi_financing_interest_rate', 0);
-            update_post_meta($property_id, '_malisafi_diaspora_financing_details', '');
-            update_post_meta($property_id, '_malisafi_developer_guarantee', '');
-            update_post_meta($property_id, '_malisafi_sustainability', array());
-            update_post_meta($property_id, '_malisafi_green_certification', '');
-        }
-        
-        return true;
-    }
-    
-    /**
-     * Save location information
-     */
-    private static function save_location($property_id, $data, $validator) {
-        // Validate
-        $validator->text($data['address'] ?? '', 'address', 5, 200, false);
-        $validator->text($data['county'] ?? '', 'county', 2, 50, true);
-        $validator->text($data['subcounty'] ?? '', 'subcounty', 2, 80, true);
-        $validator->text($data['city'] ?? '', 'city', 2, 50, false);
-        $validator->text($data['area'] ?? '', 'area', 2, 100, false);
-        $validator->text($data['gps'] ?? '', 'gps', 0, 100, false);
-        
-        if ($validator->fails()) {
-            return new \WP_Error('validation_failed', __('Validation failed', 'malisafi-mls'), $validator->get_errors());
-        }
-        
-        $validated = $validator->validated();
-        
-        // Save meta
-        foreach ($validated as $key => $value) {
-            update_post_meta($property_id, '_malisafi_' . $key, $value);
-        }
-        
-        // Set location taxonomy
-        $location_terms = array();
-        if (!empty($validated['county'])) {
-            $location_terms[] = $validated['county'];
-        }
-        if (!empty($validated['subcounty'])) {
-            $location_terms[] = $validated['subcounty'];
-        }
-
-        if (!empty($location_terms)) {
-            wp_set_object_terms($property_id, $location_terms, 'malisafi_property_location');
-        }
-        
-        return true;
-    }
-    
-    /**
-     * Save features and amenities
-     */
-    private static function save_features($property_id, $data, $validator) {
-        // If property type is Land, clear features/amenities and return
-        $is_land = false;
-        $ptype_terms = wp_get_object_terms($property_id, 'malisafi_property_type', array('fields' => 'all'));
-        if (!is_wp_error($ptype_terms) && !empty($ptype_terms)) {
-            foreach ($ptype_terms as $t) {
-                if (strcasecmp($t->name, 'land') === 0 || strcasecmp($t->slug, 'land') === 0) {
-                    $is_land = true;
-                    break;
-                }
-            }
-        }
-
-        if ($is_land) {
-            update_post_meta($property_id, '_malisafi_features', array());
-            update_post_meta($property_id, '_malisafi_amenities', array());
-            return true;
-        }
-
-        // Features are checkboxes, no validation needed
-        $features = isset($data['features']) && is_array($data['features']) ? $data['features'] : array();
-        $amenities = isset($data['amenities']) && is_array($data['amenities']) ? $data['amenities'] : array();
-
-        // Sanitize
-        $features = array_map('sanitize_text_field', $features);
-        $amenities = array_map('sanitize_text_field', $amenities);
-
-        // Save
-        update_post_meta($property_id, '_malisafi_features', $features);
-        update_post_meta($property_id, '_malisafi_amenities', $amenities);
-
-        return true;
+        // Use consolidated persist_fields for all other steps
+        return self::persist_fields($property_id, $step, $data, $validator);
     }
     
     /**
@@ -763,32 +984,30 @@ class Property_Submission {
         }
 
         $subcounty = get_post_meta($property_id, '_malisafi_subcounty', true);
-        // If property type is Land, we relax subcounty requirement and other building-specific checks
-        $is_land = false;
+
+        // Resolve property type once for all type-specific checks
+        $property_type = '';
         $ptype_terms = wp_get_object_terms($property_id, 'malisafi_property_type', array('fields' => 'all'));
         if (!is_wp_error($ptype_terms) && !empty($ptype_terms)) {
-            foreach ($ptype_terms as $t) {
-                if (strcasecmp($t->name, 'land') === 0 || strcasecmp($t->slug, 'land') === 0) {
-                    $is_land = true;
-                    break;
-                }
-            }
+            $property_type = strtolower($ptype_terms[0]->slug ?: $ptype_terms[0]->name);
         }
+        $is_land = $property_type === 'land';
 
+        // Subcounty waived for land (road access is used instead)
         if (empty($subcounty) && !$is_land) {
             $errors['subcounty'] = __('Subcounty is required', 'malisafi-mls');
         }
-        
+
         // Require at least one image via front-end gallery upload
         $featured_image_id = get_post_thumbnail_id($property_id);
         if (empty($featured_image_id)) {
             $errors['images'] = __('Featured image is required to submit this listing.', 'malisafi-mls');
         }
-        
+
         if (!empty($errors)) {
             return new \WP_Error('validation_failed', __('Validation failed', 'malisafi-mls'), $errors);
         }
-        
+
         return true;
     }
     
@@ -1088,67 +1307,43 @@ class Property_Submission {
             wp_send_json_error(array('message' => __('Permission denied', 'malisafi-mls')));
         }
         
-        // Get all property data
-        $featured_image_id = get_post_thumbnail_id($property_id);
-        $featured_image = null;
-        if ($featured_image_id) {
-            $featured_url = wp_get_attachment_image_url($featured_image_id, 'large');
-            if ($featured_url) {
-                $featured_image = array(
-                    'id' => $featured_image_id,
-                    'url' => $featured_url
-                );
-            }
-        }
-
-        $gallery_images = array();
-        $gallery_ids_raw = get_post_meta($property_id, '_malisafi_gallery_ids', true);
-        if (!empty($gallery_ids_raw)) {
-            $gallery_ids = array_filter(array_map('intval', explode(',', $gallery_ids_raw)));
-            foreach ($gallery_ids as $image_id) {
-                $image_url = wp_get_attachment_image_url($image_id, 'medium');
-                if ($image_url) {
-                    $gallery_images[] = array(
-                        'id' => $image_id,
-                        'url' => $image_url
-                    );
+        $registry = self::get_field_registry();
+        $data = array();
+        
+        foreach ($registry as $step => $fields) {
+            foreach ($fields as $key => $config) {
+                if (isset($config['is_core']) && $config['is_core']) {
+                    if ($key === 'title') $data[$key] = $property->post_title;
+                    if ($key === 'description') $data[$key] = $property->post_content;
+                } elseif (isset($config['taxonomy'])) {
+                    $terms = wp_get_object_terms($property_id, 'malisafi_' . $config['taxonomy'], array('fields' => 'slugs'));
+                    $data[$key] = !is_wp_error($terms) ? $terms : array();
+                } elseif (isset($config['meta_key'])) {
+                    $val = get_post_meta($property_id, $config['meta_key'], true);
+                    $data[$key] = $val;
                 }
             }
         }
+        
+        // Specialized handling for images
+        $featured_image_id = get_post_thumbnail_id($property_id);
+        $data['featured_image'] = $featured_image_id ? array(
+            'id' => $featured_image_id,
+            'url' => wp_get_attachment_image_url($featured_image_id, 'large')
+        ) : null;
 
-        $data = array(
-            'title' => $property->post_title,
-            'description' => $property->post_content,
-            'price' => get_post_meta($property_id, '_malisafi_price', true),
-            'currency' => get_post_meta($property_id, '_malisafi_currency', true),
-            'property_type' => wp_get_object_terms($property_id, 'malisafi_property_type', array('fields' => 'slugs')),
-            'listing_type' => get_post_meta($property_id, '_malisafi_listing_type', true),
-            'bedrooms' => get_post_meta($property_id, '_malisafi_bedrooms', true),
-            'bathrooms' => get_post_meta($property_id, '_malisafi_bathrooms', true),
-            'size' => get_post_meta($property_id, '_malisafi_size', true),
-            'county' => get_post_meta($property_id, '_malisafi_county', true),
-            'subcounty' => get_post_meta($property_id, '_malisafi_subcounty', true),
-            'city' => get_post_meta($property_id, '_malisafi_city', true),
-            'floor_plan_urls' => get_post_meta($property_id, '_malisafi_floor_plan_urls', true),
-            'expected_roi' => get_post_meta($property_id, '_malisafi_expected_roi', true),
-            'rental_yield' => get_post_meta($property_id, '_malisafi_rental_yield', true),
-            'annual_rent_income' => get_post_meta($property_id, '_malisafi_annual_rent_income', true),
-            'ownership_type' => get_post_meta($property_id, '_malisafi_ownership_type', true),
-            'title_deed_status' => get_post_meta($property_id, '_malisafi_title_deed_status', true),
-            'financing_options' => get_post_meta($property_id, '_malisafi_financing_options', true),
-            'financing_min_deposit' => get_post_meta($property_id, '_malisafi_financing_min_deposit', true),
-            'financing_tenor_months' => get_post_meta($property_id, '_malisafi_financing_tenor_months', true),
-            'financing_interest_rate' => get_post_meta($property_id, '_malisafi_financing_interest_rate', true),
-            'diaspora_financing_details' => get_post_meta($property_id, '_malisafi_diaspora_financing_details', true),
-            'developer_guarantee' => get_post_meta($property_id, '_malisafi_developer_guarantee', true),
-            'sustainability' => get_post_meta($property_id, '_malisafi_sustainability', true),
-            'green_certification' => get_post_meta($property_id, '_malisafi_green_certification', true),
-            'features' => get_post_meta($property_id, '_malisafi_features', true),
-            'amenities' => get_post_meta($property_id, '_malisafi_amenities', true),
-            'gallery_ids' => $gallery_ids_raw,
-            'featured_image' => $featured_image,
-            'gallery_images' => $gallery_images
-        );
+        $gallery_ids_raw = get_post_meta($property_id, '_malisafi_gallery_ids', true);
+        $data['gallery_ids'] = $gallery_ids_raw;
+        $data['gallery_images'] = array();
+        if (!empty($gallery_ids_raw)) {
+            $gallery_ids = array_filter(array_map('intval', explode(',', $gallery_ids_raw)));
+            foreach ($gallery_ids as $image_id) {
+                $url = wp_get_attachment_image_url($image_id, 'medium');
+                if ($url) {
+                    $data['gallery_images'][] = array('id' => $image_id, 'url' => $url);
+                }
+            }
+        }
         
         wp_send_json_success(array('data' => $data));
     }

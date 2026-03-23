@@ -55,10 +55,8 @@
             this.bindEvents();
             this.toggleSaleLeaseDetails();
 
-            // Adjust wizard UI if the draft's property type is land
-            this.adjustForLandUI();
-            // Adjust UI for land properties (hide details/features steps)
-            this.adjustForLandUI();
+            // Adjust wizard fields and steps based on property type and listing type
+            this.refreshFieldsVisibility();
             
             // Load draft if editing
             if (this.propertyId && this.propertyId !== '0' && this.propertyId !== 0) {
@@ -114,14 +112,14 @@
                 self.scheduleAutoSave();
             });
 
-            // Listing type toggle for sale/lease details
+            // Listing type toggle for sale/lease details - use registry for all visibility
             this.$form.on('change', '#listing_type', function() {
-                self.toggleSaleLeaseDetails();
+                self.refreshFieldsVisibility();
             });
 
-            // Property type change - adjust wizard for land
+            // Property type change - adjust wizard fields dynamically
             this.$form.on('change', '#property_type', function() {
-                self.adjustForLandUI();
+                self.refreshFieldsVisibility();
             });
 
             // County -> Subcounty
@@ -137,6 +135,11 @@
             // Extract coordinates from Google Maps URL
             $('.btn-extract-coords').on('click', function() {
                 self.extractCoordsFromMapsURL();
+            });
+
+            // Generate Reference ID
+            $('.btn-generate-ref').on('click', function() {
+                self.generateReferenceId();
             });
 
             // Prevent form submission
@@ -206,35 +209,57 @@
         },
 
         validateStep: function(step) {
-            const $currentStep = $('#step-' + step);
-            // If the step is hidden (skipped for land), it's considered valid
-            if ($currentStep.is(':hidden')) {
-                return true;
-            }
-            const $required = $currentStep.find('[required]');
+            const stepName = this.getStepName(step);
+            const registry = malisafiSubmission.fieldRegistry;
+            const fields = registry[stepName] || {};
             let isValid = true;
+            let firstErrorField = null;
 
-            $required.each(function() {
-                if (!this.checkValidity()) {
-                    isValid = false;
-                    $(this).addClass('error');
-                    $(this).focus();
-                    return false;
+            // Clear previous errors
+            this.$form.find('.error').removeClass('error');
+
+            for (const fieldKey in fields) {
+                const config = fields[fieldKey];
+                const selector = `[name="${fieldKey}"], [name="${fieldKey}[]"]`;
+                const $field = this.$form.find(selector);
+                
+                // Skip if field is hidden or disabled
+                if (!$field.length || $field.is(':disabled') || !$field.is(':visible')) {
+                    continue;
                 }
-                $(this).removeClass('error');
-            });
 
-            if (step === 5 && malisafiSubmission.uploadsEnabled === true) {
+                // Validation based on registry
+                if (config.required) {
+                    let value = $field.val();
+                    let isEmpty = false;
+
+                    if ($field.attr('type') === 'checkbox') {
+                        isEmpty = !this.$form.find(`[name="${fieldKey}[]"]:checked`).length;
+                    } else if (Array.isArray(value)) {
+                        isEmpty = value.length === 0;
+                    } else {
+                        isEmpty = !value || value.toString().trim() === '';
+                    }
+
+                    if (isEmpty) {
+                        isValid = false;
+                        $field.addClass('error');
+                        if (!firstErrorField) firstErrorField = $field;
+                    }
+                }
+            }
+
+            // Special check for images step
+            if (stepName === 'images' && malisafiSubmission.uploadsEnabled === true) {
                 if (!$('#featured_image_id').val()) {
                     isValid = false;
                     $('#featured-dropzone').addClass('error');
                     this.showError('Featured image is required before you continue.');
-                } else {
-                    $('#featured-dropzone').removeClass('error');
                 }
             }
 
             if (!isValid) {
+                if (firstErrorField) firstErrorField.focus();
                 this.showError(malisafiSubmission.strings.error || 'Please fill in all required fields');
             }
 
@@ -317,27 +342,29 @@
         },
 
         getStepData: function(step) {
-            const $step = $('#step-' + step);
+            const stepName = this.getStepName(step);
+            const registry = malisafiSubmission.fieldRegistry;
+            const fields = registry[stepName] || {};
             const data = {};
 
-            $step.find('input, textarea, select').each(function() {
-                const $field = $(this);
-                let name = $field.attr('name');
+            for (const fieldKey in fields) {
+                const selector = `[name="${fieldKey}"], [name="${fieldKey}[]"]`;
+                const $field = this.$form.find(selector);
                 
-                if (!name) return;
-
-                // Remove array notation from name for data key
-                const dataKey = name.replace(/\[\]$/, '');
-                
-                if ($field.attr('type') === 'checkbox') {
-                    if (!data[dataKey]) data[dataKey] = [];
-                    if ($field.is(':checked')) {
-                        data[dataKey].push($field.val());
-                    }
-                } else {
-                    data[dataKey] = $field.val();
+                if (!$field.length || $field.is(':disabled')) {
+                    continue;
                 }
-            });
+
+                if ($field.attr('type') === 'checkbox') {
+                    const values = [];
+                    this.$form.find(`[name="${fieldKey}[]"]:checked`).each(function() {
+                        values.push($(this).val());
+                    });
+                    data[fieldKey] = values;
+                } else {
+                    data[fieldKey] = $field.val();
+                }
+            }
 
             return data;
         },
@@ -823,6 +850,51 @@
             this.updateGalleryOrder();
         },
 
+        generateReferenceId: function() {
+            const self = this;
+            const $btn = $('.btn-generate-ref');
+            const $input = $('#reference_id');
+
+            if (!this.propertyId || this.propertyId === '0') {
+                this.showAutoSave('saving');
+                this.saveStep();
+                
+                setTimeout(function() {
+                    if (self.propertyId && self.propertyId !== '0') {
+                        self.generateReferenceId();
+                    } else {
+                        self.showError('Unable to generate ID. Please try again after the draft is saved.');
+                    }
+                }, 1000);
+                return;
+            }
+
+            $btn.prop('disabled', true).text('Generating...');
+
+            $.ajax({
+                url: malisafiSubmission.ajaxurl,
+                type: 'POST',
+                data: {
+                    action: 'malisafi_generate_reference_id',
+                    nonce: malisafiSubmission.refNonce,
+                    property_id: this.propertyId
+                },
+                success: function(response) {
+                    if (response.success && response.data.reference_id) {
+                        $input.val(response.data.reference_id);
+                        self.showSuccess(response.data.message || 'Reference ID generated successfully!');
+                    } else {
+                        self.showError(response.data.message || 'Failed to generate Reference ID');
+                    }
+                    $btn.prop('disabled', false).text('Generate ID');
+                },
+                error: function() {
+                    self.showError('An error occurred while generating Reference ID');
+                    $btn.prop('disabled', false).text('Generate ID');
+                }
+            });
+        },
+
         updateGalleryOrder: function() {
             const order = [];
             $('#image-gallery .gallery-item').each(function() {
@@ -1013,55 +1085,94 @@
             });
         },
 
-        toggleSaleLeaseDetails: function() {
+        /**
+         * Refresh field visibility based on entire registry and current state
+         */
+        refreshFieldsVisibility: function() {
+            const propertyType = this.getPropertyType();
             const listingType = $('#listing_type').val();
-            const show = listingType === 'sale' || listingType === 'lease';
-            $('.sale-lease-details').toggle(show);
-        },
+            const registry = malisafiSubmission.fieldRegistry;
 
-        isLandSelected: function() {
-            const val = (this.$form.find('#property_type').val() || '').toString().toLowerCase();
-            return val === 'land';
-        },
+            // Iterate through every step and field in the registry
+            for (const stepName in registry) {
+                const fields = registry[stepName];
+                let stepHasVisibleFields = false;
 
-        adjustForLandUI: function() {
-            const isLand = this.isLandSelected();
-            
-            // Step 2 (Details) should be visible for Land (to set Size), 
-            // but specific house-centric fields should be hidden.
-            const $step2 = $('#step-2');
-            const $houseFields = $step2.find('#bedrooms, #bathrooms, #year_built, #condition, #floor_plan_urls').closest('.form-row, .form-row-group');
-            
-            if (isLand) {
-                $houseFields.hide();
-                // Step 4 (Features) is usually house-centric, but keep it if there are land features?
-                // For now, keep the existing logic of hiding Step 4 for Land.
-                $('#step-4').hide().attr('data-land-skip', '1');
-                $step2.show().removeAttr('data-land-skip');
-            } else {
-                $houseFields.show();
-                $('#step-4').show().removeAttr('data-land-skip');
+                for (const fieldKey in fields) {
+                    const config = fields[fieldKey];
+                    const selector = `[name="${fieldKey}"], [name="${fieldKey}[]"]`;
+                    const $field = this.$form.find(selector);
+                    
+                    if (!$field.length) continue;
+
+                    let isVisible = true;
+
+                    // Check show_for (property type)
+                    if (config.show_for) {
+                        const showForArr = config.show_for.split(',').map(function(s) { return s.trim(); });
+                        if (propertyType && showForArr.indexOf(propertyType) === -1) {
+                            isVisible = false;
+                        }
+                    }
+
+                    // Check show_for_listing (listing type)
+                    if (isVisible && config.show_for_listing) {
+                        const showForListingArr = config.show_for_listing.split(',').map(function(s) { return s.trim(); });
+                        if (listingType && showForListingArr.indexOf(listingType) === -1) {
+                            isVisible = false;
+                        }
+                    }
+
+                    // Toggle visibility of the field's container
+                    // We target form-row, type-field, features-section, or closest grouping
+                    const $container = $field.closest('.form-row, .form-row-group, .type-field, .features-section, .sale-lease-details');
+                    
+                    if ($container.length) {
+                        $container.toggle(isVisible);
+                    } else {
+                        $field.toggle(isVisible);
+                    }
+
+                    // Disable hidden fields so they aren't validated by browser or our script
+                    $field.prop('disabled', !isVisible);
+
+                    if (isVisible) {
+                        stepHasVisibleFields = true;
+                    }
+                }
+
+                // Toggle visibility of the step itself if it has no visible fields
+                // Note: basic, images, and review are always visible
+                if (stepName !== 'basic' && stepName !== 'images' && stepName !== 'review') {
+                    const stepNum = this.getStepNumberFromName(stepName);
+                    $('#step-' + stepNum).toggle(stepHasVisibleFields);
+                }
             }
 
-            // Adjust progress markers visibility
-            this.$progressSteps.each(function(index) {
-                const stepNum = index + 1;
-                const $step = $('#step-' + stepNum);
-                $(this).toggle(!$step.is(':hidden'));
-            });
+            // Update step headings for Step 2
+            const propertyTypeConfigMap = {
+                house:      { title: 'Residential Details', desc: 'Add details about your house' },
+                apartment:  { title: 'Apartment Details',   desc: 'Add details about your apartment' },
+                land:       { title: 'Land Details',        desc: 'Add details about your land' },
+                commercial: { title: 'Commercial Details',  desc: 'Add details about your commercial property' },
+                industrial: { title: 'Industrial Details',  desc: 'Add details about your industrial property' }
+            };
 
-            // If current step is hidden, move to next visible step
-            if ($('#step-' + this.currentStep).is(':hidden')) {
-                let next = this.currentStep;
-                while ($('#step-' + next).is(':hidden') && next < this.totalSteps) {
-                    next++;
-                }
-                if (!$('#step-' + next).is(':hidden')) {
-                    this.currentStep = next;
-                }
+            if (propertyTypeConfigMap[propertyType]) {
+                $('#step-2-title').text(propertyTypeConfigMap[propertyType].title);
+                $('#step-2-desc').text(propertyTypeConfigMap[propertyType].desc);
             }
 
             this.updateStep();
+        },
+
+        getStepNumberFromName: function(name) {
+            const names = { basic: 1, details: 2, location: 3, features: 4, images: 5, review: 6 };
+            return names[name] || 1;
+        },
+
+        getPropertyType: function() {
+            return (this.$form.find('#property_type').val() || '').toString().toLowerCase().trim();
         },
 
         submitProperty: function() {
@@ -1133,30 +1244,29 @@
         },
 
         populateForm: function(data) {
-            // Populate all fields
-            for (const key in data) {
-                // Handle array fields (checkboxes) - try both with and without []
-                let $field = $('[name="' + key + '"]');
-                if (!$field.length) {
-                    $field = $('[name="' + key + '[]"]');
-                }
-                
-                if ($field.length) {
-                    // Skip file inputs as they cannot be set programmatically
-                    if ($field.attr('type') === 'file') {
-                        continue;
-                    }
-                    
-                    if ($field.attr('type') === 'checkbox') {
-                        // Handle checkboxes - check/uncheck based on array values
-                        const values = Array.isArray(data[key]) ? data[key] : [];
-                        $field.each(function() {
-                            const $checkbox = $(this);
-                            const isChecked = values.includes($checkbox.val());
-                            $checkbox.prop('checked', isChecked);
-                        });
-                    } else {
-                        $field.val(data[key]);
+            const registry = malisafiSubmission.fieldRegistry;
+            
+            // Populate fields based on registry to ensure we cover everything
+            for (const step in registry) {
+                const fields = registry[step];
+                for (const fieldKey in fields) {
+                    if (data.hasOwnProperty(fieldKey)) {
+                        const value = data[fieldKey];
+                        let $field = this.$form.find(`[name="${fieldKey}"]`);
+                        if (!$field.length) {
+                            $field = this.$form.find(`[name="${fieldKey}[]"]`);
+                        }
+                        
+                        if ($field.length) {
+                            if ($field.attr('type') === 'checkbox') {
+                                const values = Array.isArray(value) ? value : [];
+                                $field.each(function() {
+                                    $(this).prop('checked', values.indexOf($(this).val()) !== -1);
+                                });
+                            } else {
+                                $field.val(value);
+                            }
+                        }
                     }
                 }
             }
@@ -1165,7 +1275,7 @@
                 this.fetchSubcounties(data.county, data.subcounty || '');
             }
 
-            this.toggleSaleLeaseDetails();
+            this.refreshFieldsVisibility();
 
             if (data.featured_image) {
                 this.setFeaturedImage(data.featured_image);

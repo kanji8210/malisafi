@@ -123,10 +123,11 @@ $can_assign_agent = current_user_can('manage_options') || current_user_can('edit
 
         <!-- Step 2: Details -->
         <div class="wizard-step" id="step-2">
-            <h2><?php _e('Property Details', 'malisafi-mls'); ?></h2>
-            <p class="step-description"><?php _e('Add specific details about your property', 'malisafi-mls'); ?></p>
+            <h2 id="step-2-title"><?php _e('Property Details', 'malisafi-mls'); ?></h2>
+            <p class="step-description" id="step-2-desc"><?php _e('Add specific details about your property', 'malisafi-mls'); ?></p>
 
-            <div class="form-row-group">
+            <!-- Residential: Bedrooms / Bathrooms (house, apartment) -->
+            <div class="form-row-group type-field" data-show-for="house,apartment">
                 <div class="form-row">
                     <label for="bedrooms"><?php _e('Bedrooms', 'malisafi-mls'); ?></label>
                     <input type="number" id="bedrooms" name="bedrooms" class="form-control" min="0" max="50" value="0">
@@ -137,7 +138,58 @@ $can_assign_agent = current_user_can('manage_options') || current_user_can('edit
                 </div>
             </div>
 
-            <div class="form-row-group">
+            <!-- Apartment: Floor number / Total floors -->
+            <div class="form-row-group type-field" data-show-for="apartment">
+                <div class="form-row">
+                    <label for="floor_number"><?php _e('Floor Number', 'malisafi-mls'); ?></label>
+                    <input type="number" id="floor_number" name="floor_number" class="form-control" min="0" max="200" placeholder="3">
+                </div>
+                <div class="form-row">
+                    <label for="total_floors"><?php _e('Total Floors in Building', 'malisafi-mls'); ?></label>
+                    <input type="number" id="total_floors" name="total_floors" class="form-control" min="1" max="200" placeholder="10">
+                </div>
+            </div>
+
+            <!-- Commercial: Rooms/Offices count / Parking spaces -->
+            <div class="form-row-group type-field" data-show-for="commercial">
+                <div class="form-row">
+                    <label for="office_spaces"><?php _e('Office / Shop Units', 'malisafi-mls'); ?></label>
+                    <input type="number" id="office_spaces" name="office_spaces" class="form-control" min="0" placeholder="4">
+                </div>
+                <div class="form-row">
+                    <label for="parking_spaces"><?php _e('Parking Spaces', 'malisafi-mls'); ?></label>
+                    <input type="number" id="parking_spaces" name="parking_spaces" class="form-control" min="0" placeholder="10">
+                </div>
+            </div>
+            <div class="form-row-group type-field" data-show-for="commercial">
+                <div class="form-row">
+                    <label for="floor_number_c"><?php _e('Floor Level', 'malisafi-mls'); ?></label>
+                    <input type="number" id="floor_number_c" name="floor_number" class="form-control" min="0" max="200" placeholder="1">
+                </div>
+                <div class="form-row">
+                    <label for="total_floors_c"><?php _e('Total Floors in Building', 'malisafi-mls'); ?></label>
+                    <input type="number" id="total_floors_c" name="total_floors" class="form-control" min="1" max="200" placeholder="5">
+                </div>
+            </div>
+
+            <!-- Industrial: Loading bays / Power capacity / Ceiling height -->
+            <div class="form-row-group type-field" data-show-for="industrial">
+                <div class="form-row">
+                    <label for="loading_bays"><?php _e('Loading Bays', 'malisafi-mls'); ?></label>
+                    <input type="number" id="loading_bays" name="loading_bays" class="form-control" min="0" placeholder="2">
+                </div>
+                <div class="form-row">
+                    <label for="power_capacity_kva"><?php _e('Power Capacity (kVA)', 'malisafi-mls'); ?></label>
+                    <input type="number" id="power_capacity_kva" name="power_capacity_kva" class="form-control" min="0" step="0.1" placeholder="100">
+                </div>
+            </div>
+            <div class="form-row type-field" data-show-for="industrial">
+                <label for="ceiling_height_m"><?php _e('Clear Ceiling Height (m)', 'malisafi-mls'); ?></label>
+                <input type="number" id="ceiling_height_m" name="ceiling_height_m" class="form-control" min="0" step="0.1" placeholder="6">
+            </div>
+
+            <!-- All types: Size -->
+            <div class="form-row-group type-field" data-show-for="house,apartment,land,commercial,industrial">
                 <div class="form-row">
                     <label for="property_size"><?php _e('Size', 'malisafi-mls'); ?></label>
                     <input type="number" id="property_size" name="size" class="form-control" min="0" step="0.01" placeholder="120">
@@ -153,7 +205,8 @@ $can_assign_agent = current_user_can('manage_options') || current_user_can('edit
                 </div>
             </div>
 
-            <div class="form-row-group">
+            <!-- Building types: Year built / Condition -->
+            <div class="form-row-group type-field" data-show-for="house,apartment,commercial,industrial">
                 <div class="form-row">
                     <label for="year_built"><?php _e('Year Built', 'malisafi-mls'); ?></label>
                     <input type="number" id="year_built" name="year_built" class="form-control" min="1800" max="<?php echo date('Y') + 5; ?>" placeholder="<?php echo date('Y'); ?>">
@@ -168,6 +221,41 @@ $can_assign_agent = current_user_can('manage_options') || current_user_can('edit
                         <option value="fair"><?php _e('Fair', 'malisafi-mls'); ?></option>
                         <option value="renovation"><?php _e('Needs Renovation', 'malisafi-mls'); ?></option>
                     </select>
+                </div>
+            </div>
+
+            <!-- Land-specific fields -->
+            <div class="form-row-group type-field" data-show-for="land">
+                <div class="form-row">
+                    <label for="land_use"><?php _e('Zoning / Land Use', 'malisafi-mls'); ?></label>
+                    <select id="land_use" name="land_use" class="form-control">
+                        <option value=""><?php _e('Select...', 'malisafi-mls'); ?></option>
+                        <option value="residential"><?php _e('Residential', 'malisafi-mls'); ?></option>
+                        <option value="commercial"><?php _e('Commercial', 'malisafi-mls'); ?></option>
+                        <option value="agricultural"><?php _e('Agricultural', 'malisafi-mls'); ?></option>
+                        <option value="industrial"><?php _e('Industrial', 'malisafi-mls'); ?></option>
+                        <option value="mixed_use"><?php _e('Mixed Use', 'malisafi-mls'); ?></option>
+                        <option value="conservation"><?php _e('Conservation', 'malisafi-mls'); ?></option>
+                    </select>
+                </div>
+                <div class="form-row">
+                    <label for="road_access"><?php _e('Road Access', 'malisafi-mls'); ?></label>
+                    <select id="road_access" name="road_access" class="form-control">
+                        <option value=""><?php _e('Select...', 'malisafi-mls'); ?></option>
+                        <option value="tarmac"><?php _e('Tarmac Road', 'malisafi-mls'); ?></option>
+                        <option value="murram"><?php _e('Murram / Gravel Road', 'malisafi-mls'); ?></option>
+                        <option value="footpath"><?php _e('Footpath Only', 'malisafi-mls'); ?></option>
+                        <option value="none"><?php _e('No Road Access', 'malisafi-mls'); ?></option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-row type-field" data-show-for="land">
+                <label><?php _e('Available Utilities', 'malisafi-mls'); ?></label>
+                <div class="checkbox-grid">
+                    <label><input type="checkbox" name="land_utilities[]" value="electricity"> <?php _e('Electricity', 'malisafi-mls'); ?></label>
+                    <label><input type="checkbox" name="land_utilities[]" value="water"> <?php _e('Water Supply', 'malisafi-mls'); ?></label>
+                    <label><input type="checkbox" name="land_utilities[]" value="sewer"> <?php _e('Sewer / Drainage', 'malisafi-mls'); ?></label>
+                    <label><input type="checkbox" name="land_utilities[]" value="fibre"> <?php _e('Fibre / Internet', 'malisafi-mls'); ?></label>
                 </div>
             </div>
 
@@ -368,8 +456,9 @@ $can_assign_agent = current_user_can('manage_options') || current_user_can('edit
             <h2><?php _e('Features & Amenities', 'malisafi-mls'); ?></h2>
             <p class="step-description"><?php _e('Select all that apply to your property', 'malisafi-mls'); ?></p>
 
-            <div class="features-section">
-                <h3><?php _e('Key Features', 'malisafi-mls'); ?></h3>
+            <!-- Residential Features (house, apartment) -->
+            <div class="features-section type-field" data-show-for="house,apartment">
+                <h3><?php _e('Residential Features', 'malisafi-mls'); ?></h3>
                 <div class="checkbox-grid">
                     <label class="checkbox-item"><input type="checkbox" name="features[]" value="parking"> <span class="icon">🚗</span> <span class="label"><?php _e('Parking', 'malisafi-mls'); ?></span></label>
                     <label class="checkbox-item"><input type="checkbox" name="features[]" value="garden"> <span class="icon">🌳</span> <span class="label"><?php _e('Garden', 'malisafi-mls'); ?></span></label>
@@ -379,10 +468,13 @@ $can_assign_agent = current_user_can('manage_options') || current_user_can('edit
                     <label class="checkbox-item"><input type="checkbox" name="features[]" value="gym"> <span class="icon">💪</span> <span class="label"><?php _e('Gym', 'malisafi-mls'); ?></span></label>
                     <label class="checkbox-item"><input type="checkbox" name="features[]" value="security"> <span class="icon">🔒</span> <span class="label"><?php _e('24/7 Security', 'malisafi-mls'); ?></span></label>
                     <label class="checkbox-item"><input type="checkbox" name="features[]" value="furnished"> <span class="icon">🛋️</span> <span class="label"><?php _e('Furnished', 'malisafi-mls'); ?></span></label>
+                    <label class="checkbox-item"><input type="checkbox" name="features[]" value="playground"> <span class="icon">🎮</span> <span class="label"><?php _e('Playground', 'malisafi-mls'); ?></span></label>
+                    <label class="checkbox-item"><input type="checkbox" name="features[]" value="clubhouse"> <span class="icon">🏛️</span> <span class="label"><?php _e('Clubhouse', 'malisafi-mls'); ?></span></label>
                 </div>
             </div>
 
-            <div class="features-section">
+            <!-- Residential Amenities (house, apartment) -->
+            <div class="features-section type-field" data-show-for="house,apartment">
                 <h3><?php _e('Amenities', 'malisafi-mls'); ?></h3>
                 <div class="checkbox-grid">
                     <label class="checkbox-item"><input type="checkbox" name="amenities[]" value="wifi"> <span class="icon">📶</span> <span class="label"><?php _e('WiFi', 'malisafi-mls'); ?></span></label>
@@ -391,8 +483,65 @@ $can_assign_agent = current_user_can('manage_options') || current_user_can('edit
                     <label class="checkbox-item"><input type="checkbox" name="amenities[]" value="elevator"> <span class="icon">🛗</span> <span class="label"><?php _e('Elevator', 'malisafi-mls'); ?></span></label>
                     <label class="checkbox-item"><input type="checkbox" name="amenities[]" value="backup_generator"> <span class="icon">⚡</span> <span class="label"><?php _e('Backup Generator', 'malisafi-mls'); ?></span></label>
                     <label class="checkbox-item"><input type="checkbox" name="amenities[]" value="water_backup"> <span class="icon">💧</span> <span class="label"><?php _e('Water Backup', 'malisafi-mls'); ?></span></label>
-                    <label class="checkbox-item"><input type="checkbox" name="amenities[]" value="playground"> <span class="icon">🎮</span> <span class="label"><?php _e('Playground', 'malisafi-mls'); ?></span></label>
-                    <label class="checkbox-item"><input type="checkbox" name="amenities[]" value="clubhouse"> <span class="icon">🏛️</span> <span class="label"><?php _e('Clubhouse', 'malisafi-mls'); ?></span></label>
+                </div>
+            </div>
+
+            <!-- Commercial Features -->
+            <div class="features-section type-field" data-show-for="commercial">
+                <h3><?php _e('Commercial Features', 'malisafi-mls'); ?></h3>
+                <div class="checkbox-grid">
+                    <label class="checkbox-item"><input type="checkbox" name="features[]" value="parking"> <span class="icon">🚗</span> <span class="label"><?php _e('Parking', 'malisafi-mls'); ?></span></label>
+                    <label class="checkbox-item"><input type="checkbox" name="features[]" value="security"> <span class="icon">🔒</span> <span class="label"><?php _e('24/7 Security', 'malisafi-mls'); ?></span></label>
+                    <label class="checkbox-item"><input type="checkbox" name="features[]" value="terrace"> <span class="icon">☀️</span> <span class="label"><?php _e('Outdoor Terrace', 'malisafi-mls'); ?></span></label>
+                    <label class="checkbox-item"><input type="checkbox" name="features[]" value="loading_area"> <span class="icon">🏗️</span> <span class="label"><?php _e('Loading Area', 'malisafi-mls'); ?></span></label>
+                    <label class="checkbox-item"><input type="checkbox" name="features[]" value="reception"> <span class="icon">🏢</span> <span class="label"><?php _e('Reception Area', 'malisafi-mls'); ?></span></label>
+                    <label class="checkbox-item"><input type="checkbox" name="features[]" value="boardroom"> <span class="icon">📋</span> <span class="label"><?php _e('Boardroom', 'malisafi-mls'); ?></span></label>
+                </div>
+            </div>
+            <div class="features-section type-field" data-show-for="commercial">
+                <h3><?php _e('Commercial Amenities', 'malisafi-mls'); ?></h3>
+                <div class="checkbox-grid">
+                    <label class="checkbox-item"><input type="checkbox" name="amenities[]" value="elevator"> <span class="icon">🛗</span> <span class="label"><?php _e('Elevator', 'malisafi-mls'); ?></span></label>
+                    <label class="checkbox-item"><input type="checkbox" name="amenities[]" value="ac"> <span class="icon">❄️</span> <span class="label"><?php _e('Air Conditioning', 'malisafi-mls'); ?></span></label>
+                    <label class="checkbox-item"><input type="checkbox" name="amenities[]" value="backup_generator"> <span class="icon">⚡</span> <span class="label"><?php _e('Backup Generator', 'malisafi-mls'); ?></span></label>
+                    <label class="checkbox-item"><input type="checkbox" name="amenities[]" value="water_backup"> <span class="icon">💧</span> <span class="label"><?php _e('Water Backup', 'malisafi-mls'); ?></span></label>
+                    <label class="checkbox-item"><input type="checkbox" name="amenities[]" value="wifi"> <span class="icon">📶</span> <span class="label"><?php _e('WiFi Ready', 'malisafi-mls'); ?></span></label>
+                    <label class="checkbox-item"><input type="checkbox" name="amenities[]" value="cctv"> <span class="icon">📷</span> <span class="label"><?php _e('CCTV', 'malisafi-mls'); ?></span></label>
+                </div>
+            </div>
+
+            <!-- Industrial Features -->
+            <div class="features-section type-field" data-show-for="industrial">
+                <h3><?php _e('Industrial Features', 'malisafi-mls'); ?></h3>
+                <div class="checkbox-grid">
+                    <label class="checkbox-item"><input type="checkbox" name="features[]" value="parking"> <span class="icon">🚗</span> <span class="label"><?php _e('Truck Parking', 'malisafi-mls'); ?></span></label>
+                    <label class="checkbox-item"><input type="checkbox" name="features[]" value="security"> <span class="icon">🔒</span> <span class="label"><?php _e('24/7 Security', 'malisafi-mls'); ?></span></label>
+                    <label class="checkbox-item"><input type="checkbox" name="features[]" value="loading_area"> <span class="icon">🏗️</span> <span class="label"><?php _e('Loading Bays', 'malisafi-mls'); ?></span></label>
+                    <label class="checkbox-item"><input type="checkbox" name="features[]" value="crane"> <span class="icon">🏗️</span> <span class="label"><?php _e('Overhead Crane', 'malisafi-mls'); ?></span></label>
+                    <label class="checkbox-item"><input type="checkbox" name="features[]" value="cold_storage"> <span class="icon">🧊</span> <span class="label"><?php _e('Cold Storage', 'malisafi-mls'); ?></span></label>
+                    <label class="checkbox-item"><input type="checkbox" name="features[]" value="sprinkler_system"> <span class="icon">💦</span> <span class="label"><?php _e('Sprinkler System', 'malisafi-mls'); ?></span></label>
+                </div>
+            </div>
+            <div class="features-section type-field" data-show-for="industrial">
+                <h3><?php _e('Industrial Utilities', 'malisafi-mls'); ?></h3>
+                <div class="checkbox-grid">
+                    <label class="checkbox-item"><input type="checkbox" name="amenities[]" value="backup_generator"> <span class="icon">⚡</span> <span class="label"><?php _e('Backup Generator', 'malisafi-mls'); ?></span></label>
+                    <label class="checkbox-item"><input type="checkbox" name="amenities[]" value="water_backup"> <span class="icon">💧</span> <span class="label"><?php _e('Water Backup', 'malisafi-mls'); ?></span></label>
+                    <label class="checkbox-item"><input type="checkbox" name="amenities[]" value="three_phase_power"> <span class="icon">⚡</span> <span class="label"><?php _e('3-Phase Power', 'malisafi-mls'); ?></span></label>
+                    <label class="checkbox-item"><input type="checkbox" name="amenities[]" value="wastewater_treatment"> <span class="icon">🌊</span> <span class="label"><?php _e('Wastewater Treatment', 'malisafi-mls'); ?></span></label>
+                </div>
+            </div>
+
+            <!-- Land Features -->
+            <div class="features-section type-field" data-show-for="land">
+                <h3><?php _e('Land Features', 'malisafi-mls'); ?></h3>
+                <div class="checkbox-grid">
+                    <label class="checkbox-item"><input type="checkbox" name="features[]" value="security"> <span class="icon">🔒</span> <span class="label"><?php _e('Perimeter Wall / Fence', 'malisafi-mls'); ?></span></label>
+                    <label class="checkbox-item"><input type="checkbox" name="features[]" value="borehole"> <span class="icon">💧</span> <span class="label"><?php _e('Borehole', 'malisafi-mls'); ?></span></label>
+                    <label class="checkbox-item"><input type="checkbox" name="features[]" value="mature_trees"> <span class="icon">🌳</span> <span class="label"><?php _e('Mature Trees', 'malisafi-mls'); ?></span></label>
+                    <label class="checkbox-item"><input type="checkbox" name="features[]" value="flat_terrain"> <span class="icon">📐</span> <span class="label"><?php _e('Flat Terrain', 'malisafi-mls'); ?></span></label>
+                    <label class="checkbox-item"><input type="checkbox" name="features[]" value="river_frontage"> <span class="icon">🌊</span> <span class="label"><?php _e('River Frontage', 'malisafi-mls'); ?></span></label>
+                    <label class="checkbox-item"><input type="checkbox" name="features[]" value="survey_done"> <span class="icon">📏</span> <span class="label"><?php _e('Survey Done', 'malisafi-mls'); ?></span></label>
                 </div>
             </div>
         </div>
