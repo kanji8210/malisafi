@@ -419,13 +419,14 @@ class Malisafi_Admin_Dashboard {
             true
         );
         
-        // Localize script for AJAX (using the submission script handle to ensure it gets the registry)
-        wp_localize_script('malisafi-property-submission', 'malisafiSubmission', array(
+        // Localize script for AJAX and strings
+        wp_localize_script('malisafi-admin', 'malisafi_admin', array(
             'ajaxurl' => admin_url('admin-ajax.php'),
-            'nonce' => wp_create_nonce('malisafi_property_submission'),
+            'ajax_url' => admin_url('admin-ajax.php'), // Legacy support
+            'nonce' => wp_create_nonce('malisafi_admin_nonce'),
+            'submissionNonce' => wp_create_nonce('malisafi_property_submission'),
             'uploadNonce' => wp_create_nonce('malisafi_upload_images'),
             'refNonce' => wp_create_nonce('malisafi_generate_ref_id'),
-            'uploadsEnabled' => true,
             'fieldRegistry' => \MalisafiMLS\Property_Submission::get_field_registry(),
             'strings' => array(
                 'saving' => __('Saving...', 'malisafi-mls'),
@@ -441,12 +442,6 @@ class Malisafi_Admin_Dashboard {
                 'media_select_title' => __('Select Property Images', 'malisafi-mls'),
                 'media_select_button' => __('Use Images', 'malisafi-mls'),
             )
-        ));
-        
-        // Also keep legacy variable for other admin scripts if needed
-        wp_localize_script('malisafi-admin', 'malisafi_admin', array(
-            'ajax_url' => admin_url('admin-ajax.php'),
-            'nonce' => wp_create_nonce('malisafi_admin_nonce'),
         ));
     }
 }

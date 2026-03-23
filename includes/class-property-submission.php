@@ -32,8 +32,10 @@ class Property_Submission {
         // Handle direct property submission requests
         add_action('wp', array(__CLASS__, 'handle_direct_requests'));
         
-        // Shortcode for property submission form
+        // Shortcode for property submission form (Frontend & Agent Dashboard)
         add_shortcode('malisafi_submit_property', array(__CLASS__, 'render_submission_form'));
+        add_shortcode('malisafi_agent_add_property', array(__CLASS__, 'render_submission_form'));
+        add_shortcode('malisafi_property_submit', array(__CLASS__, 'render_submission_form'));
         
         // Shortcode for success page
         add_shortcode('malisafi_property_success', array(__CLASS__, 'render_success_page'));

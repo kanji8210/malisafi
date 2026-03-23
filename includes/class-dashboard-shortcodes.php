@@ -197,6 +197,7 @@ class Dashboard_Shortcodes {
 			'uploadNonce' => wp_create_nonce('malisafi_upload_images'),
 			'refNonce' => wp_create_nonce('malisafi_generate_ref_id'),
 			'uploadsEnabled' => true,
+			'fieldRegistry' => \MalisafiMLS\Property_Submission::get_field_registry(),
 			'strings' => array(
 				'saving' => __('Saving...', 'malisafi-mls'),
 				'saved' => __('Saved', 'malisafi-mls'),
