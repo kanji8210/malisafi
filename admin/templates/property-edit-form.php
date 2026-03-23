@@ -11,39 +11,26 @@ if (!defined('ABSPATH')) exit;
 \MalisafiMLS\Property_Submission::enqueue_assets();
 
 echo '<div class="wrap malisafi-unified-wizard-admin">';
-echo \MalisafiMLS\Property_Submission::render_submission_form();
+echo \MalisafiMLS\Property_Submission::render_submission_form(array());
 echo '</div>';
 
-// Simple fix for admin menu styles to accommodate the wizard
+/**
+ * Simple fix for admin menu styles to accommodate the wizard
+ */
 ?>
 <style>
 .malisafi-unified-wizard-admin .malisafi-property-wizard {
     margin-top: 20px;
     background: #fff;
-    padding: 2px; /* Small padding to avoid border collisions in admin */
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
 }
 #adminmenuwrap {
-    z-index: 10001; /* Ensure admin menu stays on top if wizard uses high z-index */
+    z-index: 10001;
 }
-</style>    });
-
-    populateSubcounties($('#county').val(), '<?php echo esc_js($property_meta['subcounty'] ?? ''); ?>');
-
-    $('#listing_type').on('change', toggleSaleLeaseDetails);
-    toggleSaleLeaseDetails();
-});
-
-function malisafiGetLocation() {
-    if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(function(position) {
-            var lat = position.coords.latitude.toFixed(6);
-            var lng = position.coords.longitude.toFixed(6);
-            document.getElementById('property_gps').value = lat + ', ' + lng;
-        }, function(error) {
-            alert('<?php _e('Unable to retrieve your location.', 'malisafi-mls'); ?>');
-        });
-    } else {
-        alert('<?php _e('Geolocation is not supported by your browser.', 'malisafi-mls'); ?>');
-    }
+/* Ensure the wizard doesn't conflict with admin styles */
+.malisafi-property-wizard * {
+    box-sizing: border-box;
 }
-</script>
+</style>

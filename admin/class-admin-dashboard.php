@@ -419,8 +419,8 @@ class Malisafi_Admin_Dashboard {
             true
         );
         
-        // Localize script for AJAX
-        wp_localize_script('malisafi-admin', 'malisafiSubmission', array(
+        // Localize script for AJAX (using the submission script handle to ensure it gets the registry)
+        wp_localize_script('malisafi-property-submission', 'malisafiSubmission', array(
             'ajaxurl' => admin_url('admin-ajax.php'),
             'nonce' => wp_create_nonce('malisafi_property_submission'),
             'uploadNonce' => wp_create_nonce('malisafi_upload_images'),

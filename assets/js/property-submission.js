@@ -209,7 +209,7 @@
 
         validateStep: function(step) {
             const stepName = this.getStepName(step);
-            const registry = malisafiSubmission.fieldRegistry;
+            const registry = malisafiSubmission && malisafiSubmission.fieldRegistry ? malisafiSubmission.fieldRegistry : {};
             const fields = registry[stepName] || {};
             let isValid = true;
             let firstErrorField = null;
@@ -342,7 +342,7 @@
 
         getStepData: function(step) {
             const stepName = this.getStepName(step);
-            const registry = malisafiSubmission.fieldRegistry;
+            const registry = malisafiSubmission && malisafiSubmission.fieldRegistry ? malisafiSubmission.fieldRegistry : {};
             const fields = registry[stepName] || {};
             const data = {};
 
