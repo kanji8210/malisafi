@@ -53,7 +53,6 @@
             this.propertyId = $('#property_id').val() || 0;
             this.cacheElements();
             this.bindEvents();
-            this.toggleSaleLeaseDetails();
 
             // Adjust wizard fields and steps based on property type and listing type
             this.refreshFieldsVisibility();

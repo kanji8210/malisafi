@@ -422,4 +422,4 @@ class Malisafi_Agent_Ratings_Admin {
 }
 
 // Initialize
-Malisafi_Agent_Ratings_Admin::init();
+// Malisafi_Agent_Ratings_Admin::init();

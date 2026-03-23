@@ -107,12 +107,7 @@ $total_properties = intval($total_published) + intval($total_pending);
                     </div>
                 <?php endif; ?>
                 
-                <?php if ($avg_rating): ?>
-                    <div class="agent-rating-badge">
-                        <span class="rating-stars"><?php echo str_repeat('⭐', round($avg_rating)); ?></span>
-                        <span class="rating-value"><?php echo number_format($avg_rating, 1); ?></span>
-                    </div>
-                <?php endif; ?>
+
             </div>
 
             <div class="agent-info">
@@ -126,18 +121,7 @@ $total_properties = intval($total_published) + intval($total_pending);
                         </p>
                     <?php endif; ?>
 
-                    <?php if ($rating_count): ?>
-                        <div class="agent-rating">
-                            <div class="stars">
-                                <?php for ($i = 1; $i <= 5; $i++): ?>
-                                    <span class="star <?php echo $i <= round($avg_rating) ? 'filled' : ''; ?>">★</span>
-                                <?php endfor; ?>
-                            </div>
-                            <span class="rating-text">
-                                <?php printf(__('%s (%d reviews)', 'malisafi-mls'), number_format($avg_rating, 1), $rating_count); ?>
-                            </span>
-                        </div>
-                    <?php endif; ?>
+
 
                     <div class="agent-meta-details">
                         <?php if ($agent_experience): ?>
@@ -192,34 +176,7 @@ $total_properties = intval($total_published) + intval($total_pending);
                         </div>
                     </div>
 
-                    <div class="rating-action">
-                        <?php 
-                        // Check if user can rate this agent
-                        $current_user = wp_get_current_user();
-                        $can_rate = false;
-                        
-                        // User must be logged in
-                        if ($current_user->ID) {
-                            // Cannot rate yourself
-                            if ($current_user->ID != $linked_user_id) {
-                                // Agents cannot rate other agents
-                                $is_agent = in_array('malisafi_agent_basic', $current_user->roles) || 
-                                           in_array('malisafi_agent_premium', $current_user->roles);
-                                
-                                if (!$is_agent) {
-                                    $can_rate = true;
-                                }
-                            }
-                        }
-                        ?>
-                        
-                        <?php if ($can_rate): ?>
-                            <button class="btn-rate-agent" id="writeReviewBtn">
-                                <span class="dashicons dashicons-star-filled"></span>
-                                <?php _e('Rate Agent', 'malisafi-mls'); ?>
-                            </button>
-                        <?php endif; ?>
-                    </div>
+
                 </div>
             </div>
         </div>
@@ -238,10 +195,7 @@ $total_properties = intval($total_published) + intval($total_pending);
                 <?php endif; ?>
             </div>
         </div>
-        <div class="stat-item">
-            <div class="stat-value"><?php echo $rating_count; ?></div>
-            <div class="stat-label"><?php _e('Reviews', 'malisafi-mls'); ?></div>
-        </div>
+
         <div class="stat-item">
             <div class="stat-value"><?php echo $agent_experience ?: '0'; ?></div>
             <div class="stat-label"><?php _e('Years Experience', 'malisafi-mls'); ?></div>
@@ -335,140 +289,4 @@ $total_properties = intval($total_published) + intval($total_pending);
         </div>
     <?php endif; ?>
 
-    <!-- Reviews Section -->
-    <div class="agent-reviews">
-        <h2><?php _e('Client Reviews', 'malisafi-mls'); ?></h2>
-        
-        <?php 
-        // Check if user can write review (already checked above)
-        if (is_user_logged_in() && isset($can_rate) && $can_rate): 
-        ?>
-            <button class="button" id="writeReviewBtn"><?php _e('Write a Review', 'malisafi-mls'); ?></button>
-        <?php elseif (is_user_logged_in()): ?>
-            <?php 
-            $current_user = wp_get_current_user();
-            if ($current_user->ID == $linked_user_id): ?>
-                <p class="rate-notice"><?php _e('You cannot rate yourself.', 'malisafi-mls'); ?></p>
-            <?php else: ?>
-                <p class="rate-notice"><?php _e('Only clients can rate agents.', 'malisafi-mls'); ?></p>
-            <?php endif; ?>
-        <?php endif; ?>
 
-        <div id="reviewsList">
-            <?php
-            $reviews = $wpdb->get_results($wpdb->prepare(
-                "SELECT * FROM $ratings_table WHERE agent_id = %d AND status = 'approved' ORDER BY created_at DESC LIMIT 10",
-                $agent_id
-            ));
-
-            if ($reviews):
-                foreach ($reviews as $review):
-                    $reviewer = get_userdata($review->user_id);
-                    ?>
-                    <div class="review-item">
-                        <div class="review-header">
-                            <div class="reviewer-info">
-                                <?php echo get_avatar($review->user_id, 40); ?>
-                                <div>
-                                    <strong><?php echo $reviewer ? esc_html($reviewer->display_name) : __('Anonymous', 'malisafi-mls'); ?></strong>
-                                    <?php if ($review->verified_client): ?>
-                                        <span class="verified-badge" title="<?php esc_attr_e('Verified Client', 'malisafi-mls'); ?>">
-                                            <span class="dashicons dashicons-yes-alt"></span> <?php _e('Verified', 'malisafi-mls'); ?>
-                                        </span>
-                                    <?php endif; ?>
-                                    <div class="review-stars">
-                                        <?php for ($i = 1; $i <= 5; $i++): ?>
-                                            <span class="star <?php echo $i <= $review->rating ? 'filled' : ''; ?>">★</span>
-                                        <?php endfor; ?>
-                                    </div>
-                                </div>
-                            </div>
-                            <span class="review-date"><?php echo human_time_diff(strtotime($review->created_at), current_time('timestamp')) . ' ' . __('ago', 'malisafi-mls'); ?></span>
-                        </div>
-                        
-                        <?php if ($review->review_title): ?>
-                            <h4 class="review-title"><?php echo esc_html($review->review_title); ?></h4>
-                        <?php endif; ?>
-                        
-                        <?php if ($review->review_text): ?>
-                            <p class="review-comment"><?php echo esc_html($review->review_text); ?></p>
-                        <?php endif; ?>
-                        
-                        <!-- Helpful votes -->
-                        <div class="review-helpful">
-                            <span class="helpful-label"><?php _e('Was this review helpful?', 'malisafi-mls'); ?></span>
-                            <button class="helpful-btn helpful-yes" data-review-id="<?php echo $review->id; ?>">
-                                <span class="dashicons dashicons-thumbs-up"></span>
-                                <?php _e('Yes', 'malisafi-mls'); ?>
-                                <span class="helpful-yes-count"><?php echo intval($review->helpful_count); ?></span>
-                            </button>
-                            <button class="helpful-btn helpful-no" data-review-id="<?php echo $review->id; ?>">
-                                <span class="dashicons dashicons-thumbs-down"></span>
-                                <?php _e('No', 'malisafi-mls'); ?>
-                                <span class="helpful-no-count"><?php echo intval($review->not_helpful_count); ?></span>
-                            </button>
-                        </div>
-                        
-                        <?php if ($review->agent_response): ?>
-                            <div class="agent-response">
-                                <div class="response-header">
-                                    <span class="dashicons dashicons-businessman"></span>
-                                    <strong><?php _e('Agent Response:', 'malisafi-mls'); ?></strong>
-                                    <span class="response-date"><?php echo human_time_diff(strtotime($review->agent_responded_at), current_time('timestamp')) . ' ' . __('ago', 'malisafi-mls'); ?></span>
-                                </div>
-                                <p><?php echo esc_html($review->agent_response); ?></p>
-                            </div>
-                        <?php endif; ?>
-                    </div>
-                <?php endforeach;
-            else: ?>
-                <p class="no-reviews"><?php _e('No reviews yet. Be the first to review this agent!', 'malisafi-mls'); ?></p>
-            <?php endif; ?>
-        </div>
-    </div>
-</div>
-
-<!-- Review Modal -->
-<div id="reviewModal" class="malisafi-modal" style="display: none;">
-    <div class="modal-overlay"></div>
-    <div class="modal-content">
-        <span class="modal-close">&times;</span>
-        <h2><?php _e('Write a Review', 'malisafi-mls'); ?></h2>
-        <form class="agent-rating-form">
-            <input type="hidden" name="agent_id" value="<?php echo $agent_id; ?>">
-            <input type="hidden" name="property_id" value="">
-            
-            <div class="form-group">
-                <label><?php _e('Rating *', 'malisafi-mls'); ?></label>
-                <div class="star-rating-input">
-                    <input type="radio" name="rating" value="5" id="star5">
-                    <span class="star" data-rating="5">★</span>
-                    <input type="radio" name="rating" value="4" id="star4">
-                    <span class="star" data-rating="4">★</span>
-                    <input type="radio" name="rating" value="3" id="star3">
-                    <span class="star" data-rating="3">★</span>
-                    <input type="radio" name="rating" value="2" id="star2">
-                    <span class="star" data-rating="2">★</span>
-                    <input type="radio" name="rating" value="1" id="star1">
-                    <span class="star" data-rating="1">★</span>
-                </div>
-            </div>
-            
-            <div class="form-group">
-                <label><?php _e('Review Title', 'malisafi-mls'); ?></label>
-                <input type="text" name="review_title" placeholder="<?php esc_attr_e('e.g., Great service!', 'malisafi-mls'); ?>" maxlength="100">
-            </div>
-            
-            <div class="form-group">
-                <label><?php _e('Your Review *', 'malisafi-mls'); ?></label>
-                <textarea name="review_text" rows="5" placeholder="<?php esc_attr_e('Share your experience working with this agent...', 'malisafi-mls'); ?>" required maxlength="500"></textarea>
-                <small class="char-count"><span class="current">0</span> / 500 <?php _e('characters', 'malisafi-mls'); ?></small>
-            </div>
-            
-            <div class="form-actions">
-                <button type="button" class="button cancel-review"><?php _e('Cancel', 'malisafi-mls'); ?></button>
-                <button type="submit" class="button button-primary submit-rating"><?php _e('Submit Review', 'malisafi-mls'); ?></button>
-            </div>
-        </form>
-    </div>
-</div>

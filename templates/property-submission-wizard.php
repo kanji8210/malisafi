@@ -186,18 +186,47 @@ $can_assign_agent = current_user_can('manage_options') || current_user_can('edit
             </div>
 
             <?php if ($can_assign_agent) : ?>
+            <div class="form-row">
+                <label for="agent_user_id"><?php _e('Assign to Agent (System User)', 'malisafi-mls'); ?></label>
+                <select id="agent_user_id" name="agent_user_id" class="form-control">
+                    <option value=""><?php _e('Select an Agent...', 'malisafi-mls'); ?></option>
+                    <?php
+                    $agents = get_users(array(
+                        'role__in' => array('malisafi_agent_basic', 'malisafi_agent_premium', 'administrator'),
+                        'orderby' => 'display_name'
+                    ));
+                    $current_author = 0;
+                    if (isset($_GET['property_id'])) {
+                        $prop = get_post(intval($_GET['property_id']));
+                        if ($prop) $current_author = $prop->post_author;
+                    } elseif (isset($property_id)) {
+                        $prop = get_post($property_id);
+                        if ($prop) $current_author = $prop->post_author;
+                    }
+                    
+                    if (empty($current_author)) {
+                        $current_author = get_current_user_id();
+                    }
+
+                    foreach ($agents as $agent) {
+                        echo '<option value="' . esc_attr($agent->ID) . '" ' . selected($current_author, $agent->ID, false) . '>' . esc_html($agent->display_name) . ' (' . esc_html($agent->user_email) . ')</option>';
+                    }
+                    ?>
+                </select>
+            </div>
+
             <div class="form-row-group">
                 <div class="form-row">
-                    <label for="agent_name"><?php _e('Agent/Contact Name', 'malisafi-mls'); ?></label>
+                    <label for="agent_name"><?php _e('Public Display Name', 'malisafi-mls'); ?></label>
                     <input type="text" id="agent_name" name="agent_name" class="form-control" placeholder="<?php echo esc_attr__('e.g., John Doe', 'malisafi-mls'); ?>">
                 </div>
                 <div class="form-row">
-                    <label for="agent_email"><?php _e('Agent Email', 'malisafi-mls'); ?></label>
+                    <label for="agent_email"><?php _e('Public Display Email', 'malisafi-mls'); ?></label>
                     <input type="email" id="agent_email" name="agent_email" class="form-control" placeholder="agent@example.com">
                 </div>
             </div>
             <div class="form-row">
-                <label for="agent_phone"><?php _e('Agent Phone', 'malisafi-mls'); ?></label>
+                <label for="agent_phone"><?php _e('Public Display Phone', 'malisafi-mls'); ?></label>
                 <input type="text" id="agent_phone" name="agent_phone" class="form-control" placeholder="<?php echo esc_attr__('+254700000000', 'malisafi-mls'); ?>">
             </div>
             <?php endif; ?>

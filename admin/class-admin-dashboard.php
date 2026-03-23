@@ -420,16 +420,33 @@ class Malisafi_Admin_Dashboard {
         );
         
         // Localize script for AJAX
-        wp_localize_script('malisafi-admin', 'malisafi_admin', array(
-            'ajax_url' => admin_url('admin-ajax.php'),
-            'nonce' => wp_create_nonce('malisafi_admin_nonce'),
+        wp_localize_script('malisafi-admin', 'malisafiSubmission', array(
+            'ajaxurl' => admin_url('admin-ajax.php'),
+            'nonce' => wp_create_nonce('malisafi_property_submission'),
+            'uploadNonce' => wp_create_nonce('malisafi_upload_images'),
+            'refNonce' => wp_create_nonce('malisafi_generate_ref_id'),
+            'uploadsEnabled' => true,
+            'fieldRegistry' => \MalisafiMLS\Property_Submission::get_field_registry(),
             'strings' => array(
+                'saving' => __('Saving...', 'malisafi-mls'),
+                'saved' => __('Saved', 'malisafi-mls'),
+                'error' => __('Error saving/uploading', 'malisafi-mls'),
+                'uploading' => __('Uploading...', 'malisafi-mls'),
+                'uploadError' => __('Upload failed', 'malisafi-mls'),
+                'confirmDelete' => __('Are you sure you want to delete this image?', 'malisafi-mls'),
+                'submitProperty' => __('Submit Property', 'malisafi-mls'),
+                'submitting' => __('Submitting...', 'malisafi-mls'),
+                'success' => __('Property submitted successfully!', 'malisafi-mls'),
                 'confirm_delete' => __('Are you sure you want to delete this item?', 'malisafi-mls'),
-                'error' => __('An error occurred. Please try again.', 'malisafi-mls'),
-                'success' => __('Operation completed successfully.', 'malisafi-mls'),
                 'media_select_title' => __('Select Property Images', 'malisafi-mls'),
                 'media_select_button' => __('Use Images', 'malisafi-mls'),
             )
+        ));
+        
+        // Also keep legacy variable for other admin scripts if needed
+        wp_localize_script('malisafi-admin', 'malisafi_admin', array(
+            'ajax_url' => admin_url('admin-ajax.php'),
+            'nonce' => wp_create_nonce('malisafi_admin_nonce'),
         ));
     }
 }

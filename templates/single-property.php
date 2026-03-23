@@ -632,14 +632,7 @@ $formatted_price = $price > 0 ? ($currency_symbol . ' ' . number_format($price))
                     </div>
                 </div>
                 
-                <?php if ($can_rate): ?>
-                <button class="rate-agent-button">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                        <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/>
-                    </svg>
-                    Rate Agent
-                </button>
-                <?php endif; ?>
+
                 
                 <button class="contact-agent-button" data-agent-id="<?php echo $author_id; ?>">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
@@ -728,53 +721,7 @@ $formatted_price = $price > 0 ? ($currency_symbol . ' ' . number_format($price))
     
 </div>
 
-<!-- Rate Agent Modal -->
-<div id="rate-agent-modal" class="malisafi-modal">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h3>Rate Agent</h3>
-            <button class="modal-close">&times;</button>
-        </div>
-        <div class="modal-body">
-            <?php if (!is_user_logged_in()): ?>
-                <div class="login-prompt">
-                    <p>You must be logged in to rate an agent.</p>
-                    <a href="<?php echo esc_url(wp_login_url(get_permalink())); ?>" class="button-primary">Login</a>
-                </div>
-            <?php elseif (!$can_rate): ?>
-                <p>You cannot rate this agent.</p>
-            <?php else: ?>
-            <form id="rate-agent-form" method="post">
-                <input type="hidden" name="agent_id" value="<?php echo $author_id; ?>">
-                <div class="form-group">
-                    <label for="rating">Your Rating:</label>
-                    <select name="rating" id="rating" required>
-                        <option value="">Choose...</option>
-                        <option value="5">5 - Excellent</option>
-                        <option value="4">4 - Very Good</option>
-                        <option value="3">3 - Good</option>
-                        <option value="2">2 - Average</option>
-                        <option value="1">1 - Poor</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="review_title">Review Title:</label>
-                    <input type="text" name="review_title" id="review_title" maxlength="255" placeholder="Short title" required>
-                </div>
-                <div class="form-group">
-                    <label for="review_text">Your Review:</label>
-                    <textarea name="review_text" id="review_text" rows="4" placeholder="Your experience..." required></textarea>
-                </div>
-                <div class="form-actions">
-                    <button type="button" class="button-secondary modal-close">Cancel</button>
-                    <button type="submit" class="button-primary">Submit</button>
-                </div>
-            </form>
-            <div id="rate-agent-success" class="success-message hidden"></div>
-            <?php endif; ?>
-        </div>
-    </div>
-</div>
+
 
 <!-- Report Modal -->
 <div id="report-modal" class="malisafi-modal">

@@ -153,7 +153,7 @@ class Property_Submission {
         }
 
         $current_user = wp_get_current_user();
-        $can_assign_agent = current_user_can('manage_options') || current_user_can('edit_others_properties') || current_user_can('publish_properties');
+        $can_assign_agent = current_user_can('manage_options') || current_user_can('moderate_properties');
 
         $frontend_cancel_url = '';
         if (class_exists('MalisafiMLS\\Page_Manager') && method_exists('MalisafiMLS\\Page_Manager', 'get_page_url')) {
@@ -295,6 +295,11 @@ class Property_Submission {
                     'type' => 'select',
                     'meta_key' => '_malisafi_listing_type',
                     'required' => true
+                ),
+                'agent_user_id' => array(
+                    'name' => 'agent_user_id',
+                    'type' => 'author',
+                    'required' => false
                 ),
                 'size' => array(
                     'name' => 'size',
@@ -595,10 +600,15 @@ class Property_Submission {
         
         // Create or update property
         if ($property_id) {
-            // Verify ownership
             $property = get_post($property_id);
-            if (!$property || $property->post_author != get_current_user_id()) {
+            if (!$property) {
                 wp_send_json_error(array('message' => __('Invalid property', 'malisafi-mls')));
+            }
+            
+            // Verify ownership or admin status
+            $can_edit = ($property->post_author == get_current_user_id() || current_user_can('moderate_properties'));
+            if (!$can_edit) {
+                wp_send_json_error(array('message' => __('Permission denied to edit this property', 'malisafi-mls')));
             }
         } else {
             // Try to reuse a recently-created auto-draft to avoid duplicates (race conditions)
@@ -742,6 +752,12 @@ class Property_Submission {
             switch ($type) {
                 case 'email':
                     $validator->email($value ?? '', $key, $required);
+                    break;
+                case 'author':
+                    if (current_user_can('moderate_properties') && !empty($value)) {
+                        $post_data['post_author'] = intval($value);
+                        $update_post = true;
+                    }
                     break;
                 case 'url':
                     $validator->url($value ?? '', $key, $required);
