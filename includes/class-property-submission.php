@@ -20,15 +20,14 @@ class Property_Submission {
         
         // AJAX handlers
         add_action('wp_ajax_malisafi_save_property_step', array(__CLASS__, 'ajax_save_property_step'));
+        add_action('wp_ajax_malisafi_get_subcounties', array(__CLASS__, 'ajax_get_subcounties'));
+        add_action('wp_ajax_nopriv_malisafi_get_subcounties', array(__CLASS__, 'ajax_get_subcounties'));
         add_action('wp_ajax_malisafi_submit_property', array(__CLASS__, 'ajax_submit_property'));
         add_action('wp_ajax_malisafi_upload_property_images', array(__CLASS__, 'ajax_upload_images'));
         add_action('wp_ajax_malisafi_upload_featured_image', array(__CLASS__, 'ajax_upload_featured_image'));
         add_action('wp_ajax_malisafi_delete_property_image', array(__CLASS__, 'ajax_delete_image'));
         add_action('wp_ajax_malisafi_clear_featured_image', array(__CLASS__, 'ajax_clear_featured_image'));
         add_action('wp_ajax_malisafi_reorder_property_images', array(__CLASS__, 'ajax_reorder_images'));
-        add_action('wp_ajax_malisafi_get_property_draft', array(__CLASS__, 'ajax_get_draft'));
-        add_action('wp_ajax_malisafi_get_subcounties', array(__CLASS__, 'ajax_get_subcounties'));
-        add_action('wp_ajax_nopriv_malisafi_get_subcounties', array(__CLASS__, 'ajax_get_subcounties'));
         
         // Handle direct property submission requests
         add_action('wp', array(__CLASS__, 'handle_direct_requests'));
@@ -894,10 +893,11 @@ class Property_Submission {
             wp_send_json_error(array('message' => __('Invalid property', 'malisafi-mls')));
         }
         
-        // Verify ownership
+        // Verify ownership or admin permissions
         $property = get_post($property_id);
-        if (!$property || $property->post_author != get_current_user_id()) {
-            wp_send_json_error(array('message' => __('Invalid property', 'malisafi-mls')));
+        $can_submit = ($property && ($property->post_author == get_current_user_id() || current_user_can('moderate_properties')));
+        if (!$can_submit) {
+            wp_send_json_error(array('message' => __('Invalid property or permission denied', 'malisafi-mls')));
         }
         
         // DUPLICATE PREVENTION: Check submission lock
@@ -1037,11 +1037,12 @@ class Property_Submission {
 
         $property_id = isset($_POST['property_id']) ? intval($_POST['property_id']) : 0;
 
-        // Check if property exists and user owns it
+        // Check if property exists and user owns it or is admin
         if ($property_id) {
             $property = get_post($property_id);
-            if (!$property || $property->post_author != get_current_user_id()) {
-                wp_send_json_error(array('message' => __('Invalid property', 'malisafi-mls')));
+            $can_edit = ($property && ($property->post_author == get_current_user_id() || current_user_can('moderate_properties')));
+            if (!$can_edit) {
+                wp_send_json_error(array('message' => __('Invalid property or permission denied', 'malisafi-mls')));
             }
         }
 
@@ -1054,13 +1055,13 @@ class Property_Submission {
 
         // Upload using Image_Handler
         $upload_result = Image_Handler::upload_single($file, array(
-            'validate_dimensions' => false, // Made optional for flexibility
+            'validate_dimensions' => false,
             'size_map' => array(
                 'url' => 'large',
                 'thumb' => 'medium'
             ),
-            'min_width' => 800,  // Reduced from 1600
-            'min_height' => 600  // Reduced from 900
+            'min_width' => 800,
+            'min_height' => 600
         ));
 
         if (is_wp_error($upload_result)) {
@@ -1073,10 +1074,12 @@ class Property_Submission {
         }
 
         wp_send_json_success(array(
-            'message' => __('Featured image uploaded successfully', 'malisafi-mls'),
-            'image' => array(
-                'id' => $upload_result['id'],
-                'url' => $upload_result['sizes']['url']
+            'data' => array(
+                'message' => __('Featured image uploaded successfully', 'malisafi-mls'),
+                'image' => array(
+                    'id' => $upload_result['id'],
+                    'url' => $upload_result['sizes']['url']
+                )
             )
         ));
     }
@@ -1093,11 +1096,12 @@ class Property_Submission {
 
         $property_id = isset($_POST['property_id']) ? intval($_POST['property_id']) : 0;
 
-        // Check if property exists and user owns it
+        // Check if property exists and user owns it or is admin
         if ($property_id) {
             $property = get_post($property_id);
-            if (!$property || $property->post_author != get_current_user_id()) {
-                wp_send_json_error(array('message' => __('Invalid property', 'malisafi-mls')));
+            $can_edit = ($property && ($property->post_author == get_current_user_id() || current_user_can('moderate_properties')));
+            if (!$can_edit) {
+                wp_send_json_error(array('message' => __('Invalid property or permission denied', 'malisafi-mls')));
             }
         }
 
@@ -1175,7 +1179,9 @@ class Property_Submission {
             if ($replace_id && in_array($replace_id, $existing_ids)) {
                 // Replace the specific image
                 $key = array_search($replace_id, $existing_ids);
-                $existing_ids[$key] = $new_ids[0]; // Replace with first new image
+                if ($key !== false) {
+                    $existing_ids[$key] = $new_ids[0]; 
+                }
                 $updated_gallery = $existing_ids;
             } else {
                 // Add new images
@@ -1186,8 +1192,10 @@ class Property_Submission {
         }
 
         wp_send_json_success(array(
-            'message' => sprintf(__('Successfully uploaded %d image(s)', 'malisafi-mls'), count($uploaded_images)),
-            'images' => $uploaded_images
+            'data' => array(
+                'message' => sprintf(__('Successfully uploaded %d image(s)', 'malisafi-mls'), count($uploaded_images)),
+                'images' => $uploaded_images
+            )
         ));
     }
 
@@ -1208,9 +1216,10 @@ class Property_Submission {
             wp_send_json_error(array('message' => __('Invalid data', 'malisafi-mls')));
         }
 
-        // Verify ownership
+        // Verify ownership and admin permissions
         $property = get_post($property_id);
-        if (!$property || $property->post_author != get_current_user_id()) {
+        $can_edit = ($property && ($property->post_author == get_current_user_id() || current_user_can('moderate_properties')));
+        if (!$can_edit) {
             wp_send_json_error(array('message' => __('Permission denied', 'malisafi-mls')));
         }
 
@@ -1254,9 +1263,10 @@ class Property_Submission {
             wp_send_json_error(array('message' => __('Invalid property', 'malisafi-mls')));
         }
 
-        // Verify ownership
+        // Verify ownership and admin permissions
         $property = get_post($property_id);
-        if (!$property || $property->post_author != get_current_user_id()) {
+        $can_edit = ($property && ($property->post_author == get_current_user_id() || current_user_can('moderate_properties')));
+        if (!$can_edit) {
             wp_send_json_error(array('message' => __('Permission denied', 'malisafi-mls')));
         }
 
@@ -1282,9 +1292,10 @@ class Property_Submission {
             wp_send_json_error(array('message' => __('Invalid data', 'malisafi-mls')));
         }
 
-        // Verify ownership
+        // Verify ownership and admin permissions
         $property = get_post($property_id);
-        if (!$property || $property->post_author != get_current_user_id()) {
+        $can_edit = ($property && ($property->post_author == get_current_user_id() || current_user_can('moderate_properties')));
+        if (!$can_edit) {
             wp_send_json_error(array('message' => __('Permission denied', 'malisafi-mls')));
         }
 
@@ -1373,9 +1384,11 @@ class Property_Submission {
             wp_send_json_success(array('subcounties' => array()));
         }
 
-        $subcounties = function_exists('malisafi_get_subcounties_by_county')
-            ? malisafi_get_subcounties_by_county($county)
-            : array();
+        if (!function_exists('malisafi_get_subcounties_by_county')) {
+            require_once MALISAFI_MLS_PATH . 'includes/kenya-location-helpers.php';
+        }
+
+        $subcounties = malisafi_get_subcounties_by_county($county);
 
         wp_send_json_success(array('subcounties' => $subcounties));
     }
