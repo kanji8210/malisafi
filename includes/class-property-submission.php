@@ -295,6 +295,55 @@ class Property_Submission {
                     'type' => 'select',
                     'meta_key' => '_malisafi_listing_type',
                     'required' => true
+                ),
+                'size' => array(
+                    'name' => 'size',
+                    'type' => 'number',
+                    'meta_key' => '_malisafi_size',
+                    'required' => true
+                ),
+                'size_unit' => array(
+                    'name' => 'size_unit',
+                    'type' => 'select',
+                    'meta_key' => '_malisafi_size_unit',
+                    'required' => true
+                ),
+                'land_use' => array(
+                    'name' => 'land_use',
+                    'type' => 'select',
+                    'meta_key' => '_malisafi_land_use',
+                    'show_for' => array('land')
+                ),
+                'road_access' => array(
+                    'name' => 'road_access',
+                    'type' => 'select',
+                    'meta_key' => '_malisafi_road_access',
+                    'show_for' => array('land')
+                ),
+                'ownership_type' => array(
+                    'name' => 'ownership_type',
+                    'type' => 'select',
+                    'meta_key' => '_malisafi_ownership_type'
+                ),
+                'title_deed_status' => array(
+                    'name' => 'title_deed_status',
+                    'type' => 'select',
+                    'meta_key' => '_malisafi_title_deed_status'
+                ),
+                'agent_name' => array(
+                    'name' => 'agent_name',
+                    'type' => 'text',
+                    'meta_key' => '_malisafi_agent_name'
+                ),
+                'agent_email' => array(
+                    'name' => 'agent_email',
+                    'type' => 'email',
+                    'meta_key' => '_malisafi_agent_email'
+                ),
+                'agent_phone' => array(
+                    'name' => 'agent_phone',
+                    'type' => 'text',
+                    'meta_key' => '_malisafi_agent_phone'
                 )
             ),
             'details' => array(
@@ -352,18 +401,6 @@ class Property_Submission {
                     'meta_key' => '_malisafi_ceiling_height_m',
                     'show_for' => array('industrial')
                 ),
-                'size' => array(
-                    'name' => 'size',
-                    'type' => 'number',
-                    'meta_key' => '_malisafi_size',
-                    'required' => true
-                ),
-                'size_unit' => array(
-                    'name' => 'size_unit',
-                    'type' => 'select',
-                    'meta_key' => '_malisafi_size_unit',
-                    'required' => true
-                ),
                 'year_built' => array(
                     'name' => 'year_built',
                     'type' => 'number',
@@ -375,123 +412,6 @@ class Property_Submission {
                     'type' => 'select',
                     'meta_key' => '_malisafi_condition',
                     'show_for' => array('house', 'apartment', 'commercial', 'industrial')
-                ),
-                'land_use' => array(
-                    'name' => 'land_use',
-                    'type' => 'select',
-                    'meta_key' => '_malisafi_land_use',
-                    'show_for' => array('land')
-                ),
-                'road_access' => array(
-                    'name' => 'road_access',
-                    'type' => 'select',
-                    'meta_key' => '_malisafi_road_access',
-                    'show_for' => array('land')
-                ),
-                'land_utilities' => array(
-                    'name' => 'land_utilities',
-                    'type' => 'checkbox_group',
-                    'meta_key' => '_malisafi_land_utilities',
-                    'show_for' => array('land')
-                ),
-                'agent_name' => array(
-                    'name' => 'agent_name',
-                    'type' => 'text',
-                    'meta_key' => '_malisafi_agent_name'
-                ),
-                'agent_email' => array(
-                    'name' => 'agent_email',
-                    'type' => 'email',
-                    'meta_key' => '_malisafi_agent_email'
-                ),
-                'agent_phone' => array(
-                    'name' => 'agent_phone',
-                    'type' => 'text',
-                    'meta_key' => '_malisafi_agent_phone'
-                ),
-                'floor_plan_urls' => array(
-                    'name' => 'floor_plan_urls',
-                    'type' => 'textarea',
-                    'meta_key' => '_malisafi_floor_plan_urls',
-                    'show_for_listing' => array('sale', 'lease')
-                ),
-                'expected_roi' => array(
-                    'name' => 'expected_roi',
-                    'type' => 'number',
-                    'meta_key' => '_malisafi_expected_roi',
-                    'show_for_listing' => array('sale', 'lease')
-                ),
-                'rental_yield' => array(
-                    'name' => 'rental_yield',
-                    'type' => 'number',
-                    'meta_key' => '_malisafi_rental_yield',
-                    'show_for_listing' => array('sale', 'lease')
-                ),
-                'annual_rent_income' => array(
-                    'name' => 'annual_rent_income',
-                    'type' => 'number',
-                    'meta_key' => '_malisafi_annual_rent_income',
-                    'show_for_listing' => array('sale', 'lease')
-                ),
-                'ownership_type' => array(
-                    'name' => 'ownership_type',
-                    'type' => 'select',
-                    'meta_key' => '_malisafi_ownership_type',
-                    'show_for_listing' => array('sale', 'lease')
-                ),
-                'title_deed_status' => array(
-                    'name' => 'title_deed_status',
-                    'type' => 'select',
-                    'meta_key' => '_malisafi_title_deed_status',
-                    'show_for_listing' => array('sale', 'lease')
-                ),
-                'developer_guarantee' => array(
-                    'name' => 'developer_guarantee',
-                    'type' => 'textarea',
-                    'meta_key' => '_malisafi_developer_guarantee',
-                    'show_for_listing' => array('sale', 'lease')
-                ),
-                'financing_options' => array(
-                    'name' => 'financing_options',
-                    'type' => 'checkbox_group',
-                    'meta_key' => '_malisafi_financing_options',
-                    'show_for_listing' => array('sale', 'lease')
-                ),
-                'financing_min_deposit' => array(
-                    'name' => 'financing_min_deposit',
-                    'type' => 'number',
-                    'meta_key' => '_malisafi_financing_min_deposit',
-                    'show_for_listing' => array('sale', 'lease')
-                ),
-                'financing_tenor_months' => array(
-                    'name' => 'financing_tenor_months',
-                    'type' => 'number',
-                    'meta_key' => '_malisafi_financing_tenor_months',
-                    'show_for_listing' => array('sale', 'lease')
-                ),
-                'financing_interest_rate' => array(
-                    'name' => 'financing_interest_rate',
-                    'type' => 'number',
-                    'meta_key' => '_malisafi_financing_interest_rate',
-                    'show_for_listing' => array('sale', 'lease')
-                ),
-                'diaspora_financing_details' => array(
-                    'name' => 'diaspora_financing_details',
-                    'type' => 'text',
-                    'meta_key' => '_malisafi_diaspora_financing_details',
-                    'show_for_listing' => array('sale', 'lease')
-                ),
-                'sustainability' => array(
-                    'name' => 'sustainability',
-                    'type' => 'checkbox_group',
-                    'meta_key' => '_malisafi_sustainability',
-                    'show_for_listing' => array('sale', 'lease')
-                ),
-                'green_certification' => array(
-                    'name' => 'green_certification',
-                    'type' => 'text',
-                    'meta_key' => '_malisafi_green_certification',
-                    'show_for_listing' => array('sale', 'lease')
                 )
             ),
             'location' => array(
@@ -543,6 +463,84 @@ class Property_Submission {
                     'name' => 'amenities',
                     'type' => 'checkbox_group',
                     'meta_key' => '_malisafi_amenities'
+                ),
+                'land_utilities' => array(
+                    'name' => 'land_utilities',
+                    'type' => 'checkbox_group',
+                    'meta_key' => '_malisafi_land_utilities',
+                    'show_for' => array('land')
+                ),
+                'floor_plan_urls' => array(
+                    'name' => 'floor_plan_urls',
+                    'type' => 'textarea',
+                    'meta_key' => '_malisafi_floor_plan_urls',
+                    'show_for_listing' => array('sale', 'lease')
+                ),
+                'expected_roi' => array(
+                    'name' => 'expected_roi',
+                    'type' => 'number',
+                    'meta_key' => '_malisafi_expected_roi',
+                    'show_for_listing' => array('sale', 'lease')
+                ),
+                'rental_yield' => array(
+                    'name' => 'rental_yield',
+                    'type' => 'number',
+                    'meta_key' => '_malisafi_rental_yield',
+                    'show_for_listing' => array('sale', 'lease')
+                ),
+                'annual_rent_income' => array(
+                    'name' => 'annual_rent_income',
+                    'type' => 'number',
+                    'meta_key' => '_malisafi_annual_rent_income',
+                    'show_for_listing' => array('sale', 'lease')
+                ),
+                'developer_guarantee' => array(
+                    'name' => 'developer_guarantee',
+                    'type' => 'textarea',
+                    'meta_key' => '_malisafi_developer_guarantee',
+                    'show_for_listing' => array('sale', 'lease')
+                ),
+                'financing_options' => array(
+                    'name' => 'financing_options',
+                    'type' => 'checkbox_group',
+                    'meta_key' => '_malisafi_financing_options',
+                    'show_for_listing' => array('sale', 'lease')
+                ),
+                'financing_min_deposit' => array(
+                    'name' => 'financing_min_deposit',
+                    'type' => 'number',
+                    'meta_key' => '_malisafi_financing_min_deposit',
+                    'show_for_listing' => array('sale', 'lease')
+                ),
+                'financing_tenor_months' => array(
+                    'name' => 'financing_tenor_months',
+                    'type' => 'number',
+                    'meta_key' => '_malisafi_financing_tenor_months',
+                    'show_for_listing' => array('sale', 'lease')
+                ),
+                'financing_interest_rate' => array(
+                    'name' => 'financing_interest_rate',
+                    'type' => 'number',
+                    'meta_key' => '_malisafi_financing_interest_rate',
+                    'show_for_listing' => array('sale', 'lease')
+                ),
+                'diaspora_financing_details' => array(
+                    'name' => 'diaspora_financing_details',
+                    'type' => 'text',
+                    'meta_key' => '_malisafi_diaspora_financing_details',
+                    'show_for_listing' => array('sale', 'lease')
+                ),
+                'sustainability' => array(
+                    'name' => 'sustainability',
+                    'type' => 'checkbox_group',
+                    'meta_key' => '_malisafi_sustainability',
+                    'show_for_listing' => array('sale', 'lease')
+                ),
+                'green_certification' => array(
+                    'name' => 'green_certification',
+                    'type' => 'text',
+                    'meta_key' => '_malisafi_green_certification',
+                    'show_for_listing' => array('sale', 'lease')
                 )
             ),
             'images' => array(

@@ -119,6 +119,88 @@ $can_assign_agent = current_user_can('manage_options') || current_user_can('edit
                     </select>
                 </div>
             </div>
+
+            <div class="form-row-group">
+                <div class="form-row">
+                    <label for="ownership_type"><?php _e('Ownership Type', 'malisafi-mls'); ?></label>
+                    <select id="ownership_type" name="ownership_type" class="form-control">
+                        <option value=""><?php _e('Select...', 'malisafi-mls'); ?></option>
+                        <option value="freehold"><?php _e('Freehold', 'malisafi-mls'); ?></option>
+                        <option value="leasehold"><?php _e('Leasehold', 'malisafi-mls'); ?></option>
+                        <option value="sectional"><?php _e('Sectional Title', 'malisafi-mls'); ?></option>
+                    </select>
+                </div>
+                <div class="form-row">
+                    <label for="title_deed_status"><?php _e('Title Deed Status', 'malisafi-mls'); ?></label>
+                    <select id="title_deed_status" name="title_deed_status" class="form-control">
+                        <option value=""><?php _e('Select...', 'malisafi-mls'); ?></option>
+                        <option value="available"><?php _e('Available / Ready', 'malisafi-mls'); ?></option>
+                        <option value="processing"><?php _e('In Progress / Processing', 'malisafi-mls'); ?></option>
+                        <option value="mother_title"><?php _e('Mother Title (Subdivision)', 'malisafi-mls'); ?></option>
+                        <option value="none"><?php _e('Allocation Letter only', 'malisafi-mls'); ?></option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Basic Details: Size (moved from Step 2) -->
+            <div class="form-row-group">
+                <div class="form-row">
+                    <label for="property_size" class="required"><?php _e('Size', 'malisafi-mls'); ?></label>
+                    <input type="number" id="property_size" name="size" class="form-control" min="0" step="0.01" placeholder="120" required>
+                </div>
+                <div class="form-row">
+                    <label for="size_unit" class="required"><?php _e('Unit', 'malisafi-mls'); ?></label>
+                    <select id="size_unit" name="size_unit" class="form-control" required>
+                        <option value="sqm"><?php _e('Square Meters', 'malisafi-mls'); ?></option>
+                        <option value="sqft"><?php _e('Square Feet', 'malisafi-mls'); ?></option>
+                        <option value="acres"><?php _e('Acres', 'malisafi-mls'); ?></option>
+                        <option value="hectares"><?php _e('Hectares', 'malisafi-mls'); ?></option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Land Basics: Zoning / Road Access (moved from Step 2) -->
+            <div class="form-row-group type-field" data-show-for="land">
+                <div class="form-row">
+                    <label for="land_use"><?php _e('Zoning / Land Use', 'malisafi-mls'); ?></label>
+                    <select id="land_use" name="land_use" class="form-control">
+                        <option value=""><?php _e('Select...', 'malisafi-mls'); ?></option>
+                        <option value="residential"><?php _e('Residential', 'malisafi-mls'); ?></option>
+                        <option value="commercial"><?php _e('Commercial', 'malisafi-mls'); ?></option>
+                        <option value="agricultural"><?php _e('Agricultural', 'malisafi-mls'); ?></option>
+                        <option value="industrial"><?php _e('Industrial', 'malisafi-mls'); ?></option>
+                        <option value="mixed_use"><?php _e('Mixed Use', 'malisafi-mls'); ?></option>
+                        <option value="conservation"><?php _e('Conservation', 'malisafi-mls'); ?></option>
+                    </select>
+                </div>
+                <div class="form-row">
+                    <label for="road_access"><?php _e('Road Access', 'malisafi-mls'); ?></label>
+                    <select id="road_access" name="road_access" class="form-control">
+                        <option value=""><?php _e('Select...', 'malisafi-mls'); ?></option>
+                        <option value="tarmac"><?php _e('Tarmac Road', 'malisafi-mls'); ?></option>
+                        <option value="murram"><?php _e('Murram / Gravel Road', 'malisafi-mls'); ?></option>
+                        <option value="footpath"><?php _e('Footpath Only', 'malisafi-mls'); ?></option>
+                        <option value="none"><?php _e('No Road Access', 'malisafi-mls'); ?></option>
+                    </select>
+                </div>
+            </div>
+
+            <?php if ($can_assign_agent) : ?>
+            <div class="form-row-group">
+                <div class="form-row">
+                    <label for="agent_name"><?php _e('Agent/Contact Name', 'malisafi-mls'); ?></label>
+                    <input type="text" id="agent_name" name="agent_name" class="form-control" placeholder="<?php echo esc_attr__('e.g., John Doe', 'malisafi-mls'); ?>">
+                </div>
+                <div class="form-row">
+                    <label for="agent_email"><?php _e('Agent Email', 'malisafi-mls'); ?></label>
+                    <input type="email" id="agent_email" name="agent_email" class="form-control" placeholder="agent@example.com">
+                </div>
+            </div>
+            <div class="form-row">
+                <label for="agent_phone"><?php _e('Agent Phone', 'malisafi-mls'); ?></label>
+                <input type="text" id="agent_phone" name="agent_phone" class="form-control" placeholder="<?php echo esc_attr__('+254700000000', 'malisafi-mls'); ?>">
+            </div>
+            <?php endif; ?>
         </div>
 
         <!-- Step 2: Details -->
@@ -188,22 +270,7 @@ $can_assign_agent = current_user_can('manage_options') || current_user_can('edit
                 <input type="number" id="ceiling_height_m" name="ceiling_height_m" class="form-control" min="0" step="0.1" placeholder="6">
             </div>
 
-            <!-- All types: Size -->
-            <div class="form-row-group type-field" data-show-for="house,apartment,land,commercial,industrial">
-                <div class="form-row">
-                    <label for="property_size"><?php _e('Size', 'malisafi-mls'); ?></label>
-                    <input type="number" id="property_size" name="size" class="form-control" min="0" step="0.01" placeholder="120">
-                </div>
-                <div class="form-row">
-                    <label for="size_unit"><?php _e('Unit', 'malisafi-mls'); ?></label>
-                    <select id="size_unit" name="size_unit" class="form-control">
-                        <option value="sqm"><?php _e('Square Meters', 'malisafi-mls'); ?></option>
-                        <option value="sqft"><?php _e('Square Feet', 'malisafi-mls'); ?></option>
-                        <option value="acres"><?php _e('Acres', 'malisafi-mls'); ?></option>
-                        <option value="hectares"><?php _e('Hectares', 'malisafi-mls'); ?></option>
-                    </select>
-                </div>
-            </div>
+
 
             <!-- Building types: Year built / Condition -->
             <div class="form-row-group type-field" data-show-for="house,apartment,commercial,industrial">
@@ -224,157 +291,11 @@ $can_assign_agent = current_user_can('manage_options') || current_user_can('edit
                 </div>
             </div>
 
-            <!-- Land-specific fields -->
-            <div class="form-row-group type-field" data-show-for="land">
-                <div class="form-row">
-                    <label for="land_use"><?php _e('Zoning / Land Use', 'malisafi-mls'); ?></label>
-                    <select id="land_use" name="land_use" class="form-control">
-                        <option value=""><?php _e('Select...', 'malisafi-mls'); ?></option>
-                        <option value="residential"><?php _e('Residential', 'malisafi-mls'); ?></option>
-                        <option value="commercial"><?php _e('Commercial', 'malisafi-mls'); ?></option>
-                        <option value="agricultural"><?php _e('Agricultural', 'malisafi-mls'); ?></option>
-                        <option value="industrial"><?php _e('Industrial', 'malisafi-mls'); ?></option>
-                        <option value="mixed_use"><?php _e('Mixed Use', 'malisafi-mls'); ?></option>
-                        <option value="conservation"><?php _e('Conservation', 'malisafi-mls'); ?></option>
-                    </select>
-                </div>
-                <div class="form-row">
-                    <label for="road_access"><?php _e('Road Access', 'malisafi-mls'); ?></label>
-                    <select id="road_access" name="road_access" class="form-control">
-                        <option value=""><?php _e('Select...', 'malisafi-mls'); ?></option>
-                        <option value="tarmac"><?php _e('Tarmac Road', 'malisafi-mls'); ?></option>
-                        <option value="murram"><?php _e('Murram / Gravel Road', 'malisafi-mls'); ?></option>
-                        <option value="footpath"><?php _e('Footpath Only', 'malisafi-mls'); ?></option>
-                        <option value="none"><?php _e('No Road Access', 'malisafi-mls'); ?></option>
-                    </select>
-                </div>
-            </div>
-            <div class="form-row type-field" data-show-for="land">
-                <label><?php _e('Available Utilities', 'malisafi-mls'); ?></label>
-                <div class="checkbox-grid">
-                    <label><input type="checkbox" name="land_utilities[]" value="electricity"> <?php _e('Electricity', 'malisafi-mls'); ?></label>
-                    <label><input type="checkbox" name="land_utilities[]" value="water"> <?php _e('Water Supply', 'malisafi-mls'); ?></label>
-                    <label><input type="checkbox" name="land_utilities[]" value="sewer"> <?php _e('Sewer / Drainage', 'malisafi-mls'); ?></label>
-                    <label><input type="checkbox" name="land_utilities[]" value="fibre"> <?php _e('Fibre / Internet', 'malisafi-mls'); ?></label>
-                </div>
-            </div>
 
-            <?php if ($can_assign_agent) : ?>
-            <div class="form-row-group">
-                <div class="form-row">
-                    <label for="agent_name"><?php _e('Agent/Contact Name', 'malisafi-mls'); ?></label>
-                    <input type="text" id="agent_name" name="agent_name" class="form-control" placeholder="<?php echo esc_attr__('e.g., John Doe', 'malisafi-mls'); ?>">
-                </div>
-                <div class="form-row">
-                    <label for="agent_email"><?php _e('Agent Email', 'malisafi-mls'); ?></label>
-                    <input type="email" id="agent_email" name="agent_email" class="form-control" placeholder="agent@example.com">
-                </div>
-            </div>
-            <div class="form-row">
-                <label for="agent_phone"><?php _e('Agent Phone', 'malisafi-mls'); ?></label>
-                <input type="text" id="agent_phone" name="agent_phone" class="form-control" placeholder="<?php echo esc_attr__('+254700000000', 'malisafi-mls'); ?>">
-            </div>
-            <?php endif; ?>
 
-            <div class="sale-lease-details" style="display: none;">
-                <h3><?php _e('Buyer & Investor Details (Sale/Lease)', 'malisafi-mls'); ?></h3>
-                <p class="step-description"><?php _e('Optional details for buyers and investors', 'malisafi-mls'); ?></p>
 
-                <div class="form-row">
-                    <label for="floor_plan_urls"><?php _e('Floor Plans (URLs)', 'malisafi-mls'); ?></label>
-                    <textarea id="floor_plan_urls" name="floor_plan_urls" class="form-control" rows="3" placeholder="https://..."></textarea>
-                </div>
 
-                <div class="form-row-group">
-                    <div class="form-row">
-                        <label for="expected_roi"><?php _e('Expected ROI (%)', 'malisafi-mls'); ?></label>
-                        <input type="number" id="expected_roi" name="expected_roi" class="form-control" min="0" max="100" step="0.01" placeholder="12.5">
-                    </div>
-                    <div class="form-row">
-                        <label for="rental_yield"><?php _e('Rental Yield (%)', 'malisafi-mls'); ?></label>
-                        <input type="number" id="rental_yield" name="rental_yield" class="form-control" min="0" max="100" step="0.01" placeholder="8.0">
-                    </div>
-                </div>
 
-                <div class="form-row-group">
-                    <div class="form-row">
-                        <label for="annual_rent_income"><?php _e('Expected Annual Income', 'malisafi-mls'); ?></label>
-                        <input type="number" id="annual_rent_income" name="annual_rent_income" class="form-control" min="0" step="0.01" placeholder="1200000">
-                    </div>
-                    <div class="form-row">
-                        <label for="ownership_type"><?php _e('Ownership Type', 'malisafi-mls'); ?></label>
-                        <select id="ownership_type" name="ownership_type" class="form-control">
-                            <option value=""><?php _e('Select...', 'malisafi-mls'); ?></option>
-                            <option value="freehold"><?php _e('Freehold', 'malisafi-mls'); ?></option>
-                            <option value="leasehold"><?php _e('Leasehold', 'malisafi-mls'); ?></option>
-                            <option value="company_shares"><?php _e('Company Shares', 'malisafi-mls'); ?></option>
-                            <option value="sectional_title"><?php _e('Sectional Title', 'malisafi-mls'); ?></option>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="form-row-group">
-                    <div class="form-row">
-                        <label for="title_deed_status"><?php _e('Title Deed Status', 'malisafi-mls'); ?></label>
-                        <select id="title_deed_status" name="title_deed_status" class="form-control">
-                            <option value=""><?php _e('Select...', 'malisafi-mls'); ?></option>
-                            <option value="ready"><?php _e('Ready', 'malisafi-mls'); ?></option>
-                            <option value="processing"><?php _e('Processing', 'malisafi-mls'); ?></option>
-                            <option value="not_available"><?php _e('Not Available', 'malisafi-mls'); ?></option>
-                        </select>
-                    </div>
-                    <div class="form-row">
-                        <label for="developer_guarantee"><?php _e('Developer Guarantees', 'malisafi-mls'); ?></label>
-                        <textarea id="developer_guarantee" name="developer_guarantee" class="form-control" rows="2"></textarea>
-                    </div>
-                </div>
-
-                <div class="form-row">
-                    <label><?php _e('Financing Options', 'malisafi-mls'); ?></label>
-                    <div class="checkbox-grid">
-                        <label><input type="checkbox" name="financing_options" value="bank_mortgage"> <?php _e('Bank Mortgage', 'malisafi-mls'); ?></label>
-                        <label><input type="checkbox" name="financing_options" value="developer_finance"> <?php _e('Developer Financing', 'malisafi-mls'); ?></label>
-                        <label><input type="checkbox" name="financing_options" value="installments"> <?php _e('Installments', 'malisafi-mls'); ?></label>
-                        <label><input type="checkbox" name="financing_options" value="cash"> <?php _e('Cash', 'malisafi-mls'); ?></label>
-                        <label><input type="checkbox" name="financing_options" value="diaspora"> <?php _e('Diaspora Financing', 'malisafi-mls'); ?></label>
-                    </div>
-                </div>
-
-                <div class="form-row-group">
-                    <div class="form-row">
-                        <label for="financing_min_deposit"><?php _e('Min Deposit (%)', 'malisafi-mls'); ?></label>
-                        <input type="number" id="financing_min_deposit" name="financing_min_deposit" class="form-control" min="0" max="100" step="0.01" placeholder="20">
-                    </div>
-                    <div class="form-row">
-                        <label for="financing_tenor_months"><?php _e('Tenor (months)', 'malisafi-mls'); ?></label>
-                        <input type="number" id="financing_tenor_months" name="financing_tenor_months" class="form-control" min="0" max="600" step="1" placeholder="120">
-                    </div>
-                </div>
-
-                <div class="form-row-group">
-                    <div class="form-row">
-                        <label for="financing_interest_rate"><?php _e('Interest Rate (%)', 'malisafi-mls'); ?></label>
-                        <input type="number" id="financing_interest_rate" name="financing_interest_rate" class="form-control" min="0" max="100" step="0.01" placeholder="12">
-                    </div>
-                    <div class="form-row">
-                        <label for="diaspora_financing_details"><?php _e('Diaspora Financing Details', 'malisafi-mls'); ?></label>
-                        <input type="text" id="diaspora_financing_details" name="diaspora_financing_details" class="form-control" placeholder="e.g., USD financing, KYC required">
-                    </div>
-                </div>
-
-                <div class="form-row">
-                    <label><?php _e('Sustainability', 'malisafi-mls'); ?></label>
-                    <div class="checkbox-grid">
-                        <label><input type="checkbox" name="sustainability" value="solar"> <?php _e('Solar', 'malisafi-mls'); ?></label>
-                        <label><input type="checkbox" name="sustainability" value="water_harvesting"> <?php _e('Water Harvesting', 'malisafi-mls'); ?></label>
-                    </div>
-                </div>
-
-                <div class="form-row">
-                    <label for="green_certification"><?php _e('Green Certification', 'malisafi-mls'); ?></label>
-                    <input type="text" id="green_certification" name="green_certification" class="form-control" placeholder="EDGE, LEED, etc.">
-                </div>
-            </div>
         </div>
 
         <!-- Step 3: Location -->
@@ -532,7 +453,16 @@ $can_assign_agent = current_user_can('manage_options') || current_user_can('edit
                 </div>
             </div>
 
-            <!-- Land Features -->
+            <!-- Land Features (Utilities moved from Step 2) -->
+            <div class="features-section type-field" data-show-for="land">
+                <h3><?php _e('Land Utilities', 'malisafi-mls'); ?></h3>
+                <div class="checkbox-grid">
+                    <label class="checkbox-item"><input type="checkbox" name="land_utilities[]" value="electricity"> <span class="icon">⚡</span> <span class="label"><?php _e('Electricity', 'malisafi-mls'); ?></span></label>
+                    <label class="checkbox-item"><input type="checkbox" name="land_utilities[]" value="water"> <span class="icon">💧</span> <span class="label"><?php _e('Water Supply', 'malisafi-mls'); ?></span></label>
+                    <label class="checkbox-item"><input type="checkbox" name="land_utilities[]" value="sewer"> <span class="icon">🌊</span> <span class="label"><?php _e('Sewer / Drainage', 'malisafi-mls'); ?></span></label>
+                    <label class="checkbox-item"><input type="checkbox" name="land_utilities[]" value="fibre"> <span class="icon">📶</span> <span class="label"><?php _e('Fibre / Internet', 'malisafi-mls'); ?></span></label>
+                </div>
+            </div>
             <div class="features-section type-field" data-show-for="land">
                 <h3><?php _e('Land Features', 'malisafi-mls'); ?></h3>
                 <div class="checkbox-grid">
@@ -542,6 +472,83 @@ $can_assign_agent = current_user_can('manage_options') || current_user_can('edit
                     <label class="checkbox-item"><input type="checkbox" name="features[]" value="flat_terrain"> <span class="icon">📐</span> <span class="label"><?php _e('Flat Terrain', 'malisafi-mls'); ?></span></label>
                     <label class="checkbox-item"><input type="checkbox" name="features[]" value="river_frontage"> <span class="icon">🌊</span> <span class="label"><?php _e('River Frontage', 'malisafi-mls'); ?></span></label>
                     <label class="checkbox-item"><input type="checkbox" name="features[]" value="survey_done"> <span class="icon">📏</span> <span class="label"><?php _e('Survey Done', 'malisafi-mls'); ?></span></label>
+                </div>
+            </div>
+
+            <div class="sale-lease-details" style="display: none; margin-top: 30px; border-top: 1px solid #ddd; padding-top: 20px;">
+                <h3><?php _e('Buyer & Investor Details (Sale/Lease)', 'malisafi-mls'); ?></h3>
+                <p class="step-description"><?php _e('Optional details for buyers and investors', 'malisafi-mls'); ?></p>
+
+                <div class="form-row">
+                    <label for="floor_plan_urls"><?php _e('Floor Plans (URLs)', 'malisafi-mls'); ?></label>
+                    <textarea id="floor_plan_urls" name="floor_plan_urls" class="form-control" rows="3" placeholder="https://..."></textarea>
+                </div>
+
+                <div class="form-row-group">
+                    <div class="form-row">
+                        <label for="expected_roi"><?php _e('Expected ROI (%)', 'malisafi-mls'); ?></label>
+                        <input type="number" id="expected_roi" name="expected_roi" class="form-control" min="0" max="100" step="0.01" placeholder="12.5">
+                    </div>
+                    <div class="form-row">
+                        <label for="rental_yield"><?php _e('Rental Yield (%)', 'malisafi-mls'); ?></label>
+                        <input type="number" id="rental_yield" name="rental_yield" class="form-control" min="0" max="100" step="0.01" placeholder="8.0">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <label for="annual_rent_income"><?php _e('Expected Annual Income', 'malisafi-mls'); ?></label>
+                    <input type="number" id="annual_rent_income" name="annual_rent_income" class="form-control" min="0" step="0.01" placeholder="1200000">
+                </div>
+
+                <div class="form-row">
+                    <label for="developer_guarantee"><?php _e('Developer Guarantees', 'malisafi-mls'); ?></label>
+                    <textarea id="developer_guarantee" name="developer_guarantee" class="form-control" rows="2"></textarea>
+                </div>
+
+                <div class="form-row">
+                    <label><?php _e('Financing Options', 'malisafi-mls'); ?></label>
+                    <div class="checkbox-grid">
+                        <label><input type="checkbox" name="financing_options[]" value="bank_mortgage"> <?php _e('Bank Mortgage', 'malisafi-mls'); ?></label>
+                        <label><input type="checkbox" name="financing_options[]" value="developer_finance"> <?php _e('Developer Financing', 'malisafi-mls'); ?></label>
+                        <label><input type="checkbox" name="financing_options[]" value="installments"> <?php _e('Installments', 'malisafi-mls'); ?></label>
+                        <label><input type="checkbox" name="financing_options[]" value="cash"> <?php _e('Cash', 'malisafi-mls'); ?></label>
+                        <label><input type="checkbox" name="financing_options[]" value="diaspora"> <?php _e('Diaspora Financing', 'malisafi-mls'); ?></label>
+                    </div>
+                </div>
+
+                <div class="form-row-group">
+                    <div class="form-row">
+                        <label for="financing_min_deposit"><?php _e('Min Deposit (%)', 'malisafi-mls'); ?></label>
+                        <input type="number" id="financing_min_deposit" name="financing_min_deposit" class="form-control" min="0" max="100" step="0.01" placeholder="20">
+                    </div>
+                    <div class="form-row">
+                        <label for="financing_tenor_months"><?php _e('Tenor (months)', 'malisafi-mls'); ?></label>
+                        <input type="number" id="financing_tenor_months" name="financing_tenor_months" class="form-control" min="0" max="600" step="1" placeholder="120">
+                    </div>
+                </div>
+
+                <div class="form-row-group">
+                    <div class="form-row">
+                        <label for="financing_interest_rate"><?php _e('Interest Rate (%)', 'malisafi-mls'); ?></label>
+                        <input type="number" id="financing_interest_rate" name="financing_interest_rate" class="form-control" min="0" max="100" step="0.01" placeholder="12">
+                    </div>
+                    <div class="form-row">
+                        <label for="diaspora_financing_details"><?php _e('Diaspora Financing Details', 'malisafi-mls'); ?></label>
+                        <input type="text" id="diaspora_financing_details" name="diaspora_financing_details" class="form-control" placeholder="e.g., USD financing, KYC required">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <label><?php _e('Sustainability', 'malisafi-mls'); ?></label>
+                    <div class="checkbox-grid">
+                        <label><input type="checkbox" name="sustainability[]" value="solar"> <?php _e('Solar', 'malisafi-mls'); ?></label>
+                        <label><input type="checkbox" name="sustainability[]" value="water_harvesting"> <?php _e('Water Harvesting', 'malisafi-mls'); ?></label>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <label for="green_certification"><?php _e('Green Certification', 'malisafi-mls'); ?></label>
+                    <input type="text" id="green_certification" name="green_certification" class="form-control" placeholder="EDGE, LEED, etc.">
                 </div>
             </div>
         </div>
