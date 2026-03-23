@@ -1108,7 +1108,13 @@
 
                     // Check show_for (property type)
                     if (config.show_for) {
-                        const showForArr = config.show_for.split(',').map(function(s) { return s.trim(); });
+                        let showForArr = [];
+                        if (typeof config.show_for === 'string') {
+                            showForArr = config.show_for.split(',').map(function(s) { return s.trim(); });
+                        } else if (Array.isArray(config.show_for)) {
+                            showForArr = config.show_for;
+                        }
+                        
                         if (propertyType && showForArr.indexOf(propertyType) === -1) {
                             isVisible = false;
                         }
@@ -1116,7 +1122,13 @@
 
                     // Check show_for_listing (listing type)
                     if (isVisible && config.show_for_listing) {
-                        const showForListingArr = config.show_for_listing.split(',').map(function(s) { return s.trim(); });
+                        let showForListingArr = [];
+                        if (typeof config.show_for_listing === 'string') {
+                            showForListingArr = config.show_for_listing.split(',').map(function(s) { return s.trim(); });
+                        } else if (Array.isArray(config.show_for_listing)) {
+                            showForListingArr = config.show_for_listing;
+                        }
+                        
                         if (listingType && showForListingArr.indexOf(listingType) === -1) {
                             isVisible = false;
                         }
