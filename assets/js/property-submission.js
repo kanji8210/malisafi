@@ -145,6 +145,35 @@
             this.$form.on('submit', function(e) {
                 e.preventDefault();
             });
+
+            // Progress steps click navigation
+            this.$progressSteps.on('click', function() {
+                const targetStep = parseInt($(this).data('step'));
+                self.goToStep(targetStep);
+            });
+        },
+
+        goToStep: function(stepNum) {
+            if (stepNum === this.currentStep) return;
+
+            // If going forward, validate current step
+            if (stepNum > this.currentStep) {
+                if (!this.validateStep(this.currentStep)) {
+                    return;
+                }
+                
+                // If jumping ahead multiple steps, we could validate intermediate steps,
+                // but usually for UX we just validate the one the user is leaving.
+            }
+
+            // Check if target step is skipped
+            if ($('#step-' + stepNum).hasClass('step-skipped')) {
+                return;
+            }
+
+            this.currentStep = stepNum;
+            this.updateStep();
+            this.saveStep();
         },
 
         nextStep: function() {
@@ -154,8 +183,8 @@
 
             if (this.currentStep < this.totalSteps) {
                 this.currentStep++;
-                // Skip hidden steps (land-specific skips)
-                while ($('#step-' + this.currentStep).is(':hidden') && this.currentStep < this.totalSteps) {
+                // Skip hidden steps (logic-specific skips via .step-skipped)
+                while ($('#step-' + this.currentStep).hasClass('step-skipped') && this.currentStep < this.totalSteps) {
                     this.currentStep++;
                 }
                 this.updateStep();
@@ -167,7 +196,7 @@
             if (this.currentStep > 1) {
                 this.currentStep--;
                 // Skip hidden steps backwards
-                while (this.currentStep > 1 && $('#step-' + this.currentStep).is(':hidden')) {
+                while (this.currentStep > 1 && $('#step-' + this.currentStep).hasClass('step-skipped')) {
                     this.currentStep--;
                 }
                 this.updateStep();
@@ -183,9 +212,11 @@
             this.$progressSteps.removeClass('active completed');
             this.$progressSteps.each(function(index) {
                 const stepNum = index + 1;
-                // Hide progress markers for steps that are hidden in the wizard
                 const $step = $('#step-' + stepNum);
-                $(this).toggle(!$step.is(':hidden'));
+                const isSkipped = $step.hasClass('step-skipped');
+                
+                $(this).toggle(!isSkipped);
+                
                 if (stepNum < PropertySubmission.currentStep) {
                     $(this).addClass('completed');
                 } else if (stepNum === PropertySubmission.currentStep) {
@@ -1156,7 +1187,7 @@
                 // Note: basic, images, and review are always visible
                 if (stepName !== 'basic' && stepName !== 'images' && stepName !== 'review') {
                     const stepNum = this.getStepNumberFromName(stepName);
-                    $('#step-' + stepNum).toggle(stepHasVisibleFields);
+                    $('#step-' + stepNum).toggleClass('step-skipped', !stepHasVisibleFields);
                 }
             }
 

@@ -26,6 +26,13 @@
     text-align: center;
     color: var(--text-links);
     font-size: 12px;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.progress-step:hover:not(.active) .step-number {
+    border-color: var(--color-blue);
+    background: var(--color-blue-light, #f0f7ff);
 }
 
 .progress-step .step-number {
