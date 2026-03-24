@@ -54,6 +54,11 @@
             this.cacheElements();
             this.bindEvents();
 
+            // Apply preset values from data attributes (only for new forms, not edits)
+            if (!this.propertyId || this.propertyId === '0' || this.propertyId === 0) {
+                this.applyPresets();
+            }
+
             // Adjust wizard fields and steps based on property type and listing type
             this.refreshFieldsVisibility();
             
@@ -1083,6 +1088,24 @@
         saveDraft: function() {
             this.saveStep();
             this.showSuccess('Draft saved. You can continue later.');
+        },
+
+        applyPresets: function() {
+            const $form = this.$form;
+            const listingType  = $form.data('preset-listing-type');
+            const propertyType = $form.data('preset-property-type');
+            const county       = $form.data('preset-county');
+
+            if (listingType) {
+                $('#listing_type').val(listingType);
+            }
+            if (propertyType) {
+                $('#property_type').val(propertyType);
+            }
+            if (county) {
+                $('#property_county').val(county);
+                this.fetchSubcounties(county, '');
+            }
         },
 
         fetchSubcounties: function(county, selected) {

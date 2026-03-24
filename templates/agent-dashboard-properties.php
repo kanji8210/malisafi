@@ -78,6 +78,10 @@ if (!defined('ABSPATH')) exit;
                             <span class="date">
                                 <?php echo esc_html(get_the_date()); ?>
                             </span>
+                            <span class="property-views-badge">
+                                <span class="dashicons dashicons-visibility" aria-hidden="true"></span>
+                                <?php echo number_format((int) get_post_meta(get_the_ID(), '_property_views', true)); ?>
+                            </span>
                         </div>
                     </div>
                     <div class="property-actions">

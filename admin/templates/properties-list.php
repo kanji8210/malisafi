@@ -106,6 +106,7 @@ if (isset($_GET['error'])) {
                     <th class="manage-column column-type"><?php _e('Type', 'malisafi-mls'); ?></th>
                     <th class="manage-column column-location"><?php _e('Location', 'malisafi-mls'); ?></th>
                     <th class="manage-column column-status"><?php _e('Status', 'malisafi-mls'); ?></th>
+                    <th class="manage-column column-views" style="text-align:center;" title="<?php _e('Total property page views', 'malisafi-mls'); ?>"><?php _e('Views', 'malisafi-mls'); ?></th>
                     <th class="manage-column column-author"><?php _e('Author', 'malisafi-mls'); ?></th>
                     <th class="manage-column column-date"><?php _e('Date', 'malisafi-mls'); ?></th>
                     <th class="manage-column column-actions"><?php _e('Actions', 'malisafi-mls'); ?></th>
@@ -120,6 +121,12 @@ if (isset($_GET['error'])) {
                         $price = !empty($price) ? floatval($price) : 0;
                         $city = get_post_meta($property_id, '_malisafi_city', true);
                         $property_types = wp_get_post_terms($property_id, 'malisafi_property_type');
+                        // Fetch view count from analytics table
+                        global $wpdb;
+                        $views_count = (int) $wpdb->get_var($wpdb->prepare(
+                            "SELECT views_count FROM {$wpdb->prefix}mf_properties WHERE post_id = %d",
+                            $property_id
+                        ));
                         ?>
                         <tr>
                             <td class="check-column">
@@ -174,6 +181,12 @@ if (isset($_GET['error'])) {
                                 }
                                 ?>
                             </td>
+                            <td class="column-views" style="text-align:center;">
+                                <span class="mls-views-badge" title="<?php _e('Total views', 'malisafi-mls'); ?>">
+                                    <span class="dashicons dashicons-visibility" style="vertical-align:middle;font-size:14px;color:#1e5277;"></span>
+                                    <strong style="margin-left:3px;"><?php echo number_format($views_count); ?></strong>
+                                </span>
+                            </td>
                             <td class="column-author">
                                 <?php the_author(); ?>
                             </td>
@@ -215,7 +228,7 @@ if (isset($_GET['error'])) {
                     <?php endwhile; wp_reset_postdata(); ?>
                 <?php else : ?>
                     <tr>
-                        <td colspan="10" style="text-align: center; padding: 40px;">
+                        <td colspan="11" style="text-align: center; padding: 40px;">
                             <?php _e('No properties found.', 'malisafi-mls'); ?>
                             <br><br>
                             <a href="<?php echo admin_url('admin.php?page=malisafi-properties&action=add'); ?>" class="button button-primary">

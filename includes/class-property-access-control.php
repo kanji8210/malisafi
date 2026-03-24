@@ -107,6 +107,7 @@ class Property_Access_Control {
                 $new_columns['property_price'] = __('Price', 'malisafi-mls');
                 $new_columns['property_type'] = __('Type', 'malisafi-mls');
                 $new_columns['property_location'] = __('Location', 'malisafi-mls');
+                $new_columns['property_views'] = __('Views', 'malisafi-mls');
             }
         }
         
@@ -156,6 +157,18 @@ class Property_Access_Control {
                 } else {
                     echo '<span style="color: #999;">—</span>';
                 }
+                break;
+
+            case 'property_views':
+                global $wpdb;
+                $views = (int) $wpdb->get_var($wpdb->prepare(
+                    "SELECT views_count FROM {$wpdb->prefix}mf_properties WHERE post_id = %d",
+                    $post_id
+                ));
+                echo '<span style="display:flex;align-items:center;gap:4px;">';
+                echo '<span class="dashicons dashicons-visibility" style="font-size:14px;color:#1e5277;"></span>';
+                echo '<strong>' . number_format($views) . '</strong>';
+                echo '</span>';
                 break;
         }
     }

@@ -11,6 +11,11 @@ if (!defined('ABSPATH')) {
 $current_user = wp_get_current_user();
 $property_id = isset($_GET['property_id']) ? intval($_GET['property_id']) : 0;
 $can_assign_agent = current_user_can('manage_options') || current_user_can('edit_others_properties') || current_user_can('malisafi_moderate_properties');
+
+// Preset values passed from render_submission_form() — only used for new (non-edit) forms
+$preset_listing_type  = !$property_id && isset($preset_listing_type)  ? $preset_listing_type  : '';
+$preset_property_type = !$property_id && isset($preset_property_type) ? $preset_property_type : '';
+$preset_county        = !$property_id && isset($preset_county)        ? $preset_county        : '';
 ?>
 
 <div class="malisafi-submission-wizard">
@@ -49,7 +54,10 @@ $can_assign_agent = current_user_can('manage_options') || current_user_can('edit
     </div>
 
     <!-- Wizard Form -->
-    <form id="property-submission-form" class="wizard-form">
+    <form id="property-submission-form" class="wizard-form"
+          data-preset-listing-type="<?php echo esc_attr($preset_listing_type); ?>"
+          data-preset-property-type="<?php echo esc_attr($preset_property_type); ?>"
+          data-preset-county="<?php echo esc_attr($preset_county); ?>">
         <input type="hidden" name="property_id" id="property_id" value="<?php echo esc_attr($property_id); ?>">
 
         <!-- Step 1: Basic Information -->
@@ -101,21 +109,21 @@ $can_assign_agent = current_user_can('manage_options') || current_user_can('edit
                     <label for="property_type" class="required"><?php _e('Property Type', 'malisafi-mls'); ?></label>
                     <select id="property_type" name="property_type" class="form-control" required>
                         <option value=""><?php _e('Select type...', 'malisafi-mls'); ?></option>
-                        <option value="house"><?php _e('House', 'malisafi-mls'); ?></option>
-                        <option value="apartment"><?php _e('Apartment', 'malisafi-mls'); ?></option>
-                        <option value="land"><?php _e('Land', 'malisafi-mls'); ?></option>
-                        <option value="commercial"><?php _e('Commercial', 'malisafi-mls'); ?></option>
-                        <option value="industrial"><?php _e('Industrial', 'malisafi-mls'); ?></option>
+                        <option value="house" <?php selected($preset_property_type, 'house'); ?>><?php _e('House', 'malisafi-mls'); ?></option>
+                        <option value="apartment" <?php selected($preset_property_type, 'apartment'); ?>><?php _e('Apartment', 'malisafi-mls'); ?></option>
+                        <option value="land" <?php selected($preset_property_type, 'land'); ?>><?php _e('Land', 'malisafi-mls'); ?></option>
+                        <option value="commercial" <?php selected($preset_property_type, 'commercial'); ?>><?php _e('Commercial', 'malisafi-mls'); ?></option>
+                        <option value="industrial" <?php selected($preset_property_type, 'industrial'); ?>><?php _e('Industrial', 'malisafi-mls'); ?></option>
                     </select>
                 </div>
                 <div class="form-row">
                     <label for="listing_type" class="required"><?php _e('Listing Type', 'malisafi-mls'); ?></label>
                     <select id="listing_type" name="listing_type" class="form-control" required>
                         <option value=""><?php _e('Select...', 'malisafi-mls'); ?></option>
-                        <option value="sale"><?php _e('For Sale', 'malisafi-mls'); ?></option>
-                        <option value="rent"><?php _e('For Rent', 'malisafi-mls'); ?></option>
-                        <option value="lease"><?php _e('For Lease', 'malisafi-mls'); ?></option>
-                        <option value="short_term"><?php _e('Short Term Rent (Airbnb)', 'malisafi-mls'); ?></option>
+                        <option value="sale" <?php selected($preset_listing_type, 'sale'); ?>><?php _e('For Sale', 'malisafi-mls'); ?></option>
+                        <option value="rent" <?php selected($preset_listing_type, 'rent'); ?>><?php _e('For Rent', 'malisafi-mls'); ?></option>
+                        <option value="lease" <?php selected($preset_listing_type, 'lease'); ?>><?php _e('For Lease', 'malisafi-mls'); ?></option>
+                        <option value="short_term" <?php selected($preset_listing_type, 'short_term'); ?>><?php _e('Short Term Rent (Airbnb)', 'malisafi-mls'); ?></option>
                     </select>
                 </div>
             </div>
@@ -344,7 +352,7 @@ $can_assign_agent = current_user_can('manage_options') || current_user_can('edit
                         <option value=""><?php _e('Select county...', 'malisafi-mls'); ?></option>
                         <?php if (function_exists('malisafi_get_kenya_counties')): ?>
                             <?php foreach (malisafi_get_kenya_counties() as $county): ?>
-                                <option value="<?php echo esc_attr($county); ?>"><?php echo esc_html($county); ?></option>
+                                <option value="<?php echo esc_attr($county); ?>" <?php selected($preset_county, $county); ?>><?php echo esc_html($county); ?></option>
                             <?php endforeach; ?>
                         <?php endif; ?>
                     </select>

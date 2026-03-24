@@ -181,6 +181,10 @@ if (defined('WP_DEBUG') && WP_DEBUG) {
                                 <span class="date">
                                     <?php echo human_time_diff(strtotime($property->post_date), current_time('timestamp')) . ' ' . __('ago', 'malisafi-mls'); ?>
                                 </span>
+                                <span class="property-views-badge">
+                                    <span class="dashicons dashicons-visibility" aria-hidden="true"></span>
+                                    <?php echo number_format((int) get_post_meta($property->ID, '_property_views', true)); ?>
+                                </span>
                             </div>
                         </div>
                         <div class="property-actions">

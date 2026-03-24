@@ -40,6 +40,63 @@ while (have_posts()) : the_post();
     $subcounty = get_post_meta($property_id, '_malisafi_subcounty', true);
     $county = get_post_meta($property_id, '_malisafi_county', true);
     $country = get_post_meta($property_id, '_malisafi_country', true) ?: 'Kenya';
+    $latitude  = get_post_meta($property_id, '_malisafi_latitude', true);
+    $longitude = get_post_meta($property_id, '_malisafi_longitude', true);
+
+    // Geocode from county if no GPS coords stored
+    if ((empty($latitude) || empty($longitude)) && !empty($county)) {
+        $location_name = $county . ', Kenya';
+        $cache_key = 'malisafi_geocode_' . sanitize_title($location_name);
+        $cached_coords = get_transient($cache_key);
+        if ($cached_coords !== false) {
+            $latitude  = $cached_coords['lat'];
+            $longitude = $cached_coords['lng'];
+        } else {
+            $geocode_url = add_query_arg(array(
+                'format'       => 'json',
+                'q'            => $location_name,
+                'limit'        => 1,
+                'countrycodes' => 'ke',
+            ), 'https://nominatim.openstreetmap.org/search');
+            $response = wp_remote_get($geocode_url, array(
+                'timeout' => 5,
+                'headers' => array('User-Agent' => 'Malisafi MLS WordPress Plugin'),
+            ));
+            if (!is_wp_error($response) && wp_remote_retrieve_response_code($response) === 200) {
+                $body = json_decode(wp_remote_retrieve_body($response), true);
+                if (!empty($body) && isset($body[0]['lat'], $body[0]['lon'])) {
+                    $latitude  = $body[0]['lat'];
+                    $longitude = $body[0]['lon'];
+                    set_transient($cache_key, array('lat' => $latitude, 'lng' => $longitude), 30 * DAY_IN_SECONDS);
+                }
+            }
+        }
+    }
+
+    // Privacy offset for non-admins (consistent per property ID)
+    $map_lat = '';
+    $map_lng = '';
+    if (!empty($latitude) && !empty($longitude)) {
+        if (!current_user_can('manage_options')) {
+            $offset_meters = absint(get_option('malisafi_mls_map_public_offset_meters', 100));
+            $offset_meters = min(800, max(0, $offset_meters));
+            $offset_deg    = ($offset_meters / 1000) / 111;
+            mt_srand(intval($property_id));
+            $angle   = mt_rand(0, 360);
+            mt_srand();
+            $map_lat = floatval($latitude)  + ($offset_deg * cos(deg2rad($angle)));
+            $map_lng = floatval($longitude) + ($offset_deg * sin(deg2rad($angle)));
+        } else {
+            $map_lat = floatval($latitude);
+            $map_lng = floatval($longitude);
+        }
+    }
+
+    // Enqueue Leaflet for the single-property map
+    if (!empty($map_lat) && !empty($map_lng)) {
+        wp_enqueue_style('leaflet', 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css', array(), '1.9.4');
+        wp_enqueue_script('leaflet', 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js', array(), '1.9.4', true);
+    }
     
     // Additional details
     $year_built = get_post_meta($property_id, '_malisafi_year_built', true);
@@ -543,6 +600,80 @@ $formatted_price = $price > 0 ? ($currency_symbol . ' ' . number_format($price))
                         </div>
                     <?php endforeach; ?>
                 </div>
+            </section>
+            <?php endif; ?>
+
+            <?php if (!empty($map_lat) && !empty($map_lng)) : ?>
+            <!-- Location Map -->
+            <section class="property-section property-map-section">
+                <div class="section-header">
+                    <h2 class="section-title">
+                        <svg class="section-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/>
+                            <circle cx="12" cy="10" r="3"/>
+                        </svg>
+                        <?php _e('Location', 'malisafi-mls'); ?>
+                    </h2>
+                    <?php if (!current_user_can('manage_options')) : ?>
+                    <span class="map-privacy-note">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                        </svg>
+                        <?php _e('Approximate location shown for privacy', 'malisafi-mls'); ?>
+                    </span>
+                    <?php else: ?>
+                    <span class="map-admin-note">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                            <circle cx="12" cy="12" r="3"/>
+                        </svg>
+                        <?php _e('Admin: exact GPS shown', 'malisafi-mls'); ?>
+                    </span>
+                    <?php endif; ?>
+                </div>
+                <div id="mls-single-property-map"
+                     data-lat="<?php echo esc_attr($map_lat); ?>"
+                     data-lng="<?php echo esc_attr($map_lng); ?>"
+                     data-title="<?php echo esc_attr(get_the_title($property_id)); ?>"
+                     data-label="<?php echo esc_attr(implode(', ', array_filter(array($city, $county)))); ?>"
+                     style="height: 340px; border-radius: var(--radius-lg); overflow: hidden;"
+                     class="mls-single-map"></div>
+                <script>
+                (function(){
+                    function initMlsSingleMap() {
+                        if (typeof L === 'undefined') { setTimeout(initMlsSingleMap, 100); return; }
+                        var el = document.getElementById('mls-single-property-map');
+                        if (!el || el.dataset.init) return;
+                        el.dataset.init = '1';
+                        var lat   = parseFloat(el.dataset.lat);
+                        var lng   = parseFloat(el.dataset.lng);
+                        var title = el.dataset.title;
+                        var label = el.dataset.label;
+                        var map = L.map(el, { scrollWheelZoom: false }).setView([lat, lng], 13);
+                        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                            attribution: '&copy; <a href="https://openstreetmap.org/copyright">OpenStreetMap</a>',
+                            maxZoom: 19
+                        }).addTo(map);
+                        var icon = L.divIcon({
+                            html: '<div class="mls-map-pin"><svg width="28" height="36" viewBox="0 0 28 36" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M14 0C6.268 0 0 6.268 0 14c0 9.625 14 22 14 22s14-12.375 14-22C28 6.268 21.732 0 14 0z" fill="#1e5277"/><circle cx="14" cy="14" r="6" fill="#b4ab74"/></svg></div>',
+                            iconSize: [28, 36],
+                            iconAnchor: [14, 36],
+                            popupAnchor: [0, -36],
+                            className: ''
+                        });
+                        var marker = L.marker([lat, lng], { icon: icon }).addTo(map);
+                        marker.bindPopup(
+                            '<div class="mls-map-popup"><strong>' + title + '</strong>' +
+                            (label ? '<br><small style="color:#666">' + label + '</small>' : '') + '</div>'
+                        );
+                    }
+                    if (document.readyState === 'loading') {
+                        document.addEventListener('DOMContentLoaded', initMlsSingleMap);
+                    } else {
+                        initMlsSingleMap();
+                    }
+                })();
+                </script>
             </section>
             <?php endif; ?>
             

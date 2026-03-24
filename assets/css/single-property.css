@@ -1430,3 +1430,70 @@
         display: block;
     }
 }
+/* ============================================
+   PROPERTY MAP SECTION — single property
+   ============================================ */
+
+.property-map-section .section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: var(--mls-space-sm, 8px);
+    margin-bottom: var(--mls-space-lg, 16px);
+}
+
+.property-map-section .section-title {
+    display: flex;
+    align-items: center;
+    gap: var(--mls-space-sm, 8px);
+    margin-bottom: 0;
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.property-map-section .section-icon {
+    color: var(--mls-primary, #1e5277);
+    flex-shrink: 0;
+}
+
+.map-privacy-note,
+.map-admin-note {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 12px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-weight: 500;
+}
+
+.map-privacy-note {
+    background: rgba(180, 171, 116, 0.12);
+    color: var(--mls-primary, #1e5277);
+    border: 1px solid rgba(180, 171, 116, 0.35);
+}
+
+.map-admin-note {
+    background: rgba(30, 82, 119, 0.1);
+    color: var(--mls-primary, #1e5277);
+    border: 1px solid rgba(30, 82, 119, 0.25);
+}
+
+.mls-single-map {
+    width: 100%;
+    border-radius: var(--mls-radius-lg, 6px);
+    border: 1px solid var(--mls-gray-200, #e5e7eb);
+    box-shadow: var(--mls-shadow, 0 2px 4px rgba(0,0,0,0.1));
+}
+
+/* Custom map pin used in single property map */
+.mls-map-pin {
+    line-height: 0;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.35));
+}
+
+.mls-map-popup strong {
+    color: var(--mls-primary, #1e5277);
+    font-size: 13px;
+}

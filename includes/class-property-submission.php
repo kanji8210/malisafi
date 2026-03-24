@@ -167,6 +167,37 @@ class Property_Submission {
             }
         }
 
+        // Resolve preset values: shortcode atts take priority, then URL params
+        $allowed_listing_types  = array('sale', 'rent', 'lease', 'short_term');
+        $allowed_property_types = array('house', 'apartment', 'land', 'commercial', 'industrial');
+
+        $preset_listing_type = '';
+        if (!empty($atts['listing_type']) && in_array($atts['listing_type'], $allowed_listing_types, true)) {
+            $preset_listing_type = $atts['listing_type'];
+        } elseif (!empty($_GET['listing_type'])) {
+            $param = sanitize_text_field(wp_unslash($_GET['listing_type']));
+            if (in_array($param, $allowed_listing_types, true)) {
+                $preset_listing_type = $param;
+            }
+        }
+
+        $preset_property_type = '';
+        if (!empty($atts['property_type']) && in_array($atts['property_type'], $allowed_property_types, true)) {
+            $preset_property_type = $atts['property_type'];
+        } elseif (!empty($_GET['property_type'])) {
+            $param = sanitize_text_field(wp_unslash($_GET['property_type']));
+            if (in_array($param, $allowed_property_types, true)) {
+                $preset_property_type = $param;
+            }
+        }
+
+        $preset_county = '';
+        if (!empty($atts['county'])) {
+            $preset_county = sanitize_text_field($atts['county']);
+        } elseif (!empty($_GET['county'])) {
+            $preset_county = sanitize_text_field(wp_unslash($_GET['county']));
+        }
+
         // Load wizard template for frontend usage
         ob_start();
         include MALISAFI_MLS_PATH . 'templates/property-submission-wizard.php';
