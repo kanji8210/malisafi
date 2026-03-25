@@ -9,6 +9,8 @@
     margin: 0 auto;
     padding: 24px 16px 40px;
     color: var(--text-base);
+    clear: both;
+    margin-bottom: 60px;
 }
 
 .wizard-progress {

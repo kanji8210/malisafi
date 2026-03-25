@@ -208,7 +208,7 @@
             }
         },
 
-        updateStep: function() {
+        updateStep: function(shouldScroll = true) {
             // Update wizard steps display
             this.$steps.removeClass('active');
             $('#step-' + this.currentStep).addClass('active');
@@ -240,7 +240,9 @@
             }
 
             // Scroll to top
-            $('html, body').animate({ scrollTop: 0 }, 300);
+            if (shouldScroll) {
+                $('html, body').animate({ scrollTop: 0 }, 300);
+            }
         },
 
         validateStep: function(step) {
@@ -1228,7 +1230,7 @@
                 $('#step-2-desc').text(propertyTypeConfigMap[propertyType].desc);
             }
 
-            this.updateStep();
+            this.updateStep(false);
         },
 
         getStepNumberFromName: function(name) {

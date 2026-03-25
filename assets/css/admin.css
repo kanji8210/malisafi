@@ -48,3 +48,109 @@
 .malisafi-section h2 {
     margin-top: 0;
 }
+
+/* Property List Table Responsiveness */
+@media screen and (max-width: 782px) {
+    .malisafi-properties-page .wp-list-table,
+    .malisafi-properties-page .wp-list-table thead,
+    .malisafi-properties-page .wp-list-table tbody,
+    .malisafi-properties-page .wp-list-table tr,
+    .malisafi-properties-page .wp-list-table td {
+        display: block;
+        width: 100% !important;
+        box-sizing: border-box;
+    }
+
+    .malisafi-properties-page .wp-list-table thead {
+        display: none;
+    }
+
+    .malisafi-properties-page .wp-list-table tr {
+        margin-bottom: 20px;
+        background: #fff;
+        border: 1px solid #e1e1e1;
+        border-radius: 12px;
+        padding: 15px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        position: relative;
+    }
+
+    .malisafi-properties-page .wp-list-table td {
+        border: none !important;
+        padding: 8px 0 !important;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        text-align: right;
+        min-height: 36px;
+    }
+
+    .malisafi-properties-page .wp-list-table td::before {
+        content: attr(data-label);
+        font-weight: 600;
+        color: #72777c;
+        text-align: left;
+        padding-right: 15px;
+        font-size: 13px;
+    }
+
+    .malisafi-properties-page .wp-list-table td.column-thumbnail {
+        justify-content: center;
+        margin-bottom: 10px;
+        height: auto;
+    }
+
+    .malisafi-properties-page .wp-list-table td.column-thumbnail::before {
+        display: none;
+    }
+
+    .malisafi-properties-page .wp-list-table td.column-thumbnail img,
+    .malisafi-properties-page .wp-list-table td.column-thumbnail div {
+        width: 100% !important;
+        height: 150px !important;
+        border-radius: 8px !important;
+    }
+
+    .malisafi-properties-page .wp-list-table td.column-title {
+        text-align: center;
+        justify-content: center;
+        font-size: 18px;
+        border-bottom: 1px solid #f0f0f1 !important;
+        margin-bottom: 10px;
+        padding-bottom: 15px !important;
+    }
+
+    .malisafi-properties-page .wp-list-table td.column-title::before {
+        display: none;
+    }
+
+    .malisafi-properties-page .wp-list-table td.column-actions {
+        justify-content: center;
+        margin-top: 10px;
+        padding-top: 15px !important;
+        border-top: 1px solid #f0f0f1 !important;
+    }
+
+    .malisafi-properties-page .wp-list-table td.column-actions::before {
+        display: none;
+    }
+}
+
+/* Badges and Helpers */
+.status-badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 20px !important;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.mls-views-badge {
+    background: #f0f6fb;
+    color: #1e5277;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    display: inline-flex;
+    align-items: center;
+}

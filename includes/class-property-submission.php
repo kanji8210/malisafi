@@ -68,16 +68,30 @@ class Property_Submission {
      * Enqueue assets
      */
     public static function enqueue_assets() {
-        if (is_page() && (has_shortcode(get_post()->post_content, 'malisafi_submit_property') ||
+        $is_admin_page = is_admin() && isset($_GET['page']) && $_GET['page'] === 'malisafi-properties';
+        
+        if ($is_admin_page || 
+            (is_page() && get_post() && (has_shortcode(get_post()->post_content, 'malisafi_submit_property') ||
                           has_shortcode(get_post()->post_content, 'malisafi_property_submit') ||
-                          has_shortcode(get_post()->post_content, 'malisafi_agent_add_property')) ||
+                          has_shortcode(get_post()->post_content, 'malisafi_agent_add_property'))) ||
             (isset($_GET['malisafi_action']) && $_GET['malisafi_action'] === 'submit_property')) {
+            
             if (defined('WP_DEBUG') && WP_DEBUG) {
-                error_log('Enqueuing property submission assets');
+                error_log('Enqueuing property submission assets' . (is_admin() ? ' (Admin)' : ''));
             }
             
             wp_enqueue_media();
             wp_enqueue_script('jquery-ui-sortable');
+
+            // Ensure variables are enqueued if not already (safeguard)
+            if (!wp_style_is('malisafi-mls-variables', 'enqueued')) {
+                wp_enqueue_style(
+                    'malisafi-mls-variables',
+                    MALISAFI_MLS_URL . 'assets/css/variables.css',
+                    array(),
+                    MALISAFI_MLS_VERSION
+                );
+            }
 
             wp_enqueue_style(
                 'malisafi-property-submission',

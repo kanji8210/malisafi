@@ -402,11 +402,19 @@ class Malisafi_Admin_Dashboard {
             wp_enqueue_media();
         }
         
+        // Enqueue global variables
+        wp_enqueue_style(
+            'malisafi-mls-variables',
+            MALISAFI_MLS_URL . 'assets/css/variables.css',
+            array(),
+            MALISAFI_MLS_VERSION
+        );
+
         // Enqueue styles
         wp_enqueue_style(
             'malisafi-admin',
             MALISAFI_MLS_URL . 'assets/css/admin.css',
-            array(),
+            array('malisafi-mls-variables'),
             MALISAFI_MLS_VERSION
         );
         

@@ -33,4 +33,10 @@ echo '</div>';
 .malisafi-property-wizard * {
     box-sizing: border-box;
 }
+/* Fix for overlapping admin footer */
+#wpfooter {
+    position: relative !important;
+    clear: both;
+    margin-top: 40px;
+}
 </style>

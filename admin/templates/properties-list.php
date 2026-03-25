@@ -129,10 +129,10 @@ if (isset($_GET['error'])) {
                         ));
                         ?>
                         <tr>
-                            <td class="check-column">
+                            <td class="check-column" data-label="<?php _e('Select', 'malisafi-mls'); ?>">
                                 <input type="checkbox" name="properties[]" value="<?php echo esc_attr($property_id); ?>">
                             </td>
-                            <td class="column-thumbnail">
+                            <td class="column-thumbnail" data-label="<?php _e('Image', 'malisafi-mls'); ?>">
                                 <?php if (has_post_thumbnail()) : ?>
                                     <?php the_post_thumbnail('thumbnail', array('style' => 'width: 60px; height: 60px; object-fit: cover;')); ?>
                                 <?php else : ?>
@@ -141,17 +141,17 @@ if (isset($_GET['error'])) {
                                     </div>
                                 <?php endif; ?>
                             </td>
-                            <td class="column-title">
+                            <td class="column-title" data-label="<?php _e('Title', 'malisafi-mls'); ?>">
                                 <strong>
                                     <a href="<?php echo admin_url('admin.php?page=malisafi-properties&action=edit&property_id=' . $property_id); ?>">
                                         <?php the_title(); ?>
                                     </a>
                                 </strong>
                             </td>
-                            <td class="column-price">
+                            <td class="column-price" data-label="<?php _e('Price', 'malisafi-mls'); ?>">
                                 <strong>$<?php echo number_format($price); ?></strong>
                             </td>
-                            <td class="column-type">
+                            <td class="column-type" data-label="<?php _e('Type', 'malisafi-mls'); ?>">
                                 <?php 
                                 if (!empty($property_types)) {
                                     echo esc_html($property_types[0]->name);
@@ -160,10 +160,10 @@ if (isset($_GET['error'])) {
                                 }
                                 ?>
                             </td>
-                            <td class="column-location">
+                            <td class="column-location" data-label="<?php _e('Location', 'malisafi-mls'); ?>">
                                 <?php echo $city ? esc_html($city) : '<span style="color: #999;">—</span>'; ?>
                             </td>
-                            <td class="column-status">
+                            <td class="column-status" data-label="<?php _e('Status', 'malisafi-mls'); ?>">
                                 <?php
                                 $status = get_post_status();
                                 $status_labels = array(
@@ -181,19 +181,19 @@ if (isset($_GET['error'])) {
                                 }
                                 ?>
                             </td>
-                            <td class="column-views" style="text-align:center;">
+                            <td class="column-views" data-label="<?php _e('Views', 'malisafi-mls'); ?>" style="text-align:center;">
                                 <span class="mls-views-badge" title="<?php _e('Total views', 'malisafi-mls'); ?>">
                                     <span class="dashicons dashicons-visibility" style="vertical-align:middle;font-size:14px;color:#1e5277;"></span>
                                     <strong style="margin-left:3px;"><?php echo number_format($views_count); ?></strong>
                                 </span>
                             </td>
-                            <td class="column-author">
+                            <td class="column-author" data-label="<?php _e('Author', 'malisafi-mls'); ?>">
                                 <?php the_author(); ?>
                             </td>
-                            <td class="column-date">
+                            <td class="column-date" data-label="<?php _e('Date', 'malisafi-mls'); ?>">
                                 <?php echo get_the_date('M j, Y'); ?>
                             </td>
-                            <td class="column-actions">
+                            <td class="column-actions" data-label="<?php _e('Actions', 'malisafi-mls'); ?>">
                                 <div class="row-actions-wrapper">
                                     <a href="<?php echo admin_url('admin.php?page=malisafi-properties&action=edit&property_id=' . $property_id); ?>" 
                                        class="button button-small" 

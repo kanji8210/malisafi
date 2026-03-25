@@ -1143,32 +1143,47 @@ class Dashboard_Shortcodes {
 			<?php endif; ?>
 
 			<?php if ($query->have_posts()) : ?>
-				<table class="widefat striped">
-					<thead>
-						<tr>
-							<th><?php _e('Project', 'malisafi-mls'); ?></th>
-							<th><?php _e('Status', 'malisafi-mls'); ?></th>
-							<th><?php _e('Linked Units', 'malisafi-mls'); ?></th>
-							<th><?php _e('Updated', 'malisafi-mls'); ?></th>
-						</tr>
-					</thead>
-					<tbody>
-						<?php while ($query->have_posts()) : $query->the_post(); ?>
-							<?php
-							$linked = get_post_meta(get_the_ID(), '_malisafi_project_linked_properties', true);
-							if (!is_array($linked)) {
-								$linked = $linked ? (array) $linked : array();
-							}
-							?>
-							<tr>
-								<td><a href="<?php echo esc_url(get_permalink()); ?>"><?php the_title(); ?></a></td>
-								<td><?php echo esc_html(ucfirst(get_post_status())); ?></td>
-								<td><?php echo esc_html(count($linked)); ?></td>
-								<td><?php echo esc_html(get_the_modified_date()); ?></td>
-							</tr>
-						<?php endwhile; ?>
-					</tbody>
-				</table>
+				<div class="developer-projects-grid">
+					<?php while ($query->have_posts()) : $query->the_post(); ?>
+						<?php
+						$project_id = get_the_ID();
+						$status = get_post_status();
+						$linked = get_post_meta($project_id, '_malisafi_project_linked_properties', true);
+						if (!is_array($linked)) {
+							$linked = $linked ? (array) $linked : array();
+						}
+						?>
+						<div class="project-card">
+							<div class="project-image">
+								<?php if (has_post_thumbnail()) : ?>
+									<?php the_post_thumbnail('medium'); ?>
+								<?php else : ?>
+									<div class="no-image"><span class="dashicons dashicons-building"></span></div>
+								<?php endif; ?>
+								<div class="project-status-tag status-<?php echo esc_attr($status); ?>">
+									<?php echo esc_html(ucfirst($status)); ?>
+								</div>
+							</div>
+							<div class="project-content">
+								<h3><?php the_title(); ?></h3>
+								<div class="project-meta">
+									<div class="meta-item">
+										<span class="dashicons dashicons-admin-home"></span>
+										<?php printf(__('Units: %d', 'malisafi-mls'), count($linked)); ?>
+									</div>
+									<div class="meta-item">
+										<span class="dashicons dashicons-calendar-alt"></span>
+										<?php echo get_the_modified_date(); ?>
+									</div>
+								</div>
+								<div class="project-actions">
+									<a href="<?php echo esc_url(get_permalink()); ?>" class="button"><?php _e('View', 'malisafi-mls'); ?></a>
+									<a href="<?php echo esc_url(add_query_arg(['action' => 'edit', 'project_id' => $project_id])); ?>" class="button button-secondary"><?php _e('Edit', 'malisafi-mls'); ?></a>
+								</div>
+							</div>
+						</div>
+					<?php endwhile; ?>
+				</div>
 			<?php else : ?>
 				<p><?php _e('No projects found yet.', 'malisafi-mls'); ?></p>
 			<?php endif; ?>

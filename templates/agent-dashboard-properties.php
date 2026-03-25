@@ -69,13 +69,31 @@ if (!defined('ABSPATH')) exit;
                 );
                 ?>
                 <div class="property-item">
+                    <div class="property-image">
+                        <?php if (has_post_thumbnail()) : ?>
+                            <?php the_post_thumbnail('medium'); ?>
+                        <?php else : ?>
+                            <div class="no-image">
+                                <span class="dashicons dashicons-admin-home"></span>
+                            </div>
+                        <?php endif; ?>
+                        <div class="property-status-tag status-<?php echo esc_attr($status); ?>">
+                            <?php echo esc_html(ucfirst($status)); ?>
+                        </div>
+                    </div>
                     <div class="property-info">
                         <h3><?php the_title(); ?></h3>
                         <div class="property-meta">
-                            <span class="status status-<?php echo esc_attr($status); ?>">
-                                <?php echo esc_html(ucfirst($status)); ?>
+                            <span class="price">
+                                <?php 
+                                $price = get_post_meta(get_the_ID(), '_malisafi_price', true);
+                                if ($price) {
+                                    echo \MalisafiMLS\Property_Manager::format_price($price);
+                                }
+                                ?>
                             </span>
                             <span class="date">
+                                <span class="dashicons dashicons-calendar-alt"></span>
                                 <?php echo esc_html(get_the_date()); ?>
                             </span>
                             <span class="property-views-badge">
@@ -124,6 +142,18 @@ if (!defined('ABSPATH')) exit;
                     $days_left = $delete_at ? max(0, ceil(($delete_at - time()) / DAY_IN_SECONDS)) : 0;
                     ?>
                     <div class="property-item">
+                        <div class="property-image">
+                            <?php if (has_post_thumbnail()) : ?>
+                                <?php the_post_thumbnail('medium'); ?>
+                            <?php else : ?>
+                                <div class="no-image">
+                                    <span class="dashicons dashicons-admin-home"></span>
+                                </div>
+                            <?php endif; ?>
+                            <div class="property-status-tag status-trash">
+                                <?php _e('Trashed', 'malisafi-mls'); ?>
+                            </div>
+                        </div>
                         <div class="property-info">
                             <h3><?php the_title(); ?></h3>
                             <div class="property-meta">
