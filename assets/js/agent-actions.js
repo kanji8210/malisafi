@@ -223,6 +223,48 @@
         $('.modal-content').on('click', function(e) {
             e.stopPropagation();
         });
+
+        // ==========================
+        // Agent Profile Inquiry Form
+        // ==========================
+        $('#openContactForm').on('click', function(e) {
+            e.preventDefault();
+            $('#inquiry-modal').fadeIn();
+        });
+
+        $('#inquiry-modal .modal-close, #inquiry-modal .modal-overlay').on('click', function() {
+            $('#inquiry-modal').fadeOut();
+        });
+
+        $('#inquiry-form').on('submit', function(e) {
+            e.preventDefault();
+            const $form = $(this);
+            const $submitBtn = $form.find('button[type="submit"]');
+            const originalText = $submitBtn.text();
+
+            $submitBtn.prop('disabled', true).text(malisafiAgentAjax.messages.submitting);
+
+            $.ajax({
+                url: malisafiAgentAjax.ajaxurl,
+                type: 'POST',
+                data: $form.serialize() + '&action=malisafi_send_inquiry&nonce=' + malisafiAgentAjax.inquiryNonce,
+                success: function(response) {
+                    if (response.success) {
+                        alert(response.data.message || 'Inquiry sent successfully!');
+                        $form[0].reset();
+                        $('#inquiry-modal').fadeOut();
+                    } else {
+                        alert(response.data.message || malisafiAgentAjax.messages.error);
+                    }
+                },
+                error: function() {
+                    alert(malisafiAgentAjax.messages.error);
+                },
+                complete: function() {
+                    $submitBtn.prop('disabled', false).text(originalText);
+                }
+            });
+        });
         
     });
 

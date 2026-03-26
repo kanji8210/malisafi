@@ -164,6 +164,7 @@ class Property_Actions_Ajax {
         }
 
         $property_id = isset($_POST['property_id']) ? intval($_POST['property_id']) : 0;
+        $agent_id = isset($_POST['agent_id']) ? intval($_POST['agent_id']) : 0;
         $name = isset($_POST['inquiry_name']) ? sanitize_text_field($_POST['inquiry_name']) : '';
         $email = isset($_POST['inquiry_email']) ? sanitize_email($_POST['inquiry_email']) : '';
         $phone = isset($_POST['inquiry_phone']) ? sanitize_text_field($_POST['inquiry_phone']) : '';
@@ -224,7 +225,7 @@ class Property_Actions_Ajax {
         }
 
         // Validation
-        if (!$property_id || get_post_type($property_id) !== 'malisafi_property') {
+        if ((!$property_id || get_post_type($property_id) !== 'malisafi_property') && !$agent_id) {
             wp_send_json_error(array('message' => 'Invalid property.'));
         }
 
@@ -249,10 +250,14 @@ class Property_Actions_Ajax {
         }
 
         // Get property and agent info
-        $property = get_post($property_id);
-        $property_title = $property->post_title;
-        $property_url = get_permalink($property_id);
-        $agent_id = $property->post_author;
+        $property = $property_id ? get_post($property_id) : null;
+        $property_title = $property ? $property->post_title : __('General Inquiry', 'malisafi-mls');
+        $property_url = $property ? get_permalink($property_id) : '';
+        
+        if ($property) {
+            $agent_id = $property->post_author;
+        }
+
         $agent_email = get_the_author_meta('user_email', $agent_id);
         $agent_name = get_the_author_meta('display_name', $agent_id);
 
@@ -279,11 +284,15 @@ class Property_Actions_Ajax {
         }
 
         // Prepare email
-        $subject = 'New Property Inquiry: ' . $property_title;
+        $subject = 'New Inquiry: ' . $property_title;
         $email_message = "Hello {$agent_name},\n\n";
-        $email_message .= "You have received a new inquiry about your property.\n\n";
-        $email_message .= "Property: {$property_title}\n";
-        $email_message .= "URL: {$property_url}\n\n";
+        $email_message .= "You have received a new inquiry.\n\n";
+        if ($property) {
+            $email_message .= "Property: {$property_title}\n";
+            $email_message .= "URL: {$property_url}\n\n";
+        } else {
+            $email_message .= "Inquiry Type: General Contact (via Agent Profile)\n\n";
+        }
         $email_message .= "Inquirer Details:\n";
         $email_message .= "Name: {$name}\n";
         $email_message .= "Email: {$email}\n";

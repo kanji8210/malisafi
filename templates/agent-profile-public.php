@@ -47,6 +47,7 @@ wp_enqueue_script('malisafi-agent-actions', MALISAFI_MLS_URL . 'assets/js/agent-
 wp_localize_script('malisafi-agent-actions', 'malisafiAgentAjax', array(
     'ajaxurl' => admin_url('admin-ajax.php'),
     'nonce' => wp_create_nonce('agent_actions_nonce'),
+    'inquiryNonce' => wp_create_nonce('malisafi_ajax_nonce'),
     'isLoggedIn' => is_user_logged_in(),
     'messages' => array(
         'loginRequired' => __('You must be logged in to perform this action.', 'malisafi-mls'),
@@ -167,12 +168,10 @@ $total_properties = intval($total_published) + intval($total_pending);
                                 </a>
                             <?php endif; ?>
 
-                            <?php if (is_user_logged_in()): ?>
-                                <button class="contact-link" id="openContactForm" title="<?php _e('Send direct message', 'malisafi-mls'); ?>">
-                                    <span class="dashicons dashicons-email-alt"></span>
-                                    <span><?php _e('Message', 'malisafi-mls'); ?></span>
-                                </button>
-                            <?php endif; ?>
+                            <button class="contact-link" id="openContactForm" title="<?php _e('Send direct message', 'malisafi-mls'); ?>">
+                                <span class="dashicons dashicons-email-alt"></span>
+                                <span><?php _e('Message', 'malisafi-mls'); ?></span>
+                            </button>
                         </div>
                     </div>
 
@@ -288,5 +287,53 @@ $total_properties = intval($total_published) + intval($total_pending);
             </div>
         </div>
     <?php endif; ?>
+
+    <!-- Inquiry Modal -->
+    <div id="inquiry-modal" class="malisafi-modal" style="display: none;">
+        <div class="modal-overlay"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><?php _e('Contact Agent', 'malisafi-mls'); ?></h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="inquiry-form">
+                    <input type="hidden" name="agent_id" value="<?php echo $agent_id; ?>">
+                    <input type="hidden" name="property_id" value="0">
+                    <input type="hidden" name="hp_name" value="">
+                    <input type="hidden" name="form_ts" value="<?php echo time(); ?>">
+                    
+                    <div class="form-group">
+                        <label><?php _e('Your Name', 'malisafi-mls'); ?></label>
+                        <input type="text" name="inquiry_name" placeholder="<?php _e('Enter your name', 'malisafi-mls'); ?>" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label><?php _e('Your Email', 'malisafi-mls'); ?></label>
+                        <input type="email" name="inquiry_email" placeholder="your@email.com" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label><?php _e('Phone Number', 'malisafi-mls'); ?></label>
+                        <input type="tel" name="inquiry_phone" placeholder="<?php _e('Your phone number', 'malisafi-mls'); ?>">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label><?php _e('Message', 'malisafi-mls'); ?></label>
+                        <textarea name="inquiry_message" rows="4" placeholder="<?php _e('I would like to inquire about your services. Please contact me.', 'malisafi-mls'); ?>" required></textarea>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="button" class="button-secondary modal-close"><?php _e('Cancel', 'malisafi-mls'); ?></button>
+                        <?php if (get_option('malisafi_inquiry_recaptcha_enabled') && get_option('malisafi_inquiry_recaptcha_site_key')): ?>
+                            <div class="g-recaptcha" data-sitekey="<?php echo esc_attr(get_option('malisafi_inquiry_recaptcha_site_key')); ?>" style="margin-bottom:8px;"></div>
+                            <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+                        <?php endif; ?>
+                        <button type="submit" class="button-primary"><?php _e('Send Inquiry', 'malisafi-mls'); ?></button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 
 
