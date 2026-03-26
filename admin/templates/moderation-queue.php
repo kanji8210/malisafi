@@ -223,7 +223,7 @@ $current_chat_user_id = get_current_user_id();
                                 
                                 <div class="property-author">
                                     <?php _e('Posted by:', 'malisafi-mls'); ?>
-                                    <strong><?php echo esc_html($author->display_name); ?></strong>
+                                    <strong><?php echo $author ? esc_html($author->display_name) : esc_html__('Unknown', 'malisafi-mls'); ?></strong>
                                     <span class="post-date"><?php echo human_time_diff(get_the_time('U'), current_time('timestamp')) . ' ' . __('ago', 'malisafi-mls'); ?></span>
                                 </div>
                                 

@@ -543,7 +543,144 @@ textarea.error {
     background-color: #f8d7da !important;
 }
 
+
 .dropzone-success {
     border-color: #28a745 !important;
     background-color: #d4edda !important;
+}
+
+/* Lighthouse Success Popup */
+.lighthouse-popup-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100000;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.4s ease;
+}
+
+.lighthouse-popup-overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.lighthouse-popup-card {
+    background: #ffffff;
+    width: 90%;
+    max-width: 500px;
+    padding: 50px 40px;
+    border-radius: 24px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+    text-align: center;
+    transform: scale(0.85) translateY(20px);
+    transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.lighthouse-popup-overlay.active .lighthouse-popup-card {
+    transform: scale(1) translateY(0);
+}
+
+.lighthouse-success-icon {
+    width: 80px;
+    height: 80px;
+    background: #00c853;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 30px;
+    color: #fff;
+    box-shadow: 0 10px 20px rgba(0, 200, 83, 0.3);
+}
+
+.lighthouse-success-icon svg {
+    width: 40px;
+    height: 40px;
+}
+
+.lighthouse-popup-card h2 {
+    font-size: 28px;
+    font-weight: 700;
+    margin: 0 0 15px;
+    color: #1a1a1b;
+    border: none;
+    padding: 0;
+}
+
+.lighthouse-popup-card p {
+    font-size: 16px;
+    color: #666;
+    line-height: 1.6;
+    margin-bottom: 35px;
+}
+
+.lighthouse-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.lighthouse-actions .btn {
+    padding: 14px 24px;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 16px;
+    transition: all 0.3s ease !important;
+    text-decoration: none;
+    display: block;
+    cursor: pointer;
+    border: none;
+    text-align: center;
+}
+
+.lighthouse-actions .btn-primary {
+    background: #007bff;
+    color: #fff !important;
+}
+
+.lighthouse-actions .btn-primary:hover {
+    background: #0069d9;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 123, 255, 0.3);
+}
+
+.lighthouse-actions .btn-secondary {
+    background: #f0f2f5;
+    color: #1a1a1b !important;
+}
+
+.lighthouse-actions .btn-secondary:hover {
+    background: #e4e6e9;
+    transform: translateY(-2px);
+}
+
+.lighthouse-actions .btn-link {
+    background: transparent;
+    color: #007bff !important;
+    margin-top: 10px;
+}
+
+.lighthouse-actions .btn-link:hover {
+    text-decoration: underline;
+}
+
+/* Admin Responsive Adjustments */
+@media screen and (max-width: 600px) {
+    .lighthouse-popup-card {
+        padding: 40px 25px;
+        margin: 20px;
+    }
+    
+    .lighthouse-popup-card h2 {
+        font-size: 24px;
+    }
 }

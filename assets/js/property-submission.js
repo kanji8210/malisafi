@@ -1395,23 +1395,54 @@
         },
 
         showSubmitSuccess: function(data) {
-            const message = data && data.message ? data.message : 'Property submitted successfully!';
-            const addUrl = data && data.add_new_url ? data.add_new_url : '';
+            this.$form.find('.success-message').remove();
+            const message = data && data.message ? data.message : (malisafiSubmission.strings.success || 'Property submitted successfully!');
             const viewUrl = data && data.view_url ? data.view_url : '';
+            const editUrl = data && data.edit_url ? data.edit_url : '';
+            const dashboardUrl = malisafiSubmission.dashboardUrl || '';
 
-            const $success = $(
-                '<div class="success-message success-actions">' +
-                    '<p>' + message + '</p>' +
-                    '<div class="success-buttons">' +
-                        (addUrl ? '<a class="btn btn-secondary" href="' + addUrl + '">Continue Adding</a>' : '') +
-                        (viewUrl ? '<a class="btn btn-primary" href="' + viewUrl + '" target="_blank">View Property</a>' : '') +
-                    '</div>' +
-                '</div>'
-            );
+            // Create Lighthouse Popup Overlay
+            const $overlay = $('<div class="lighthouse-popup-overlay"></div>');
+            const $card = $('<div class="lighthouse-popup-card"></div>');
 
-            this.$form.prepend($success);
-            $('html, body').animate({ scrollTop: 0 }, 300);
+            // Success Icon (SVG)
+            const iconSvg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>';
+            const $icon = $('<div class="lighthouse-success-icon">' + iconSvg + '</div>');
+
+            // Content
+            const $title = $('<h2>' + (malisafiSubmission.strings.saved || 'Success!') + '</h2>');
+            const $message = $('<p>' + message + '</p>');
+
+            // Actions
+            const $actions = $('<div class="lighthouse-actions"></div>');
+            
+            if (viewUrl) {
+                $actions.append('<a href="' + viewUrl + '" target="_blank" class="btn btn-primary">View Property</a>');
+            }
+            
+            if (editUrl) {
+                $actions.append('<a href="' + editUrl + '" class="btn btn-secondary">Edit Property</a>');
+            }
+            
+            if (dashboardUrl) {
+                $actions.append('<a href="' + dashboardUrl + '" class="btn btn-link">Go to Dashboard</a>');
+            }
+
+            // Assemble
+            $card.append($icon, $title, $message, $actions);
+            $overlay.append($card);
+            $('body').append($overlay);
+
+            // Trigger Animation
+            setTimeout(() => {
+                $overlay.addClass('active');
+            }, 10);
+
+            // Re-enable submit button
             this.$btnSubmit.prop('disabled', false).text(malisafiSubmission.strings.submitProperty);
+            
+            // Auto-scroll to top
+            $('html, body').animate({ scrollTop: 0 }, 300);
         }
     };
 

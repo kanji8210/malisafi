@@ -28,6 +28,7 @@ class Property_Submission {
         add_action('wp_ajax_malisafi_delete_property_image', array(__CLASS__, 'ajax_delete_image'));
         add_action('wp_ajax_malisafi_clear_featured_image', array(__CLASS__, 'ajax_clear_featured_image'));
         add_action('wp_ajax_malisafi_reorder_property_images', array(__CLASS__, 'ajax_reorder_images'));
+        add_action('wp_ajax_malisafi_get_property_draft', array(__CLASS__, 'ajax_get_property_draft'));
         
         // Handle direct property submission requests
         add_action('wp', array(__CLASS__, 'handle_direct_requests'));
@@ -113,6 +114,8 @@ class Property_Submission {
                 'nonce' => wp_create_nonce('malisafi_property_submission'),
                 'uploadNonce' => wp_create_nonce('malisafi_upload_images'),
                 'refNonce' => wp_create_nonce('malisafi_generate_ref_id'),
+                'dashboardUrl' => admin_url('admin.php?page=malisafi-dashboard'),
+                'propertiesUrl' => admin_url('admin.php?page=malisafi-properties'),
                 'uploadsEnabled' => true,
                 'fieldRegistry' => self::get_field_registry(),
                 'strings' => array(
@@ -1012,11 +1015,14 @@ class Property_Submission {
 
         $view_url = get_permalink($property_id);
         
+        $edit_url = admin_url('admin.php?page=malisafi-properties&action=add&property_id=' . $property_id);
+
         wp_send_json_success(array(
             'message' => __('Property submitted successfully!', 'malisafi-mls'),
             'redirect' => $success_url,
             'add_new_url' => $add_new_url,
-            'view_url' => $view_url
+            'view_url' => $view_url,
+            'edit_url' => $edit_url
         ));
     }
     
@@ -1121,12 +1127,10 @@ class Property_Submission {
         }
 
         wp_send_json_success(array(
-            'data' => array(
-                'message' => __('Featured image uploaded successfully', 'malisafi-mls'),
-                'image' => array(
-                    'id' => $upload_result['id'],
-                    'url' => $upload_result['sizes']['url']
-                )
+            'message' => __('Featured image uploaded successfully', 'malisafi-mls'),
+            'image' => array(
+                'id' => $upload_result['id'],
+                'url' => $upload_result['sizes']['url']
             )
         ));
     }
@@ -1239,10 +1243,8 @@ class Property_Submission {
         }
 
         wp_send_json_success(array(
-            'data' => array(
-                'message' => sprintf(__('Successfully uploaded %d image(s)', 'malisafi-mls'), count($uploaded_images)),
-                'images' => $uploaded_images
-            )
+            'message' => sprintf(__('Successfully uploaded %d image(s)', 'malisafi-mls'), count($uploaded_images)),
+            'images' => $uploaded_images
         ));
     }
 
@@ -1438,5 +1440,84 @@ class Property_Submission {
         $subcounties = malisafi_get_subcounties_by_county($county);
 
         wp_send_json_success(array('subcounties' => $subcounties));
+    }
+
+    /**
+     * AJAX: Get property draft data for form population
+     */
+    public static function ajax_get_property_draft() {
+        check_ajax_referer('malisafi_property_submission', 'nonce');
+        
+        $property_id = isset($_POST['property_id']) ? intval($_POST['property_id']) : 0;
+        
+        if (!$property_id) {
+            wp_send_json_error(array('message' => __('Invalid property ID', 'malisafi-mls')));
+        }
+        
+        $property = get_post($property_id);
+        if (!$property || $property->post_type !== 'malisafi_property') {
+            wp_send_json_error(array('message' => __('Property not found', 'malisafi-mls')));
+        }
+        
+        // Verify ownership or admin status
+        if ($property->post_author != get_current_user_id() && !current_user_can('moderate_properties')) {
+            wp_send_json_error(array('message' => __('Permission denied', 'malisafi-mls')));
+        }
+        
+        $registry = self::get_field_registry();
+        $data = array();
+        
+        // Core fields
+        $data['title'] = $property->post_title;
+        $data['description'] = $property->post_content;
+        
+        // Loop through registry to collect meta and taxonomy data
+        foreach ($registry as $step => $fields) {
+            foreach ($fields as $key => $config) {
+                if (isset($config['is_core']) && $config['is_core']) {
+                    continue; // Already handled title and description
+                }
+                
+                if (isset($config['meta_key'])) {
+                    $value = get_post_meta($property_id, $config['meta_key'], true);
+                    
+                    // Special handling for gallery images
+                    if ($key === 'gallery_ids') {
+                        $ids = explode(',', $value);
+                        $gallery_images = array();
+                        foreach ($ids as $id) {
+                            $id = intval($id);
+                            if ($id) {
+                                $url = wp_get_attachment_image_url($id, 'thumbnail');
+                                if ($url) {
+                                    $gallery_images[] = array('id' => $id, 'url' => $url);
+                                }
+                            }
+                        }
+                        $data['gallery_images'] = $gallery_images;
+                    } 
+                    // Special handling for featured image
+                    elseif ($key === 'featured_image_id') {
+                        $featured_id = get_post_thumbnail_id($property_id);
+                        if ($featured_id) {
+                            $url = wp_get_attachment_image_url($featured_id, 'medium');
+                            $data['featured_image'] = array('id' => $featured_id, 'url' => $url);
+                        }
+                    }
+                    else {
+                        $data[$key] = $value;
+                    }
+                } 
+                elseif (isset($config['taxonomy'])) {
+                    $terms = wp_get_object_terms($property_id, 'malisafi_' . $config['taxonomy'], array('fields' => 'slugs'));
+                    $data[$key] = (!is_wp_error($terms) && !empty($terms)) ? $terms[0] : '';
+                }
+                elseif ($key === 'agent_user_id') {
+                    $data[$key] = $property->post_author;
+                }
+            }
+        }
+        
+        wp_send_json_success(array('data' => $data));
     }
 }
