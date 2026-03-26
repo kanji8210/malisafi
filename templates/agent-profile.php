@@ -276,7 +276,8 @@ $can_see_contacts = true; // Allowed for everyone as per guest inquiry requireme
                     rating: data.get('rating'),
                     review_title: data.get('review_title'),
                     review_text: data.get('review_text'),
-                    nonce: '<?php echo wp_create_nonce('malisafi_agent_nonce'); ?>'
+                    nonce: '<?php echo wp_create_nonce('malisafi_ajax_nonce'); ?>',
+                    inquiryNonce: '<?php echo wp_create_nonce('malisafi_ajax_nonce'); ?>'
                 })
             })
             .then(r => r.json())

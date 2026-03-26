@@ -247,7 +247,7 @@
             $.ajax({
                 url: malisafiAgentAjax.ajaxurl,
                 type: 'POST',
-                data: $form.serialize() + '&action=malisafi_send_inquiry&nonce=' + malisafiAgentAjax.inquiryNonce,
+                data: $form.serialize() + '&action=malisafi_send_inquiry&nonce=' + malisafiAgentAjax.nonce,
                 success: function(response) {
                     if (response.success) {
                         alert(response.data.message || 'Inquiry sent successfully!');

@@ -46,7 +46,7 @@ wp_enqueue_script('malisafi-agent-actions', MALISAFI_MLS_URL . 'assets/js/agent-
 // Localize script
 wp_localize_script('malisafi-agent-actions', 'malisafiAgentAjax', array(
     'ajaxurl' => admin_url('admin-ajax.php'),
-    'nonce' => wp_create_nonce('agent_actions_nonce'),
+    'nonce' => wp_create_nonce('malisafi_ajax_nonce'),
     'inquiryNonce' => wp_create_nonce('malisafi_ajax_nonce'),
     'isLoggedIn' => is_user_logged_in(),
     'messages' => array(
