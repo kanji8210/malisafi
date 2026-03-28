@@ -801,8 +801,10 @@ $formatted_price = $price > 0 ? ($currency_symbol . ' ' . number_format($price))
                 
                 <div class="contact-form hidden">
                     <form class="quick-contact-form">
+                        <div class="malisafi-form-error"></div>
                         <input type="hidden" name="property_id" value="<?php echo $property_id; ?>">
                         <input type="hidden" name="agent_id" value="<?php echo $author_id; ?>">
+                        <?php wp_nonce_field('malisafi_ajax_nonce', 'nonce'); ?>
                         
                         <div class="form-group">
                             <input type="text" name="name" placeholder="Your Name" required>
@@ -863,7 +865,9 @@ $formatted_price = $price > 0 ? ($currency_symbol . ' ' . number_format($price))
         </div>
         <div class="modal-body">
             <form id="report-form">
+                <div class="malisafi-form-error"></div>
                 <input type="hidden" name="property_id" value="<?php echo $property_id; ?>">
+                <?php wp_nonce_field('malisafi_report_property', 'nonce'); ?>
                 
                 <div class="form-group">
                     <label>Reason for reporting</label>
@@ -901,9 +905,11 @@ $formatted_price = $price > 0 ? ($currency_symbol . ' ' . number_format($price))
         </div>
         <div class="modal-body">
             <form id="inquiry-form">
+                <div class="malisafi-form-error"></div>
                 <input type="hidden" name="property_id" value="<?php echo $property_id; ?>">
                 <input type="hidden" name="hp_name" value="">
                 <input type="hidden" name="form_ts" value="<?php echo time(); ?>">
+                <?php wp_nonce_field('malisafi_ajax_nonce', 'nonce'); ?>
                 
                 <div class="form-group">
                     <label>Your Name</label>

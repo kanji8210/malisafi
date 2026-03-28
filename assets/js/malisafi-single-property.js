@@ -74,6 +74,26 @@
             }
             return fallback;
         }
+
+        // Helper: Show form error in red container
+        function showFormError($form, message) {
+            var $errorContainer = $form.find('.malisafi-form-error');
+            if ($errorContainer.length) {
+                $errorContainer.text(message).fadeIn();
+                // Scroll to error if not visible
+                if (!$errorContainer.is(':visible')) {
+                    $errorContainer[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            } else {
+                alert(message);
+            }
+        }
+
+        // Helper: Clear form errors
+        function clearFormErrors($form) {
+            $form.find('.malisafi-form-error').hide().text('');
+            $form.find('.error').removeClass('error');
+        }
         // Initialize gallery
         function initGallery() {
             var $thumbnails = $('.gallery-thumbnails .thumbnail');
@@ -279,28 +299,29 @@
         });
         
         // Submit report form
-        $reportForm.on('submit', function(e) {
-            e.preventDefault();
-            
-            var formData = $(this).serialize();
-            
-            $.ajax({
-                url: malisafi_ajax.ajax_url,
-                type: 'POST',
-                data: formData + '&action=malisafi_report_property&nonce=' + malisafi_ajax.report_nonce,
-                beforeSend: function() {
-                    $reportForm.find('.button-primary').prop('disabled', true).text('Submitting...');
-                },
-                success: function(response) {
-                    if (response.success) {
-                        alert('Thank you for your report. We will review it shortly.');
-                        $reportModal.removeClass('open');
-                        $('body').removeClass('modal-open');
-                        $reportForm[0].reset();
-                    } else {
-                        alert(getResponseMessage(response, 'Failed to submit report. Please try again.'));
-                    }
-                },
+            $reportForm.on('submit', function(e) {
+                e.preventDefault();
+                clearFormErrors($reportForm);
+                
+                var formData = $(this).serialize();
+                
+                $.ajax({
+                    url: malisafi_ajax.ajax_url,
+                    type: 'POST',
+                    data: formData + '&action=malisafi_report_property&nonce=' + malisafi_ajax.report_nonce,
+                    beforeSend: function() {
+                        $reportForm.find('.button-primary').prop('disabled', true).text('Submitting...');
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            alert('Thank you for your report. We will review it shortly.');
+                            $reportModal.removeClass('open').hide();
+                            $('body').removeClass('modal-open');
+                            $reportForm[0].reset();
+                        } else {
+                            showFormError($reportForm, getResponseMessage(response, 'Failed to submit report. Please try again.'));
+                        }
+                    },
                 error: function() {
                     // Log detailed XHR info for debugging
                     try {
@@ -347,31 +368,46 @@
         });
         
         // Submit inquiry form
-        $inquiryForm.on('submit', function(e) {
-            e.preventDefault();
-            
-            var formData = $(this).serialize();
-            
-            $.ajax({
-                url: malisafi_ajax.ajax_url,
-                type: 'POST',
-                data: formData + '&action=malisafi_send_inquiry&nonce=' + malisafi_ajax.nonce,
-                beforeSend: function() {
-                    $inquiryForm.find('.button-primary').prop('disabled', true).text('Sending...');
-                },
-                success: function(response) {
-                    if (response.success) {
-                        alert('Thank you! Your inquiry has been sent successfully.');
-                        $inquiryModal.removeClass('open');
-                        $('body').removeClass('modal-open');
-                        $inquiryForm[0].reset();
-                    } else {
-                        alert(getResponseMessage(response, 'Failed to send inquiry. Please try again.'));
+            $inquiryForm.on('submit', function(e) {
+                e.preventDefault();
+                clearFormErrors($inquiryForm);
+
+                // Simple validation
+                var hasError = false;
+                $inquiryForm.find('input[required], textarea[required]').each(function() {
+                    if (!$(this).val()) {
+                        $(this).addClass('error');
+                        hasError = true;
                     }
-                },
-                error: function() {
-                    alert('Network error. Please try again.');
-                },
+                });
+
+                if (hasError) {
+                    showFormError($inquiryForm, 'Please fill all required fields.');
+                    return;
+                }
+                
+                var formData = $(this).serialize();
+                
+                $.ajax({
+                    url: malisafi_ajax.ajax_url,
+                    type: 'POST',
+                    data: formData + '&action=malisafi_send_inquiry&nonce=' + malisafi_ajax.nonce,
+                    beforeSend: function() {
+                        $inquiryForm.find('.button-primary').prop('disabled', true).text('Sending...');
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            alert('Thank you! Your inquiry has been sent successfully.');
+                            $inquiryModal.removeClass('open').hide();
+                            $('body').removeClass('modal-open');
+                            $inquiryForm[0].reset();
+                        } else {
+                            showFormError($inquiryForm, getResponseMessage(response, 'Failed to send inquiry. Please try again.'));
+                        }
+                    },
+                    error: function() {
+                        showFormError($inquiryForm, 'Network error. Please try again.');
+                    },
                 complete: function() {
                     $inquiryForm.find('.button-primary').prop('disabled', false).text('Send Inquiry');
                 }
@@ -458,8 +494,23 @@
         // ===== QUICK CONTACT FORM =====
         $('.quick-contact-form').on('submit', function(e) {
             e.preventDefault();
-            
             var $form = $(this);
+            clearFormErrors($form);
+
+            // Simple validation
+            var hasError = false;
+            $form.find('input[required], textarea[required]').each(function() {
+                if (!$(this).val()) {
+                    $(this).addClass('error');
+                    hasError = true;
+                }
+            });
+
+            if (hasError) {
+                showFormError($form, 'Please fill all required fields.');
+                return;
+            }
+            
             var formData = $form.serialize();
             
             $.ajax({
@@ -474,11 +525,11 @@
                         alert('Message sent successfully!');
                         $form[0].reset();
                     } else {
-                        alert(getResponseMessage(response, 'Failed to send message. Please try again.'));
+                        showFormError($form, getResponseMessage(response, 'Failed to send message. Please try again.'));
                     }
                 },
                 error: function() {
-                    alert('Network error. Please try again.');
+                    showFormError($form, 'Network error. Please try again.');
                 },
                 complete: function() {
                     $form.find('.submit-button').prop('disabled', false).text('Send Message');

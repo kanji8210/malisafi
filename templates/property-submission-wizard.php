@@ -60,6 +60,10 @@ $preset_county        = !$property_id && isset($preset_county)        ? $preset_
           data-preset-county="<?php echo esc_attr($preset_county); ?>">
         <input type="hidden" name="property_id" id="property_id" value="<?php echo esc_attr($property_id); ?>">
 
+        <!-- Unified Error/Success Message Containers -->
+        <div class="malisafi-form-error" style="display:none; margin-bottom: 20px;"></div>
+        <div class="malisafi-form-success" style="display:none; margin-bottom: 20px;"></div>
+
         <!-- Step 1: Basic Information -->
         <div class="wizard-step" id="step-1">
             <h2><?php _e('Basic Information', 'malisafi-mls'); ?></h2>

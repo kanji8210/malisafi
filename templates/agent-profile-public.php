@@ -298,10 +298,12 @@ $total_properties = intval($total_published) + intval($total_pending);
             </div>
             <div class="modal-body">
                 <form id="inquiry-form">
+                    <div class="malisafi-form-error"></div>
                     <input type="hidden" name="agent_id" value="<?php echo $agent_id; ?>">
                     <input type="hidden" name="property_id" value="0">
                     <input type="hidden" name="hp_name" value="">
                     <input type="hidden" name="form_ts" value="<?php echo time(); ?>">
+                    <?php wp_nonce_field('malisafi_ajax_nonce', 'nonce'); ?>
                     
                     <div class="form-group">
                         <label><?php _e('Your Name', 'malisafi-mls'); ?></label>

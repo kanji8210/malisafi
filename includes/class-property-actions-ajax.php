@@ -87,7 +87,7 @@ class Property_Actions_Ajax {
      */
     public function toggle_favorite() {
         // Verify nonce
-        if (!isset($_POST['nonce']) || !wp_verify_nonce($_POST['nonce'], 'malisafi_property_nonce')) {
+        if (!isset($_POST['nonce']) || !wp_verify_nonce($_POST['nonce'], 'malisafi_ajax_nonce')) {
             wp_send_json_error(array('message' => 'Invalid security token.'));
         }
         
@@ -465,7 +465,7 @@ class Property_Actions_Ajax {
      */
     public function contact_agent() {
         // Verify nonce
-        if (!isset($_POST['nonce']) || !wp_verify_nonce($_POST['nonce'], 'malisafi_property_nonce')) {
+        if (!isset($_POST['nonce']) || !wp_verify_nonce($_POST['nonce'], 'malisafi_ajax_nonce')) {
             wp_send_json_error(array('message' => 'Invalid security token.'));
         }
         

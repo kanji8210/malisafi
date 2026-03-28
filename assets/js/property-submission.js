@@ -251,9 +251,11 @@
             const fields = registry[stepName] || {};
             let isValid = true;
             let firstErrorField = null;
+            let missingFieldLabels = [];
 
             // Clear previous errors
             this.$form.find('.error').removeClass('error');
+            this.$form.find('.malisafi-form-error, .malisafi-form-success').hide().text('');
 
             for (const fieldKey in fields) {
                 const config = fields[fieldKey];
@@ -282,6 +284,23 @@
                         isValid = false;
                         $field.addClass('error');
                         if (!firstErrorField) firstErrorField = $field;
+
+                        // Get field label
+                        let label = '';
+                        const id = $field.attr('id');
+                        if (id) {
+                            label = $(`label[for="${id}"]`).text().replace('*', '').trim();
+                        }
+                        if (!label) {
+                            label = $field.closest('.form-row').find('label').text().replace('*', '').trim();
+                        }
+                        if (!label) {
+                            label = fieldKey.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                        }
+
+                        if (missingFieldLabels.indexOf(label) === -1) {
+                            missingFieldLabels.push(label);
+                        }
                     }
                 }
             }
@@ -291,13 +310,18 @@
                 if (!$('#featured_image_id').val()) {
                     isValid = false;
                     $('#featured-dropzone').addClass('error');
-                    this.showError('Featured image is required before you continue.');
+                    missingFieldLabels.push('Featured Image');
                 }
             }
 
             if (!isValid) {
                 if (firstErrorField) firstErrorField.focus();
-                this.showError(malisafiSubmission.strings.error || 'Please fill in all required fields');
+                
+                const message = missingFieldLabels.length > 0 
+                    ? 'Please fill the following fields to continue: ' + missingFieldLabels.join(', ')
+                    : 'Please fill the following fields to continue';
+                
+                this.showError(message);
             }
 
             return isValid;
@@ -358,7 +382,7 @@
                     console.error('Save step AJAX error:', status, error, xhr);
                     if (xhr.status === 403) {
                         self.showAutoSave('error');
-                        alert('Your session has expired. Please refresh the page and log in again.');
+                        self.showError('Your session has expired. Please refresh the page and log in again.');
                     } else {
                         self.showAutoSave('error');
                     }
@@ -825,7 +849,7 @@
                 error: function(xhr, status, error) {
                     console.error('Delete image AJAX error:', status, error, xhr);
                     if (xhr.status === 403) {
-                        alert('Permission denied. Your session may have expired. Please refresh the page and try again.');
+                        this.showError('Permission denied. Your session may have expired. Please refresh the page and try again.');
                     }
                 }
             });
@@ -857,7 +881,7 @@
                 error: function(xhr, status, error) {
                     console.error('Clear featured image AJAX error:', status, error, xhr);
                     if (xhr.status === 403) {
-                        alert('Permission denied. Your session may have expired. Please refresh the page and try again.');
+                        this.showError('Permission denied. Your session may have expired. Please refresh the page and try again.');
                     }
                 }
             });
@@ -965,7 +989,7 @@
 
         getLocation: function() {
             if (!navigator.geolocation) {
-                alert('Geolocation is not supported by your browser');
+                this.showError('Geolocation is not supported by your browser');
                 return;
             }
 
@@ -979,7 +1003,7 @@
                     $('.btn-get-location').html('<span class="icon">\u{1F4CD}</span> Get My Location').prop('disabled', false);
                 },
                 function() {
-                    alert('Unable to retrieve your location');
+                    self.showError('Unable to retrieve your location');
                     $('.btn-get-location').html('<span class="icon">\u{1F4CD}</span> Get My Location').prop('disabled', false);
                 }
             );
@@ -988,7 +1012,7 @@
         extractCoordsFromMapsURL: function() {
             const mapsUrl = $('#google_maps_url').val().trim();
             if (!mapsUrl) {
-                alert('Please enter a Google Maps URL first');
+                this.showError('Please enter a Google Maps URL first');
                 return;
             }
 
@@ -1026,12 +1050,12 @@
                     $('#property_gps').val(coords);
                     this.showSuccess('Coordinates extracted successfully!');
                 } else {
-                    alert('Could not extract coordinates from this URL. Please make sure it contains latitude and longitude.');
+                    this.showError('Could not extract coordinates from this URL. Please make sure it contains latitude and longitude.');
                 }
 
             } catch (error) {
                 console.error('Error extracting coordinates:', error);
-                alert('Error processing the URL. Please check the format.');
+                this.showError('Error processing the URL. Please check the format.');
             }
 
             $('.btn-extract-coords').html('<span class="icon">\u{1F4CC}</span> Extract Coordinates').prop('disabled', false);
@@ -1378,20 +1402,34 @@
         },
 
         showError: function(message) {
-            const $error = $('<div class="error-message">' + message + '</div>');
-            this.$form.prepend($error);
-            $('html, body').animate({ scrollTop: 0 }, 300);
-            setTimeout(function() {
-                $error.fadeOut(function() {
-                    $(this).remove();
-                });
-            }, 5000);
+            const $error = this.$form.find('.malisafi-form-error');
+            if ($error.length) {
+                $error.text(message).fadeIn();
+                $('html, body').animate({
+                    scrollTop: $error.offset().top - 100
+                }, 300);
+            } else {
+                // Fallback to old dynamic way if container missing
+                const $dynError = $('<div class="malisafi-form-error" style="display:block;">' + message + '</div>');
+                this.$form.prepend($dynError);
+                $('html, body').animate({ scrollTop: 0 }, 300);
+            }
         },
 
         showSuccess: function(message) {
-            const $success = $('<div class="success-message">' + message + '</div>');
-            this.$form.prepend($success);
-            $('html, body').animate({ scrollTop: 0 }, 300);
+            const $success = this.$form.find('.malisafi-form-success');
+            if ($success.length) {
+                $success.text(message).fadeIn();
+                $('html, body').animate({
+                    scrollTop: $success.offset().top - 100
+                }, 300);
+                setTimeout(() => $success.fadeOut(), 5000);
+            } else {
+                const $dynSuccess = $('<div class="malisafi-form-success" style="display:block;">' + message + '</div>');
+                this.$form.prepend($dynSuccess);
+                $('html, body').animate({ scrollTop: 0 }, 300);
+                setTimeout(() => $dynSuccess.fadeOut(), 5000);
+            }
         },
 
         showSubmitSuccess: function(data) {

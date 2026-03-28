@@ -8,6 +8,26 @@
 
     $(document).ready(function() {
         
+        // Helper: Show form error in red container
+        function showFormError($form, message) {
+            var $errorContainer = $form.find('.malisafi-form-error');
+            if ($errorContainer.length) {
+                $errorContainer.text(message).fadeIn();
+                // Scroll to error if not visible
+                if (!$errorContainer.is(':visible')) {
+                    $errorContainer[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            } else {
+                alert(message);
+            }
+        }
+
+        // Helper: Clear form errors
+        function clearFormErrors($form) {
+            $form.find('.malisafi-form-error').hide().text('');
+            $form.find('.error').removeClass('error');
+        }
+
         // ==========================
         // Rate Agent
         // ==========================
@@ -239,6 +259,22 @@
         $('#inquiry-form').on('submit', function(e) {
             e.preventDefault();
             const $form = $(this);
+            clearFormErrors($form);
+
+            // Simple validation
+            var hasError = false;
+            $form.find('input[required], textarea[required]').each(function() {
+                if (!$(this).val()) {
+                    $(this).addClass('error');
+                    hasError = true;
+                }
+            });
+
+            if (hasError) {
+                showFormError($form, 'Please fill all required fields.');
+                return;
+            }
+
             const $submitBtn = $form.find('button[type="submit"]');
             const originalText = $submitBtn.text();
 
@@ -254,11 +290,11 @@
                         $form[0].reset();
                         $('#inquiry-modal').fadeOut();
                     } else {
-                        alert(response.data.message || malisafiAgentAjax.messages.error);
+                        showFormError($form, response.data.message || malisafiAgentAjax.messages.error);
                     }
                 },
                 error: function() {
-                    alert(malisafiAgentAjax.messages.error);
+                    showFormError($form, malisafiAgentAjax.messages.error);
                 },
                 complete: function() {
                     $submitBtn.prop('disabled', false).text(originalText);
